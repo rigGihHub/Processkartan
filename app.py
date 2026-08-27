@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.5.6"
+APP_VERSION = "0.5.7"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 
@@ -426,16 +426,28 @@ function drawRoundedRect(ctx,x,y,w,h,r){
 async function renderMapSnapshot(){
   persist();
   const b=exportBounds();if(!b)throw new Error('Processen är tom');
+  const logoImg=new Image();
+  const logoReady=new Promise(resolve=>{logoImg.onload=()=>resolve(true);logoImg.onerror=()=>resolve(false);});
+  logoImg.src="__MAPLINI_LOGO__";
+  await logoReady;
   const pad=60,header=90,scale=Math.min(2,Math.max(1,1800/Math.max(900,b.width)));
   const width=Math.ceil((b.width+pad*2)*scale),height=Math.ceil((b.height+pad*2+header)*scale);
   const out=document.createElement('canvas');out.width=width;out.height=height;
   const ctx=out.getContext('2d');ctx.scale(scale,scale);
   ctx.fillStyle='#ffffff';ctx.fillRect(0,0,width/scale,height/scale);
 
-  // header
-  ctx.fillStyle='#12243b';ctx.font='700 28px Arial';ctx.textBaseline='top';
-  ctx.fillText(state().name,pad,18);
-  ctx.fillStyle='#516173';ctx.font='600 12px Arial';ctx.fillText('MAP · UNDERSTAND · IMPROVE',pad,54);
+  // branded export header
+  ctx.textBaseline='top';
+  if(logoImg.complete&&logoImg.naturalWidth){
+    const maxLogoW=260,maxLogoH=58;
+    const lr=Math.min(maxLogoW/logoImg.naturalWidth,maxLogoH/logoImg.naturalHeight);
+    const lw=logoImg.naturalWidth*lr,lh=logoImg.naturalHeight*lr;
+    ctx.drawImage(logoImg,pad,12,lw,lh);
+  }else{
+    ctx.fillStyle='#12243b';ctx.font='700 30px Arial';ctx.fillText('Maplini',pad,15);
+  }
+  ctx.fillStyle='#20364f';ctx.font='700 13px Arial';ctx.fillText('MAP · UNDERSTAND · IMPROVE',pad,66);
+  ctx.fillStyle='#12243b';ctx.font='700 22px Arial';ctx.fillText(state().name,pad+330,28);
 
   const ox=pad-b.minX,oy=header+pad-b.minY;
 
