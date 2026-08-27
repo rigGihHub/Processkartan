@@ -1,35 +1,33 @@
-# Processkartan v0.3.0
+# Processkartan v0.4.0
 
-Streamlit-prototyp för drag-and-drop-baserad processkartläggning.
+## Nytt
+- ISO-information borttagen helt.
+- En enda stor canvas, 2400 × 1400 px.
+- Flera separata processer i samma app.
+- `Ny process` skapar en tom canvas.
+- `Spara process` bevarar den aktuella processen.
+- Processväljare för att växla mellan sparade processer.
+- Lokal lagring i webbläsaren.
+- Export/import av hela processbiblioteket som JSON.
+- Google Docs-export (.doc).
+- SVG-export.
+- Drag-and-drop, pilar, multiselect, undo/redo, kopiera/klistra in och snap-to-grid.
 
 ## Starta lokalt
-
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## Arbetsprincip
+## GitHub Desktop
+1. Packa upp ZIP-filen.
+2. GitHub Desktop → Repository → Show in Explorer.
+3. Kopiera innehållet från den uppackade ZIP-mappen till repository-mappen.
+4. Ersätt befintliga filer.
+5. Commit to main.
+6. Push origin.
+7. Streamlit uppdaterar appen automatiskt.
 
-Appen ska i första hand styras genom drag-and-drop:
-- dra aktiviteter, beslut, delprocesser och grupper till arbetsytan
-- dra processsteg mellan swimlanes
-- dra från grön anslutningspunkt för att skapa pilar
-- dra risker, kontroller, KPI och dokument/bevis direkt på processsteg
-- Ctrl/Cmd-klick för multiselect
-- kopiera/klistra in markerade steg
-- drag-and-drop för swimlane-ordning
-
-## Google Docs-export
-
-Klicka **Exportera till Google Docs (.doc)** i appens högra panel.
-
-1. Appen laddar ner `Processkartan_Google_Docs.doc`.
-2. Ladda upp filen till Google Drive.
-3. Högerklicka på filen och välj **Öppna med → Google Dokument**.
-4. Processbeskrivningen blir redigerbar i Google Docs.
-
-Exporten innehåller processsteg, ansvar, risker, kontroller, KPI och dokument/bevis.
-För själva visuella processkartan används **Exportera karta (.svg)** och SVG-filen kan sedan infogas i Google Docs eller Google Slides.
-
-> Direkt skapande av ett Google Docs-dokument i användarens Drive kräver Google OAuth/API och är ett senare integrationssteg.
+## Sparning
+`Spara process` sparar i webbläsarens lokala lagring.
+`Spara alla (.json)` skapar en portabel backup av hela processbiblioteket.
