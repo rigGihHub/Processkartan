@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.5.7"
+APP_VERSION = "0.5.9"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 
@@ -28,9 +28,11 @@ html = r"""
 .p48-logo-crop{height:52px;width:315px;overflow:hidden;display:flex;align-items:flex-start}
 .p48-logo-crop img{width:315px!important;height:auto!important;max-width:none!important;display:block;transform:translateY(-1px)}
 .p48-tagline{font:800 13px/1.1 Inter,system-ui,sans-serif;letter-spacing:2.2px;color:#20364f;margin-left:83px;white-space:nowrap}
-.p48-resize{position:absolute;width:13px;height:13px;background:#fff;border:2px solid #2c7be5;border-radius:3px;z-index:10}
+.p48-resize{position:absolute;width:13px;height:13px;background:#fff;border:2px solid #2c7be5;border-radius:3px;z-index:10;display:none}
+.p48-node.selected .p48-resize{display:block}
 .p48-resize.se{right:-7px;bottom:-7px;cursor:nwse-resize}.p48-resize.sw{left:-7px;bottom:-7px;cursor:nesw-resize}
 .p48-resize.ne{right:-7px;top:-7px;cursor:nesw-resize}.p48-resize.nw{left:-7px;top:-7px;cursor:nwse-resize}
+.p48-step-io{margin-top:10px;padding-top:10px;border-top:1px solid #e1e7ed}.p48-step-io .p48-io-wrap{margin-top:0}
 .p48-io-wrap{margin-top:12px;border-top:1px solid #e3e8ed;padding-top:10px}
 .p48-io-title{font-size:10px;font-weight:800;color:#64717d;margin:6px 0}
 .p48-io-list{display:grid;gap:5px}.p48-io-row{display:flex;gap:5px;align-items:center}
@@ -74,13 +76,19 @@ html = r"""
 .p48-label[contenteditable="true"]{user-select:text;-webkit-user-select:text;cursor:text;min-width:40px}
 .p48-node.start,.p48-node.end{border-radius:38px}.p48-node.start{border-color:#2b7b61}.p48-node.end{border-color:#985148}
 .p48-node.decision{min-width:160px;max-width:240px;min-height:120px;padding:34px 32px;border:0;background:transparent!important;border-radius:0;overflow:visible}
-.p48-node.decision::before{content:"";position:absolute;left:50%;top:50%;width:72%;height:72%;transform:translate(-50%,-50%) rotate(45deg);background:var(--decision-bg,#fff8df);border:2px solid #a97a20;z-index:-1}
+.p48-node.decision::before{content:"";position:absolute;left:50%;top:50%;width:78%;height:78%;transform:translate(-50%,-50%) rotate(45deg);background:var(--decision-bg,#fff8df);border:2px solid #a97a20;z-index:-1}
 .p48-node.decision .p48-label,.p48-node.decision .p48-node-io{position:relative;z-index:2}
 .p48-node.subprocess{border-style:double;border-width:4px;border-color:#7556a6}.p48-node.note{border-color:#b8973e}.p48-node.group{min-width:240px;max-width:440px;min-height:120px;border-style:dashed;color:#536171}
 .p48-node.selected{outline:3px solid #2c7be5;outline-offset:3px}
+.p48-node.decision.selected{outline:none}
+.p48-node.decision.selected::before{box-shadow:0 0 0 3px #2c7be5}
 .p48-handle{position:absolute;width:16px;height:16px;border-radius:50%;background:#1f6f55;border:3px solid #fff;box-shadow:0 0 0 1px #1f6f55;cursor:crosshair;z-index:8}
 .p48-handle.right{right:-8px;top:50%;transform:translateY(-50%)}.p48-handle.left{left:-8px;top:50%;transform:translateY(-50%)}.p48-handle.top{top:-8px;left:50%;transform:translateX(-50%)}.p48-handle.bottom{bottom:-8px;left:50%;transform:translateX(-50%)}
-.p48-node.decision .p48-handle.right{right:4px}.p48-node.decision .p48-handle.left{left:4px}.p48-node.decision .p48-handle.top{top:4px}.p48-node.decision .p48-handle.bottom{bottom:4px}
+.p48-node.decision .p48-handle.right{right:10px}.p48-node.decision .p48-handle.left{left:10px}.p48-node.decision .p48-handle.top{top:10px}.p48-node.decision .p48-handle.bottom{bottom:10px}
+.p48-node.decision .p48-resize.se{right:12px;bottom:12px}
+.p48-node.decision .p48-resize.sw{left:12px;bottom:12px}
+.p48-node.decision .p48-resize.ne{right:12px;top:12px}
+.p48-node.decision .p48-resize.nw{left:12px;top:12px}
 @media(max-width:850px){.p48-body{grid-template-columns:1fr}.p48-side{border-right:0;border-bottom:1px solid #dce2e8}}
 </style>
 
@@ -118,11 +126,21 @@ html = r"""
       <div class="p48-item" draggable="true" data-type="end"><span class="p48-icon">■</span>Slut</div>
       <div class="p48-item" draggable="true" data-type="subprocess"><span class="p48-icon">▣</span>Delprocess</div>
       <div class="p48-item" draggable="true" data-type="note"><span class="p48-icon">N</span>Anteckning</div>
+      <div class="p48-step-io">
+        <div class="p48-io-wrap">
+          <div class="p48-io-title">Inputs</div>
+          <div id="p48-inputs" class="p48-io-list"></div>
+          <button type="button" class="p48-addio" id="p48-add-input">+ Lägg till input</button>
+          <div class="p48-io-title">Outputs</div>
+          <div id="p48-outputs" class="p48-io-list"></div>
+          <button type="button" class="p48-addio" id="p48-add-output">+ Lägg till output</button>
+        </div>
+      </div>
     </div>
 
     <div class="p48-format">
       <div class="p48-title">Formatering</div>
-      <div class="p48-sub">Markera en ruta för att ändra dess text, färger, storlek, inputs och outputs.</div>
+      <div class="p48-sub">Markera en ruta för att ändra dess text, färger och formatering.</div>
       <div id="p48-controls">
         <div class="p48-format-grid">
           <div><label>Typsnitt</label><select id="p48-font"><option value="Arial">Arial</option><option value="Verdana">Verdana</option><option value="Georgia">Georgia</option><option value="Trebuchet MS">Trebuchet MS</option><option value="Courier New">Courier New</option><option value="system-ui">System</option></select></div>
@@ -141,14 +159,7 @@ html = r"""
           <button type="button" class="p48-mini" data-align="right">Höger</button>
         </div>
         <button type="button" class="p48-btn" id="p48-delete-node" style="width:100%;margin-top:10px;color:#a43d34;border-color:#e0c4c1">Ta bort markerad ruta</button>
-        <div class="p48-io-wrap">
-          <div class="p48-io-title">Inputs</div>
-          <div id="p48-inputs" class="p48-io-list"></div>
-          <button type="button" class="p48-addio" id="p48-add-input">+ Lägg till input</button>
-          <div class="p48-io-title">Outputs</div>
-          <div id="p48-outputs" class="p48-io-list"></div>
-          <button type="button" class="p48-addio" id="p48-add-output">+ Lägg till output</button>
-        </div>
+
       </div>
     </div>
   </aside>
@@ -270,10 +281,11 @@ function renderIOEditor(item){
 }
 
 function setFormatEnabled(enabled){
-  controls.querySelectorAll('select,input,button').forEach(el=>{
-    el.disabled=!enabled;
-  });
+  controls.querySelectorAll('select,input,button').forEach(el=>{el.disabled=!enabled;});
+  root.querySelectorAll('.p48-step-io input,.p48-step-io button').forEach(el=>{el.disabled=!enabled;});
   controls.style.opacity=enabled?'1':'0.45';
+  const stepIO=root.querySelector('.p48-step-io');
+  if(stepIO)stepIO.style.opacity=enabled?'1':'0.45';
 }
 
 function refreshControls(){const item=selectedId?nodes.get(selectedId):null;if(!item){setFormatEnabled(false);inputsBox.innerHTML='';outputsBox.innerHTML='';return}setFormatEnabled(true);const s=styleOf(item.data);font.value=s.fontFamily;size.value=s.fontSize;textColor.value=s.textColor;bgColor.value=s.bgColor;bold.classList.toggle('active',s.fontWeight==='700');italic.classList.toggle('active',s.fontStyle==='italic');under.classList.toggle('active',s.textDecoration==='underline');root.querySelectorAll('[data-align]').forEach(b=>b.classList.toggle('active',b.dataset.align===s.textAlign));renderIOEditor(item)}

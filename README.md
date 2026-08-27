@@ -1,8 +1,6 @@
-# Maplini v0.5.7
+# Maplini v0.5.9
 
-## Nytt
-- Maplini-logotypen följer nu med i den visuella exportbilden.
-- Därmed visas logotypen både i PDF-exporten och DOCX-exporten.
-- `MAP · UNDERSTAND · IMPROVE` visas under logotypen i mörkare och tydligare text.
-- Processnamnet visas i samma exportheader.
-- PDF och DOCX fortsätter använda samma visuella processkarta, så branding och innehåll blir konsekventa.
+- Inputs och Outputs ligger nu direkt under `Anteckning` i vänsterkolumnen.
+- De visas före `Formatering`.
+- De är synliga från start men inaktiva tills en ruta markeras.
+- När en ruta markeras gäller Inputs/Outputs den markerade rutan.
