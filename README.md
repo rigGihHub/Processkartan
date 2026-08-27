@@ -1,13 +1,11 @@
-# Maplini v0.5.4
+# Maplini v0.5.6
 
-## Nytt
-- Ny knapp `Exportera PDF`.
-- PDF-exporten skapar en riktig PDF av den aktuella processkartan.
-- Rutornas storlek, bakgrundsfärger, textfärger, pilar, inputs och outputs följer med.
-- Processen skalas automatiskt till A3 liggande så att hela kartan får plats.
-- Processnamnet visas högst upp i PDF-filen.
-- Vanlig `Spara` finns kvar för den redigerbara processen.
-- DOCX- och Google Docs-funktionerna finns kvar.
+## Fixar
+- Beslutspunkter kan nu markeras på samma sätt som övriga processrutor.
+- Beslutspunkten ritas visuellt som en diamant men den klickbara ytan klipps inte längre av CSS.
+- Ny tydlig knapp `Ta bort markerad ruta` i formateringspanelen.
+- Delete-tangenten fungerar fortfarande som kortkommando.
+- Övriga funktioner från v0.5.5 finns kvar.
 
-## Uppdatera
-Packa upp ZIP → GitHub Desktop → Show in Explorer → ersätt filer → Commit to main → Push origin.
+## Dela appen
+Den publicerade Streamlit-länken kan skickas till en kollega. Observera att sparade processer i nuläget lagras lokalt i respektive webbläsare, så kollegan ser inte automatiskt dina sparade processer.

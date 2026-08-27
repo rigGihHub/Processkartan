@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.5.4"
+APP_VERSION = "0.5.6"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 
@@ -49,6 +49,10 @@ html = r"""
 .p48-side{background:#fff;border-right:1px solid #dce2e8;padding:10px}
 .p48-section{margin-bottom:16px}.p48-title{font-size:12px;font-weight:800;margin-bottom:8px}.p48-sub{font-size:11px;color:#6c7784;line-height:1.45;margin-bottom:9px}
 .p48-list{display:grid;gap:6px}
+.p48-proc-row{display:grid;grid-template-columns:minmax(0,1fr) 34px;gap:5px;align-items:stretch}
+.p48-proc-row .p48-proc{min-width:0}
+.p48-proc-delete{border:1px solid #e0c4c1;background:#fff;color:#a43d34;border-radius:8px;cursor:pointer;font-size:14px;font-weight:800}
+.p48-proc-delete:hover{background:#fff1ef;border-color:#d58f88}
 .p48-proc{width:100%;text-align:left;border:1px solid #d5dce3;background:#fff;border-radius:8px;padding:9px;font:700 12px system-ui;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .p48-proc:hover{background:#f3f6f8}.p48-proc.active{border-color:#1f6f55;background:#eef7f3;color:#175540}
 .p48-item{display:flex;align-items:center;gap:8px;border:1px solid #d0d7df;background:#fff;border-radius:9px;padding:9px;margin-bottom:7px;cursor:grab;font-size:12.5px;font-weight:700;user-select:none}
@@ -69,7 +73,9 @@ html = r"""
 .p48-label{display:block;width:100%;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;line-height:1.28;cursor:text;outline:none}
 .p48-label[contenteditable="true"]{user-select:text;-webkit-user-select:text;cursor:text;min-width:40px}
 .p48-node.start,.p48-node.end{border-radius:38px}.p48-node.start{border-color:#2b7b61}.p48-node.end{border-color:#985148}
-.p48-node.decision{min-width:160px;max-width:240px;min-height:120px;padding:34px 32px;border-color:#a97a20;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);border-radius:0}
+.p48-node.decision{min-width:160px;max-width:240px;min-height:120px;padding:34px 32px;border:0;background:transparent!important;border-radius:0;overflow:visible}
+.p48-node.decision::before{content:"";position:absolute;left:50%;top:50%;width:72%;height:72%;transform:translate(-50%,-50%) rotate(45deg);background:var(--decision-bg,#fff8df);border:2px solid #a97a20;z-index:-1}
+.p48-node.decision .p48-label,.p48-node.decision .p48-node-io{position:relative;z-index:2}
 .p48-node.subprocess{border-style:double;border-width:4px;border-color:#7556a6}.p48-node.note{border-color:#b8973e}.p48-node.group{min-width:240px;max-width:440px;min-height:120px;border-style:dashed;color:#536171}
 .p48-node.selected{outline:3px solid #2c7be5;outline-offset:3px}
 .p48-handle{position:absolute;width:16px;height:16px;border-radius:50%;background:#1f6f55;border:3px solid #fff;box-shadow:0 0 0 1px #1f6f55;cursor:crosshair;z-index:8}
@@ -134,6 +140,7 @@ html = r"""
           <button type="button" class="p48-mini" data-align="center">Centrera</button>
           <button type="button" class="p48-mini" data-align="right">Höger</button>
         </div>
+        <button type="button" class="p48-btn" id="p48-delete-node" style="width:100%;margin-top:10px;color:#a43d34;border-color:#e0c4c1">Ta bort markerad ruta</button>
         <div class="p48-io-wrap">
           <div class="p48-io-title">Inputs</div>
           <div id="p48-inputs" class="p48-io-list"></div>
@@ -165,7 +172,7 @@ const nameInput=root.querySelector('#p48-name'),status=root.querySelector('#p48-
 const controls=root.querySelector('#p48-controls'),font=root.querySelector('#p48-font'),size=root.querySelector('#p48-size'),textColor=root.querySelector('#p48-textcolor'),bgColor=root.querySelector('#p48-bgcolor');
 const bold=root.querySelector('#p48-bold'),italic=root.querySelector('#p48-italic'),under=root.querySelector('#p48-under');
 const inputsBox=root.querySelector('#p48-inputs'),outputsBox=root.querySelector('#p48-outputs');
-const addInputBtn=root.querySelector('#p48-add-input'),addOutputBtn=root.querySelector('#p48-add-output');
+const addInputBtn=root.querySelector('#p48-add-input'),addOutputBtn=root.querySelector('#p48-add-output'),deleteNodeBtn=root.querySelector('#p48-delete-node');
 
 let nodes=new Map(),links=[],selectedId=null,seq=8,undo=[],redo=[],currentId='proc-1',processes={};
 
@@ -178,7 +185,7 @@ function uid(){return 'proc-'+Date.now().toString(36)+'-'+Math.random().toString
 function msg(t){status.textContent=t;setTimeout(()=>{if(status.textContent===t)status.textContent=''},1800)}
 function defBg(type){return {start:'#edf8f3',end:'#fff3f1',decision:'#fff8df',subprocess:'#f7f3ff',note:'#fffbe8',group:'#f8fafc'}[type]||'#ffffff'}
 function styleOf(d){return{fontFamily:d.fontFamily||'Arial',fontSize:Number(d.fontSize||13),textColor:d.textColor||'#17202a',bgColor:d.bgColor||defBg(d.type),fontWeight:d.fontWeight||'700',fontStyle:d.fontStyle||'normal',textDecoration:d.textDecoration||'none',textAlign:d.textAlign||'center'}}
-function applyStyle(item){const s=styleOf(item.data);Object.assign(item.data,s);item.label.style.fontFamily=s.fontFamily;item.label.style.fontSize=s.fontSize+'px';item.label.style.color=s.textColor;item.label.style.fontWeight=s.fontWeight;item.label.style.fontStyle=s.fontStyle;item.label.style.textDecoration=s.textDecoration;item.label.style.textAlign=s.textAlign;item.el.style.background=s.bgColor}
+function applyStyle(item){const s=styleOf(item.data);Object.assign(item.data,s);item.label.style.fontFamily=s.fontFamily;item.label.style.fontSize=s.fontSize+'px';item.label.style.color=s.textColor;item.label.style.fontWeight=s.fontWeight;item.label.style.fontStyle=s.fontStyle;item.label.style.textDecoration=s.textDecoration;item.label.style.textAlign=s.textAlign;item.el.style.background=s.bgColor;item.el.style.setProperty('--decision-bg',s.bgColor)}
 function state(){return{id:currentId,name:nameInput.value.trim()||'Namnlös process',nodes:[...nodes.values()].map(x=>clone(x.data)),links:clone(links)}}
 function saveLocal(){try{localStorage.setItem('maplini_v050',JSON.stringify({currentId,processes}))}catch(e){}}
 function loadLocal(){
@@ -193,13 +200,42 @@ function loadLocal(){
     return true;
   }catch(e){return false}
 }
-function renderProcesses(){processBox.innerHTML='';Object.values(processes).sort((a,b)=>(a.name||'').localeCompare(b.name||'','sv')).forEach(p=>{const b=document.createElement('button');b.type='button';b.className='p48-proc'+(p.id===currentId?' active':'');b.textContent=p.name||'Namnlös process';b.title=p.name||'Namnlös process';b.addEventListener('click',()=>{persist();openProcess(p.id)});processBox.appendChild(b)})}
+function renderProcesses(){
+  processBox.innerHTML='';
+  Object.values(processes).sort((a,b)=>(a.name||'').localeCompare(b.name||'','sv')).forEach(p=>{
+    const row=document.createElement('div');row.className='p48-proc-row';
+    const b=document.createElement('button');b.type='button';b.className='p48-proc'+(p.id===currentId?' active':'');
+    b.textContent=p.name||'Namnlös process';b.title=p.name||'Namnlös process';
+    b.addEventListener('click',()=>{if(p.id!==currentId){persist();openProcess(p.id)}});
+    const del=document.createElement('button');del.type='button';del.className='p48-proc-delete';del.textContent='×';del.title='Radera process';
+    del.addEventListener('click',e=>{e.stopPropagation();deleteProcess(p.id)});
+    row.append(b,del);processBox.appendChild(row);
+  });
+}
 function persist(show=false){const s=state();processes[currentId]=clone(s);saveLocal();renderProcesses();if(show)msg('Sparad')}
 function pushUndo(){undo.push(JSON.stringify(state()));if(undo.length>50)undo.shift();redo=[]}
 function clearCanvas(){for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;linkLayer.innerHTML='';refreshControls()}
 function restore(s){const d=typeof s==='string'?JSON.parse(s):clone(s);clearCanvas();currentId=d.id||currentId;nameInput.value=d.name||'Namnlös process';(d.nodes||[]).forEach(makeNode);links=d.links||[];seq=Math.max(0,...[...nodes.keys()].map(id=>parseInt(String(id).replace(/\D/g,''),10)||0));drawLinks()}
 function openProcess(id){if(!processes[id])return;currentId=id;undo=[];redo=[];restore(processes[id]);saveLocal();renderProcesses();msg('Process öppnad')}
 function newProcess(){persist();const n=prompt('Namn på den nya processen:','Ny process');if(n===null)return;currentId=uid();processes[currentId]={id:currentId,name:n.trim()||'Ny process',nodes:[],links:[]};undo=[];redo=[];restore(processes[currentId]);saveLocal();renderProcesses();scroll.scrollLeft=0;scroll.scrollTop=0;msg('Ny process skapad')}
+function deleteProcess(id){
+  const proc=processes[id]; if(!proc)return;
+  const label=proc.name||'Namnlös process';
+  if(!confirm('Radera processen "'+label+'"? Detta går inte att ångra.'))return;
+  delete processes[id];
+  if(id===currentId){
+    const remaining=Object.keys(processes);
+    if(remaining.length){
+      currentId=remaining[0];
+      restore(processes[currentId]);
+    }else{
+      currentId=uid();
+      processes[currentId]={id:currentId,name:'Ny process',nodes:[],links:[]};
+      restore(processes[currentId]);
+    }
+  }
+  saveLocal();renderProcesses();refreshControls();msg('Process raderad');
+}
 function nodeText(t){return{start:'Start',process:'Ny aktivitet',decision:'Beslut?',end:'Slut',subprocess:'Ny delprocess',group:'Ny grupp / område',note:'Anteckning'}[t]||'Nytt steg'}
 function place(el,x,y){const snap=20,nx=Math.round(x/snap)*snap,ny=Math.round(y/snap)*snap;el.style.left=Math.max(10,Math.min(2400-el.offsetWidth-10,nx))+'px';el.style.top=Math.max(10,Math.min(1400-el.offsetHeight-10,ny))+'px'}
 function sync(el){const x=nodes.get(el.dataset.id);if(x){x.data.x=parseFloat(el.style.left)||0;x.data.y=parseFloat(el.style.top)||0}}
@@ -316,209 +352,239 @@ function deleteSelected(){if(!selectedId||!nodes.has(selectedId))return;pushUndo
 function crc32(bytes){let crc=0^(-1);for(let i=0;i<bytes.length;i++){crc^=bytes[i];for(let j=0;j<8;j++)crc=(crc>>>1)^(0xEDB88320&-(crc&1))}return(crc^(-1))>>>0}
 const u16=n=>new Uint8Array([n&255,(n>>>8)&255]);const u32=n=>new Uint8Array([n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]);
 function cat(parts){const n=parts.reduce((s,p)=>s+p.length,0),o=new Uint8Array(n);let k=0;for(const p of parts){o.set(p,k);k+=p.length}return o}
-function mkzip(files){const enc=new TextEncoder(),locals=[],centrals=[];let off=0;for(const f of files){const nb=enc.encode(f.name),db=enc.encode(f.data),crc=crc32(db),local=cat([u32(0x04034b50),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(db.length),u32(db.length),u16(nb.length),u16(0),nb,db]);locals.push(local);centrals.push(cat([u32(0x02014b50),u16(20),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(db.length),u32(db.length),u16(nb.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(off),nb]));off+=local.length}const cb=cat(centrals),end=cat([u32(0x06054b50),u16(0),u16(0),u16(files.length),u16(files.length),u32(cb.length),u32(off),u16(0)]);return cat([...locals,cb,end])}
-function xe(v){return String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
-function para(t,b=false){return`<w:p><w:r>${b?'<w:rPr><w:b/></w:rPr>':''}<w:t xml:space="preserve">${xe(t)}</w:t></w:r></w:p>`}
-function exportDoc(){persist();const s=state(),ordered=[...nodes.values()].sort((a,b)=>a.data.y-b.data.y||a.data.x-b.data.x);let body=para(s.name,true)+para('')+para('Processsteg',true);ordered.forEach((x,i)=>body+=para(`${i+1}. ${x.data.text}`));body+=para('')+para('Kopplingar',true);links.forEach(l=>body+=para('• '+(nodes.get(l[0])?.data.text||l[0])+' → '+(nodes.get(l[1])?.data.text||l[1])));const doc=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${body}<w:sectPr/></w:body></w:document>`,ct=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>`,rels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`,bytes=mkzip([{name:'[Content_Types].xml',data:ct},{name:'_rels/.rels',data:rels},{name:'word/document.xml',data:doc}]),blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(s.name.replace(/[^a-z0-9åäö_-]+/gi,'_')||'Process')+'.docx';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1200);msg('DOCX skapad')}
-
-
-function pdfEscapeText(value){
-  return String(value??'')
-    .replace(/\\/g,'\\\\')
-    .replace(/\(/g,'\\(')
-    .replace(/\)/g,'\\)')
-    .replace(/[^\x20-\x7E\u00C0-\u00FF]/g,'?');
+function mkzip(files){
+  const enc=new TextEncoder(),locals=[],centrals=[];let off=0;
+  for(const f of files){
+    const nb=enc.encode(f.name);
+    const db=(f.data instanceof Uint8Array)?f.data:enc.encode(String(f.data));
+    const crc=crc32(db);
+    const local=cat([u32(0x04034b50),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(db.length),u32(db.length),u16(nb.length),u16(0),nb,db]);
+    locals.push(local);
+    centrals.push(cat([u32(0x02014b50),u16(20),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(db.length),u32(db.length),u16(nb.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(off),nb]));
+    off+=local.length;
+  }
+  const cb=cat(centrals),end=cat([u32(0x06054b50),u16(0),u16(0),u16(files.length),u16(files.length),u32(cb.length),u32(off),u16(0)]);
+  return cat([...locals,cb,end]);
 }
-function pdfLatin1Bytes(str){
-  const out=new Uint8Array(str.length);
-  for(let i=0;i<str.length;i++)out[i]=str.charCodeAt(i)&255;
-  return out;
+
+function cleanFileName(name){
+  return (String(name||'Maplini_process').replace(/[^a-z0-9åäö_-]+/gi,'_').replace(/^_+|_+$/g,'')||'Maplini_process');
 }
-function pdfHexColor(hex){
+function hexRgb(hex){
   const h=String(hex||'#ffffff').replace('#','');
-  if(h.length!==6)return [1,1,1];
-  return [
-    parseInt(h.slice(0,2),16)/255,
-    parseInt(h.slice(2,4),16)/255,
-    parseInt(h.slice(4,6),16)/255
-  ];
+  if(h.length!==6)return [255,255,255];
+  return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)];
 }
-function pdfFmt(n){return Number(n).toFixed(2).replace(/\.00$/,'')}
-function pdfTextWidthApprox(text,size){return String(text).length*size*0.52}
-function wrapPdfText(text,maxWidth,size){
-  const raw=String(text??'').split(/\n/),lines=[];
-  for(const para of raw){
-    const words=para.split(/\s+/).filter(Boolean);
+function rgba(hex,a=1){
+  const [r,g,b]=hexRgb(hex);return `rgba(${r},${g},${b},${a})`;
+}
+function wrapCanvasText(ctx,text,maxWidth){
+  const lines=[];
+  for(const paragraph of String(text??'').split(/\n/)){
+    const words=paragraph.split(/\s+/).filter(Boolean);
     if(!words.length){lines.push('');continue}
     let line='';
     for(const word of words){
       const candidate=line?line+' '+word:word;
-      if(pdfTextWidthApprox(candidate,size)<=maxWidth){line=candidate}
+      if(ctx.measureText(candidate).width<=maxWidth){line=candidate}
       else{
         if(line)lines.push(line);
-        if(pdfTextWidthApprox(word,size)<=maxWidth){line=word}
-        else{
-          let chunk='';
-          for(const ch of word){
-            if(pdfTextWidthApprox(chunk+ch,size)>maxWidth&&chunk){lines.push(chunk);chunk=ch}
-            else chunk+=ch;
-          }
-          line=chunk;
+        let part='';
+        for(const ch of word){
+          if(ctx.measureText(part+ch).width>maxWidth&&part){lines.push(part);part=ch}
+          else part+=ch;
         }
+        line=part;
       }
     }
     if(line)lines.push(line);
   }
   return lines;
 }
-function pdfEllipsePath(cx,cy,rx,ry){
-  const k=0.5522847498;
-  return [
-    `${pdfFmt(cx+rx)} ${pdfFmt(cy)} m`,
-    `${pdfFmt(cx+rx)} ${pdfFmt(cy+k*ry)} ${pdfFmt(cx+k*rx)} ${pdfFmt(cy+ry)} ${pdfFmt(cx)} ${pdfFmt(cy+ry)} c`,
-    `${pdfFmt(cx-k*rx)} ${pdfFmt(cy+ry)} ${pdfFmt(cx-rx)} ${pdfFmt(cy+k*ry)} ${pdfFmt(cx-rx)} ${pdfFmt(cy)} c`,
-    `${pdfFmt(cx-rx)} ${pdfFmt(cy-k*ry)} ${pdfFmt(cx-k*rx)} ${pdfFmt(cy-ry)} ${pdfFmt(cx)} ${pdfFmt(cy-ry)} c`,
-    `${pdfFmt(cx+k*rx)} ${pdfFmt(cy-ry)} ${pdfFmt(cx+rx)} ${pdfFmt(cy-k*ry)} ${pdfFmt(cx+rx)} ${pdfFmt(cy)} c`
-  ].join('\n');
-}
-function buildProcessPdf(){
-  persist();
-  const stateNow=state();
-  const nodeItems=[...nodes.values()];
-  if(!nodeItems.length){msg('Processen är tom');return null}
-
+function exportBounds(){
+  const items=[...nodes.values()];
+  if(!items.length)return null;
   let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
-  nodeItems.forEach(item=>{
+  for(const item of items){
     const x=item.data.x||0,y=item.data.y||0,w=item.el.offsetWidth,h=item.el.offsetHeight;
-    minX=Math.min(minX,x);minY=Math.min(minY,y);
-    maxX=Math.max(maxX,x+w);maxY=Math.max(maxY,y+h);
-  });
+    minX=Math.min(minX,x);minY=Math.min(minY,y);maxX=Math.max(maxX,x+w);maxY=Math.max(maxY,y+h);
+  }
+  return {minX,minY,maxX,maxY,width:maxX-minX,height:maxY-minY};
+}
+function drawArrow(ctx,x1,y1,x2,y2){
+  ctx.save();ctx.strokeStyle='#687584';ctx.fillStyle='#687584';ctx.lineWidth=2;
+  ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  const ang=Math.atan2(y2-y1,x2-x1),len=10,w=5;
+  ctx.beginPath();ctx.moveTo(x2,y2);
+  ctx.lineTo(x2-len*Math.cos(ang)+w*Math.sin(ang),y2-len*Math.sin(ang)-w*Math.cos(ang));
+  ctx.lineTo(x2-len*Math.cos(ang)-w*Math.sin(ang),y2-len*Math.sin(ang)+w*Math.cos(ang));
+  ctx.closePath();ctx.fill();ctx.restore();
+}
+function drawRoundedRect(ctx,x,y,w,h,r){
+  const rr=Math.min(r,w/2,h/2);ctx.beginPath();ctx.moveTo(x+rr,y);ctx.arcTo(x+w,y,x+w,y+h,rr);ctx.arcTo(x+w,y+h,x,y+h,rr);ctx.arcTo(x,y+h,x,y,rr);ctx.arcTo(x,y,x+w,y,rr);ctx.closePath();
+}
+async function renderMapSnapshot(){
+  persist();
+  const b=exportBounds();if(!b)throw new Error('Processen är tom');
+  const pad=60,header=90,scale=Math.min(2,Math.max(1,1800/Math.max(900,b.width)));
+  const width=Math.ceil((b.width+pad*2)*scale),height=Math.ceil((b.height+pad*2+header)*scale);
+  const out=document.createElement('canvas');out.width=width;out.height=height;
+  const ctx=out.getContext('2d');ctx.scale(scale,scale);
+  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,width/scale,height/scale);
 
-  const pageW=1190.55,pageH=841.89; // A3 landscape in points
-  const margin=48,headerH=46;
-  const availW=pageW-margin*2,availH=pageH-margin*2-headerH;
-  const contentW=Math.max(1,maxX-minX),contentH=Math.max(1,maxY-minY);
-  const scale=Math.min(availW/contentW,availH/contentH,1.35);
-  const ox=margin+(availW-contentW*scale)/2-minX*scale;
-  const oy=margin+(availH-contentH*scale)/2-minY*scale;
+  // header
+  ctx.fillStyle='#12243b';ctx.font='700 28px Arial';ctx.textBaseline='top';
+  ctx.fillText(state().name,pad,18);
+  ctx.fillStyle='#516173';ctx.font='600 12px Arial';ctx.fillText('MAP · UNDERSTAND · IMPROVE',pad,54);
 
-  const tx=x=>ox+x*scale;
-  const ty=y=>pageH-(margin+headerH)-((y-minY)*scale); // top baseline helper
-  const mapY=(y,h=0)=>pageH-(margin+headerH)-((y-minY+h)*scale);
+  const ox=pad-b.minX,oy=header+pad-b.minY;
 
-  const c=[];
-  c.push('q');
-  c.push('0.08 0.14 0.23 rg');
-  c.push('BT /F1 22 Tf');
-  c.push(`${pdfFmt(margin)} ${pdfFmt(pageH-margin-20)} Td (${pdfEscapeText(stateNow.name)}) Tj ET`);
-  c.push('0.35 0.42 0.50 rg');
-  c.push('BT /F1 9 Tf');
-  c.push(`${pdfFmt(margin)} ${pdfFmt(pageH-margin-37)} Td (Exported from Maplini) Tj ET`);
-
-  // connectors first
-  c.push('0.35 0.42 0.50 RG 1.4 w');
-  for(const link of links){
-    const A=nodes.get(link[0])?.el,B=nodes.get(link[1])?.el;
-    if(!A||!B)continue;
-    const side=link[2]||'right';
-    const target=targetSide(A,B);
-    const [ax,ay]=anchor(A,side),[bx,by]=anchor(B,target);
-    const x1=tx(ax),y1=mapY(ay),x2=tx(bx),y2=mapY(by);
-    c.push(`${pdfFmt(x1)} ${pdfFmt(y1)} m ${pdfFmt(x2)} ${pdfFmt(y2)} l S`);
-    // arrow head
-    const ang=Math.atan2(y2-y1,x2-x1),len=8,w=4;
-    const xa=x2-len*Math.cos(ang)+w*Math.sin(ang);
-    const ya=y2-len*Math.sin(ang)-w*Math.cos(ang);
-    const xb=x2-len*Math.cos(ang)-w*Math.sin(ang);
-    const yb=y2-len*Math.sin(ang)+w*Math.cos(ang);
-    c.push(`${pdfFmt(x2)} ${pdfFmt(y2)} m ${pdfFmt(xa)} ${pdfFmt(ya)} l ${pdfFmt(xb)} ${pdfFmt(yb)} l h f`);
+  // connectors
+  for(const [a,bid,side] of links){
+    const A=nodes.get(a)?.el,B=nodes.get(bid)?.el;if(!A||!B)continue;
+    const t=targetSide(A,B),[ax,ay]=anchor(A,side||'right'),[bx,by]=anchor(B,t);
+    drawArrow(ctx,ox+ax,oy+ay,ox+bx,oy+by);
   }
 
   // nodes
-  for(const item of nodeItems){
-    const d=item.data,s=styleOf(d);
-    const x=tx(d.x||0),w=item.el.offsetWidth*scale,h=item.el.offsetHeight*scale;
-    const y=mapY(d.y||0,item.el.offsetHeight);
-    const bg=pdfHexColor(s.bgColor),fg=pdfHexColor(s.textColor);
-    let border=[0.39,0.45,0.53];
-    if(d.type==='start')border=[0.17,0.48,0.38];
-    if(d.type==='end')border=[0.60,0.32,0.28];
-    if(d.type==='decision')border=[0.66,0.48,0.13];
-    if(d.type==='subprocess')border=[0.46,0.34,0.65];
-
-    c.push(`${pdfFmt(bg[0])} ${pdfFmt(bg[1])} ${pdfFmt(bg[2])} rg`);
-    c.push(`${pdfFmt(border[0])} ${pdfFmt(border[1])} ${pdfFmt(border[2])} RG 1.5 w`);
+  for(const item of nodes.values()){
+    const d=item.data,s=styleOf(d),x=ox+(d.x||0),y=oy+(d.y||0),w=item.el.offsetWidth,h=item.el.offsetHeight;
+    ctx.save();
+    ctx.fillStyle=s.bgColor||'#ffffff';
+    let stroke='#637387';
+    if(d.type==='start')stroke='#2b7b61';
+    else if(d.type==='end')stroke='#985148';
+    else if(d.type==='decision')stroke='#a97a20';
+    else if(d.type==='subprocess')stroke='#7556a6';
+    else if(d.type==='note')stroke='#b8973e';
+    ctx.strokeStyle=stroke;ctx.lineWidth=(d.type==='subprocess'?4:2);
 
     if(d.type==='decision'){
-      const cx=x+w/2,cy=y+h/2;
-      c.push(`${pdfFmt(cx)} ${pdfFmt(y+h)} m ${pdfFmt(x+w)} ${pdfFmt(cy)} l ${pdfFmt(cx)} ${pdfFmt(y)} l ${pdfFmt(x)} ${pdfFmt(cy)} l h B`);
+      ctx.beginPath();ctx.moveTo(x+w/2,y);ctx.lineTo(x+w,y+h/2);ctx.lineTo(x+w/2,y+h);ctx.lineTo(x,y+h/2);ctx.closePath();ctx.fill();ctx.stroke();
     }else if(d.type==='start'||d.type==='end'){
-      c.push(pdfEllipsePath(x+w/2,y+h/2,w/2,h/2)+' B');
+      ctx.beginPath();ctx.ellipse(x+w/2,y+h/2,w/2,h/2,0,0,Math.PI*2);ctx.fill();ctx.stroke();
     }else{
-      c.push(`${pdfFmt(x)} ${pdfFmt(y)} ${pdfFmt(w)} ${pdfFmt(h)} re B`);
+      drawRoundedRect(ctx,x,y,w,h,10);ctx.fill();ctx.stroke();
     }
 
-    const fontSize=Math.max(7,Math.min(18,Number(s.fontSize||13)*scale*0.95));
-    const pad=10*scale,maxText=Math.max(20,w-pad*2);
-    const lines=wrapPdfText(d.text,maxText,fontSize);
-    const ioInputs=Array.isArray(d.inputs)?d.inputs.filter(Boolean):[];
-    const ioOutputs=Array.isArray(d.outputs)?d.outputs.filter(Boolean):[];
-    const allLines=[...lines];
-    if(ioInputs.length)allLines.push('In: '+ioInputs.join(', '));
-    if(ioOutputs.length)allLines.push('Out: '+ioOutputs.join(', '));
-    const lineH=fontSize*1.22;
-    const totalH=allLines.length*lineH;
-    let startY=y+h/2+totalH/2-lineH;
-    c.push(`${pdfFmt(fg[0])} ${pdfFmt(fg[1])} ${pdfFmt(fg[2])} rg`);
-    allLines.forEach((line,idx)=>{
-      const fs=(idx>=lines.length)?Math.max(6,fontSize*0.72):fontSize;
-      const ww=pdfTextWidthApprox(line,fs);
-      let lx=x+(w-ww)/2;
-      if(s.textAlign==='left')lx=x+pad;
-      if(s.textAlign==='right')lx=x+w-pad-ww;
-      c.push(`BT /F1 ${pdfFmt(fs)} Tf ${pdfFmt(lx)} ${pdfFmt(startY)} Td (${pdfEscapeText(line)}) Tj ET`);
-      startY-=lineH;
-    });
+    const fontSize=Math.max(10,Math.min(36,Number(s.fontSize||13)));
+    const weight=s.fontWeight==='700'?'700':'400',italicStyle=s.fontStyle==='italic'?'italic ':'';
+    ctx.font=`${italicStyle}${weight} ${fontSize}px ${s.fontFamily==='system-ui'?'Arial':s.fontFamily}`;
+    ctx.fillStyle=s.textColor||'#17202a';ctx.textBaseline='top';
+    const inputs=Array.isArray(d.inputs)?d.inputs.filter(Boolean):[],outputs=Array.isArray(d.outputs)?d.outputs.filter(Boolean):[];
+    const ioLines=[];
+    if(inputs.length)ioLines.push('In: '+inputs.join(', '));
+    if(outputs.length)ioLines.push('Out: '+outputs.join(', '));
+    const maxText=Math.max(40,w-28);
+    const labelLines=wrapCanvasText(ctx,d.text,maxText);
+    const ioSize=Math.max(9,fontSize*.72),lineH=fontSize*1.28,ioH=ioSize*1.25;
+    const totalH=labelLines.length*lineH+ioLines.length*ioH+(ioLines.length?7:0);
+    let cy=y+Math.max(10,(h-totalH)/2);
+    const align=s.textAlign||'center';
+    ctx.textAlign=align;
+    const tx=align==='left'?x+14:align==='right'?x+w-14:x+w/2;
+    for(const line of labelLines){ctx.fillText(line,tx,cy,maxText);cy+=lineH}
+    if(ioLines.length){cy+=4;ctx.font=`400 ${ioSize}px Arial`;ctx.fillStyle=rgba(s.textColor||'#17202a',.78);}
+    for(const line of ioLines){const ls=wrapCanvasText(ctx,line,maxText);for(const sub of ls){ctx.fillText(sub,tx,cy,maxText);cy+=ioH}}
+    ctx.restore();
   }
-  c.push('Q');
-  const stream=c.join('\n');
-
-  // Build a minimal valid PDF with Helvetica.
-  const objects=[];
-  objects[1]='<< /Type /Catalog /Pages 2 0 R >>';
-  objects[2]='<< /Type /Pages /Kids [3 0 R] /Count 1 >>';
-  objects[3]=`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageW} ${pageH}] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>`;
-  objects[4]=`<< /Length ${pdfLatin1Bytes(stream).length} >>\nstream\n${stream}\nendstream`;
-  objects[5]='<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>';
-
-  let pdf='%PDF-1.4\n%âãÏÓ\n',offsets=[0];
-  for(let i=1;i<=5;i++){
-    offsets[i]=pdfLatin1Bytes(pdf).length;
-    pdf+=`${i} 0 obj\n${objects[i]}\nendobj\n`;
-  }
-  const xref=pdfLatin1Bytes(pdf).length;
-  pdf+='xref\n0 6\n0000000000 65535 f \n';
-  for(let i=1;i<=5;i++)pdf+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';
-  pdf+=`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
-  return pdfLatin1Bytes(pdf);
+  return out;
 }
-function exportPdf(){
+function canvasJpegBytes(canvas,quality=.92){
+  const dataUrl=canvas.toDataURL('image/jpeg',quality);
+  const bin=atob(dataUrl.split(',')[1]),bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++)bytes[i]=bin.charCodeAt(i);
+  return bytes;
+}
+function asciiBytes(s){return new TextEncoder().encode(s)}
+function buildPdfFromJpeg(jpeg,imgW,imgH){
+  // A3 landscape
+  const pageW=1190.55,pageH=841.89,margin=30;
+  const scale=Math.min((pageW-2*margin)/imgW,(pageH-2*margin)/imgH);
+  const w=imgW*scale,h=imgH*scale,x=(pageW-w)/2,y=(pageH-h)/2;
+  const content=asciiBytes(`q\n${w.toFixed(3)} 0 0 ${h.toFixed(3)} ${x.toFixed(3)} ${y.toFixed(3)} cm\n/Im1 Do\nQ\n`);
+  const parts=[asciiBytes('%PDF-1.4\n%Maplini\n')],offsets=[0];
+  const addObj=(num,chunks)=>{
+    offsets[num]=parts.reduce((n,p)=>n+p.length,0);
+    parts.push(asciiBytes(`${num} 0 obj\n`),...chunks,asciiBytes('\nendobj\n'));
+  };
+  addObj(1,[asciiBytes('<< /Type /Catalog /Pages 2 0 R >>')]);
+  addObj(2,[asciiBytes('<< /Type /Pages /Kids [3 0 R] /Count 1 >>')]);
+  addObj(3,[asciiBytes(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageW} ${pageH}] /Resources << /XObject << /Im1 5 0 R >> >> /Contents 4 0 R >>`)]);
+  addObj(4,[asciiBytes(`<< /Length ${content.length} >>\nstream\n`),content,asciiBytes('endstream')]);
+  addObj(5,[asciiBytes(`<< /Type /XObject /Subtype /Image /Width ${imgW} /Height ${imgH} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.length} >>\nstream\n`),jpeg,asciiBytes('\nendstream')]);
+  const xref=parts.reduce((n,p)=>n+p.length,0);
+  let tail='xref\n0 6\n0000000000 65535 f \n';
+  for(let i=1;i<=5;i++)tail+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';
+  tail+=`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+  parts.push(asciiBytes(tail));return cat(parts);
+}
+function buildDocxWithJpeg(jpeg,imgW,imgH,title){
+  const maxCx=9144000,maxCy=6400800; // roughly 10 x 7 in
+  let cx=maxCx,cy=Math.round(cx*imgH/imgW);
+  if(cy>maxCy){cy=maxCy;cx=Math.round(cy*imgW/imgH)}
+  const safeTitle=String(title||'Maplini process').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const doc=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
+ xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
+ xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
+ xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"
+ xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
+<w:body>
+<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="32"/></w:rPr><w:t>${safeTitle}</w:t></w:r></w:p>
+<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:drawing>
+<wp:inline distT="0" distB="0" distL="0" distR="0">
+<wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="1" name="Maplini process map"/>
+<a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
+<pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="process-map.jpg"/><pic:cNvPicPr/></pic:nvPicPr>
+<pic:blipFill><a:blip r:embed="rId1"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>
+<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>
+</pic:pic></a:graphicData></a:graphic>
+</wp:inline></w:drawing></w:r></w:p>
+<w:sectPr><w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/><w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720"/></w:sectPr>
+</w:body></w:document>`;
+  const contentTypes=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Default Extension="jpg" ContentType="image/jpeg"/>
+<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>`;
+  const packageRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`;
+  const docRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/process-map.jpg"/>
+</Relationships>`;
+  return mkzip([
+    {name:'[Content_Types].xml',data:contentTypes},
+    {name:'_rels/.rels',data:packageRels},
+    {name:'word/document.xml',data:doc},
+    {name:'word/_rels/document.xml.rels',data:docRels},
+    {name:'word/media/process-map.jpg',data:jpeg}
+  ]);
+}
+function downloadBytes(bytes,name,type){
+  const blob=new Blob([bytes],{type}),a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download=name;a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+async function exportPdf(){
   try{
-    const bytes=buildProcessPdf();
-    if(!bytes)return;
-    const blob=new Blob([bytes],{type:'application/pdf'});
-    const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob);
-    a.download=(state().name.replace(/[^a-z0-9åäö_-]+/gi,'_')||'Maplini_process')+'.pdf';
-    a.click();
-    setTimeout(()=>URL.revokeObjectURL(a.href),1200);
-    msg('PDF skapad');
-  }catch(err){
-    console.error(err);
-    msg('PDF-export misslyckades');
-  }
+    const shot=await renderMapSnapshot(),jpeg=canvasJpegBytes(shot,.94);
+    const pdf=buildPdfFromJpeg(jpeg,shot.width,shot.height);
+    downloadBytes(pdf,cleanFileName(state().name)+'.pdf','application/pdf');msg('PDF skapad');
+  }catch(err){console.error(err);msg('PDF-export misslyckades')}
 }
-
+async function exportDoc(){
+  try{
+    const shot=await renderMapSnapshot(),jpeg=canvasJpegBytes(shot,.94);
+    const docx=buildDocxWithJpeg(jpeg,shot.width,shot.height,state().name);
+    downloadBytes(docx,cleanFileName(state().name)+'.docx','application/vnd.openxmlformats-officedocument.wordprocessingml.document');msg('DOCX skapad');
+  }catch(err){console.error(err);msg('DOCX-export misslyckades')}
+}
 
 root.querySelectorAll('.p48-item').forEach(i=>i.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',i.dataset.type);e.dataTransfer.effectAllowed='copy'}));
 canvas.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='copy'});
@@ -535,6 +601,7 @@ bold.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null
 
 addInputBtn.addEventListener('click',()=>{const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();ensureIO(item);item.data.inputs.push('Ny input');renderNodeIO(item);persist();refreshControls();});
 addOutputBtn.addEventListener('click',()=>{const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();ensureIO(item);item.data.outputs.push('Ny output');renderNodeIO(item);persist();refreshControls();});
+deleteNodeBtn.addEventListener('click',()=>deleteSelected());
 
 if(!loadLocal()){processes[starter.id]=clone(starter);currentId=starter.id}
 openProcess(currentId);renderProcesses();refreshControls();msg('Klar');
