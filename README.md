@@ -1,8 +1,13 @@
-# Maplini v0.5.2
+# Maplini v0.5.4
 
 ## Nytt
-- Formateringspanelen är alltid synlig i vänsterkolumnen.
-- Typsnitt, storlek, textfärg, bakgrund, fet/kursiv/understruken, textjustering, Inputs och Outputs visas från start.
-- När ingen ruta är markerad är kontrollerna tonade och inaktiva.
-- När en ruta markeras aktiveras panelen och visar den rutans inställningar.
-- Övriga funktioner från v0.5.1 finns kvar.
+- Ny knapp `Exportera PDF`.
+- PDF-exporten skapar en riktig PDF av den aktuella processkartan.
+- Rutornas storlek, bakgrundsfärger, textfärger, pilar, inputs och outputs följer med.
+- Processen skalas automatiskt till A3 liggande så att hela kartan får plats.
+- Processnamnet visas högst upp i PDF-filen.
+- Vanlig `Spara` finns kvar för den redigerbara processen.
+- DOCX- och Google Docs-funktionerna finns kvar.
+
+## Uppdatera
+Packa upp ZIP → GitHub Desktop → Show in Explorer → ersätt filer → Commit to main → Push origin.

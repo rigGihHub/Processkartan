@@ -1,9 +1,9 @@
 # Changelog
 
-## v0.5.2
-- Formateringspanelen visas alltid.
-- Kontroller inaktiveras istället för att döljas när ingen ruta är markerad.
-- Inputs/Outputs visas alltid som del av panelen.
+## v0.5.4
+- Visuell PDF-export av aktuell processkarta.
+- Automatisk anpassning till A3 landscape.
+- Rutor, pilar, text, färger samt inputs/outputs inkluderas.
 
-## v0.5.1
-- Resize, Inputs/Outputs och Google Docs-integration.
+## v0.5.3
+- Tydligare Maplini-tagline.

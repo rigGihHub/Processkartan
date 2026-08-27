@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.5.2"
+APP_VERSION = "0.5.4"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 
@@ -23,8 +23,11 @@ html = r"""
 <style>
 #pk48{font-family:Inter,system-ui,sans-serif;color:#17202a;background:#eef2f6;border:1px solid #dce2e8;border-radius:12px;overflow:hidden}
 #pk48 *{box-sizing:border-box}
-.p48-brand{height:86px;background:#fff;border-bottom:1px solid #e1e7ed;display:flex;align-items:center;padding:8px 18px}
-.p48-brand img{height:66px!important;width:auto;max-width:360px!important;object-fit:contain;display:block}
+.p48-brand{height:94px;background:#fff;border-bottom:1px solid #e1e7ed;display:flex;align-items:center;padding:8px 18px}
+.p48-brand-inner{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px}
+.p48-logo-crop{height:52px;width:315px;overflow:hidden;display:flex;align-items:flex-start}
+.p48-logo-crop img{width:315px!important;height:auto!important;max-width:none!important;display:block;transform:translateY(-1px)}
+.p48-tagline{font:800 13px/1.1 Inter,system-ui,sans-serif;letter-spacing:2.2px;color:#20364f;margin-left:83px;white-space:nowrap}
 .p48-resize{position:absolute;width:13px;height:13px;background:#fff;border:2px solid #2c7be5;border-radius:3px;z-index:10}
 .p48-resize.se{right:-7px;bottom:-7px;cursor:nwse-resize}.p48-resize.sw{left:-7px;bottom:-7px;cursor:nesw-resize}
 .p48-resize.ne{right:-7px;top:-7px;cursor:nesw-resize}.p48-resize.nw{left:-7px;top:-7px;cursor:nwse-resize}
@@ -75,7 +78,12 @@ html = r"""
 @media(max-width:850px){.p48-body{grid-template-columns:1fr}.p48-side{border-right:0;border-bottom:1px solid #dce2e8}}
 </style>
 
-<div class="p48-brand"><img src="__MAPLINI_LOGO__" alt="Maplini"></div>
+<div class="p48-brand">
+  <div class="p48-brand-inner">
+    <div class="p48-logo-crop"><img src="__MAPLINI_LOGO__" alt="Maplini"></div>
+    <div class="p48-tagline">MAP · UNDERSTAND · IMPROVE</div>
+  </div>
+</div>
 <div class="p48-top">
   <strong>Process</strong>
   <input id="p48-name" class="p48-name" value="Exempel – upphandlingsprocess" aria-label="Processnamn">
@@ -84,7 +92,8 @@ html = r"""
   <button type="button" class="p48-btn" id="p48-undo">↶ Ångra</button>
   <button type="button" class="p48-btn" id="p48-redo">↷ Gör om</button>
   <span class="p48-spacer"></span>
-  <button type="button" class="p48-btn primary" id="p48-doc">Exportera DOCX</button>
+  <button type="button" class="p48-btn primary" id="p48-pdf">Exportera PDF</button>
+  <button type="button" class="p48-btn" id="p48-doc">Exportera DOCX</button>
   <span id="p48-status" class="p48-status"></span>
 </div>
 
@@ -312,12 +321,211 @@ function xe(v){return String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;
 function para(t,b=false){return`<w:p><w:r>${b?'<w:rPr><w:b/></w:rPr>':''}<w:t xml:space="preserve">${xe(t)}</w:t></w:r></w:p>`}
 function exportDoc(){persist();const s=state(),ordered=[...nodes.values()].sort((a,b)=>a.data.y-b.data.y||a.data.x-b.data.x);let body=para(s.name,true)+para('')+para('Processsteg',true);ordered.forEach((x,i)=>body+=para(`${i+1}. ${x.data.text}`));body+=para('')+para('Kopplingar',true);links.forEach(l=>body+=para('• '+(nodes.get(l[0])?.data.text||l[0])+' → '+(nodes.get(l[1])?.data.text||l[1])));const doc=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${body}<w:sectPr/></w:body></w:document>`,ct=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>`,rels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`,bytes=mkzip([{name:'[Content_Types].xml',data:ct},{name:'_rels/.rels',data:rels},{name:'word/document.xml',data:doc}]),blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(s.name.replace(/[^a-z0-9åäö_-]+/gi,'_')||'Process')+'.docx';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1200);msg('DOCX skapad')}
 
+
+function pdfEscapeText(value){
+  return String(value??'')
+    .replace(/\\/g,'\\\\')
+    .replace(/\(/g,'\\(')
+    .replace(/\)/g,'\\)')
+    .replace(/[^\x20-\x7E\u00C0-\u00FF]/g,'?');
+}
+function pdfLatin1Bytes(str){
+  const out=new Uint8Array(str.length);
+  for(let i=0;i<str.length;i++)out[i]=str.charCodeAt(i)&255;
+  return out;
+}
+function pdfHexColor(hex){
+  const h=String(hex||'#ffffff').replace('#','');
+  if(h.length!==6)return [1,1,1];
+  return [
+    parseInt(h.slice(0,2),16)/255,
+    parseInt(h.slice(2,4),16)/255,
+    parseInt(h.slice(4,6),16)/255
+  ];
+}
+function pdfFmt(n){return Number(n).toFixed(2).replace(/\.00$/,'')}
+function pdfTextWidthApprox(text,size){return String(text).length*size*0.52}
+function wrapPdfText(text,maxWidth,size){
+  const raw=String(text??'').split(/\n/),lines=[];
+  for(const para of raw){
+    const words=para.split(/\s+/).filter(Boolean);
+    if(!words.length){lines.push('');continue}
+    let line='';
+    for(const word of words){
+      const candidate=line?line+' '+word:word;
+      if(pdfTextWidthApprox(candidate,size)<=maxWidth){line=candidate}
+      else{
+        if(line)lines.push(line);
+        if(pdfTextWidthApprox(word,size)<=maxWidth){line=word}
+        else{
+          let chunk='';
+          for(const ch of word){
+            if(pdfTextWidthApprox(chunk+ch,size)>maxWidth&&chunk){lines.push(chunk);chunk=ch}
+            else chunk+=ch;
+          }
+          line=chunk;
+        }
+      }
+    }
+    if(line)lines.push(line);
+  }
+  return lines;
+}
+function pdfEllipsePath(cx,cy,rx,ry){
+  const k=0.5522847498;
+  return [
+    `${pdfFmt(cx+rx)} ${pdfFmt(cy)} m`,
+    `${pdfFmt(cx+rx)} ${pdfFmt(cy+k*ry)} ${pdfFmt(cx+k*rx)} ${pdfFmt(cy+ry)} ${pdfFmt(cx)} ${pdfFmt(cy+ry)} c`,
+    `${pdfFmt(cx-k*rx)} ${pdfFmt(cy+ry)} ${pdfFmt(cx-rx)} ${pdfFmt(cy+k*ry)} ${pdfFmt(cx-rx)} ${pdfFmt(cy)} c`,
+    `${pdfFmt(cx-rx)} ${pdfFmt(cy-k*ry)} ${pdfFmt(cx-k*rx)} ${pdfFmt(cy-ry)} ${pdfFmt(cx)} ${pdfFmt(cy-ry)} c`,
+    `${pdfFmt(cx+k*rx)} ${pdfFmt(cy-ry)} ${pdfFmt(cx+rx)} ${pdfFmt(cy-k*ry)} ${pdfFmt(cx+rx)} ${pdfFmt(cy)} c`
+  ].join('\n');
+}
+function buildProcessPdf(){
+  persist();
+  const stateNow=state();
+  const nodeItems=[...nodes.values()];
+  if(!nodeItems.length){msg('Processen är tom');return null}
+
+  let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;
+  nodeItems.forEach(item=>{
+    const x=item.data.x||0,y=item.data.y||0,w=item.el.offsetWidth,h=item.el.offsetHeight;
+    minX=Math.min(minX,x);minY=Math.min(minY,y);
+    maxX=Math.max(maxX,x+w);maxY=Math.max(maxY,y+h);
+  });
+
+  const pageW=1190.55,pageH=841.89; // A3 landscape in points
+  const margin=48,headerH=46;
+  const availW=pageW-margin*2,availH=pageH-margin*2-headerH;
+  const contentW=Math.max(1,maxX-minX),contentH=Math.max(1,maxY-minY);
+  const scale=Math.min(availW/contentW,availH/contentH,1.35);
+  const ox=margin+(availW-contentW*scale)/2-minX*scale;
+  const oy=margin+(availH-contentH*scale)/2-minY*scale;
+
+  const tx=x=>ox+x*scale;
+  const ty=y=>pageH-(margin+headerH)-((y-minY)*scale); // top baseline helper
+  const mapY=(y,h=0)=>pageH-(margin+headerH)-((y-minY+h)*scale);
+
+  const c=[];
+  c.push('q');
+  c.push('0.08 0.14 0.23 rg');
+  c.push('BT /F1 22 Tf');
+  c.push(`${pdfFmt(margin)} ${pdfFmt(pageH-margin-20)} Td (${pdfEscapeText(stateNow.name)}) Tj ET`);
+  c.push('0.35 0.42 0.50 rg');
+  c.push('BT /F1 9 Tf');
+  c.push(`${pdfFmt(margin)} ${pdfFmt(pageH-margin-37)} Td (Exported from Maplini) Tj ET`);
+
+  // connectors first
+  c.push('0.35 0.42 0.50 RG 1.4 w');
+  for(const link of links){
+    const A=nodes.get(link[0])?.el,B=nodes.get(link[1])?.el;
+    if(!A||!B)continue;
+    const side=link[2]||'right';
+    const target=targetSide(A,B);
+    const [ax,ay]=anchor(A,side),[bx,by]=anchor(B,target);
+    const x1=tx(ax),y1=mapY(ay),x2=tx(bx),y2=mapY(by);
+    c.push(`${pdfFmt(x1)} ${pdfFmt(y1)} m ${pdfFmt(x2)} ${pdfFmt(y2)} l S`);
+    // arrow head
+    const ang=Math.atan2(y2-y1,x2-x1),len=8,w=4;
+    const xa=x2-len*Math.cos(ang)+w*Math.sin(ang);
+    const ya=y2-len*Math.sin(ang)-w*Math.cos(ang);
+    const xb=x2-len*Math.cos(ang)-w*Math.sin(ang);
+    const yb=y2-len*Math.sin(ang)+w*Math.cos(ang);
+    c.push(`${pdfFmt(x2)} ${pdfFmt(y2)} m ${pdfFmt(xa)} ${pdfFmt(ya)} l ${pdfFmt(xb)} ${pdfFmt(yb)} l h f`);
+  }
+
+  // nodes
+  for(const item of nodeItems){
+    const d=item.data,s=styleOf(d);
+    const x=tx(d.x||0),w=item.el.offsetWidth*scale,h=item.el.offsetHeight*scale;
+    const y=mapY(d.y||0,item.el.offsetHeight);
+    const bg=pdfHexColor(s.bgColor),fg=pdfHexColor(s.textColor);
+    let border=[0.39,0.45,0.53];
+    if(d.type==='start')border=[0.17,0.48,0.38];
+    if(d.type==='end')border=[0.60,0.32,0.28];
+    if(d.type==='decision')border=[0.66,0.48,0.13];
+    if(d.type==='subprocess')border=[0.46,0.34,0.65];
+
+    c.push(`${pdfFmt(bg[0])} ${pdfFmt(bg[1])} ${pdfFmt(bg[2])} rg`);
+    c.push(`${pdfFmt(border[0])} ${pdfFmt(border[1])} ${pdfFmt(border[2])} RG 1.5 w`);
+
+    if(d.type==='decision'){
+      const cx=x+w/2,cy=y+h/2;
+      c.push(`${pdfFmt(cx)} ${pdfFmt(y+h)} m ${pdfFmt(x+w)} ${pdfFmt(cy)} l ${pdfFmt(cx)} ${pdfFmt(y)} l ${pdfFmt(x)} ${pdfFmt(cy)} l h B`);
+    }else if(d.type==='start'||d.type==='end'){
+      c.push(pdfEllipsePath(x+w/2,y+h/2,w/2,h/2)+' B');
+    }else{
+      c.push(`${pdfFmt(x)} ${pdfFmt(y)} ${pdfFmt(w)} ${pdfFmt(h)} re B`);
+    }
+
+    const fontSize=Math.max(7,Math.min(18,Number(s.fontSize||13)*scale*0.95));
+    const pad=10*scale,maxText=Math.max(20,w-pad*2);
+    const lines=wrapPdfText(d.text,maxText,fontSize);
+    const ioInputs=Array.isArray(d.inputs)?d.inputs.filter(Boolean):[];
+    const ioOutputs=Array.isArray(d.outputs)?d.outputs.filter(Boolean):[];
+    const allLines=[...lines];
+    if(ioInputs.length)allLines.push('In: '+ioInputs.join(', '));
+    if(ioOutputs.length)allLines.push('Out: '+ioOutputs.join(', '));
+    const lineH=fontSize*1.22;
+    const totalH=allLines.length*lineH;
+    let startY=y+h/2+totalH/2-lineH;
+    c.push(`${pdfFmt(fg[0])} ${pdfFmt(fg[1])} ${pdfFmt(fg[2])} rg`);
+    allLines.forEach((line,idx)=>{
+      const fs=(idx>=lines.length)?Math.max(6,fontSize*0.72):fontSize;
+      const ww=pdfTextWidthApprox(line,fs);
+      let lx=x+(w-ww)/2;
+      if(s.textAlign==='left')lx=x+pad;
+      if(s.textAlign==='right')lx=x+w-pad-ww;
+      c.push(`BT /F1 ${pdfFmt(fs)} Tf ${pdfFmt(lx)} ${pdfFmt(startY)} Td (${pdfEscapeText(line)}) Tj ET`);
+      startY-=lineH;
+    });
+  }
+  c.push('Q');
+  const stream=c.join('\n');
+
+  // Build a minimal valid PDF with Helvetica.
+  const objects=[];
+  objects[1]='<< /Type /Catalog /Pages 2 0 R >>';
+  objects[2]='<< /Type /Pages /Kids [3 0 R] /Count 1 >>';
+  objects[3]=`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageW} ${pageH}] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>`;
+  objects[4]=`<< /Length ${pdfLatin1Bytes(stream).length} >>\nstream\n${stream}\nendstream`;
+  objects[5]='<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>';
+
+  let pdf='%PDF-1.4\n%âãÏÓ\n',offsets=[0];
+  for(let i=1;i<=5;i++){
+    offsets[i]=pdfLatin1Bytes(pdf).length;
+    pdf+=`${i} 0 obj\n${objects[i]}\nendobj\n`;
+  }
+  const xref=pdfLatin1Bytes(pdf).length;
+  pdf+='xref\n0 6\n0000000000 65535 f \n';
+  for(let i=1;i<=5;i++)pdf+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';
+  pdf+=`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+  return pdfLatin1Bytes(pdf);
+}
+function exportPdf(){
+  try{
+    const bytes=buildProcessPdf();
+    if(!bytes)return;
+    const blob=new Blob([bytes],{type:'application/pdf'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=(state().name.replace(/[^a-z0-9åäö_-]+/gi,'_')||'Maplini_process')+'.pdf';
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href),1200);
+    msg('PDF skapad');
+  }catch(err){
+    console.error(err);
+    msg('PDF-export misslyckades');
+  }
+}
+
+
 root.querySelectorAll('.p48-item').forEach(i=>i.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',i.dataset.type);e.dataTransfer.effectAllowed='copy'}));
 canvas.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='copy'});
 canvas.addEventListener('drop',e=>{e.preventDefault();const type=e.dataTransfer.getData('text/plain');if(!type)return;const r=canvas.getBoundingClientRect();addNode(type,e.clientX-r.left+scroll.scrollLeft,e.clientY-r.top+scroll.scrollTop)});
 canvas.addEventListener('click',e=>{if(e.target===canvas){for(const x of nodes.values())x.el.classList.remove('selected');selectedId=null;refreshControls()}});
 nameInput.addEventListener('change',()=>{persist();msg('Namn sparat')});
-root.querySelector('#p48-new').addEventListener('click',newProcess);root.querySelector('#p48-save').addEventListener('click',()=>persist(true));root.querySelector('#p48-doc').addEventListener('click',exportDoc);
+root.querySelector('#p48-new').addEventListener('click',newProcess);root.querySelector('#p48-save').addEventListener('click',()=>persist(true));root.querySelector('#p48-pdf').addEventListener('click',exportPdf);root.querySelector('#p48-doc').addEventListener('click',exportDoc);
 root.querySelector('#p48-undo').addEventListener('click',()=>{if(!undo.length)return;redo.push(JSON.stringify(state()));restore(undo.pop());persist()});
 root.querySelector('#p48-redo').addEventListener('click',()=>{if(!redo.length)return;undo.push(JSON.stringify(state()));restore(redo.pop());persist()});
 root.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;if(e.key==='Delete')deleteSelected()});
