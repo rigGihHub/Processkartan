@@ -1,11 +1,16 @@
 # Changelog
 
-## v0.4.0
-- ISO-information borttagen.
-- En enda stor arbetsyta ersätter swimlanes och högerpanel.
-- Ny hantering av flera processer.
-- Ny process ger en tom canvas.
-- Sparad process kan öppnas igen via processväljaren.
-- Lokal processlagring och JSON-backup.
-- Google Docs-export behållen och förenklad.
-- SVG-export behållen.
+## v0.4.2
+- Kraftigt förenklad topprad.
+- Teknisk process-dropdown borttagen.
+- JSON-biblioteksknappar borttagna från gränssnittet.
+- SVG-export borttagen från gränssnittet.
+- Snap 20 px är nu fast standardbeteende och visas inte som kontroll.
+- Statusrad borttagen.
+- Kopiera/Klistra in-knappar borttagna; kortkommandon finns kvar.
+- Ta bort-knapp borttagen; Delete-tangenten finns kvar.
+- Google Docs är den tydliga primära exportfunktionen.
+
+## v0.4.1
+- Tydligare processnamn.
+- Raka pilar och fyra anslutningspunkter.

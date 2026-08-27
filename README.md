@@ -1,33 +1,28 @@
-# Processkartan v0.4.0
+# Processkartan v0.4.2
 
-## Nytt
-- ISO-information borttagen helt.
-- En enda stor canvas, 2400 × 1400 px.
-- Flera separata processer i samma app.
-- `Ny process` skapar en tom canvas.
-- `Spara process` bevarar den aktuella processen.
-- Processväljare för att växla mellan sparade processer.
-- Lokal lagring i webbläsaren.
-- Export/import av hela processbiblioteket som JSON.
-- Google Docs-export (.doc).
-- SVG-export.
-- Drag-and-drop, pilar, multiselect, undo/redo, kopiera/klistra in och snap-to-grid.
+## Fokus i denna version
+Toppraden är kraftigt förenklad för att ge mer plats åt canvasen.
 
-## Starta lokalt
-```bash
-pip install -r requirements.txt
-streamlit run app.py
-```
+Synligt:
+- Processnamn
+- Byt namn
+- Ny process
+- Spara
+- Ångra / Gör om
+- Exportera till Google Docs
 
-## GitHub Desktop
-1. Packa upp ZIP-filen.
-2. GitHub Desktop → Repository → Show in Explorer.
-3. Kopiera innehållet från den uppackade ZIP-mappen till repository-mappen.
-4. Ersätt befintliga filer.
-5. Commit to main.
-6. Push origin.
-7. Streamlit uppdaterar appen automatiskt.
+Borttaget från huvudgränssnittet:
+- process-dropdown
+- Spara alla (.json)
+- Öppna bibliotek
+- SVG
+- Snap 20 px
+- teknisk statusrad
+- separata Kopiera/Klistra in-knappar
+- separat Ta bort-knapp
 
-## Sparning
-`Spara process` sparar i webbläsarens lokala lagring.
-`Spara alla (.json)` skapar en portabel backup av hela processbiblioteket.
+Snap-to-grid ligger kvar automatiskt i bakgrunden.
+Kortkommandon för kopiera/klistra in och Delete fungerar fortfarande.
+
+## Uppdatera
+Packa upp ZIP → GitHub Desktop → Show in Explorer → ersätt filer → Commit to main → Push origin.

@@ -8,7 +8,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-APP_VERSION = "0.4.0"
+APP_VERSION = "0.4.2"
 
 st.markdown("""
 <style>
@@ -18,7 +18,7 @@ header[data-testid="stHeader"]{height:2rem}
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown(f"**Processkartan** · v{APP_VERSION} · drag-and-drop")
+st.markdown(f"**Processkartan** · v{APP_VERSION}")
 
 html = r'''
 <div id="pk4">
@@ -28,8 +28,8 @@ html = r'''
 .pk4-top{display:flex;gap:7px;align-items:center;flex-wrap:wrap;padding:9px 10px;background:#fff;border-bottom:1px solid #dce2e8}
 .pk4-btn,.pk4-select{border:1px solid #ccd4dc;background:#fff;color:#24303d;border-radius:8px;min-height:36px;padding:7px 10px;font:600 13px system-ui}
 .pk4-btn{cursor:pointer}.pk4-btn:hover{background:#f2f5f7}.pk4-btn.primary{background:#1f6f55;color:#fff;border-color:#1f6f55}.pk4-btn.danger{color:#a13d35}
-.pk4-name{font:700 13px system-ui;border:1px solid #ccd4dc;border-radius:8px;padding:7px 9px;min-width:210px}
-.pk4-spacer{flex:1}.pk4-msg{font-size:12px;color:#697584}
+.pk4-name{font:800 14px system-ui;border:2px solid #8aa2b8;border-radius:8px;padding:7px 10px;min-width:260px;background:#fbfdff}
+.pk4-spacer{flex:1}
 .pk4-body{display:grid;grid-template-columns:185px minmax(0,1fr);min-height:900px}
 .pk4-palette{background:#fff;border-right:1px solid #dce2e8;padding:10px}
 .pk4-title{font-size:12px;font-weight:800;margin:0 0 8px}.pk4-sub{font-size:11px;color:#6c7784;line-height:1.45;margin-bottom:10px}
@@ -47,30 +47,30 @@ html = r'''
 .pk4-node.note{background:#fffbe8;border-color:#b8973e;font-weight:600}
 .pk4-node.group{width:260px;min-height:120px;border-style:dashed;background:#f8fafc;color:#536171}
 .pk4-node.selected{outline:3px solid #2c7be5;outline-offset:3px}
-.pk4-handle{position:absolute;right:-9px;top:50%;transform:translateY(-50%);width:18px;height:18px;border-radius:50%;background:#1f6f55;border:3px solid #fff;box-shadow:0 0 0 1px #1f6f55;cursor:crosshair;z-index:8}
-.pk4-node.decision .pk4-handle{right:4px}
+.pk4-handle{position:absolute;width:16px;height:16px;border-radius:50%;background:#1f6f55;border:3px solid #fff;box-shadow:0 0 0 1px #1f6f55;cursor:crosshair;z-index:8}
+.pk4-handle.right{right:-8px;top:50%;transform:translateY(-50%)}
+.pk4-handle.left{left:-8px;top:50%;transform:translateY(-50%)}
+.pk4-handle.top{top:-8px;left:50%;transform:translateX(-50%)}
+.pk4-handle.bottom{bottom:-8px;left:50%;transform:translateX(-50%)}
+.pk4-node.decision .pk4-handle.right{right:4px}
+.pk4-node.decision .pk4-handle.left{left:4px}
+.pk4-node.decision .pk4-handle.top{top:4px}
+.pk4-node.decision .pk4-handle.bottom{bottom:4px}
 .pk4-edit{position:absolute;left:6px;top:6px;width:19px;height:19px;border-radius:6px;border:1px solid #d3dae2;background:#fff;font-size:11px;display:none;place-items:center;cursor:pointer}
 .pk4-node.selected .pk4-edit{display:grid}
 @media(max-width:850px){.pk4-body{grid-template-columns:1fr}.pk4-palette{border-right:0;border-bottom:1px solid #dce2e8;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.pk4-title,.pk4-sub,.pk4-tip{grid-column:1/-1}.pk4-drag{margin-bottom:0}}
 </style>
 
 <div class="pk4-top">
+  <strong style="font-size:15px;margin-right:4px">Process</strong>
+  <input class="pk4-name" id="pk4-name" aria-label="Processnamn" placeholder="Döp processen...">
+  <button type="button" class="pk4-btn" id="pk4-rename">Byt namn</button>
   <button type="button" class="pk4-btn primary" id="pk4-new">+ Ny process</button>
-  <select class="pk4-select" id="pk4-process"></select>
-  <input class="pk4-name" id="pk4-name" aria-label="Processnamn">
-  <button type="button" class="pk4-btn" id="pk4-save">Spara process</button>
+  <button type="button" class="pk4-btn" id="pk4-save">Spara</button>
   <button type="button" class="pk4-btn" id="pk4-undo">↶ Ångra</button>
   <button type="button" class="pk4-btn" id="pk4-redo">↷ Gör om</button>
-  <button type="button" class="pk4-btn" id="pk4-copy">Kopiera</button>
-  <button type="button" class="pk4-btn" id="pk4-paste">Klistra in</button>
-  <label class="pk4-btn" style="display:flex;align-items:center;gap:5px"><input type="checkbox" id="pk4-snap" checked> Snap 20 px</label>
-  <button type="button" class="pk4-btn danger" id="pk4-delete">Ta bort</button>
   <span class="pk4-spacer"></span>
-  <button type="button" class="pk4-btn" id="pk4-library">Spara alla (.json)</button>
-  <label class="pk4-btn" style="text-align:center">Öppna bibliotek<input id="pk4-open" type="file" accept=".json,application/json" hidden></label>
-  <button type="button" class="pk4-btn primary" id="pk4-doc">Google Docs (.doc)</button>
-  <button type="button" class="pk4-btn" id="pk4-svgexport">SVG</button>
-  <span class="pk4-msg" id="pk4-msg" aria-live="polite">Dra ett steg till arbetsytan.</span>
+  <button type="button" class="pk4-btn primary" id="pk4-doc">Exportera till Google Docs</button>
 </div>
 
 <div class="pk4-body">
@@ -84,7 +84,7 @@ html = r'''
     <div class="pk4-drag" draggable="true" data-type="subprocess"><span class="pk4-icon">▣</span>Delprocess</div>
     <div class="pk4-drag" draggable="true" data-type="group"><span class="pk4-icon">G</span>Grupp / område</div>
     <div class="pk4-drag" draggable="true" data-type="note"><span class="pk4-icon">N</span>Anteckning</div>
-    <div class="pk4-tip"><b>Pilar:</b> dra från den gröna punkten på ett steg till nästa.<br><br><b>Redigera:</b> dubbelklicka på rutan eller markera den och klicka pennan.<br><br><b>Ny process:</b> skapar en helt tom canvas. Den gamla processen finns kvar när den är sparad.</div>
+    <div class="pk4-tip"><b>Pilar:</b> dra från någon av de fyra gröna punkterna.<br><br><b>Redigera:</b> dubbelklicka på rutan eller markera den och klicka pennan.</div>
   </aside>
 
   <main class="pk4-scroll" id="pk4-scroll">
@@ -106,8 +106,8 @@ html = r'''
 (()=>{
 const R=document.getElementById('pk4'); if(R.dataset.ready)return; R.dataset.ready='1';
 const C=R.querySelector('#pk4-canvas'), G=R.querySelector('#pk4-links'), TEMP=R.querySelector('#pk4-temp');
-const M=R.querySelector('#pk4-msg'), SEL=R.querySelector('#pk4-process'), NAME=R.querySelector('#pk4-name'), SCROLL=R.querySelector('#pk4-scroll');
-const snapBox=R.querySelector('#pk4-snap');
+const NAME=R.querySelector('#pk4-name'), SCROLL=R.querySelector('#pk4-scroll');
+
 let nodes=new Map(), links=[], selectedIds=new Set(), selected=null, seq=0, clipboard=[], undo=[], redo=[];
 let currentId=null, dragPaletteType=null, processes={};
 
@@ -151,34 +151,42 @@ function restoreState(s){
 function persistCurrent(show=true){
  if(!currentId)currentId=uid('proc');
  const s=currentState();processes[currentId]=clone(s);saveLocal();renderSelect();
- if(show)M.textContent='Processen "'+s.name+'" är sparad.';
+ if(show)
 }
-function renderSelect(){
- const ids=Object.keys(processes);SEL.innerHTML='';
- ids.forEach(id=>{const o=document.createElement('option');o.value=id;o.textContent=processes[id].name||'Namnlös process';SEL.appendChild(o)});
- if(currentId && processes[currentId])SEL.value=currentId;
-}
+function renderSelect(){}
 function openProcess(id){
- if(!processes[id])return;currentId=id;undo=[];redo=[];restoreState(processes[id]);saveLocal();M.textContent='Öppnade "'+processes[id].name+'".';
+ if(!processes[id])return;currentId=id;undo=[];redo=[];restoreState(processes[id]);saveLocal();
 }
 function newProcess(){
  persistCurrent(false);
  const name=prompt('Namn på den nya processen:','Ny process');
  if(name===null)return;
  currentId=uid('proc');processes[currentId]={id:currentId,name:(name.trim()||'Ny process'),nodes:[],links:[]};
- undo=[];redo=[];restoreState(processes[currentId]);saveLocal();SCROLL.scrollLeft=0;SCROLL.scrollTop=0;M.textContent='Ny tom process skapad.';
+ undo=[];redo=[];restoreState(processes[currentId]);saveLocal();SCROLL.scrollLeft=0;SCROLL.scrollTop=0;
 }
 function nodeText(type){return ({start:'Start',process:'Ny aktivitet',decision:'Beslut?',end:'Slut',subprocess:'Ny delprocess',group:'Ny grupp / område',note:'Anteckning'})[type]||'Nytt steg'}
 function place(el,x,y){
- const snap=snapBox.checked?20:1;x=Math.round(x/snap)*snap;y=Math.round(y/snap)*snap;
+ const snap=20;x=Math.round(x/snap)*snap;y=Math.round(y/snap)*snap;
  el.style.left=Math.max(10,Math.min(2400-el.offsetWidth-10,x))+'px';el.style.top=Math.max(10,Math.min(1400-el.offsetHeight-10,y))+'px';
 }
 function sync(el){const d=nodes.get(el.dataset.id).data;d.x=parseFloat(el.style.left);d.y=parseFloat(el.style.top)}
 function center(el){return[parseFloat(el.style.left)+el.offsetWidth/2,parseFloat(el.style.top)+el.offsetHeight/2]}
+function anchorPoint(el,side){
+ const x=parseFloat(el.style.left),y=parseFloat(el.style.top),w=el.offsetWidth,h=el.offsetHeight;
+ if(side==='left')return[x,y+h/2];
+ if(side==='top')return[x+w/2,y];
+ if(side==='bottom')return[x+w/2,y+h];
+ return[x+w,y+h/2];
+}
+function bestTargetSide(A,B){
+ const [ax,ay]=center(A),[bx,by]=center(B),dx=bx-ax,dy=by-ay;
+ if(Math.abs(dx)>=Math.abs(dy))return dx>=0?'left':'right';
+ return dy>=0?'top':'bottom';
+}
 function selectNode(el,add=false){
  if(!add){[...nodes.values()].forEach(o=>o.el.classList.remove('selected'));selectedIds.clear()}
  selected=el;selectedIds.add(el.dataset.id);el.classList.add('selected');
- M.textContent=selectedIds.size>1?selectedIds.size+' steg markerade.':'Markerat: '+nodes.get(el.dataset.id).data.text;
+ 
 }
 function editNode(el){
  const d=nodes.get(el.dataset.id).data;const val=prompt('Text i steget:',d.text);
@@ -188,13 +196,16 @@ function makeNode(data){
  const d={...data};const el=document.createElement('div');el.className='pk4-node '+d.type;el.dataset.id=d.id;el.style.left=d.x+'px';el.style.top=d.y+'px';el.tabIndex=0;
  const label=document.createElement('span');label.textContent=d.text;el.appendChild(label);
  const edit=document.createElement('button');edit.type='button';edit.className='pk4-edit';edit.textContent='✎';edit.title='Redigera text';el.appendChild(edit);
- const handle=document.createElement('span');handle.className='pk4-handle';handle.title='Dra pil';el.appendChild(handle);
- C.appendChild(el);nodes.set(d.id,{el,data:d,label,handle});
+ const handles={};
+ ['right','left','top','bottom'].forEach(side=>{
+   const h=document.createElement('span');h.className='pk4-handle '+side;h.dataset.side=side;h.title='Dra pil '+side;el.appendChild(h);handles[side]=h;
+ });
+ C.appendChild(el);nodes.set(d.id,{el,data:d,label,handles});
  edit.addEventListener('click',e=>{e.stopPropagation();editNode(el)});
  el.addEventListener('dblclick',e=>{e.stopPropagation();editNode(el)});
  el.addEventListener('click',e=>{e.stopPropagation();selectNode(el,e.ctrlKey||e.metaKey)});
  el.addEventListener('pointerdown',e=>{
-  if(e.target===handle||e.target===edit||e.button!==0)return;
+  if(e.target.classList.contains('pk4-handle')||e.target===edit||e.button!==0)return;
   selectNode(el,e.ctrlKey||e.metaKey);snapshot();
   const sx=e.clientX,sy=e.clientY;
   const starts=[...selectedIds].map(id=>({id,x:nodes.get(id).data.x,y:nodes.get(id).data.y}));
@@ -206,28 +217,36 @@ function makeNode(data){
   const up=()=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);persistCurrent(false)};
   el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up)
  });
- handle.addEventListener('pointerdown',e=>{
+ Object.values(handles).forEach(handle=>handle.addEventListener('pointerdown',e=>{
   e.stopPropagation();e.preventDefault();
-  const [x,y]=center(el);TEMP.hidden=false;TEMP.setAttribute('d','M'+x+','+y+' L'+x+','+y);
+  const side=handle.dataset.side;
+  const p=anchorPoint(el,side),x=p[0],y=p[1];
+  TEMP.hidden=false;TEMP.setAttribute('d','M'+x+','+y+' L'+x+','+y);
   const mv=ev=>{const r=C.getBoundingClientRect(),tx=ev.clientX-r.left+SCROLL.scrollLeft,ty=ev.clientY-r.top+SCROLL.scrollTop;TEMP.setAttribute('d','M'+x+','+y+' L'+tx+','+ty)};
   const up=ev=>{
    document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);TEMP.hidden=true;
    const target=document.elementFromPoint(ev.clientX,ev.clientY)?.closest('.pk4-node');
-   if(target&&target!==el){snapshot();links.push([el.dataset.id,target.dataset.id]);drawLinks();persistCurrent(false);M.textContent='Pil skapad.'}
-  };
+   if(target&&target!==el){snapshot();links.push([el.dataset.id,target.dataset.id,side]);drawLinks();persistCurrent(false);
   document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)
- });
+ }));
  return el;
 }
 function addNode(type,x,y){snapshot();seq++;const el=makeNode({id:'n'+seq,type,text:nodeText(type),x:x-90,y:y-38});place(el,x-90,y-38);sync(el);selectNode(el);drawLinks();persistCurrent(false)}
 function drawLinks(){
  G.innerHTML='';
- links.forEach(([a,b])=>{
+ links.forEach(link=>{
+  const [a,b,sourceSide]=link;
   const A=nodes.get(a)?.el,B=nodes.get(b)?.el;if(!A||!B)return;
-  let[x1,y1]=center(A),[x2,y2]=center(B),dx=x2-x1,dy=y2-y1;
-  if(Math.abs(dx)>Math.abs(dy)){x1+=Math.sign(dx)*A.offsetWidth/2;x2-=Math.sign(dx)*B.offsetWidth/2}else{y1+=Math.sign(dy)*A.offsetHeight/2;y2-=Math.sign(dy)*B.offsetHeight/2}
-  const mx=(x1+x2)/2,p=document.createElementNS('http://www.w3.org/2000/svg','path');
-  p.setAttribute('class','pk4-link');p.setAttribute('marker-end','url(#pk4-arrow)');p.setAttribute('d','M'+x1+','+y1+' C'+mx+','+y1+' '+mx+','+y2+' '+x2+','+y2);G.appendChild(p)
+  let side=sourceSide;
+  if(!side){
+   const [ax,ay]=center(A),[bx,by]=center(B),dx=bx-ax,dy=by-ay;
+   side=Math.abs(dx)>=Math.abs(dy)?(dx>=0?'right':'left'):(dy>=0?'bottom':'top');
+  }
+  const targetSide=bestTargetSide(A,B);
+  const [x1,y1]=anchorPoint(A,side),[x2,y2]=anchorPoint(B,targetSide);
+  const p=document.createElementNS('http://www.w3.org/2000/svg','path');
+  p.setAttribute('class','pk4-link');p.setAttribute('marker-end','url(#pk4-arrow)');
+  p.setAttribute('d','M'+x1+','+y1+' L'+x2+','+y2);G.appendChild(p)
  })
 }
 R.querySelectorAll('.pk4-drag').forEach(el=>{
@@ -241,60 +260,36 @@ C.addEventListener('drop',e=>{
  const r=C.getBoundingClientRect();addNode(type,e.clientX-r.left+SCROLL.scrollLeft,e.clientY-r.top+SCROLL.scrollTop)
 });
 C.addEventListener('click',e=>{
- if(e.target===C){[...nodes.values()].forEach(o=>o.el.classList.remove('selected'));selectedIds.clear();selected=null;M.textContent='Dra ett steg till arbetsytan.'}
-});
+ if(e.target===C){[...nodes.values()].forEach(o=>o.el.classList.remove('selected'));selectedIds.clear();selected=null;
 NAME.addEventListener('change',()=>{persistCurrent(false);renderSelect()});
-SEL.addEventListener('change',()=>{persistCurrent(false);openProcess(SEL.value)});
 R.querySelector('#pk4-new').addEventListener('click',newProcess);
+R.querySelector('#pk4-rename').addEventListener('click',()=>{
+ const old=NAME.value.trim()||'Namnlös process';
+ const val=prompt('Nytt namn på processen:',old);
+ if(val===null)return;
+ NAME.value=val.trim()||old;
+ persistCurrent(false);renderSelect();
+});
 R.querySelector('#pk4-save').addEventListener('click',()=>persistCurrent(true));
-R.querySelector('#pk4-delete').addEventListener('click',()=>{
+function deleteSelected(){
  if(!selectedIds.size)return;snapshot();
  const ids=[...selectedIds];ids.forEach(id=>{nodes.get(id)?.el.remove();nodes.delete(id)});
  links=links.filter(l=>!selectedIds.has(l[0])&&!selectedIds.has(l[1]));selectedIds.clear();selected=null;drawLinks();persistCurrent(false)
-});
+}
 R.querySelector('#pk4-undo').addEventListener('click',()=>{if(!undo.length)return;redo.push(JSON.stringify(currentState()));const s=undo.pop();restoreState(s);persistCurrent(false)});
 R.querySelector('#pk4-redo').addEventListener('click',()=>{if(!redo.length)return;undo.push(JSON.stringify(currentState()));const s=redo.pop();restoreState(s);persistCurrent(false)});
-function copySelected(){clipboard=[...selectedIds].map(id=>clone(nodes.get(id).data));M.textContent=clipboard.length?clipboard.length+' steg kopierade.':'Markera steg först.'}
-function pasteSelected(){
- if(!clipboard.length)return;snapshot();[...nodes.values()].forEach(o=>o.el.classList.remove('selected'));selectedIds.clear();
+function copySelected(){clipboard=[...selectedIds].map(id=>clone(nodes.get(id).data));snapshot();[...nodes.values()].forEach(o=>o.el.classList.remove('selected'));selectedIds.clear();
  clipboard.forEach(src=>{seq++;const d=clone(src);d.id='n'+seq;d.x+=40;d.y+=40;const el=makeNode(d);selectedIds.add(d.id);el.classList.add('selected');selected=el});
- drawLinks();persistCurrent(false);M.textContent=clipboard.length+' steg inklistrade.'
-}
-R.querySelector('#pk4-copy').addEventListener('click',copySelected);R.querySelector('#pk4-paste').addEventListener('click',pasteSelected);
+ drawLinks();persistCurrent(false);
 R.addEventListener('keydown',e=>{
  if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)||e.target.isContentEditable)return;
  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='c'){e.preventDefault();copySelected()}
  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='v'){e.preventDefault();pasteSelected()}
- if(e.key==='Delete')R.querySelector('#pk4-delete').click()
+ if(e.key==='Delete')deleteSelected()
 });
 function dl(data,name,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([data],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1200)}
 function esc(s){return String(s??'').replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[c]||c))}
-R.querySelector('#pk4-library').addEventListener('click',()=>{persistCurrent(false);dl(JSON.stringify({version:'0.4.0',currentId,processes},null,2),'Processkartan_bibliotek.json','application/json')});
-R.querySelector('#pk4-open').addEventListener('change',async e=>{
- const f=e.target.files[0];if(!f)return;
- try{
-  const d=JSON.parse(await f.text());
-  if(d.processes){processes=d.processes;currentId=d.currentId&&processes[d.currentId]?d.currentId:Object.keys(processes)[0]}
-  else if(d.nodes){currentId=uid('proc');processes[currentId]={id:currentId,name:d.name||'Importerad process',nodes:d.nodes,links:d.links||[]}}
-  openProcess(currentId);saveLocal();M.textContent='Processbibliotek öppnat.'
- }catch(err){M.textContent='Kunde inte läsa filen.'}
- e.target.value=''
-});
-R.querySelector('#pk4-doc').addEventListener('click',()=>{
- persistCurrent(false);
- const s=currentState(),ordered=[...nodes.values()].sort((a,b)=>a.data.y-b.data.y||a.data.x-b.data.x);
- const rows=ordered.map((o,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(o.data.text)+'</td><td>'+esc(({start:'Start',process:'Aktivitet',decision:'Beslut',end:'Slut',subprocess:'Delprocess',group:'Grupp / område',note:'Anteckning'})[o.data.type])+'</td></tr>').join('');
- const conn=links.map(([a,b])=>{const A=nodes.get(a)?.data.text||a,B=nodes.get(b)?.data.text||b;return '<li>'+esc(A)+' → '+esc(B)+'</li>'}).join('');
- const now=new Date().toLocaleDateString('sv-SE');
- const doc='<!doctype html><html><head><meta charset="utf-8"><style>body{font-family:Arial,sans-serif;color:#222}h1{font-size:22px}h2{font-size:16px;margin-top:24px}table{border-collapse:collapse;width:100%}th,td{border:1px solid #aaa;padding:7px;font-size:10pt}th{background:#eee}.small{color:#666;font-size:9pt}</style></head><body><h1>'+esc(s.name)+'</h1><p class="small">Exporterad '+now+' · Processkartan v0.4.0</p><h2>Processsteg</h2><table><tr><th>#</th><th>Steg</th><th>Typ</th></tr>'+rows+'</table><h2>Kopplingar</h2><ul>'+conn+'</ul><p class="small">Ladda upp filen till Google Drive och välj Öppna med → Google Dokument.</p></body></html>';
- dl(doc,(s.name.replace(/[^a-z0-9åäö_-]+/gi,'_')||'Processkartan')+'_Google_Docs.doc','application/msword');M.textContent='Google Docs-export skapad.'
-});
-R.querySelector('#pk4-svgexport').addEventListener('click',()=>{
- const s=currentState();let parts=['<svg xmlns="http://www.w3.org/2000/svg" width="2400" height="1400" viewBox="0 0 2400 1400"><rect width="100%" height="100%" fill="white"/>'];
- parts.push(G.innerHTML.replaceAll('url(#pk4-arrow)',''));
- [...nodes.values()].forEach(o=>{const d=o.data,w=o.el.offsetWidth,h=o.el.offsetHeight;parts.push('<rect x="'+d.x+'" y="'+d.y+'" width="'+w+'" height="'+h+'" rx="12" fill="white" stroke="#637387" stroke-width="2"/><text x="'+(d.x+w/2)+'" y="'+(d.y+h/2)+'" text-anchor="middle" dominant-baseline="middle" font-family="Arial" font-size="13">'+esc(d.text)+'</text>')});
- parts.push('</svg>');dl(parts.join(''),(s.name.replace(/[^a-z0-9åäö_-]+/gi,'_')||'processkarta')+'.svg','image/svg+xml')
-});
+
 
 if(!loadLocal()){processes[starter.id]=clone(starter);currentId=starter.id}
 renderSelect();openProcess(currentId);
