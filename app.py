@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.6.0"
+APP_VERSION = "0.6.1"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 
@@ -69,6 +69,11 @@ html = r"""
 .p48-empty{font-size:11px;color:#75818d;line-height:1.4}
 .p48-scroll{overflow:auto;background:#e9eef3}
 #p48-canvas{position:relative;width:2400px;height:1400px;background:#fff;touch-action:none;background-image:radial-gradient(#dce2e8 1px,transparent 1px);background-size:20px 20px}
+.p48-marquee{position:absolute;border:2px dashed #2c7be5;background:rgba(44,123,229,.10);z-index:20;pointer-events:none;display:none}
+.p48-node.multi-selected{outline:3px solid #2c7be5;outline-offset:3px}
+.p48-node.decision.multi-selected{outline:none}
+.p48-node.decision.multi-selected::before{border-color:#2c7be5;box-shadow:none}
+
 #p48-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
 .p48-link{stroke:#687584;stroke-width:2.2;fill:none}.p48-temp{stroke:#df941e;stroke-width:2.4;fill:none;stroke-dasharray:6 5}
 .p48-node{position:absolute;min-width:160px;max-width:360px;width:max-content;min-height:64px;height:auto;padding:14px 26px;border:2px solid #637387;border-radius:10px;background:#fff;box-shadow:0 3px 9px rgba(31,42,55,.10);z-index:5;user-select:none;touch-action:none;display:flex;align-items:center;justify-content:center}
@@ -102,6 +107,8 @@ html = r"""
   <button type="button" class="p48-btn" id="p48-save">Spara</button>
   <button type="button" class="p48-btn" id="p48-undo">↶ Ångra</button>
   <button type="button" class="p48-btn" id="p48-redo">↷ Gör om</button>
+  <button type="button" class="p48-btn" id="p48-select-tool">Markera område</button>
+  <button type="button" class="p48-btn" id="p48-delete-selection" disabled>Ta bort markerat</button>
   <span class="p48-spacer"></span>
   <button type="button" class="p48-btn primary" id="p48-pdf">Exportera PDF</button>
   <button type="button" class="p48-btn" id="p48-doc">Exportera DOCX</button>
@@ -163,6 +170,7 @@ html = r"""
 
   <main class="p48-scroll" id="p48-scroll">
     <div id="p48-canvas">
+      <div id="p48-marquee" class="p48-marquee"></div>
       <svg id="p48-svg" viewBox="0 0 2400 1400">
         <defs><marker id="p48-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0,0 10,4 0,8" fill="#687584"></polygon></marker></defs>
         <g id="p48-links"></g>
@@ -179,10 +187,13 @@ const canvas=root.querySelector('#p48-canvas'),scroll=root.querySelector('#p48-s
 const nameInput=root.querySelector('#p48-name'),status=root.querySelector('#p48-status'),processBox=root.querySelector('#p48-processes');
 const controls=root.querySelector('#p48-controls'),font=root.querySelector('#p48-font'),size=root.querySelector('#p48-size'),textColor=root.querySelector('#p48-textcolor'),bgColor=root.querySelector('#p48-bgcolor');
 const bold=root.querySelector('#p48-bold'),italic=root.querySelector('#p48-italic'),under=root.querySelector('#p48-under');
+const marquee=root.querySelector('#p48-marquee');
+const selectToolBtn=root.querySelector('#p48-select-tool');
+const deleteSelectionBtn=root.querySelector('#p48-delete-selection');
 const inputsBox=root.querySelector('#p48-inputs'),outputsBox=root.querySelector('#p48-outputs');
 const addInputBtn=root.querySelector('#p48-add-input'),addOutputBtn=root.querySelector('#p48-add-output'),deleteNodeBtn=root.querySelector('#p48-delete-node');
 
-let nodes=new Map(),links=[],selectedId=null,seq=8,undo=[],redo=[],currentId='proc-1',processes={};
+let nodes=new Map(),links=[],selectedId=null,selectedIds=new Set(),selectionMode=false,seq=8,undo=[],redo=[],currentId='proc-1',processes={};
 
 const starter={id:'proc-1',name:'Exempel – upphandlingsprocess',nodes:[
 {id:'n1',type:'start',text:'Upphandling identifieras',x:100,y:130},{id:'n2',type:'process',text:'Första bedömning',x:390,y:130},{id:'n3',type:'decision',text:'Relevant?',x:680,y:110},{id:'n4',type:'process',text:'Kvalificera upphandling',x:950,y:130}
@@ -222,7 +233,7 @@ function renderProcesses(){
 }
 function persist(show=false){const s=state();processes[currentId]=clone(s);saveLocal();renderProcesses();if(show)msg('Sparad')}
 function pushUndo(){undo.push(JSON.stringify(state()));if(undo.length>50)undo.shift();redo=[]}
-function clearCanvas(){for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;linkLayer.innerHTML='';refreshControls()}
+function clearCanvas(){for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();linkLayer.innerHTML='';finishTempArrow();refreshControls();updateSelectionUi()}
 function restore(s){const d=typeof s==='string'?JSON.parse(s):clone(s);clearCanvas();currentId=d.id||currentId;nameInput.value=d.name||'Namnlös process';(d.nodes||[]).forEach(makeNode);links=d.links||[];seq=Math.max(0,...[...nodes.keys()].map(id=>parseInt(String(id).replace(/\D/g,''),10)||0));drawLinks()}
 function openProcess(id){if(!processes[id])return;currentId=id;undo=[];redo=[];restore(processes[id]);saveLocal();renderProcesses();msg('Process öppnad')}
 function newProcess(){persist();const n=prompt('Namn på den nya processen:','Ny process');if(n===null)return;currentId=uid();processes[currentId]={id:currentId,name:n.trim()||'Ny process',nodes:[],links:[]};undo=[];redo=[];restore(processes[currentId]);saveLocal();renderProcesses();scroll.scrollLeft=0;scroll.scrollTop=0;msg('Ny process skapad')}
@@ -250,7 +261,48 @@ function sync(el){const x=nodes.get(el.dataset.id);if(x){x.data.x=parseFloat(el.
 function center(el){return[(parseFloat(el.style.left)||0)+el.offsetWidth/2,(parseFloat(el.style.top)||0)+el.offsetHeight/2]}
 function anchor(el,side){const x=parseFloat(el.style.left)||0,y=parseFloat(el.style.top)||0,w=el.offsetWidth,h=el.offsetHeight;if(side==='left')return[x,y+h/2];if(side==='top')return[x+w/2,y];if(side==='bottom')return[x+w/2,y+h];return[x+w,y+h/2]}
 function targetSide(a,b){const[ax,ay]=center(a),[bx,by]=center(b),dx=bx-ax,dy=by-ay;if(Math.abs(dx)>=Math.abs(dy))return dx>=0?'left':'right';return dy>=0?'top':'bottom'}
-function select(el){for(const x of nodes.values())x.el.classList.remove('selected');selectedId=el.dataset.id;el.classList.add('selected');refreshControls()}
+
+function updateSelectionUi(){
+  for(const item of nodes.values()){
+    item.el.classList.toggle('multi-selected', selectedIds.has(item.data.id));
+    if(selectedId===item.data.id)item.el.classList.add('selected');
+    else item.el.classList.remove('selected');
+  }
+  deleteSelectionBtn.disabled=selectedIds.size===0;
+  selectToolBtn.classList.toggle('primary',selectionMode);
+  selectToolBtn.textContent=selectionMode?'Avsluta markering':'Markera område';
+}
+function clearSelection(){
+  selectedIds.clear();selectedId=null;refreshControls();updateSelectionUi();
+}
+function selectMany(ids){
+  selectedIds=new Set(ids);
+  selectedId=selectedIds.size===1?[...selectedIds][0]:null;
+  refreshControls();updateSelectionUi();
+}
+function deleteSelectedMany(){
+  if(!selectedIds.size)return;
+  pushUndo();
+  const doomed=new Set(selectedIds);
+  for(const id of doomed){
+    const item=nodes.get(id);
+    if(item){item.el.remove();nodes.delete(id);}
+  }
+  links=links.filter(l=>!doomed.has(l[0])&&!doomed.has(l[1]));
+  selectedIds.clear();selectedId=null;drawLinks();persist();refreshControls();updateSelectionUi();msg('Markerat borttaget');
+}
+function rectsIntersect(a,b){
+  return !(a.right<b.left||a.left>b.right||a.bottom<b.top||a.top>b.bottom);
+}
+function finishTempArrow(){
+  temp.hidden=true;
+  temp.setAttribute('d','');
+}
+
+function select(el){
+  selectedIds.clear();selectedId=el.dataset.id;selectedIds.add(selectedId);
+  refreshControls();updateSelectionUi();
+}
 
 function ensureIO(item){
   if(!Array.isArray(item.data.inputs))item.data.inputs=[];
@@ -351,12 +403,16 @@ Object.values(resizeHandles).forEach(rh=>rh.addEventListener('pointerdown',e=>{
   document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up);
 }));
 
-Object.values(handles).forEach(h=>h.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();const side=h.dataset.side,[x1,y1]=anchor(el,side);temp.hidden=false;temp.setAttribute('d',`M${x1},${y1} L${x1},${y1}`);const mv=ev=>{const r=canvas.getBoundingClientRect(),x2=ev.clientX-r.left+scroll.scrollLeft,y2=ev.clientY-r.top+scroll.scrollTop;temp.setAttribute('d',`M${x1},${y1} L${x2},${y2}`)};const up=ev=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);temp.hidden=true;const target=document.elementFromPoint(ev.clientX,ev.clientY)?.closest('.p48-node');if(target&&target!==el){pushUndo();links.push([el.dataset.id,target.dataset.id,side]);drawLinks();persist()}};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)}));
+Object.values(handles).forEach(h=>h.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();const side=h.dataset.side,[x1,y1]=anchor(el,side);temp.hidden=false;temp.setAttribute('d',`M${x1},${y1} L${x1},${y1}`);const mv=ev=>{const r=canvas.getBoundingClientRect(),x2=ev.clientX-r.left+scroll.scrollLeft,y2=ev.clientY-r.top+scroll.scrollTop;temp.setAttribute('d',`M${x1},${y1} L${x2},${y2}`)};const up=ev=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);finishTempArrow();const target=document.elementFromPoint(ev.clientX,ev.clientY)?.closest('.p48-node');if(target&&target!==el){pushUndo();links.push([el.dataset.id,target.dataset.id,side]);drawLinks();persist()}};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)}));
 return el}
 
 function addNode(type,x,y){pushUndo();seq++;const el=makeNode({id:'n'+seq,type,text:nodeText(type),x:x-90,y:y-38});place(el,x-90,y-38);sync(el);select(el);drawLinks();persist()}
 function drawLinks(){linkLayer.innerHTML='';for(const [a,b,side] of links){const A=nodes.get(a)?.el,B=nodes.get(b)?.el;if(!A||!B)continue;const s=side||'right',t=targetSide(A,B),[x1,y1]=anchor(A,s),[x2,y2]=anchor(B,t),p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('class','p48-link');p.setAttribute('marker-end','url(#p48-arrow)');p.setAttribute('d',`M${x1},${y1} L${x2},${y2}`);linkLayer.appendChild(p)}}
-function deleteSelected(){if(!selectedId||!nodes.has(selectedId))return;pushUndo();nodes.get(selectedId).el.remove();nodes.delete(selectedId);links=links.filter(l=>l[0]!==selectedId&&l[1]!==selectedId);selectedId=null;drawLinks();persist();refreshControls()}
+function deleteSelected(){
+  if(selectedIds.size>1){deleteSelectedMany();return;}
+  if(!selectedId||!nodes.has(selectedId))return;
+  selectedIds=new Set([selectedId]);deleteSelectedMany();
+}
 
 function crc32(bytes){let crc=0^(-1);for(let i=0;i<bytes.length;i++){crc^=bytes[i];for(let j=0;j<8;j++)crc=(crc>>>1)^(0xEDB88320&-(crc&1))}return(crc^(-1))>>>0}
 const u16=n=>new Uint8Array([n&255,(n>>>8)&255]);const u32=n=>new Uint8Array([n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]);
@@ -607,15 +663,60 @@ async function exportDoc(){
   }catch(err){console.error(err);msg('DOCX-export misslyckades')}
 }
 
+
+selectToolBtn.addEventListener('click',()=>{
+  selectionMode=!selectionMode;
+  clearSelection();
+  updateSelectionUi();
+});
+deleteSelectionBtn.addEventListener('click',deleteSelectedMany);
+
+canvas.addEventListener('pointerdown',e=>{
+  if(!selectionMode||e.button!==0||e.target.closest('.p48-node'))return;
+  e.preventDefault();finishTempArrow();
+  const rect=canvas.getBoundingClientRect();
+  const sx=e.clientX-rect.left+scroll.scrollLeft;
+  const sy=e.clientY-rect.top+scroll.scrollTop;
+  marquee.style.left=sx+'px';marquee.style.top=sy+'px';marquee.style.width='0px';marquee.style.height='0px';marquee.style.display='block';
+
+  const move=ev=>{
+    const x=ev.clientX-rect.left+scroll.scrollLeft,y=ev.clientY-rect.top+scroll.scrollTop;
+    const left=Math.min(sx,x),top=Math.min(sy,y),w=Math.abs(x-sx),h=Math.abs(y-sy);
+    marquee.style.left=left+'px';marquee.style.top=top+'px';marquee.style.width=w+'px';marquee.style.height=h+'px';
+  };
+  const up=ev=>{
+    document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);
+    const x=ev.clientX-rect.left+scroll.scrollLeft,y=ev.clientY-rect.top+scroll.scrollTop;
+    const selRect={left:Math.min(sx,x),top:Math.min(sy,y),right:Math.max(sx,x),bottom:Math.max(sy,y)};
+    const ids=[];
+    for(const item of nodes.values()){
+      const nr={left:item.data.x||0,top:item.data.y||0,right:(item.data.x||0)+item.el.offsetWidth,bottom:(item.data.y||0)+item.el.offsetHeight};
+      if(rectsIntersect(selRect,nr))ids.push(item.data.id);
+    }
+    marquee.style.display='none';
+    selectMany(ids);
+  };
+  document.addEventListener('pointermove',move);document.addEventListener('pointerup',up);
+});
+
+document.addEventListener('pointerup',e=>{
+  if(!e.target.closest || !e.target.closest('.p48-handle')) finishTempArrow();
+});
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){selectionMode=false;marquee.style.display='none';finishTempArrow();updateSelectionUi();}
+});
+
 root.querySelectorAll('.p48-item').forEach(i=>i.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',i.dataset.type);e.dataTransfer.effectAllowed='copy'}));
 canvas.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='copy'});
 canvas.addEventListener('drop',e=>{e.preventDefault();const type=e.dataTransfer.getData('text/plain');if(!type)return;const r=canvas.getBoundingClientRect();addNode(type,e.clientX-r.left+scroll.scrollLeft,e.clientY-r.top+scroll.scrollTop)});
-canvas.addEventListener('click',e=>{if(e.target===canvas){for(const x of nodes.values())x.el.classList.remove('selected');selectedId=null;refreshControls()}});
+canvas.addEventListener('click',e=>{
+  if(e.target===canvas&&!selectionMode){clearSelection();finishTempArrow();}
+});
 nameInput.addEventListener('change',()=>{persist();msg('Namn sparat')});
 root.querySelector('#p48-new').addEventListener('click',newProcess);root.querySelector('#p48-save').addEventListener('click',()=>persist(true));root.querySelector('#p48-pdf').addEventListener('click',exportPdf);root.querySelector('#p48-doc').addEventListener('click',exportDoc);
 root.querySelector('#p48-undo').addEventListener('click',()=>{if(!undo.length)return;redo.push(JSON.stringify(state()));restore(undo.pop());persist()});
 root.querySelector('#p48-redo').addEventListener('click',()=>{if(!redo.length)return;undo.push(JSON.stringify(state()));restore(redo.pop());persist()});
-root.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;if(e.key==='Delete')deleteSelected()});
+root.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;if(e.key==='Delete'){if(selectedIds.size>1)deleteSelectedMany();else deleteSelected()}});
 font.addEventListener('change',()=>updateStyle({fontFamily:font.value}));size.addEventListener('change',()=>updateStyle({fontSize:Math.max(10,Math.min(36,Number(size.value)||13))}));textColor.addEventListener('input',()=>updateStyle({textColor:textColor.value}));bgColor.addEventListener('input',()=>updateStyle({bgColor:bgColor.value}));
 bold.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({fontWeight:styleOf(x.data).fontWeight==='700'?'400':'700'})});italic.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({fontStyle:styleOf(x.data).fontStyle==='italic'?'normal':'italic'})});under.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({textDecoration:styleOf(x.data).textDecoration==='underline'?'none':'underline'})});root.querySelectorAll('[data-align]').forEach(b=>b.addEventListener('click',()=>updateStyle({textAlign:b.dataset.align})));
 
@@ -625,7 +726,7 @@ addOutputBtn.addEventListener('click',()=>{const item=selectedId?nodes.get(selec
 deleteNodeBtn.addEventListener('click',()=>deleteSelected());
 
 if(!loadLocal()){processes[starter.id]=clone(starter);currentId=starter.id}
-openProcess(currentId);renderProcesses();refreshControls();msg('Klar');
+openProcess(currentId);renderProcesses();refreshControls();updateSelectionUi();msg('Klar');
 })();
 </script>
 </div>

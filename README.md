@@ -1,8 +1,9 @@
-# Maplini v0.6.0
+# Maplini v0.6.1
 
-## Beslutspunkt – visuell korrigering
-- Beslut visas som en enda ren diamant.
-- Den rektangulära resize-markeringen är borttagen från beslut.
-- När beslutet markeras blir diamantens egen kant blå.
-- Anslutningspunkterna ligger vid diamantens fyra riktiga spetsar.
-- Övriga ruttyper behåller resize-handtag.
+## Nytt
+- Nytt verktyg `Markera område`.
+- Dra en rektangel över flera rutor för att markera dem samtidigt.
+- `Ta bort markerat` raderar alla markerade rutor och deras kopplingar.
+- Delete-tangenten fungerar även på flera markerade rutor.
+- Escape avslutar markeringsläget.
+- Påbörjade pilar rensas alltid när du släpper musen/klickar bort, så inga orange/röda pilrester ska bli kvar.
