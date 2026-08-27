@@ -1,28 +1,20 @@
-# Processkartan v0.4.2
+# Processkartan v0.4.4
 
-## Fokus i denna version
-Toppraden är kraftigt förenklad för att ge mer plats åt canvasen.
+Hotfix/rebuild efter att v0.4.2–v0.4.3 hade trasig JavaScript-logik.
 
-Synligt:
-- Processnamn
-- Byt namn
-- Ny process
-- Spara
-- Ångra / Gör om
-- Exportera till Google Docs
+## Testat
+- Python-syntax
+- JavaScript-syntax via Node.js
+- Inga borttagna UI-element refereras från JavaScript
 
-Borttaget från huvudgränssnittet:
-- process-dropdown
-- Spara alla (.json)
-- Öppna bibliotek
-- SVG
-- Snap 20 px
-- teknisk statusrad
-- separata Kopiera/Klistra in-knappar
-- separat Ta bort-knapp
-
-Snap-to-grid ligger kvar automatiskt i bakgrunden.
-Kortkommandon för kopiera/klistra in och Delete fungerar fortfarande.
-
-## Uppdatera
-Packa upp ZIP → GitHub Desktop → Show in Explorer → ersätt filer → Commit to main → Push origin.
+## Funktioner
+- Drag-and-drop av Start, Aktivitet, Beslut, Slut, Delprocess, Grupp och Anteckning
+- Flytta rutor
+- Raka pilar från fyra anslutningspunkter
+- Redigera text
+- Namnge process
+- Ny tom process
+- Spara process i webbläsarens lokala lagring
+- Ångra/Gör om
+- Google Docs-export
+- Delete för markerad ruta

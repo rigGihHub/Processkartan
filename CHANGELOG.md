@@ -1,11 +1,7 @@
 # Changelog
 
-## v0.4.3
-- Hotfix efter förenklingen i v0.4.2.
-- Tog bort kvarvarande JavaScript-referenser till UI-kontroller som hade tagits bort.
-- Återställde drag-and-drop för aktiviteter och övriga processobjekt.
-- Återställde Spara-process-funktionen.
-- Behåller den förenklade toppraden från v0.4.2.
-
-## v0.4.2
-- Förenklad topprad och mer fokus på canvas.
+## v0.4.4
+- Ren ombyggnad av klientkoden.
+- Fixar att drag-and-drop och Spara inte fungerade i v0.4.2/v0.4.3.
+- JavaScript-syntax kontrolleras separat före leverans.
+- Behåller det förenklade gränssnittet.
