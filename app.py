@@ -8,7 +8,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-APP_VERSION = "0.4.2"
+APP_VERSION = "0.4.3"
 
 st.markdown("""
 <style>
