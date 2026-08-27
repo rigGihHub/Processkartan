@@ -1,37 +1,35 @@
-# Processkartan – Streamlit-prototyp v0.1
+# Processkartan v0.3.0
 
-## Starta
+Streamlit-prototyp för drag-and-drop-baserad processkartläggning.
+
+## Starta lokalt
 
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## Ingår
+## Arbetsprincip
 
-- drag-and-drop-processkarta
-- start, aktivitet, beslut och slut
-- pilar mellan processsteg
-- swimlanes: Bid/Sälj, Region, Kalkyl, Juridik, Ledning
-- metadata per steg: ansvar, input, output, risk, kontroll, KPI, dokument/bevis
-- undo/redo
-- spara/öppna projekt som JSON
-- Google Docs-kompatibel `.doc`-export av processbeskrivningen
-- flikar för risker, dokument, revisioner, rapport/export och administration
+Appen ska i första hand styras genom drag-and-drop:
+- dra aktiviteter, beslut, delprocesser och grupper till arbetsytan
+- dra processsteg mellan swimlanes
+- dra från grön anslutningspunkt för att skapa pilar
+- dra risker, kontroller, KPI och dokument/bevis direkt på processsteg
+- Ctrl/Cmd-klick för multiselect
+- kopiera/klistra in markerade steg
+- drag-and-drop för swimlane-ordning
 
-## Medveten begränsning
+## Google Docs-export
 
-Ritmotorn ligger i en inbäddad HTML/JavaScript-komponent. Det ger en betydligt bättre rityta än rena Streamlit-widgetar, men data är ännu inte synkad till en gemensam backend/databas.
+Klicka **Exportera till Google Docs (.doc)** i appens högra panel.
 
-## Rekommenderad v0.2
+1. Appen laddar ner `Processkartan_Google_Docs.doc`.
+2. Ladda upp filen till Google Drive.
+3. Högerklicka på filen och välj **Öppna med → Google Dokument**.
+4. Processbeskrivningen blir redigerbar i Google Docs.
 
-1. Gemensam datamodell i SQLite/Turso/PostgreSQL
-2. Synkning mellan ritmotor och backend
-3. Redigerbara swimlanes och egna roller
-4. Piltext: Ja/Nej, återkoppling, villkor
-5. Riskmatris och kontrollregister
-6. Versionshistorik och audit log
-7. Rollbaserade behörigheter
-8. Google OAuth
-9. Direkt export till Google Docs och Google Slides
-10. Processhierarki och klickbara delprocesser
+Exporten innehåller processsteg, ansvar, risker, kontroller, KPI och dokument/bevis.
+För själva visuella processkartan används **Exportera karta (.svg)** och SVG-filen kan sedan infogas i Google Docs eller Google Slides.
+
+> Direkt skapande av ett Google Docs-dokument i användarens Drive kräver Google OAuth/API och är ett senare integrationssteg.
