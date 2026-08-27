@@ -1,19 +1,11 @@
-# Processkartan v0.4.7
+# Processkartan v0.4.8
 
-## Nytt
-- All text hålls inne i rutorna.
-- Rutorna växer automatiskt efter textens längd.
-- Långa ord radbryts i stället för att sticka utanför rutan.
-- Formateringspanel i vänsterkolumnen för markerad ruta.
-- Val av typsnitt.
-- Textstorlek 10–36 px.
-- Textfärg.
-- Bakgrundsfärg på rutan.
-- Fet, kursiv och understruken text.
-- Vänster-, center- och högerjustering.
-- Formateringen sparas tillsammans med processen.
-- Sparade processer ligger kvar klickbara i vänsterkolumnen.
-- Google Docs-export (.docx) finns kvar.
+Ren ombyggnad av vänsterkolumn och textformatering.
 
-## Uppdatera
-Packa upp ZIP → GitHub Desktop → Show in Explorer → ersätt filer → Commit to main → Push origin.
+- Sparade processer visas direkt i vänsterkolumnen efter Spara.
+- Klick på sparad process öppnar rätt canvas.
+- Aktiv process markeras.
+- Typsnitt, textstorlek, textfärg, bakgrundsfärg, fet, kursiv, understruken och textjustering fungerar för markerad ruta.
+- Formatering sparas per ruta.
+- Text radbryts och rutan växer inom satta maxbredder.
+- Google Docs-export skapar riktig DOCX.

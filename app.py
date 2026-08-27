@@ -1,14 +1,8 @@
 import streamlit as st
 import streamlit.components.v1 as components
 
-st.set_page_config(
-    page_title="Processkartan",
-    page_icon="🧭",
-    layout="wide",
-    initial_sidebar_state="collapsed",
-)
-
-APP_VERSION = "0.4.5"
+st.set_page_config(page_title="Processkartan", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
+APP_VERSION = "0.4.8"
 
 st.markdown("""
 <style>
@@ -19,87 +13,108 @@ header[data-testid="stHeader"]{height:2rem}
 """, unsafe_allow_html=True)
 
 st.markdown(f"**Processkartan** · v{APP_VERSION}")
-
 html = r"""
-<div id="pk">
+<div id="pk48">
 <style>
-#pk{font-family:Inter,system-ui,sans-serif;color:#17202a;background:#eef2f6;border:1px solid #dce2e8;border-radius:12px;overflow:hidden}
-#pk *{box-sizing:border-box}
-.pk-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px;background:#fff;border-bottom:1px solid #dce2e8}
-.pk-btn{border:1px solid #ccd4dc;background:#fff;color:#24303d;border-radius:8px;min-height:38px;padding:8px 11px;font:600 13px system-ui;cursor:pointer}
-.pk-btn:hover{background:#f2f5f7}.pk-btn.primary{background:#1f6f55;color:#fff;border-color:#1f6f55}
-.pk-name{font:800 14px system-ui;border:2px solid #8aa2b8;border-radius:8px;padding:8px 10px;min-width:300px;background:#fbfdff}
-.pk-spacer{flex:1}
-.pk-body{display:grid;grid-template-columns:180px minmax(0,1fr);min-height:900px}
-.pk-palette{background:#fff;border-right:1px solid #dce2e8;padding:10px}
-.pk-title{font-size:12px;font-weight:800;margin-bottom:8px}
-.pk-sub{font-size:11px;color:#6c7784;line-height:1.45;margin-bottom:10px}
-.pk-item{display:flex;align-items:center;gap:8px;border:1px solid #d0d7df;background:#fff;border-radius:9px;padding:10px;margin-bottom:7px;cursor:grab;font-size:12.5px;font-weight:700;user-select:none}
-.pk-item:active{cursor:grabbing}
-.pk-icon{width:23px;height:23px;border-radius:6px;background:#edf2f6;display:grid;place-items:center;font-size:11px}
-.pk-tip{margin-top:12px;padding:8px;border-radius:8px;background:#f2f6f4;color:#4c655c;font-size:10.8px;line-height:1.45}
-.pk-scroll{overflow:auto;background:#e9eef3}
-#pk-canvas{position:relative;width:2400px;height:1400px;background:#fff;touch-action:none;background-image:radial-gradient(#dce2e8 1px,transparent 1px);background-size:20px 20px}
-#pk-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
-.pk-link{stroke:#687584;stroke-width:2.2;fill:none}
-.pk-temp{stroke:#df941e;stroke-width:2.4;fill:none;stroke-dasharray:6 5}
-.pk-node{position:absolute;width:190px;min-height:76px;padding:12px 24px;border:2px solid #637387;border-radius:10px;background:#fff;box-shadow:0 3px 9px rgba(31,42,55,.10);z-index:5;user-select:none;touch-action:none;font-size:13px;font-weight:750;text-align:center;display:flex;align-items:center;justify-content:center}
-.pk-node.start,.pk-node.end{border-radius:38px}
-.pk-node.start{border-color:#2b7b61;background:#edf8f3}
-.pk-node.end{border-color:#985148;background:#fff3f1}
-.pk-node.decision{width:145px;height:110px;min-height:110px;padding:28px 20px;border-color:#a97a20;background:#fff8df;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);border-radius:0}
-.pk-node.subprocess{border-style:double;border-width:4px;background:#f7f3ff;border-color:#7556a6}
-.pk-node.note{background:#fffbe8;border-color:#b8973e;font-weight:600}
-.pk-node.group{width:260px;min-height:120px;border-style:dashed;background:#f8fafc;color:#536171}
-.pk-node.selected{outline:3px solid #2c7be5;outline-offset:3px}
-.pk-handle{position:absolute;width:16px;height:16px;border-radius:50%;background:#1f6f55;border:3px solid #fff;box-shadow:0 0 0 1px #1f6f55;cursor:crosshair;z-index:8}
-.pk-handle.right{right:-8px;top:50%;transform:translateY(-50%)}
-.pk-handle.left{left:-8px;top:50%;transform:translateY(-50%)}
-.pk-handle.top{top:-8px;left:50%;transform:translateX(-50%)}
-.pk-handle.bottom{bottom:-8px;left:50%;transform:translateX(-50%)}
-.pk-node.decision .pk-handle.right{right:4px}.pk-node.decision .pk-handle.left{left:4px}.pk-node.decision .pk-handle.top{top:4px}.pk-node.decision .pk-handle.bottom{bottom:4px}
-.pk-edit{position:absolute;left:6px;top:6px;width:20px;height:20px;border-radius:6px;border:1px solid #d3dae2;background:#fff;font-size:11px;display:none;place-items:center;cursor:pointer}
-.pk-node.selected .pk-edit{display:grid}
-.pk-status{font-size:12px;color:#667382;padding:0 4px}
-@media(max-width:850px){.pk-body{grid-template-columns:1fr}.pk-palette{border-right:0;border-bottom:1px solid #dce2e8;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}.pk-title,.pk-sub,.pk-tip{grid-column:1/-1}.pk-item{margin-bottom:0}}
+#pk48{font-family:Inter,system-ui,sans-serif;color:#17202a;background:#eef2f6;border:1px solid #dce2e8;border-radius:12px;overflow:hidden}
+#pk48 *{box-sizing:border-box}
+.p48-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px;background:#fff;border-bottom:1px solid #dce2e8}
+.p48-btn{border:1px solid #ccd4dc;background:#fff;color:#24303d;border-radius:8px;min-height:38px;padding:8px 11px;font:600 13px system-ui;cursor:pointer}
+.p48-btn:hover{background:#f2f5f7}.p48-btn.primary{background:#1f6f55;color:#fff;border-color:#1f6f55}
+.p48-name{font:800 14px system-ui;border:2px solid #8aa2b8;border-radius:8px;padding:8px 10px;min-width:290px;background:#fbfdff}
+.p48-spacer{flex:1}.p48-status{font-size:12px;color:#667382;min-width:70px}
+.p48-body{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:900px}
+.p48-side{background:#fff;border-right:1px solid #dce2e8;padding:10px}
+.p48-section{margin-bottom:16px}.p48-title{font-size:12px;font-weight:800;margin-bottom:8px}.p48-sub{font-size:11px;color:#6c7784;line-height:1.45;margin-bottom:9px}
+.p48-list{display:grid;gap:6px}
+.p48-proc{width:100%;text-align:left;border:1px solid #d5dce3;background:#fff;border-radius:8px;padding:9px;font:700 12px system-ui;cursor:pointer;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.p48-proc:hover{background:#f3f6f8}.p48-proc.active{border-color:#1f6f55;background:#eef7f3;color:#175540}
+.p48-item{display:flex;align-items:center;gap:8px;border:1px solid #d0d7df;background:#fff;border-radius:9px;padding:9px;margin-bottom:7px;cursor:grab;font-size:12.5px;font-weight:700;user-select:none}
+.p48-icon{width:23px;height:23px;border-radius:6px;background:#edf2f6;display:grid;place-items:center;font-size:11px}
+.p48-format{border-top:1px solid #e2e7ec;padding-top:12px}
+.p48-format-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.p48-format label{display:block;font-size:10px;font-weight:800;color:#65717e;margin-bottom:3px}
+.p48-format select,.p48-format input[type="number"]{width:100%;min-height:34px;border:1px solid #cfd7df;border-radius:7px;padding:5px 7px;font:12px system-ui;background:#fff}
+.p48-format input[type="color"]{width:100%;height:34px;border:1px solid #cfd7df;border-radius:7px;padding:2px;background:#fff}
+.p48-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:7px}
+.p48-mini{min-height:33px;border:1px solid #cfd7df;border-radius:7px;background:#fff;font:700 12px system-ui;cursor:pointer}.p48-mini.active{background:#eaf1f8;border-color:#7c9ab5}
+.p48-empty{font-size:11px;color:#75818d;line-height:1.4}
+.p48-scroll{overflow:auto;background:#e9eef3}
+#p48-canvas{position:relative;width:2400px;height:1400px;background:#fff;touch-action:none;background-image:radial-gradient(#dce2e8 1px,transparent 1px);background-size:20px 20px}
+#p48-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
+.p48-link{stroke:#687584;stroke-width:2.2;fill:none}.p48-temp{stroke:#df941e;stroke-width:2.4;fill:none;stroke-dasharray:6 5}
+.p48-node{position:absolute;min-width:160px;max-width:360px;width:max-content;min-height:64px;height:auto;padding:14px 26px;border:2px solid #637387;border-radius:10px;background:#fff;box-shadow:0 3px 9px rgba(31,42,55,.10);z-index:5;user-select:none;touch-action:none;display:flex;align-items:center;justify-content:center}
+.p48-label{display:block;width:100%;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;line-height:1.28}
+.p48-node.start,.p48-node.end{border-radius:38px}.p48-node.start{border-color:#2b7b61}.p48-node.end{border-color:#985148}
+.p48-node.decision{min-width:160px;max-width:240px;min-height:120px;padding:34px 32px;border-color:#a97a20;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);border-radius:0}
+.p48-node.subprocess{border-style:double;border-width:4px;border-color:#7556a6}.p48-node.note{border-color:#b8973e}.p48-node.group{min-width:240px;max-width:440px;min-height:120px;border-style:dashed;color:#536171}
+.p48-node.selected{outline:3px solid #2c7be5;outline-offset:3px}
+.p48-handle{position:absolute;width:16px;height:16px;border-radius:50%;background:#1f6f55;border:3px solid #fff;box-shadow:0 0 0 1px #1f6f55;cursor:crosshair;z-index:8}
+.p48-handle.right{right:-8px;top:50%;transform:translateY(-50%)}.p48-handle.left{left:-8px;top:50%;transform:translateY(-50%)}.p48-handle.top{top:-8px;left:50%;transform:translateX(-50%)}.p48-handle.bottom{bottom:-8px;left:50%;transform:translateX(-50%)}
+.p48-node.decision .p48-handle.right{right:4px}.p48-node.decision .p48-handle.left{left:4px}.p48-node.decision .p48-handle.top{top:4px}.p48-node.decision .p48-handle.bottom{bottom:4px}
+@media(max-width:850px){.p48-body{grid-template-columns:1fr}.p48-side{border-right:0;border-bottom:1px solid #dce2e8}}
 </style>
 
-<div class="pk-top">
+<div class="p48-top">
   <strong>Process</strong>
-  <input id="pk-name" class="pk-name" value="Exempel – upphandlingsprocess" aria-label="Processnamn">
-  <button type="button" class="pk-btn primary" id="pk-new">+ Ny process</button>
-  <button type="button" class="pk-btn" id="pk-save">Spara</button>
-  <button type="button" class="pk-btn" id="pk-undo">↶ Ångra</button>
-  <button type="button" class="pk-btn" id="pk-redo">↷ Gör om</button>
-  <span class="pk-spacer"></span>
-  <button type="button" class="pk-btn primary" id="pk-doc">Exportera till Google Docs (.docx)</button>
-  <span id="pk-status" class="pk-status" aria-live="polite"></span>
+  <input id="p48-name" class="p48-name" value="Exempel – upphandlingsprocess" aria-label="Processnamn">
+  <button type="button" class="p48-btn primary" id="p48-new">+ Ny process</button>
+  <button type="button" class="p48-btn" id="p48-save">Spara</button>
+  <button type="button" class="p48-btn" id="p48-undo">↶ Ångra</button>
+  <button type="button" class="p48-btn" id="p48-redo">↷ Gör om</button>
+  <span class="p48-spacer"></span>
+  <button type="button" class="p48-btn primary" id="p48-doc">Exportera till Google Docs (.docx)</button>
+  <span id="p48-status" class="p48-status"></span>
 </div>
 
-<div class="pk-body">
-  <aside class="pk-palette">
-    <div class="pk-title">Dra till arbetsytan</div>
-    <div class="pk-sub">Dra ett objekt och släpp det var du vill på canvasen.</div>
-    <div class="pk-item" draggable="true" data-type="start"><span class="pk-icon">▶</span>Start</div>
-    <div class="pk-item" draggable="true" data-type="process"><span class="pk-icon">□</span>Aktivitet</div>
-    <div class="pk-item" draggable="true" data-type="decision"><span class="pk-icon">◇</span>Beslut</div>
-    <div class="pk-item" draggable="true" data-type="end"><span class="pk-icon">■</span>Slut</div>
-    <div class="pk-item" draggable="true" data-type="subprocess"><span class="pk-icon">▣</span>Delprocess</div>
-    <div class="pk-item" draggable="true" data-type="group"><span class="pk-icon">G</span>Grupp / område</div>
-    <div class="pk-item" draggable="true" data-type="note"><span class="pk-icon">N</span>Anteckning</div>
-    <div class="pk-tip"><b>Pilar:</b> dra från någon av de fyra gröna punkterna på en ruta till en annan ruta.<br><br><b>Text:</b> dubbelklicka på en ruta för att ändra texten.<br><br><b>Ta bort:</b> markera ruta och tryck Delete.</div>
+<div class="p48-body">
+  <aside class="p48-side">
+    <div class="p48-section">
+      <div class="p48-title">Sparade processer</div>
+      <div id="p48-processes" class="p48-list"></div>
+    </div>
+
+    <div class="p48-section">
+      <div class="p48-title">Dra till arbetsytan</div>
+      <div class="p48-item" draggable="true" data-type="start"><span class="p48-icon">▶</span>Start</div>
+      <div class="p48-item" draggable="true" data-type="process"><span class="p48-icon">□</span>Aktivitet</div>
+      <div class="p48-item" draggable="true" data-type="decision"><span class="p48-icon">◇</span>Beslut</div>
+      <div class="p48-item" draggable="true" data-type="end"><span class="p48-icon">■</span>Slut</div>
+      <div class="p48-item" draggable="true" data-type="subprocess"><span class="p48-icon">▣</span>Delprocess</div>
+      <div class="p48-item" draggable="true" data-type="group"><span class="p48-icon">G</span>Grupp / område</div>
+      <div class="p48-item" draggable="true" data-type="note"><span class="p48-icon">N</span>Anteckning</div>
+    </div>
+
+    <div class="p48-format">
+      <div class="p48-title">Formatera markerad ruta</div>
+      <div id="p48-empty" class="p48-empty">Markera en ruta på canvasen.</div>
+      <div id="p48-controls" hidden>
+        <div class="p48-format-grid">
+          <div><label>Typsnitt</label><select id="p48-font"><option value="Arial">Arial</option><option value="Verdana">Verdana</option><option value="Georgia">Georgia</option><option value="Trebuchet MS">Trebuchet MS</option><option value="Courier New">Courier New</option><option value="system-ui">System</option></select></div>
+          <div><label>Storlek</label><input id="p48-size" type="number" min="10" max="36" value="13"></div>
+          <div><label>Textfärg</label><input id="p48-textcolor" type="color" value="#17202a"></div>
+          <div><label>Bakgrund</label><input id="p48-bgcolor" type="color" value="#ffffff"></div>
+        </div>
+        <div class="p48-actions">
+          <button type="button" class="p48-mini" id="p48-bold"><b>B</b></button>
+          <button type="button" class="p48-mini" id="p48-italic"><i>I</i></button>
+          <button type="button" class="p48-mini" id="p48-under"><u>U</u></button>
+        </div>
+        <div class="p48-actions">
+          <button type="button" class="p48-mini" data-align="left">Vänster</button>
+          <button type="button" class="p48-mini" data-align="center">Centrera</button>
+          <button type="button" class="p48-mini" data-align="right">Höger</button>
+        </div>
+      </div>
+    </div>
   </aside>
 
-  <main class="pk-scroll" id="pk-scroll">
-    <div id="pk-canvas">
-      <svg id="pk-svg" viewBox="0 0 2400 1400">
-        <defs>
-          <marker id="pk-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto">
-            <polygon points="0,0 10,4 0,8" fill="#687584"></polygon>
-          </marker>
-        </defs>
-        <g id="pk-links"></g>
-        <path id="pk-temp" class="pk-temp" d="" hidden></path>
+  <main class="p48-scroll" id="p48-scroll">
+    <div id="p48-canvas">
+      <svg id="p48-svg" viewBox="0 0 2400 1400">
+        <defs><marker id="p48-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0,0 10,4 0,8" fill="#687584"></polygon></marker></defs>
+        <g id="p48-links"></g>
+        <path id="p48-temp" class="p48-temp" hidden></path>
       </svg>
     </div>
   </main>
@@ -107,630 +122,83 @@ html = r"""
 
 <script>
 (()=>{
-  const root = document.getElementById('pk');
-  if (!root || root.dataset.ready === '1') return;
-  root.dataset.ready = '1';
-
-  const canvas = root.querySelector('#pk-canvas');
-  const scroll = root.querySelector('#pk-scroll');
-  const linksLayer = root.querySelector('#pk-links');
-  const tempLine = root.querySelector('#pk-temp');
-  const nameInput = root.querySelector('#pk-name');
-  const status = root.querySelector('#pk-status');
-
-  let nodes = new Map();
-  let links = [];
-  let selectedId = null;
-  let seq = 8;
-  let undoStack = [];
-  let redoStack = [];
-  let currentProcessId = 'proc-1';
-  let processes = {};
-
-  const starter = {
-    id: 'proc-1',
-    name: 'Exempel – upphandlingsprocess',
-    nodes: [
-      {id:'n1',type:'start',text:'Upphandling identifieras',x:100,y:130},
-      {id:'n2',type:'process',text:'Första bedömning',x:390,y:130},
-      {id:'n3',type:'decision',text:'Relevant?',x:680,y:110},
-      {id:'n4',type:'process',text:'Kvalificera upphandling',x:950,y:130},
-      {id:'n5',type:'process',text:'Fördela ansvar',x:1240,y:130},
-      {id:'n6',type:'process',text:'Kalkyl & lösning',x:1240,y:360},
-      {id:'n7',type:'process',text:'Kvalitetssäkra',x:950,y:360},
-      {id:'n8',type:'end',text:'Lämna anbud',x:660,y:360}
-    ],
-    links: [
-      ['n1','n2','right'],['n2','n3','right'],['n3','n4','right'],
-      ['n4','n5','right'],['n5','n6','bottom'],['n6','n7','left'],['n7','n8','left']
-    ]
-  };
-
-  function clone(value) {
-    return JSON.parse(JSON.stringify(value));
-  }
-
-  function setStatus(text) {
-    status.textContent = text || '';
-    if (text) {
-      window.setTimeout(() => {
-        if (status.textContent === text) status.textContent = '';
-      }, 2200);
-    }
-  }
-
-  function uid(prefix) {
-    return prefix + '-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,7);
-  }
-
-  function currentState() {
-    return {
-      id: currentProcessId,
-      name: nameInput.value.trim() || 'Namnlös process',
-      nodes: Array.from(nodes.values()).map(item => clone(item.data)),
-      links: clone(links)
-    };
-  }
-
-  function saveBrowser() {
-    try {
-      localStorage.setItem('processkartan_v044', JSON.stringify({currentProcessId, processes}));
-    } catch (e) {}
-  }
-
-  function loadBrowser() {
-    try {
-      const raw = localStorage.getItem('processkartan_v044');
-      if (!raw) return false;
-      const parsed = JSON.parse(raw);
-      if (!parsed.processes || !Object.keys(parsed.processes).length) return false;
-      processes = parsed.processes;
-      currentProcessId = parsed.currentProcessId && processes[parsed.currentProcessId]
-        ? parsed.currentProcessId
-        : Object.keys(processes)[0];
-      return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  function persistCurrent(showMessage=false) {
-    const state = currentState();
-    processes[currentProcessId] = clone(state);
-    saveBrowser();
-    if (showMessage) setStatus('Sparad');
-  }
-
-  function pushUndo() {
-    undoStack.push(JSON.stringify(currentState()));
-    if (undoStack.length > 50) undoStack.shift();
-    redoStack = [];
-  }
-
-  function clearCanvas() {
-    for (const item of nodes.values()) item.el.remove();
-    nodes.clear();
-    links = [];
-    selectedId = null;
-    linksLayer.innerHTML = '';
-  }
-
-  function restoreState(state) {
-    const data = typeof state === 'string' ? JSON.parse(state) : clone(state);
-    clearCanvas();
-    currentProcessId = data.id || currentProcessId;
-    nameInput.value = data.name || 'Namnlös process';
-    for (const node of (data.nodes || [])) makeNode(node);
-    links = data.links || [];
-    seq = Math.max(0, ...Array.from(nodes.keys()).map(id => parseInt(String(id).replace(/\D/g,''), 10) || 0));
-    drawLinks();
-  }
-
-  function openCurrentProcess() {
-    if (!processes[currentProcessId]) return;
-    restoreState(processes[currentProcessId]);
-  }
-
-  function nodeDefaultText(type) {
-    return {
-      start:'Start',
-      process:'Ny aktivitet',
-      decision:'Beslut?',
-      end:'Slut',
-      subprocess:'Ny delprocess',
-      group:'Ny grupp / område',
-      note:'Anteckning'
-    }[type] || 'Nytt steg';
-  }
-
-  function place(el, x, y) {
-    const snap = 20;
-    const nx = Math.round(x / snap) * snap;
-    const ny = Math.round(y / snap) * snap;
-    el.style.left = Math.max(10, Math.min(2400 - el.offsetWidth - 10, nx)) + 'px';
-    el.style.top = Math.max(10, Math.min(1400 - el.offsetHeight - 10, ny)) + 'px';
-  }
-
-  function syncPosition(el) {
-    const item = nodes.get(el.dataset.id);
-    if (!item) return;
-    item.data.x = parseFloat(el.style.left) || 0;
-    item.data.y = parseFloat(el.style.top) || 0;
-  }
-
-  function center(el) {
-    return [
-      (parseFloat(el.style.left) || 0) + el.offsetWidth / 2,
-      (parseFloat(el.style.top) || 0) + el.offsetHeight / 2
-    ];
-  }
-
-  function anchor(el, side) {
-    const x = parseFloat(el.style.left) || 0;
-    const y = parseFloat(el.style.top) || 0;
-    const w = el.offsetWidth;
-    const h = el.offsetHeight;
-    if (side === 'left') return [x, y + h/2];
-    if (side === 'top') return [x + w/2, y];
-    if (side === 'bottom') return [x + w/2, y + h];
-    return [x + w, y + h/2];
-  }
-
-  function bestSourceSide(a, b) {
-    const [ax, ay] = center(a);
-    const [bx, by] = center(b);
-    const dx = bx - ax;
-    const dy = by - ay;
-    if (Math.abs(dx) >= Math.abs(dy)) return dx >= 0 ? 'right' : 'left';
-    return dy >= 0 ? 'bottom' : 'top';
-  }
-
-  function bestTargetSide(a, b) {
-    const source = bestSourceSide(a, b);
-    if (source === 'right') return 'left';
-    if (source === 'left') return 'right';
-    if (source === 'bottom') return 'top';
-    return 'bottom';
-  }
-
-  function selectNode(el) {
-    for (const item of nodes.values()) item.el.classList.remove('selected');
-    selectedId = el.dataset.id;
-    el.classList.add('selected');
-  }
-
-  function editNode(el) {
-    const item = nodes.get(el.dataset.id);
-    if (!item) return;
-    const next = prompt('Text i steget:', item.data.text);
-    if (next === null) return;
-    pushUndo();
-    item.data.text = next.trim() || item.data.text;
-    item.label.textContent = item.data.text;
-    persistCurrent();
-  }
-
-  function makeNode(data) {
-    const d = clone(data);
-    const el = document.createElement('div');
-    el.className = 'pk-node ' + d.type;
-    el.dataset.id = d.id;
-    el.style.left = d.x + 'px';
-    el.style.top = d.y + 'px';
-    el.tabIndex = 0;
-
-    const label = document.createElement('span');
-    label.textContent = d.text;
-    el.appendChild(label);
-
-    const edit = document.createElement('button');
-    edit.type = 'button';
-    edit.className = 'pk-edit';
-    edit.textContent = '✎';
-    edit.title = 'Redigera text';
-    el.appendChild(edit);
-
-    const handles = {};
-    for (const side of ['right','left','top','bottom']) {
-      const h = document.createElement('span');
-      h.className = 'pk-handle ' + side;
-      h.dataset.side = side;
-      h.title = 'Dra pil';
-      el.appendChild(h);
-      handles[side] = h;
-    }
-
-    canvas.appendChild(el);
-    nodes.set(d.id, {el, data:d, label, handles});
-
-    edit.addEventListener('click', event => {
-      event.stopPropagation();
-      editNode(el);
-    });
-
-    el.addEventListener('dblclick', event => {
-      event.stopPropagation();
-      editNode(el);
-    });
-
-    el.addEventListener('click', event => {
-      event.stopPropagation();
-      selectNode(el);
-    });
-
-    el.addEventListener('pointerdown', event => {
-      if (event.button !== 0) return;
-      if (event.target === edit || event.target.classList.contains('pk-handle')) return;
-
-      selectNode(el);
-      pushUndo();
-
-      const sx = event.clientX;
-      const sy = event.clientY;
-      const ox = parseFloat(el.style.left) || 0;
-      const oy = parseFloat(el.style.top) || 0;
-
-      el.setPointerCapture(event.pointerId);
-
-      const move = ev => {
-        place(el, ox + ev.clientX - sx, oy + ev.clientY - sy);
-        syncPosition(el);
-        drawLinks();
-      };
-
-      const up = ev => {
-        el.removeEventListener('pointermove', move);
-        el.removeEventListener('pointerup', up);
-        persistCurrent();
-      };
-
-      el.addEventListener('pointermove', move);
-      el.addEventListener('pointerup', up);
-    });
-
-    for (const handle of Object.values(handles)) {
-      handle.addEventListener('pointerdown', event => {
-        event.stopPropagation();
-        event.preventDefault();
-
-        const side = handle.dataset.side;
-        const [x1, y1] = anchor(el, side);
-        tempLine.hidden = false;
-        tempLine.setAttribute('d', `M${x1},${y1} L${x1},${y1}`);
-
-        const move = ev => {
-          const rect = canvas.getBoundingClientRect();
-          const x2 = ev.clientX - rect.left + scroll.scrollLeft;
-          const y2 = ev.clientY - rect.top + scroll.scrollTop;
-          tempLine.setAttribute('d', `M${x1},${y1} L${x2},${y2}`);
-        };
-
-        const up = ev => {
-          document.removeEventListener('pointermove', move);
-          document.removeEventListener('pointerup', up);
-          tempLine.hidden = true;
-
-          const target = document.elementFromPoint(ev.clientX, ev.clientY)?.closest('.pk-node');
-          if (target && target !== el) {
-            pushUndo();
-            links.push([el.dataset.id, target.dataset.id, side]);
-            drawLinks();
-            persistCurrent();
-          }
-        };
-
-        document.addEventListener('pointermove', move);
-        document.addEventListener('pointerup', up);
-      });
-    }
-
-    return el;
-  }
-
-  function addNode(type, x, y) {
-    pushUndo();
-    seq += 1;
-    const el = makeNode({
-      id: 'n' + seq,
-      type,
-      text: nodeDefaultText(type),
-      x: x - 90,
-      y: y - 38
-    });
-    place(el, x - 90, y - 38);
-    syncPosition(el);
-    selectNode(el);
-    drawLinks();
-    persistCurrent();
-  }
-
-  function drawLinks() {
-    linksLayer.innerHTML = '';
-    for (const link of links) {
-      const [fromId, toId, savedSide] = link;
-      const from = nodes.get(fromId)?.el;
-      const to = nodes.get(toId)?.el;
-      if (!from || !to) continue;
-
-      const sourceSide = savedSide || bestSourceSide(from, to);
-      const targetSide = bestTargetSide(from, to);
-      const [x1, y1] = anchor(from, sourceSide);
-      const [x2, y2] = anchor(to, targetSide);
-
-      const path = document.createElementNS('http://www.w3.org/2000/svg','path');
-      path.setAttribute('class','pk-link');
-      path.setAttribute('marker-end','url(#pk-arrow)');
-      path.setAttribute('d', `M${x1},${y1} L${x2},${y2}`);
-      linksLayer.appendChild(path);
-    }
-  }
-
-  function deleteSelected() {
-    if (!selectedId || !nodes.has(selectedId)) return;
-    pushUndo();
-    nodes.get(selectedId).el.remove();
-    nodes.delete(selectedId);
-    links = links.filter(link => link[0] !== selectedId && link[1] !== selectedId);
-    selectedId = null;
-    drawLinks();
-    persistCurrent();
-  }
-
-  function newProcess() {
-    persistCurrent();
-    const name = prompt('Namn på den nya processen:', 'Ny process');
-    if (name === null) return;
-    currentProcessId = uid('proc');
-    processes[currentProcessId] = {
-      id: currentProcessId,
-      name: name.trim() || 'Ny process',
-      nodes: [],
-      links: []
-    };
-    undoStack = [];
-    redoStack = [];
-    restoreState(processes[currentProcessId]);
-    scroll.scrollLeft = 0;
-    scroll.scrollTop = 0;
-    saveBrowser();
-    setStatus('Ny process skapad');
-  }
-
-  function xmlEscape(value) {
-    return String(value ?? '').replace(/[&<>"]/g, ch => ({
-      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'
-    }[ch]));
-  }
-
-  function crc32(bytes) {
-    let crc = 0 ^ (-1);
-    for (let i = 0; i < bytes.length; i++) {
-      crc = crc ^ bytes[i];
-      for (let j = 0; j < 8; j++) {
-        crc = (crc >>> 1) ^ (0xEDB88320 & -(crc & 1));
-      }
-    }
-    return (crc ^ (-1)) >>> 0;
-  }
-
-  function u16(n) {
-    return new Uint8Array([n & 255, (n >>> 8) & 255]);
-  }
-
-  function u32(n) {
-    return new Uint8Array([
-      n & 255,
-      (n >>> 8) & 255,
-      (n >>> 16) & 255,
-      (n >>> 24) & 255
-    ]);
-  }
-
-  function concatBytes(parts) {
-    const total = parts.reduce((sum, p) => sum + p.length, 0);
-    const out = new Uint8Array(total);
-    let offset = 0;
-    for (const part of parts) {
-      out.set(part, offset);
-      offset += part.length;
-    }
-    return out;
-  }
-
-  function makeZip(files) {
-    const encoder = new TextEncoder();
-    const locals = [];
-    const centrals = [];
-    let offset = 0;
-
-    for (const file of files) {
-      const nameBytes = encoder.encode(file.name);
-      const dataBytes = typeof file.data === 'string' ? encoder.encode(file.data) : file.data;
-      const crc = crc32(dataBytes);
-
-      const local = concatBytes([
-        u32(0x04034b50), u16(20), u16(0), u16(0), u16(0), u16(0),
-        u32(crc), u32(dataBytes.length), u32(dataBytes.length),
-        u16(nameBytes.length), u16(0), nameBytes, dataBytes
-      ]);
-      locals.push(local);
-
-      const central = concatBytes([
-        u32(0x02014b50), u16(20), u16(20), u16(0), u16(0), u16(0), u16(0),
-        u32(crc), u32(dataBytes.length), u32(dataBytes.length),
-        u16(nameBytes.length), u16(0), u16(0), u16(0), u16(0),
-        u32(0), u32(offset), nameBytes
-      ]);
-      centrals.push(central);
-      offset += local.length;
-    }
-
-    const centralBytes = concatBytes(centrals);
-    const end = concatBytes([
-      u32(0x06054b50), u16(0), u16(0),
-      u16(files.length), u16(files.length),
-      u32(centralBytes.length), u32(offset), u16(0)
-    ]);
-
-    return concatBytes([...locals, centralBytes, end]);
-  }
-
-  function paragraph(text, bold=false) {
-    const safe = xmlEscape(text);
-    const runProps = bold ? '<w:rPr><w:b/></w:rPr>' : '';
-    return `<w:p><w:r>${runProps}<w:t xml:space="preserve">${safe}</w:t></w:r></w:p>`;
-  }
-
-  function tableCell(text, bold=false) {
-    const safe = xmlEscape(text);
-    const runProps = bold ? '<w:rPr><w:b/></w:rPr>' : '';
-    return `<w:tc><w:tcPr><w:tcW w:w="0" w:type="auto"/></w:tcPr><w:p><w:r>${runProps}<w:t xml:space="preserve">${safe}</w:t></w:r></w:p></w:tc>`;
-  }
-
-  function exportGoogleDoc() {
-    persistCurrent();
-    const state = currentState();
-    const ordered = Array.from(nodes.values()).sort((a,b) => a.data.y - b.data.y || a.data.x - b.data.x);
-    const typeName = {
-      start:'Start', process:'Aktivitet', decision:'Beslut', end:'Slut',
-      subprocess:'Delprocess', group:'Grupp / område', note:'Anteckning'
-    };
-
-    let body = paragraph(state.name, true);
-    body += paragraph('');
-    body += paragraph('Processsteg', true);
-
-    body += '<w:tbl><w:tblPr><w:tblBorders>' +
-      '<w:top w:val="single" w:sz="4" w:color="999999"/>' +
-      '<w:left w:val="single" w:sz="4" w:color="999999"/>' +
-      '<w:bottom w:val="single" w:sz="4" w:color="999999"/>' +
-      '<w:right w:val="single" w:sz="4" w:color="999999"/>' +
-      '<w:insideH w:val="single" w:sz="4" w:color="BBBBBB"/>' +
-      '<w:insideV w:val="single" w:sz="4" w:color="BBBBBB"/>' +
-      '</w:tblBorders></w:tblPr>';
-
-    body += '<w:tr>' + tableCell('#', true) + tableCell('Steg', true) + tableCell('Typ', true) + '</w:tr>';
-    ordered.forEach((item, index) => {
-      body += '<w:tr>' +
-        tableCell(String(index + 1)) +
-        tableCell(item.data.text) +
-        tableCell(typeName[item.data.type] || item.data.type) +
-        '</w:tr>';
-    });
-    body += '</w:tbl>';
-
-    body += paragraph('');
-    body += paragraph('Kopplingar', true);
-    links.forEach(link => {
-      const a = nodes.get(link[0])?.data.text || link[0];
-      const b = nodes.get(link[1])?.data.text || link[1];
-      body += paragraph('• ' + a + ' → ' + b);
-    });
-
-    const documentXml =
-      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
-      '<w:body>' + body +
-      '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/></w:sectPr>' +
-      '</w:body></w:document>';
-
-    const contentTypes =
-      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
-      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
-      '<Default Extension="xml" ContentType="application/xml"/>' +
-      '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
-      '</Types>';
-
-    const rels =
-      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
-      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
-      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
-      '</Relationships>';
-
-    const zipBytes = makeZip([
-      {name:'[Content_Types].xml', data:contentTypes},
-      {name:'_rels/.rels', data:rels},
-      {name:'word/document.xml', data:documentXml}
-    ]);
-
-    const blob = new Blob([zipBytes], {
-      type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
-    });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = (state.name.replace(/[^a-z0-9åäö_-]+/gi,'_') || 'Processkartan') + '.docx';
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 1200);
-    setStatus('DOCX skapad');
-  }
-
-  root.querySelectorAll('.pk-item').forEach(item => {
-    item.addEventListener('dragstart', event => {
-      event.dataTransfer.setData('text/plain', item.dataset.type);
-      event.dataTransfer.effectAllowed = 'copy';
-    });
-  });
-
-  canvas.addEventListener('dragover', event => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = 'copy';
-  });
-
-  canvas.addEventListener('drop', event => {
-    event.preventDefault();
-    const type = event.dataTransfer.getData('text/plain');
-    if (!type) return;
-    const rect = canvas.getBoundingClientRect();
-    const x = event.clientX - rect.left + scroll.scrollLeft;
-    const y = event.clientY - rect.top + scroll.scrollTop;
-    addNode(type, x, y);
-  });
-
-  canvas.addEventListener('click', event => {
-    if (event.target === canvas) {
-      for (const item of nodes.values()) item.el.classList.remove('selected');
-      selectedId = null;
-    }
-  });
-
-  nameInput.addEventListener('change', () => {
-    persistCurrent();
-    setStatus('Namn sparat');
-  });
-
-  root.querySelector('#pk-new').addEventListener('click', newProcess);
-  root.querySelector('#pk-save').addEventListener('click', () => persistCurrent(true));
-
-  root.querySelector('#pk-undo').addEventListener('click', () => {
-    if (!undoStack.length) return;
-    redoStack.push(JSON.stringify(currentState()));
-    restoreState(undoStack.pop());
-    persistCurrent();
-  });
-
-  root.querySelector('#pk-redo').addEventListener('click', () => {
-    if (!redoStack.length) return;
-    undoStack.push(JSON.stringify(currentState()));
-    restoreState(redoStack.pop());
-    persistCurrent();
-  });
-
-  root.querySelector('#pk-doc').addEventListener('click', exportGoogleDoc);
-
-  root.addEventListener('keydown', event => {
-    if (['INPUT','TEXTAREA','SELECT'].includes(event.target.tagName)) return;
-    if (event.key === 'Delete') deleteSelected();
-  });
-
-  if (!loadBrowser()) {
-    processes[starter.id] = clone(starter);
-    currentProcessId = starter.id;
-  }
-  openCurrentProcess();
-  setStatus('Klar');
+const root=document.getElementById('pk48'); if(!root||root.dataset.ready==='1')return; root.dataset.ready='1';
+const canvas=root.querySelector('#p48-canvas'),scroll=root.querySelector('#p48-scroll'),linkLayer=root.querySelector('#p48-links'),temp=root.querySelector('#p48-temp');
+const nameInput=root.querySelector('#p48-name'),status=root.querySelector('#p48-status'),processBox=root.querySelector('#p48-processes');
+const empty=root.querySelector('#p48-empty'),controls=root.querySelector('#p48-controls'),font=root.querySelector('#p48-font'),size=root.querySelector('#p48-size'),textColor=root.querySelector('#p48-textcolor'),bgColor=root.querySelector('#p48-bgcolor');
+const bold=root.querySelector('#p48-bold'),italic=root.querySelector('#p48-italic'),under=root.querySelector('#p48-under');
+
+let nodes=new Map(),links=[],selectedId=null,seq=8,undo=[],redo=[],currentId='proc-1',processes={};
+
+const starter={id:'proc-1',name:'Exempel – upphandlingsprocess',nodes:[
+{id:'n1',type:'start',text:'Upphandling identifieras',x:100,y:130},{id:'n2',type:'process',text:'Första bedömning',x:390,y:130},{id:'n3',type:'decision',text:'Relevant?',x:680,y:110},{id:'n4',type:'process',text:'Kvalificera upphandling',x:950,y:130}
+],links:[['n1','n2','right'],['n2','n3','right'],['n3','n4','right']]};
+
+function clone(v){return JSON.parse(JSON.stringify(v))}
+function uid(){return 'proc-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7)}
+function msg(t){status.textContent=t;setTimeout(()=>{if(status.textContent===t)status.textContent=''},1800)}
+function defBg(type){return {start:'#edf8f3',end:'#fff3f1',decision:'#fff8df',subprocess:'#f7f3ff',note:'#fffbe8',group:'#f8fafc'}[type]||'#ffffff'}
+function styleOf(d){return{fontFamily:d.fontFamily||'Arial',fontSize:Number(d.fontSize||13),textColor:d.textColor||'#17202a',bgColor:d.bgColor||defBg(d.type),fontWeight:d.fontWeight||'700',fontStyle:d.fontStyle||'normal',textDecoration:d.textDecoration||'none',textAlign:d.textAlign||'center'}}
+function applyStyle(item){const s=styleOf(item.data);Object.assign(item.data,s);item.label.style.fontFamily=s.fontFamily;item.label.style.fontSize=s.fontSize+'px';item.label.style.color=s.textColor;item.label.style.fontWeight=s.fontWeight;item.label.style.fontStyle=s.fontStyle;item.label.style.textDecoration=s.textDecoration;item.label.style.textAlign=s.textAlign;item.el.style.background=s.bgColor}
+function state(){return{id:currentId,name:nameInput.value.trim()||'Namnlös process',nodes:[...nodes.values()].map(x=>clone(x.data)),links:clone(links)}}
+function saveLocal(){try{localStorage.setItem('processkartan_v048',JSON.stringify({currentId,processes}))}catch(e){}}
+function loadLocal(){try{const raw=localStorage.getItem('processkartan_v048');if(!raw)return false;const d=JSON.parse(raw);if(!d.processes||!Object.keys(d.processes).length)return false;processes=d.processes;currentId=d.currentId&&processes[d.currentId]?d.currentId:Object.keys(processes)[0];return true}catch(e){return false}}
+function renderProcesses(){processBox.innerHTML='';Object.values(processes).sort((a,b)=>(a.name||'').localeCompare(b.name||'','sv')).forEach(p=>{const b=document.createElement('button');b.type='button';b.className='p48-proc'+(p.id===currentId?' active':'');b.textContent=p.name||'Namnlös process';b.title=p.name||'Namnlös process';b.addEventListener('click',()=>{persist();openProcess(p.id)});processBox.appendChild(b)})}
+function persist(show=false){const s=state();processes[currentId]=clone(s);saveLocal();renderProcesses();if(show)msg('Sparad')}
+function pushUndo(){undo.push(JSON.stringify(state()));if(undo.length>50)undo.shift();redo=[]}
+function clearCanvas(){for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;linkLayer.innerHTML='';refreshControls()}
+function restore(s){const d=typeof s==='string'?JSON.parse(s):clone(s);clearCanvas();currentId=d.id||currentId;nameInput.value=d.name||'Namnlös process';(d.nodes||[]).forEach(makeNode);links=d.links||[];seq=Math.max(0,...[...nodes.keys()].map(id=>parseInt(String(id).replace(/\D/g,''),10)||0));drawLinks()}
+function openProcess(id){if(!processes[id])return;currentId=id;undo=[];redo=[];restore(processes[id]);saveLocal();renderProcesses();msg('Process öppnad')}
+function newProcess(){persist();const n=prompt('Namn på den nya processen:','Ny process');if(n===null)return;currentId=uid();processes[currentId]={id:currentId,name:n.trim()||'Ny process',nodes:[],links:[]};undo=[];redo=[];restore(processes[currentId]);saveLocal();renderProcesses();scroll.scrollLeft=0;scroll.scrollTop=0;msg('Ny process skapad')}
+function nodeText(t){return{start:'Start',process:'Ny aktivitet',decision:'Beslut?',end:'Slut',subprocess:'Ny delprocess',group:'Ny grupp / område',note:'Anteckning'}[t]||'Nytt steg'}
+function place(el,x,y){const snap=20,nx=Math.round(x/snap)*snap,ny=Math.round(y/snap)*snap;el.style.left=Math.max(10,Math.min(2400-el.offsetWidth-10,nx))+'px';el.style.top=Math.max(10,Math.min(1400-el.offsetHeight-10,ny))+'px'}
+function sync(el){const x=nodes.get(el.dataset.id);if(x){x.data.x=parseFloat(el.style.left)||0;x.data.y=parseFloat(el.style.top)||0}}
+function center(el){return[(parseFloat(el.style.left)||0)+el.offsetWidth/2,(parseFloat(el.style.top)||0)+el.offsetHeight/2]}
+function anchor(el,side){const x=parseFloat(el.style.left)||0,y=parseFloat(el.style.top)||0,w=el.offsetWidth,h=el.offsetHeight;if(side==='left')return[x,y+h/2];if(side==='top')return[x+w/2,y];if(side==='bottom')return[x+w/2,y+h];return[x+w,y+h/2]}
+function targetSide(a,b){const[ax,ay]=center(a),[bx,by]=center(b),dx=bx-ax,dy=by-ay;if(Math.abs(dx)>=Math.abs(dy))return dx>=0?'left':'right';return dy>=0?'top':'bottom'}
+function select(el){for(const x of nodes.values())x.el.classList.remove('selected');selectedId=el.dataset.id;el.classList.add('selected');refreshControls()}
+function refreshControls(){const item=selectedId?nodes.get(selectedId):null;if(!item){empty.hidden=false;controls.hidden=true;return}empty.hidden=true;controls.hidden=false;const s=styleOf(item.data);font.value=s.fontFamily;size.value=s.fontSize;textColor.value=s.textColor;bgColor.value=s.bgColor;bold.classList.toggle('active',s.fontWeight==='700');italic.classList.toggle('active',s.fontStyle==='italic');under.classList.toggle('active',s.textDecoration==='underline');root.querySelectorAll('[data-align]').forEach(b=>b.classList.toggle('active',b.dataset.align===s.textAlign))}
+function updateStyle(patch){const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();Object.assign(item.data,patch);applyStyle(item);drawLinks();persist();refreshControls()}
+function edit(el){const item=nodes.get(el.dataset.id);if(!item)return;const n=prompt('Text i steget:',item.data.text);if(n===null)return;pushUndo();item.data.text=n.trim()||item.data.text;item.label.textContent=item.data.text;applyStyle(item);drawLinks();persist()}
+
+function makeNode(data){
+const d=clone(data),el=document.createElement('div');el.className='p48-node '+d.type;el.dataset.id=d.id;el.style.left=d.x+'px';el.style.top=d.y+'px';el.tabIndex=0;
+const label=document.createElement('span');label.className='p48-label';label.textContent=d.text;el.appendChild(label);
+const handles={};for(const side of ['right','left','top','bottom']){const h=document.createElement('span');h.className='p48-handle '+side;h.dataset.side=side;el.appendChild(h);handles[side]=h}
+canvas.appendChild(el);nodes.set(d.id,{el,data:d,label,handles});applyStyle(nodes.get(d.id));
+el.addEventListener('dblclick',e=>{e.stopPropagation();edit(el)});el.addEventListener('click',e=>{e.stopPropagation();select(el)});
+el.addEventListener('pointerdown',e=>{if(e.button!==0||e.target.classList.contains('p48-handle'))return;select(el);pushUndo();const sx=e.clientX,sy=e.clientY,ox=parseFloat(el.style.left)||0,oy=parseFloat(el.style.top)||0;el.setPointerCapture(e.pointerId);const mv=ev=>{place(el,ox+ev.clientX-sx,oy+ev.clientY-sy);sync(el);drawLinks()};const up=()=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);persist()};el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up)});
+Object.values(handles).forEach(h=>h.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();const side=h.dataset.side,[x1,y1]=anchor(el,side);temp.hidden=false;temp.setAttribute('d',`M${x1},${y1} L${x1},${y1}`);const mv=ev=>{const r=canvas.getBoundingClientRect(),x2=ev.clientX-r.left+scroll.scrollLeft,y2=ev.clientY-r.top+scroll.scrollTop;temp.setAttribute('d',`M${x1},${y1} L${x2},${y2}`)};const up=ev=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);temp.hidden=true;const target=document.elementFromPoint(ev.clientX,ev.clientY)?.closest('.p48-node');if(target&&target!==el){pushUndo();links.push([el.dataset.id,target.dataset.id,side]);drawLinks();persist()}};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)}));
+return el}
+
+function addNode(type,x,y){pushUndo();seq++;const el=makeNode({id:'n'+seq,type,text:nodeText(type),x:x-90,y:y-38});place(el,x-90,y-38);sync(el);select(el);drawLinks();persist()}
+function drawLinks(){linkLayer.innerHTML='';for(const [a,b,side] of links){const A=nodes.get(a)?.el,B=nodes.get(b)?.el;if(!A||!B)continue;const s=side||'right',t=targetSide(A,B),[x1,y1]=anchor(A,s),[x2,y2]=anchor(B,t),p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('class','p48-link');p.setAttribute('marker-end','url(#p48-arrow)');p.setAttribute('d',`M${x1},${y1} L${x2},${y2}`);linkLayer.appendChild(p)}}
+function deleteSelected(){if(!selectedId||!nodes.has(selectedId))return;pushUndo();nodes.get(selectedId).el.remove();nodes.delete(selectedId);links=links.filter(l=>l[0]!==selectedId&&l[1]!==selectedId);selectedId=null;drawLinks();persist();refreshControls()}
+
+function crc32(bytes){let crc=0^(-1);for(let i=0;i<bytes.length;i++){crc^=bytes[i];for(let j=0;j<8;j++)crc=(crc>>>1)^(0xEDB88320&-(crc&1))}return(crc^(-1))>>>0}
+const u16=n=>new Uint8Array([n&255,(n>>>8)&255]);const u32=n=>new Uint8Array([n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]);
+function cat(parts){const n=parts.reduce((s,p)=>s+p.length,0),o=new Uint8Array(n);let k=0;for(const p of parts){o.set(p,k);k+=p.length}return o}
+function mkzip(files){const enc=new TextEncoder(),locals=[],centrals=[];let off=0;for(const f of files){const nb=enc.encode(f.name),db=enc.encode(f.data),crc=crc32(db),local=cat([u32(0x04034b50),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(db.length),u32(db.length),u16(nb.length),u16(0),nb,db]);locals.push(local);centrals.push(cat([u32(0x02014b50),u16(20),u16(20),u16(0),u16(0),u16(0),u16(0),u32(crc),u32(db.length),u32(db.length),u16(nb.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(off),nb]));off+=local.length}const cb=cat(centrals),end=cat([u32(0x06054b50),u16(0),u16(0),u16(files.length),u16(files.length),u32(cb.length),u32(off),u16(0)]);return cat([...locals,cb,end])}
+function xe(v){return String(v??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function para(t,b=false){return`<w:p><w:r>${b?'<w:rPr><w:b/></w:rPr>':''}<w:t xml:space="preserve">${xe(t)}</w:t></w:r></w:p>`}
+function exportDoc(){persist();const s=state(),ordered=[...nodes.values()].sort((a,b)=>a.data.y-b.data.y||a.data.x-b.data.x);let body=para(s.name,true)+para('')+para('Processsteg',true);ordered.forEach((x,i)=>body+=para(`${i+1}. ${x.data.text}`));body+=para('')+para('Kopplingar',true);links.forEach(l=>body+=para('• '+(nodes.get(l[0])?.data.text||l[0])+' → '+(nodes.get(l[1])?.data.text||l[1])));const doc=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${body}<w:sectPr/></w:body></w:document>`,ct=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>`,rels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`,bytes=mkzip([{name:'[Content_Types].xml',data:ct},{name:'_rels/.rels',data:rels},{name:'word/document.xml',data:doc}]),blob=new Blob([bytes],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(s.name.replace(/[^a-z0-9åäö_-]+/gi,'_')||'Process')+'.docx';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1200);msg('DOCX skapad')}
+
+root.querySelectorAll('.p48-item').forEach(i=>i.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',i.dataset.type);e.dataTransfer.effectAllowed='copy'}));
+canvas.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='copy'});
+canvas.addEventListener('drop',e=>{e.preventDefault();const type=e.dataTransfer.getData('text/plain');if(!type)return;const r=canvas.getBoundingClientRect();addNode(type,e.clientX-r.left+scroll.scrollLeft,e.clientY-r.top+scroll.scrollTop)});
+canvas.addEventListener('click',e=>{if(e.target===canvas){for(const x of nodes.values())x.el.classList.remove('selected');selectedId=null;refreshControls()}});
+nameInput.addEventListener('change',()=>{persist();msg('Namn sparat')});
+root.querySelector('#p48-new').addEventListener('click',newProcess);root.querySelector('#p48-save').addEventListener('click',()=>persist(true));root.querySelector('#p48-doc').addEventListener('click',exportDoc);
+root.querySelector('#p48-undo').addEventListener('click',()=>{if(!undo.length)return;redo.push(JSON.stringify(state()));restore(undo.pop());persist()});
+root.querySelector('#p48-redo').addEventListener('click',()=>{if(!redo.length)return;undo.push(JSON.stringify(state()));restore(redo.pop());persist()});
+root.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;if(e.key==='Delete')deleteSelected()});
+font.addEventListener('change',()=>updateStyle({fontFamily:font.value}));size.addEventListener('change',()=>updateStyle({fontSize:Math.max(10,Math.min(36,Number(size.value)||13))}));textColor.addEventListener('input',()=>updateStyle({textColor:textColor.value}));bgColor.addEventListener('input',()=>updateStyle({bgColor:bgColor.value}));
+bold.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({fontWeight:styleOf(x.data).fontWeight==='700'?'400':'700'})});italic.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({fontStyle:styleOf(x.data).fontStyle==='italic'?'normal':'italic'})});under.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({textDecoration:styleOf(x.data).textDecoration==='underline'?'none':'underline'})});root.querySelectorAll('[data-align]').forEach(b=>b.addEventListener('click',()=>updateStyle({textAlign:b.dataset.align})));
+
+if(!loadLocal()){processes[starter.id]=clone(starter);currentId=starter.id}
+openProcess(currentId);renderProcesses();refreshControls();msg('Klar');
 })();
 </script>
 </div>
 """
-components.html(html, height=990, scrolling=True)
+components.html(html, height=1000, scrolling=True)
