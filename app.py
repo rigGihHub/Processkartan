@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.6.1"
+APP_VERSION = "0.6.2"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 
@@ -80,17 +80,54 @@ html = r"""
 .p48-label{display:block;width:100%;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;line-height:1.28;cursor:text;outline:none}
 .p48-label[contenteditable="true"]{user-select:text;-webkit-user-select:text;cursor:text;min-width:40px}
 .p48-node.start,.p48-node.end{border-radius:38px}.p48-node.start{border-color:#2b7b61}.p48-node.end{border-color:#985148}
-.p48-node.decision{min-width:160px;max-width:240px;min-height:120px;padding:34px 32px;border:0;background:transparent!important;border-radius:0;overflow:visible}
-.p48-node.decision::before{content:"";position:absolute;left:50%;top:50%;width:70%;height:70%;transform:translate(-50%,-50%) rotate(45deg);background:var(--decision-bg,#fff8df);border:2px solid #a97a20;z-index:-1}
-.p48-node.decision .p48-label,.p48-node.decision .p48-node-io{position:relative;z-index:2}
+.p48-node.decision{
+  min-width:150px;
+  max-width:320px;
+  min-height:150px;
+  width:170px;
+  height:170px;
+  padding:38px;
+  border:0;
+  background:transparent!important;
+  border-radius:0;
+  overflow:visible;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.p48-node.decision::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:70.71%;
+  height:70.71%;
+  transform:translate(-50%,-50%) rotate(45deg);
+  transform-origin:center;
+  background:var(--decision-bg,#fff8df);
+  border:2px solid #d69a18;
+  box-sizing:border-box;
+  z-index:-1;
+}
+.p48-node.decision .p48-label,.p48-node.decision .p48-node-io{position:relative;z-index:2;text-align:center}
 .p48-node.subprocess{border-style:double;border-width:4px;border-color:#7556a6}.p48-node.note{border-color:#b8973e}.p48-node.group{min-width:240px;max-width:440px;min-height:120px;border-style:dashed;color:#536171}
 .p48-node.selected{outline:3px solid #2c7be5;outline-offset:3px}
 .p48-node.decision.selected{outline:none}
-.p48-node.decision.selected::before{border-color:#2c7be5;box-shadow:none}
+.p48-node.decision.selected::before{
+  border-color:#2c7be5;
+  box-shadow:0 0 0 2px rgba(44,123,229,.22);
+}
 .p48-handle{position:absolute;width:16px;height:16px;border-radius:50%;background:#1f6f55;border:3px solid #fff;box-shadow:0 0 0 1px #1f6f55;cursor:crosshair;z-index:8}
 .p48-handle.right{right:-8px;top:50%;transform:translateY(-50%)}.p48-handle.left{left:-8px;top:50%;transform:translateY(-50%)}.p48-handle.top{top:-8px;left:50%;transform:translateX(-50%)}.p48-handle.bottom{bottom:-8px;left:50%;transform:translateX(-50%)}
-.p48-node.decision .p48-handle.right{right:2px;top:50%}.p48-node.decision .p48-handle.left{left:2px;top:50%}.p48-node.decision .p48-handle.top{top:2px;left:50%}.p48-node.decision .p48-handle.bottom{bottom:2px;left:50%}
-.p48-node.decision .p48-resize{display:none!important}
+.p48-node.decision .p48-handle.right{right:-8px;top:50%;transform:translateY(-50%)}
+.p48-node.decision .p48-handle.left{left:-8px;top:50%;transform:translateY(-50%)}
+.p48-node.decision .p48-handle.top{top:-8px;left:50%;transform:translateX(-50%)}
+.p48-node.decision .p48-handle.bottom{bottom:-8px;left:50%;transform:translateX(-50%)}
+.p48-node.decision.selected .p48-resize{display:block}
+.p48-node.decision .p48-resize.se{right:5px;bottom:5px}
+.p48-node.decision .p48-resize.sw{left:5px;bottom:5px}
+.p48-node.decision .p48-resize.ne{right:5px;top:5px}
+.p48-node.decision .p48-resize.nw{left:5px;top:5px}
 @media(max-width:850px){.p48-body{grid-template-columns:1fr}.p48-side{border-right:0;border-bottom:1px solid #dce2e8}}
 </style>
 
@@ -369,7 +406,7 @@ function finishInlineEdit(el){
 }
 
 function makeNode(data){
-const d=clone(data),el=document.createElement('div');el.className='p48-node '+d.type;el.dataset.id=d.id;el.style.left=d.x+'px';el.style.top=d.y+'px';el.tabIndex=0;if(d.width)el.style.width=d.width+'px';if(d.height)el.style.minHeight=d.height+'px';
+const d=clone(data),el=document.createElement('div');el.className='p48-node '+d.type;el.dataset.id=d.id;el.style.left=d.x+'px';el.style.top=d.y+'px';el.tabIndex=0;if(d.width)el.style.width=d.width+'px';if(d.height){el.style.height=d.height+'px';el.style.minHeight=d.height+'px';}
 const label=document.createElement('span');label.className='p48-label';label.textContent=d.text;label.contentEditable='false';label.spellcheck=true;el.appendChild(label);
 const handles={};for(const side of ['right','left','top','bottom']){const h=document.createElement('span');h.className='p48-handle '+side;h.dataset.side=side;el.appendChild(h);handles[side]=h}
 const resizeHandles={};for(const corner of ['se','sw','ne','nw']){const rh=document.createElement('span');rh.className='p48-resize '+corner;rh.dataset.corner=corner;el.appendChild(rh);resizeHandles[corner]=rh}
@@ -393,10 +430,15 @@ Object.values(resizeHandles).forEach(rh=>rh.addEventListener('pointerdown',e=>{
   const mv=ev=>{
     const dx=ev.clientX-sx,dy=ev.clientY-sy;
     let w=ow+(corner.includes('e')?dx:-dx),h=oh+(corner.includes('s')?dy:-dy);
-    w=Math.max(120,Math.min(700,w));h=Math.max(54,Math.min(500,h));
+    if(el.classList.contains('decision')){
+      const size=Math.max(130,Math.min(420,Math.max(w,h)));
+      w=size;h=size;
+    }else{
+      w=Math.max(120,Math.min(700,w));h=Math.max(54,Math.min(500,h));
+    }
     if(corner.includes('w'))el.style.left=(ox+ow-w)+'px';
     if(corner.includes('n'))el.style.top=(oy+oh-h)+'px';
-    el.style.width=w+'px';el.style.minHeight=h+'px';
+    el.style.width=w+'px';el.style.height=h+'px';el.style.minHeight=h+'px';
     sync(el);const item=nodes.get(el.dataset.id);item.data.width=w;item.data.height=h;drawLinks();
   };
   const up=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);persist()};
@@ -531,7 +573,7 @@ async function renderMapSnapshot(){
     let stroke='#637387';
     if(d.type==='start')stroke='#2b7b61';
     else if(d.type==='end')stroke='#985148';
-    else if(d.type==='decision')stroke='#a97a20';
+    else if(d.type==='decision')stroke='#d69a18';
     else if(d.type==='subprocess')stroke='#7556a6';
     else if(d.type==='note')stroke='#b8973e';
     ctx.strokeStyle=stroke;ctx.lineWidth=(d.type==='subprocess'?4:2);

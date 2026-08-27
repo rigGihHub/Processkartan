@@ -1,9 +1,13 @@
-# Maplini v0.6.1
+# Maplini v0.6.2
 
-## Nytt
-- Nytt verktyg `Markera område`.
-- Dra en rektangel över flera rutor för att markera dem samtidigt.
-- `Ta bort markerat` raderar alla markerade rutor och deras kopplingar.
-- Delete-tangenten fungerar även på flera markerade rutor.
-- Escape avslutar markeringsläget.
-- Påbörjade pilar rensas alltid när du släpper musen/klickar bort, så inga orange/röda pilrester ska bli kvar.
+## Beslutspunkt
+- Ny ren och symmetrisk diamant, integrerad i appen.
+- Resize finns kvar på beslutspunkten.
+- Beslutspunkten behåller kvadratisk bounding box vid resize så diamanten inte blir skev.
+- Fyra anslutningspunkter sitter på diamantens fyra spetsar.
+- Markerad beslutspunkt markeras på själva diamantkanten.
+- PDF/DOCX-exporten använder fortsatt diamantform.
+
+## Övrigt
+- Områdesmarkering och massradering från v0.6.1 finns kvar.
+- Temporära pilrester rensas fortsatt automatiskt.
