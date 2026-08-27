@@ -1,2 +1,2 @@
-# v0.5.9
-- Flyttat Inputs/Outputs direkt under Anteckning och före Formatering.
+# v0.6.0
+- Renare beslutspunkt utan dubbel/överlappande markeringsgeometri.
