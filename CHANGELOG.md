@@ -1,11 +1,8 @@
 # Changelog
 
-## v0.4.9
-- Namnbyte till Procely.
-- Procely-logotyp integrerad i appens header.
-- Inline-redigering av text direkt i processrutor.
-- Prompt-dialog för textredigering borttagen.
-- Formatering fungerar på markerad ruta under redigering.
-
-## v0.4.8
-- Sparade processer och textformatering reparerade.
+## v0.5.0
+- Namnbyte till Maplini.
+- Maplini-logotyp integrerad i headern.
+- Inline-redigering direkt i processruta vid dubbelklick.
+- Prompt/dialog för textredigering borttagen.
+- Migrering av sparade processer från v0.4.8.

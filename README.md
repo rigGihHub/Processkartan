@@ -1,14 +1,10 @@
-# Procely v0.4.9
+# Maplini v0.5.0
 
-## Nytt
-- Appen heter nu Procely.
-- Procely-logotypen är inbakad i appen och kräver ingen separat bildfil.
-- Klick på texten i en processruta redigerar texten direkt i samma ruta.
-- Ingen prompt/dialogruta öppnas längre för textredigering.
-- Formateringsverktygen kan användas medan den aktuella rutan är markerad.
-- Texten radbryts och rutan anpassar sig efter innehållet.
-- Sparade processer finns kvar i vänsterkolumnen.
-- DOCX-export till Google Docs finns kvar.
-
-## Uppdatera
-Packa upp ZIP → GitHub Desktop → Show in Explorer → ersätt filerna → Commit to main → Push origin.
+- Ny Maplini-branding och logotyp i appens header.
+- Dubbelklick på texten i en processruta redigerar direkt i samma ruta.
+- Ingen popup/dialog används för textredigering.
+- Formateringspanelen fungerar på markerad ruta.
+- Esc eller Ctrl/Cmd + Enter avslutar inline-redigeringen.
+- Klick utanför texten sparar också ändringen.
+- Befintliga sparade processer från v0.4.8 migreras automatiskt i samma webbläsare.
+- Google Docs-export skapar riktig DOCX.

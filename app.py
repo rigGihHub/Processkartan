@@ -1,8 +1,12 @@
 import streamlit as st
 import streamlit.components.v1 as components
+from pathlib import Path
+import base64
 
-st.set_page_config(page_title="Processkartan", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.4.8"
+st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
+APP_VERSION = "0.5.0"
+_LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
+_LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 
 st.markdown("""
 <style>
@@ -12,12 +16,14 @@ header[data-testid="stHeader"]{height:2rem}
 </style>
 """, unsafe_allow_html=True)
 
-st.markdown(f"**Processkartan** · v{APP_VERSION}")
+
 html = r"""
 <div id="pk48">
 <style>
 #pk48{font-family:Inter,system-ui,sans-serif;color:#17202a;background:#eef2f6;border:1px solid #dce2e8;border-radius:12px;overflow:hidden}
 #pk48 *{box-sizing:border-box}
+.p48-brand{height:72px;background:#fff;border-bottom:1px solid #e1e7ed;display:flex;align-items:center;padding:6px 14px}
+.p48-brand img{height:56px;width:auto;max-width:310px;object-fit:contain;display:block}
 .p48-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px;background:#fff;border-bottom:1px solid #dce2e8}
 .p48-btn{border:1px solid #ccd4dc;background:#fff;color:#24303d;border-radius:8px;min-height:38px;padding:8px 11px;font:600 13px system-ui;cursor:pointer}
 .p48-btn:hover{background:#f2f5f7}.p48-btn.primary{background:#1f6f55;color:#fff;border-color:#1f6f55}
@@ -44,7 +50,8 @@ html = r"""
 #p48-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
 .p48-link{stroke:#687584;stroke-width:2.2;fill:none}.p48-temp{stroke:#df941e;stroke-width:2.4;fill:none;stroke-dasharray:6 5}
 .p48-node{position:absolute;min-width:160px;max-width:360px;width:max-content;min-height:64px;height:auto;padding:14px 26px;border:2px solid #637387;border-radius:10px;background:#fff;box-shadow:0 3px 9px rgba(31,42,55,.10);z-index:5;user-select:none;touch-action:none;display:flex;align-items:center;justify-content:center}
-.p48-label{display:block;width:100%;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;line-height:1.28}
+.p48-label{display:block;width:100%;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;line-height:1.28;cursor:text;outline:none}
+.p48-label[contenteditable="true"]{user-select:text;-webkit-user-select:text;cursor:text;min-width:40px}
 .p48-node.start,.p48-node.end{border-radius:38px}.p48-node.start{border-color:#2b7b61}.p48-node.end{border-color:#985148}
 .p48-node.decision{min-width:160px;max-width:240px;min-height:120px;padding:34px 32px;border-color:#a97a20;clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);border-radius:0}
 .p48-node.subprocess{border-style:double;border-width:4px;border-color:#7556a6}.p48-node.note{border-color:#b8973e}.p48-node.group{min-width:240px;max-width:440px;min-height:120px;border-style:dashed;color:#536171}
@@ -55,6 +62,7 @@ html = r"""
 @media(max-width:850px){.p48-body{grid-template-columns:1fr}.p48-side{border-right:0;border-bottom:1px solid #dce2e8}}
 </style>
 
+<div class="p48-brand"><img src="__MAPLINI_LOGO__" alt="Maplini"></div>
 <div class="p48-top">
   <strong>Process</strong>
   <input id="p48-name" class="p48-name" value="Exempel – upphandlingsprocess" aria-label="Processnamn">
@@ -87,7 +95,7 @@ html = r"""
 
     <div class="p48-format">
       <div class="p48-title">Formatera markerad ruta</div>
-      <div id="p48-empty" class="p48-empty">Markera en ruta på canvasen.</div>
+      <div id="p48-empty" class="p48-empty">Markera en ruta. Dubbelklicka på texten för att redigera direkt.</div>
       <div id="p48-controls" hidden>
         <div class="p48-format-grid">
           <div><label>Typsnitt</label><select id="p48-font"><option value="Arial">Arial</option><option value="Verdana">Verdana</option><option value="Georgia">Georgia</option><option value="Trebuchet MS">Trebuchet MS</option><option value="Courier New">Courier New</option><option value="system-ui">System</option></select></div>
@@ -141,8 +149,19 @@ function defBg(type){return {start:'#edf8f3',end:'#fff3f1',decision:'#fff8df',su
 function styleOf(d){return{fontFamily:d.fontFamily||'Arial',fontSize:Number(d.fontSize||13),textColor:d.textColor||'#17202a',bgColor:d.bgColor||defBg(d.type),fontWeight:d.fontWeight||'700',fontStyle:d.fontStyle||'normal',textDecoration:d.textDecoration||'none',textAlign:d.textAlign||'center'}}
 function applyStyle(item){const s=styleOf(item.data);Object.assign(item.data,s);item.label.style.fontFamily=s.fontFamily;item.label.style.fontSize=s.fontSize+'px';item.label.style.color=s.textColor;item.label.style.fontWeight=s.fontWeight;item.label.style.fontStyle=s.fontStyle;item.label.style.textDecoration=s.textDecoration;item.label.style.textAlign=s.textAlign;item.el.style.background=s.bgColor}
 function state(){return{id:currentId,name:nameInput.value.trim()||'Namnlös process',nodes:[...nodes.values()].map(x=>clone(x.data)),links:clone(links)}}
-function saveLocal(){try{localStorage.setItem('processkartan_v048',JSON.stringify({currentId,processes}))}catch(e){}}
-function loadLocal(){try{const raw=localStorage.getItem('processkartan_v048');if(!raw)return false;const d=JSON.parse(raw);if(!d.processes||!Object.keys(d.processes).length)return false;processes=d.processes;currentId=d.currentId&&processes[d.currentId]?d.currentId:Object.keys(processes)[0];return true}catch(e){return false}}
+function saveLocal(){try{localStorage.setItem('maplini_v050',JSON.stringify({currentId,processes}))}catch(e){}}
+function loadLocal(){
+  try{
+    const raw=localStorage.getItem('maplini_v050')||localStorage.getItem('processkartan_v048');
+    if(!raw)return false;
+    const d=JSON.parse(raw);
+    if(!d.processes||!Object.keys(d.processes).length)return false;
+    processes=d.processes;
+    currentId=d.currentId&&processes[d.currentId]?d.currentId:Object.keys(processes)[0];
+    saveLocal();
+    return true;
+  }catch(e){return false}
+}
 function renderProcesses(){processBox.innerHTML='';Object.values(processes).sort((a,b)=>(a.name||'').localeCompare(b.name||'','sv')).forEach(p=>{const b=document.createElement('button');b.type='button';b.className='p48-proc'+(p.id===currentId?' active':'');b.textContent=p.name||'Namnlös process';b.title=p.name||'Namnlös process';b.addEventListener('click',()=>{persist();openProcess(p.id)});processBox.appendChild(b)})}
 function persist(show=false){const s=state();processes[currentId]=clone(s);saveLocal();renderProcesses();if(show)msg('Sparad')}
 function pushUndo(){undo.push(JSON.stringify(state()));if(undo.length>50)undo.shift();redo=[]}
@@ -159,15 +178,51 @@ function targetSide(a,b){const[ax,ay]=center(a),[bx,by]=center(b),dx=bx-ax,dy=by
 function select(el){for(const x of nodes.values())x.el.classList.remove('selected');selectedId=el.dataset.id;el.classList.add('selected');refreshControls()}
 function refreshControls(){const item=selectedId?nodes.get(selectedId):null;if(!item){empty.hidden=false;controls.hidden=true;return}empty.hidden=true;controls.hidden=false;const s=styleOf(item.data);font.value=s.fontFamily;size.value=s.fontSize;textColor.value=s.textColor;bgColor.value=s.bgColor;bold.classList.toggle('active',s.fontWeight==='700');italic.classList.toggle('active',s.fontStyle==='italic');under.classList.toggle('active',s.textDecoration==='underline');root.querySelectorAll('[data-align]').forEach(b=>b.classList.toggle('active',b.dataset.align===s.textAlign))}
 function updateStyle(patch){const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();Object.assign(item.data,patch);applyStyle(item);drawLinks();persist();refreshControls()}
-function edit(el){const item=nodes.get(el.dataset.id);if(!item)return;const n=prompt('Text i steget:',item.data.text);if(n===null)return;pushUndo();item.data.text=n.trim()||item.data.text;item.label.textContent=item.data.text;applyStyle(item);drawLinks();persist()}
+function beginInlineEdit(el){
+  const item=nodes.get(el.dataset.id);
+  if(!item)return;
+  select(el);
+  if(item.label.contentEditable==='true')return;
+  pushUndo();
+  item.label.contentEditable='true';
+  item.label.focus();
+  const range=document.createRange();
+  range.selectNodeContents(item.label);
+  range.collapse(false);
+  const selection=window.getSelection();
+  selection.removeAllRanges();
+  selection.addRange(range);
+}
+function finishInlineEdit(el){
+  const item=nodes.get(el.dataset.id);
+  if(!item)return;
+  if(item.label.contentEditable!=='true')return;
+  const clean=(item.label.innerText||'').replace(/\n{3,}/g,'\n\n').trim();
+  item.data.text=clean||item.data.text||'Nytt steg';
+  item.label.textContent=item.data.text;
+  item.label.contentEditable='false';
+  applyStyle(item);
+  drawLinks();
+  persist();
+  refreshControls();
+}
 
 function makeNode(data){
 const d=clone(data),el=document.createElement('div');el.className='p48-node '+d.type;el.dataset.id=d.id;el.style.left=d.x+'px';el.style.top=d.y+'px';el.tabIndex=0;
-const label=document.createElement('span');label.className='p48-label';label.textContent=d.text;el.appendChild(label);
+const label=document.createElement('span');label.className='p48-label';label.textContent=d.text;label.contentEditable='false';label.spellcheck=true;el.appendChild(label);
 const handles={};for(const side of ['right','left','top','bottom']){const h=document.createElement('span');h.className='p48-handle '+side;h.dataset.side=side;el.appendChild(h);handles[side]=h}
 canvas.appendChild(el);nodes.set(d.id,{el,data:d,label,handles});applyStyle(nodes.get(d.id));
-el.addEventListener('dblclick',e=>{e.stopPropagation();edit(el)});el.addEventListener('click',e=>{e.stopPropagation();select(el)});
-el.addEventListener('pointerdown',e=>{if(e.button!==0||e.target.classList.contains('p48-handle'))return;select(el);pushUndo();const sx=e.clientX,sy=e.clientY,ox=parseFloat(el.style.left)||0,oy=parseFloat(el.style.top)||0;el.setPointerCapture(e.pointerId);const mv=ev=>{place(el,ox+ev.clientX-sx,oy+ev.clientY-sy);sync(el);drawLinks()};const up=()=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);persist()};el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up)});
+el.addEventListener('dblclick',e=>{e.stopPropagation();beginInlineEdit(el)});
+label.addEventListener('click',e=>{e.stopPropagation();select(el)});
+label.addEventListener('dblclick',e=>{e.stopPropagation();beginInlineEdit(el)});
+label.addEventListener('input',()=>{const item=nodes.get(el.dataset.id);if(item){item.data.text=label.innerText;drawLinks();}});
+label.addEventListener('blur',()=>finishInlineEdit(el));
+label.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){e.preventDefault();finishInlineEdit(el);el.focus();}
+  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();finishInlineEdit(el);el.focus();}
+});
+el.addEventListener('click',e=>{e.stopPropagation();select(el)});
+el.addEventListener('pointerdown',e=>{if(e.button!==0||e.target.classList.contains('p48-handle')||e.target.classList.contains('p48-label'))return;select(el);pushUndo();const sx=e.clientX,sy=e.clientY,ox=parseFloat(el.style.left)||0,oy=parseFloat(el.style.top)||0;el.setPointerCapture(e.pointerId);const mv=ev=>{place(el,ox+ev.clientX-sx,oy+ev.clientY-sy);sync(el);drawLinks()};const up=()=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);persist()};el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up)});
 Object.values(handles).forEach(h=>h.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();const side=h.dataset.side,[x1,y1]=anchor(el,side);temp.hidden=false;temp.setAttribute('d',`M${x1},${y1} L${x1},${y1}`);const mv=ev=>{const r=canvas.getBoundingClientRect(),x2=ev.clientX-r.left+scroll.scrollLeft,y2=ev.clientY-r.top+scroll.scrollTop;temp.setAttribute('d',`M${x1},${y1} L${x2},${y2}`)};const up=ev=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);temp.hidden=true;const target=document.elementFromPoint(ev.clientX,ev.clientY)?.closest('.p48-node');if(target&&target!==el){pushUndo();links.push([el.dataset.id,target.dataset.id,side]);drawLinks();persist()}};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)}));
 return el}
 
@@ -201,4 +256,5 @@ openProcess(currentId);renderProcesses();refreshControls();msg('Klar');
 </script>
 </div>
 """
+html = html.replace("__MAPLINI_LOGO__", f"data:image/png;base64,{_LOGO_B64}")
 components.html(html, height=1000, scrolling=True)
