@@ -5,9 +5,15 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.6.2"
+APP_VERSION = "0.7.0"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
+_SUPABASE = st.secrets.get("supabase", {})
+_SUPABASE_URL = _SUPABASE.get("url", "")
+_SUPABASE_ANON_KEY = _SUPABASE.get("anon_key", "")
+_PUBLIC_APP_URL = st.secrets.get("app", {}).get("public_url", "https://processkartan.streamlit.app")
+_CLOUD_ENABLED = bool(_SUPABASE_URL and _SUPABASE_ANON_KEY)
+
 
 st.markdown("""
 <style>
@@ -49,7 +55,15 @@ html = r"""
 .p48-spacer{flex:1}.p48-status{font-size:12px;color:#667382;min-width:70px}
 .p48-body{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:900px}
 .p48-side{background:#fff;border-right:1px solid #dce2e8;padding:10px}
-.p48-section{margin-bottom:16px}.p48-title{font-size:12px;font-weight:800;margin-bottom:8px}.p48-sub{font-size:11px;color:#6c7784;line-height:1.45;margin-bottom:9px}
+.p48-section{margin-bottom:16px}
+.p48-account{border:1px solid #d8e0e7;background:#f8fafc;border-radius:10px;padding:9px;margin-bottom:12px}
+.p48-account input{width:100%;border:1px solid #cfd7df;border-radius:7px;padding:7px 8px;font:12px system-ui;margin-top:5px}
+.p48-account-actions{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:7px}
+.p48-cloud-badge{display:inline-flex;font-size:10px;font-weight:800;border-radius:999px;padding:4px 7px;background:#edf7f2;color:#1f6f55;margin-top:5px}
+.p48-cloud-badge.off{background:#f4f4f4;color:#777}
+.p48-sharebox{display:none;border:1px solid #cfdbe6;background:#f8fbfe;border-radius:9px;padding:7px}
+.p48-sharebox input{width:260px;border:1px solid #cfd7df;border-radius:7px;padding:6px;font-size:11px}
+.p48-small{font-size:10.5px;color:#6b7885;line-height:1.35}.p48-title{font-size:12px;font-weight:800;margin-bottom:8px}.p48-sub{font-size:11px;color:#6c7784;line-height:1.45;margin-bottom:9px}
 .p48-list{display:grid;gap:6px}
 .p48-proc-row{display:grid;grid-template-columns:minmax(0,1fr) 34px;gap:5px;align-items:stretch}
 .p48-proc-row .p48-proc{min-width:0}
@@ -142,6 +156,9 @@ html = r"""
   <input id="p48-name" class="p48-name" value="Exempel – upphandlingsprocess" aria-label="Processnamn">
   <button type="button" class="p48-btn primary" id="p48-new">+ Ny process</button>
   <button type="button" class="p48-btn" id="p48-save">Spara</button>
+  <button type="button" class="p48-btn" id="p48-cloud-save">Spara i molnet</button>
+  <button type="button" class="p48-btn" id="p48-share">Dela</button>
+  <div class="p48-sharebox" id="p48-sharebox"><input id="p48-share-url" readonly><button type="button" class="p48-mini" id="p48-copy-share">Kopiera länk</button></div>
   <button type="button" class="p48-btn" id="p48-undo">↶ Ångra</button>
   <button type="button" class="p48-btn" id="p48-redo">↷ Gör om</button>
   <button type="button" class="p48-btn" id="p48-select-tool">Markera område</button>
@@ -154,6 +171,23 @@ html = r"""
 
 <div class="p48-body">
   <aside class="p48-side">
+    <div class="p48-account">
+      <div class="p48-title">Konto & moln</div>
+      <div id="p48-account-signedout">
+        <input id="p48-email" type="email" placeholder="E-post">
+        <input id="p48-password" type="password" placeholder="Lösenord">
+        <div class="p48-account-actions">
+          <button type="button" class="p48-mini" id="p48-login">Logga in</button>
+          <button type="button" class="p48-mini" id="p48-signup">Skapa konto</button>
+        </div>
+      </div>
+      <div id="p48-account-signedin" hidden>
+        <div id="p48-user-email" style="font-size:12px;font-weight:800"></div>
+        <button type="button" class="p48-mini" id="p48-logout" style="width:100%;margin-top:6px">Logga ut</button>
+      </div>
+      <div id="p48-cloud-badge" class="p48-cloud-badge off">Lokal lagring</div>
+      <div id="p48-cloud-help" class="p48-small">Supabase är inte konfigurerat.</div>
+    </div>
     <div class="p48-section">
       <div class="p48-title">Sparade processer</div>
       <div id="p48-processes" class="p48-list"></div>
@@ -224,6 +258,11 @@ const canvas=root.querySelector('#p48-canvas'),scroll=root.querySelector('#p48-s
 const nameInput=root.querySelector('#p48-name'),status=root.querySelector('#p48-status'),processBox=root.querySelector('#p48-processes');
 const controls=root.querySelector('#p48-controls'),font=root.querySelector('#p48-font'),size=root.querySelector('#p48-size'),textColor=root.querySelector('#p48-textcolor'),bgColor=root.querySelector('#p48-bgcolor');
 const bold=root.querySelector('#p48-bold'),italic=root.querySelector('#p48-italic'),under=root.querySelector('#p48-under');
+const emailInput=root.querySelector('#p48-email'),passwordInput=root.querySelector('#p48-password');
+const loginBtn=root.querySelector('#p48-login'),signupBtn=root.querySelector('#p48-signup'),logoutBtn=root.querySelector('#p48-logout');
+const signedOut=root.querySelector('#p48-account-signedout'),signedIn=root.querySelector('#p48-account-signedin'),userEmail=root.querySelector('#p48-user-email');
+const cloudBadge=root.querySelector('#p48-cloud-badge'),cloudHelp=root.querySelector('#p48-cloud-help');
+const cloudSaveBtn=root.querySelector('#p48-cloud-save'),shareBtn=root.querySelector('#p48-share'),shareBox=root.querySelector('#p48-sharebox'),shareUrlInput=root.querySelector('#p48-share-url'),copyShareBtn=root.querySelector('#p48-copy-share');
 const marquee=root.querySelector('#p48-marquee');
 const selectToolBtn=root.querySelector('#p48-select-tool');
 const deleteSelectionBtn=root.querySelector('#p48-delete-selection');
@@ -231,10 +270,45 @@ const inputsBox=root.querySelector('#p48-inputs'),outputsBox=root.querySelector(
 const addInputBtn=root.querySelector('#p48-add-input'),addOutputBtn=root.querySelector('#p48-add-output'),deleteNodeBtn=root.querySelector('#p48-delete-node');
 
 let nodes=new Map(),links=[],selectedId=null,selectedIds=new Set(),selectionMode=false,seq=8,undo=[],redo=[],currentId='proc-1',processes={};
+const SUPABASE_URL="__SUPABASE_URL__", SUPABASE_ANON_KEY="__SUPABASE_ANON_KEY__", PUBLIC_APP_URL="__PUBLIC_APP_URL__";
+const CLOUD_ENABLED=SUPABASE_URL.length>0&&SUPABASE_ANON_KEY.length>0;
+let cloudSession=null,sharedView=false;
+
 
 const starter={id:'proc-1',name:'Exempel – upphandlingsprocess',nodes:[
 {id:'n1',type:'start',text:'Upphandling identifieras',x:100,y:130},{id:'n2',type:'process',text:'Första bedömning',x:390,y:130},{id:'n3',type:'decision',text:'Relevant?',x:680,y:110},{id:'n4',type:'process',text:'Kvalificera upphandling',x:950,y:130}
 ],links:[['n1','n2','right'],['n2','n3','right'],['n3','n4','right']]};
+
+
+function cloudKey(){return'maplini_supabase_session'}
+function updateAccountUi(){
+ const logged=!!(cloudSession?.access_token&&cloudSession?.user);
+ signedOut.hidden=logged;signedIn.hidden=!logged;
+ if(logged)userEmail.textContent=cloudSession.user.email||'Inloggad';
+ cloudSaveBtn.disabled=!logged||!CLOUD_ENABLED||sharedView;shareBtn.disabled=!logged||!CLOUD_ENABLED||sharedView;
+ if(CLOUD_ENABLED&&logged){cloudBadge.className='p48-cloud-badge';cloudBadge.textContent='Moln anslutet';cloudHelp.textContent='Spara och dela mellan enheter.'}
+ else if(CLOUD_ENABLED){cloudBadge.className='p48-cloud-badge off';cloudBadge.textContent='Ej inloggad';cloudHelp.textContent='Logga in för molnlagring.'}
+ else{cloudBadge.className='p48-cloud-badge off';cloudBadge.textContent='Lokal lagring';cloudHelp.textContent='Lägg in Supabase i Streamlit Secrets.'}
+}
+function loadCloudSession(){try{cloudSession=JSON.parse(localStorage.getItem(cloudKey())||'null')}catch(e){cloudSession=null}updateAccountUi()}
+function saveCloudSession(v){cloudSession=v||null;try{cloudSession?localStorage.setItem(cloudKey(),JSON.stringify(cloudSession)):localStorage.removeItem(cloudKey())}catch(e){}updateAccountUi()}
+async function sb(path,opt={},auth=true){
+ if(!CLOUD_ENABLED)throw new Error('Supabase saknas');
+ const headers=Object.assign({'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'},opt.headers||{});
+ if(auth&&cloudSession?.access_token)headers.Authorization='Bearer '+cloudSession.access_token;
+ const r=await fetch(SUPABASE_URL+path,Object.assign({},opt,{headers})),raw=await r.text();let d=null;try{d=raw?JSON.parse(raw):null}catch(e){d=raw}
+ if(!r.ok)throw new Error(d?.msg||d?.message||d?.error_description||String(d||r.status));return d;
+}
+async function signIn(){try{const email=emailInput.value.trim(),password=passwordInput.value;if(!email||!password)return msg('Fyll i e-post och lösenord');const d=await sb('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})},false);saveCloudSession(d);msg('Inloggad');await loadCloudProcesses()}catch(e){console.error(e);msg('Inloggning misslyckades')}}
+async function signUp(){try{const email=emailInput.value.trim(),password=passwordInput.value;if(!email||password.length<6)return msg('Minst 6 tecken krävs');const d=await sb('/auth/v1/signup',{method:'POST',body:JSON.stringify({email,password})},false);if(d.access_token)saveCloudSession(d);msg(d.access_token?'Konto skapat':'Kontrollera e-posten')}catch(e){console.error(e);msg('Kunde inte skapa konto')}}
+function signOut(){saveCloudSession(null);msg('Utloggad')}
+function ownerId(){return cloudSession?.user?.id||null}
+async function saveCurrentToCloud(){if(!ownerId())throw new Error('Logga in först');persist();await sb('/rest/v1/processes?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:currentId,owner_id:ownerId(),name:state().name,data:state(),updated_at:new Date().toISOString()})});msg('Sparad i molnet')}
+async function loadCloudProcesses(){if(!ownerId())return;try{const rows=await sb('/rest/v1/processes?select=id,name,data&order=updated_at.desc');for(const row of(rows||[]))if(row.data&&row.id)processes[row.id]=Object.assign({},row.data,{id:row.id,name:row.name||row.data.name});saveLocal();renderProcesses()}catch(e){console.error(e);msg('Kunde inte läsa molnet')}}
+function shareToken(){return crypto?.randomUUID?crypto.randomUUID().replace(/-/g,''):Math.random().toString(36).slice(2)+Date.now().toString(36)}
+async function shareCurrent(){try{await saveCurrentToCloud();const rows=await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(currentId)+'&select=share_token');const token=rows?.[0]?.share_token||shareToken();await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(currentId),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({share_token:token,share_mode:'view'})});shareUrlInput.value=PUBLIC_APP_URL.replace(/\/$/,'')+'?share='+token;shareBox.style.display='block';msg('Delningslänk skapad')}catch(e){console.error(e);msg('Delning misslyckades')}}
+async function loadShared(token){if(!CLOUD_ENABLED||!token)return false;try{const rows=await sb('/rest/v1/processes?share_token=eq.'+encodeURIComponent(token)+'&share_mode=eq.view&select=id,name,data',{},false);if(rows?.length){const row=rows[0];sharedView=true;currentId=row.id;processes={[row.id]:Object.assign({},row.data,{id:row.id,name:row.name||row.data.name})};restore(processes[row.id]);renderProcesses();root.querySelectorAll('.p48-item,.p48-format input,.p48-format select,.p48-format button,.p48-step-io input,.p48-step-io button').forEach(el=>{el.style.pointerEvents='none';el.style.opacity='.5'});root.querySelector('#p48-new').disabled=true;root.querySelector('#p48-save').disabled=true;updateAccountUi();msg('Delad process – endast visning');return true}}catch(e){console.error(e)}return false}
+async function deleteCloud(id){if(ownerId())try{await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:{Prefer:'return=minimal'}})}catch(e){console.error(e)}}
 
 function clone(v){return JSON.parse(JSON.stringify(v))}
 function uid(){return 'proc-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7)}
@@ -278,7 +352,7 @@ function deleteProcess(id){
   const proc=processes[id]; if(!proc)return;
   const label=proc.name||'Namnlös process';
   if(!confirm('Radera processen "'+label+'"? Detta går inte att ångra.'))return;
-  delete processes[id];
+  delete processes[id];deleteCloud(id);
   if(id===currentId){
     const remaining=Object.keys(processes);
     if(remaining.length){
@@ -755,7 +829,11 @@ canvas.addEventListener('click',e=>{
   if(e.target===canvas&&!selectionMode){clearSelection();finishTempArrow();}
 });
 nameInput.addEventListener('change',()=>{persist();msg('Namn sparat')});
-root.querySelector('#p48-new').addEventListener('click',newProcess);root.querySelector('#p48-save').addEventListener('click',()=>persist(true));root.querySelector('#p48-pdf').addEventListener('click',exportPdf);root.querySelector('#p48-doc').addEventListener('click',exportDoc);
+root.querySelector('#p48-new').addEventListener('click',newProcess);
+root.querySelector('#p48-save').addEventListener('click',async()=>{persist(true);if(ownerId())try{await saveCurrentToCloud()}catch(e){console.error(e)}});
+cloudSaveBtn.addEventListener('click',async()=>{try{await saveCurrentToCloud()}catch(e){console.error(e);msg('Molnsparning misslyckades')}});
+shareBtn.addEventListener('click',shareCurrent);copyShareBtn.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(shareUrlInput.value);msg('Länk kopierad')}catch(e){shareUrlInput.select();document.execCommand('copy')}});
+loginBtn.addEventListener('click',signIn);signupBtn.addEventListener('click',signUp);logoutBtn.addEventListener('click',signOut);root.querySelector('#p48-pdf').addEventListener('click',exportPdf);root.querySelector('#p48-doc').addEventListener('click',exportDoc);
 root.querySelector('#p48-undo').addEventListener('click',()=>{if(!undo.length)return;redo.push(JSON.stringify(state()));restore(undo.pop());persist()});
 root.querySelector('#p48-redo').addEventListener('click',()=>{if(!redo.length)return;undo.push(JSON.stringify(state()));restore(redo.pop());persist()});
 root.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;if(e.key==='Delete'){if(selectedIds.size>1)deleteSelectedMany();else deleteSelected()}});
@@ -767,8 +845,14 @@ addInputBtn.addEventListener('click',()=>{const item=selectedId?nodes.get(select
 addOutputBtn.addEventListener('click',()=>{const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();ensureIO(item);item.data.outputs.push('Ny output');renderNodeIO(item);persist();refreshControls();});
 deleteNodeBtn.addEventListener('click',()=>deleteSelected());
 
-if(!loadLocal()){processes[starter.id]=clone(starter);currentId=starter.id}
-openProcess(currentId);renderProcesses();refreshControls();updateSelectionUi();msg('Klar');
+loadCloudSession();
+const SHARE_TOKEN="__SHARE_TOKEN__";
+(async()=>{
+ if(SHARE_TOKEN&&await loadShared(SHARE_TOKEN))return;
+ if(!loadLocal()){processes[starter.id]=clone(starter);currentId=starter.id}
+ openProcess(currentId);renderProcesses();refreshControls();updateSelectionUi();updateAccountUi();msg('Klar');
+ if(ownerId())await loadCloudProcesses();
+})();
 })();
 </script>
 </div>
@@ -802,4 +886,10 @@ with st.expander("Google Docs", expanded=False):
                 st.error(f"Kunde inte skapa Google Doc: {exc}")
 
 html = html.replace("__MAPLINI_LOGO__", f"data:image/png;base64,{_LOGO_B64}")
+html = html.replace("__SUPABASE_URL__", _SUPABASE_URL)
+html = html.replace("__SUPABASE_ANON_KEY__", _SUPABASE_ANON_KEY)
+html = html.replace("__PUBLIC_APP_URL__", _PUBLIC_APP_URL)
+html = html.replace("__SHARE_TOKEN__", st.query_params.get("share", ""))
+if not _CLOUD_ENABLED:
+    st.caption("Molnlagring är inte aktiverad ännu. Lägg Supabase-inställningarna i Streamlit Secrets enligt README.")
 components.html(html, height=1000, scrolling=True)
