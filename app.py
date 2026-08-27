@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.5.1"
+APP_VERSION = "0.5.2"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 
@@ -106,9 +106,9 @@ html = r"""
     </div>
 
     <div class="p48-format">
-      <div class="p48-title">Formatera markerad ruta</div>
-      <div id="p48-empty" class="p48-empty">Markera en ruta. Dubbelklicka på texten för att redigera direkt.</div>
-      <div id="p48-controls" hidden>
+      <div class="p48-title">Formatering</div>
+      <div class="p48-sub">Markera en ruta för att ändra dess text, färger, storlek, inputs och outputs.</div>
+      <div id="p48-controls">
         <div class="p48-format-grid">
           <div><label>Typsnitt</label><select id="p48-font"><option value="Arial">Arial</option><option value="Verdana">Verdana</option><option value="Georgia">Georgia</option><option value="Trebuchet MS">Trebuchet MS</option><option value="Courier New">Courier New</option><option value="system-ui">System</option></select></div>
           <div><label>Storlek</label><input id="p48-size" type="number" min="10" max="36" value="13"></div>
@@ -153,7 +153,7 @@ html = r"""
 const root=document.getElementById('pk48'); if(!root||root.dataset.ready==='1')return; root.dataset.ready='1';
 const canvas=root.querySelector('#p48-canvas'),scroll=root.querySelector('#p48-scroll'),linkLayer=root.querySelector('#p48-links'),temp=root.querySelector('#p48-temp');
 const nameInput=root.querySelector('#p48-name'),status=root.querySelector('#p48-status'),processBox=root.querySelector('#p48-processes');
-const empty=root.querySelector('#p48-empty'),controls=root.querySelector('#p48-controls'),font=root.querySelector('#p48-font'),size=root.querySelector('#p48-size'),textColor=root.querySelector('#p48-textcolor'),bgColor=root.querySelector('#p48-bgcolor');
+const controls=root.querySelector('#p48-controls'),font=root.querySelector('#p48-font'),size=root.querySelector('#p48-size'),textColor=root.querySelector('#p48-textcolor'),bgColor=root.querySelector('#p48-bgcolor');
 const bold=root.querySelector('#p48-bold'),italic=root.querySelector('#p48-italic'),under=root.querySelector('#p48-under');
 const inputsBox=root.querySelector('#p48-inputs'),outputsBox=root.querySelector('#p48-outputs');
 const addInputBtn=root.querySelector('#p48-add-input'),addOutputBtn=root.querySelector('#p48-add-output');
@@ -223,7 +223,15 @@ function renderIOEditor(item){
   item.data.inputs.forEach((v,i)=>inputsBox.appendChild(row(v,i,'inputs')));
   item.data.outputs.forEach((v,i)=>outputsBox.appendChild(row(v,i,'outputs')));
 }
-function refreshControls(){const item=selectedId?nodes.get(selectedId):null;if(!item){empty.hidden=false;controls.hidden=true;return}empty.hidden=true;controls.hidden=false;const s=styleOf(item.data);font.value=s.fontFamily;size.value=s.fontSize;textColor.value=s.textColor;bgColor.value=s.bgColor;bold.classList.toggle('active',s.fontWeight==='700');italic.classList.toggle('active',s.fontStyle==='italic');under.classList.toggle('active',s.textDecoration==='underline');root.querySelectorAll('[data-align]').forEach(b=>b.classList.toggle('active',b.dataset.align===s.textAlign));renderIOEditor(item)}
+
+function setFormatEnabled(enabled){
+  controls.querySelectorAll('select,input,button').forEach(el=>{
+    el.disabled=!enabled;
+  });
+  controls.style.opacity=enabled?'1':'0.45';
+}
+
+function refreshControls(){const item=selectedId?nodes.get(selectedId):null;if(!item){setFormatEnabled(false);inputsBox.innerHTML='';outputsBox.innerHTML='';return}setFormatEnabled(true);const s=styleOf(item.data);font.value=s.fontFamily;size.value=s.fontSize;textColor.value=s.textColor;bgColor.value=s.bgColor;bold.classList.toggle('active',s.fontWeight==='700');italic.classList.toggle('active',s.fontStyle==='italic');under.classList.toggle('active',s.textDecoration==='underline');root.querySelectorAll('[data-align]').forEach(b=>b.classList.toggle('active',b.dataset.align===s.textAlign));renderIOEditor(item)}
 function updateStyle(patch){const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();Object.assign(item.data,patch);applyStyle(item);drawLinks();persist();refreshControls()}
 function beginInlineEdit(el){
   const item=nodes.get(el.dataset.id);
