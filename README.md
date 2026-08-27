@@ -1,11 +1,14 @@
-# Processkartan v0.4.8
+# Procely v0.4.9
 
-Ren ombyggnad av vänsterkolumn och textformatering.
+## Nytt
+- Appen heter nu Procely.
+- Procely-logotypen är inbakad i appen och kräver ingen separat bildfil.
+- Klick på texten i en processruta redigerar texten direkt i samma ruta.
+- Ingen prompt/dialogruta öppnas längre för textredigering.
+- Formateringsverktygen kan användas medan den aktuella rutan är markerad.
+- Texten radbryts och rutan anpassar sig efter innehållet.
+- Sparade processer finns kvar i vänsterkolumnen.
+- DOCX-export till Google Docs finns kvar.
 
-- Sparade processer visas direkt i vänsterkolumnen efter Spara.
-- Klick på sparad process öppnar rätt canvas.
-- Aktiv process markeras.
-- Typsnitt, textstorlek, textfärg, bakgrundsfärg, fet, kursiv, understruken och textjustering fungerar för markerad ruta.
-- Formatering sparas per ruta.
-- Text radbryts och rutan växer inom satta maxbredder.
-- Google Docs-export skapar riktig DOCX.
+## Uppdatera
+Packa upp ZIP → GitHub Desktop → Show in Explorer → ersätt filerna → Commit to main → Push origin.

@@ -1,6 +1,11 @@
 # Changelog
 
+## v0.4.9
+- Namnbyte till Procely.
+- Procely-logotyp integrerad i appens header.
+- Inline-redigering av text direkt i processrutor.
+- Prompt-dialog för textredigering borttagen.
+- Formatering fungerar på markerad ruta under redigering.
+
 ## v0.4.8
-- Fix: sparade processer visas och går att öppna.
-- Fix: textformatering är faktiskt implementerad i appfilen.
-- Ren ombyggnad av processbibliotek och formateringspanel.
+- Sparade processer och textformatering reparerade.
