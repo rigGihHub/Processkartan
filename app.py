@@ -2,9 +2,10 @@ import streamlit as st
 import streamlit.components.v1 as components
 from pathlib import Path
 import base64
+import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.5.0"
+APP_VERSION = "0.5.1"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 
@@ -22,7 +23,19 @@ html = r"""
 <style>
 #pk48{font-family:Inter,system-ui,sans-serif;color:#17202a;background:#eef2f6;border:1px solid #dce2e8;border-radius:12px;overflow:hidden}
 #pk48 *{box-sizing:border-box}
-.p48-brand{height:72px;background:#fff;border-bottom:1px solid #e1e7ed;display:flex;align-items:center;padding:6px 14px}
+.p48-brand{height:86px;background:#fff;border-bottom:1px solid #e1e7ed;display:flex;align-items:center;padding:8px 18px}
+.p48-brand img{height:66px!important;width:auto;max-width:360px!important;object-fit:contain;display:block}
+.p48-resize{position:absolute;width:13px;height:13px;background:#fff;border:2px solid #2c7be5;border-radius:3px;z-index:10}
+.p48-resize.se{right:-7px;bottom:-7px;cursor:nwse-resize}.p48-resize.sw{left:-7px;bottom:-7px;cursor:nesw-resize}
+.p48-resize.ne{right:-7px;top:-7px;cursor:nesw-resize}.p48-resize.nw{left:-7px;top:-7px;cursor:nwse-resize}
+.p48-io-wrap{margin-top:12px;border-top:1px solid #e3e8ed;padding-top:10px}
+.p48-io-title{font-size:10px;font-weight:800;color:#64717d;margin:6px 0}
+.p48-io-list{display:grid;gap:5px}.p48-io-row{display:flex;gap:5px;align-items:center}
+.p48-io-row input{min-width:0;flex:1;border:1px solid #cfd7df;border-radius:7px;padding:6px 7px;font:12px system-ui}
+.p48-io-row button{border:1px solid #d7dde3;background:#fff;border-radius:6px;width:28px;height:28px;cursor:pointer}
+.p48-addio{width:100%;margin-top:5px;border:1px dashed #9fb0bf;background:#f8fafc;border-radius:7px;padding:6px;font:700 11px system-ui;cursor:pointer}
+.p48-node-io{width:100%;margin-top:6px;display:grid;gap:2px;font-size:10px;font-weight:500;opacity:.8;text-align:left}
+.p48-node-io span{display:block;white-space:pre-wrap;overflow-wrap:anywhere}
 .p48-brand img{height:56px;width:auto;max-width:310px;object-fit:contain;display:block}
 .p48-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px;background:#fff;border-bottom:1px solid #dce2e8}
 .p48-btn{border:1px solid #ccd4dc;background:#fff;color:#24303d;border-radius:8px;min-height:38px;padding:8px 11px;font:600 13px system-ui;cursor:pointer}
@@ -71,7 +84,7 @@ html = r"""
   <button type="button" class="p48-btn" id="p48-undo">↶ Ångra</button>
   <button type="button" class="p48-btn" id="p48-redo">↷ Gör om</button>
   <span class="p48-spacer"></span>
-  <button type="button" class="p48-btn primary" id="p48-doc">Exportera till Google Docs (.docx)</button>
+  <button type="button" class="p48-btn primary" id="p48-doc">Exportera DOCX</button>
   <span id="p48-status" class="p48-status"></span>
 </div>
 
@@ -89,7 +102,6 @@ html = r"""
       <div class="p48-item" draggable="true" data-type="decision"><span class="p48-icon">◇</span>Beslut</div>
       <div class="p48-item" draggable="true" data-type="end"><span class="p48-icon">■</span>Slut</div>
       <div class="p48-item" draggable="true" data-type="subprocess"><span class="p48-icon">▣</span>Delprocess</div>
-      <div class="p48-item" draggable="true" data-type="group"><span class="p48-icon">G</span>Grupp / område</div>
       <div class="p48-item" draggable="true" data-type="note"><span class="p48-icon">N</span>Anteckning</div>
     </div>
 
@@ -113,6 +125,14 @@ html = r"""
           <button type="button" class="p48-mini" data-align="center">Centrera</button>
           <button type="button" class="p48-mini" data-align="right">Höger</button>
         </div>
+        <div class="p48-io-wrap">
+          <div class="p48-io-title">Inputs</div>
+          <div id="p48-inputs" class="p48-io-list"></div>
+          <button type="button" class="p48-addio" id="p48-add-input">+ Lägg till input</button>
+          <div class="p48-io-title">Outputs</div>
+          <div id="p48-outputs" class="p48-io-list"></div>
+          <button type="button" class="p48-addio" id="p48-add-output">+ Lägg till output</button>
+        </div>
       </div>
     </div>
   </aside>
@@ -135,6 +155,8 @@ const canvas=root.querySelector('#p48-canvas'),scroll=root.querySelector('#p48-s
 const nameInput=root.querySelector('#p48-name'),status=root.querySelector('#p48-status'),processBox=root.querySelector('#p48-processes');
 const empty=root.querySelector('#p48-empty'),controls=root.querySelector('#p48-controls'),font=root.querySelector('#p48-font'),size=root.querySelector('#p48-size'),textColor=root.querySelector('#p48-textcolor'),bgColor=root.querySelector('#p48-bgcolor');
 const bold=root.querySelector('#p48-bold'),italic=root.querySelector('#p48-italic'),under=root.querySelector('#p48-under');
+const inputsBox=root.querySelector('#p48-inputs'),outputsBox=root.querySelector('#p48-outputs');
+const addInputBtn=root.querySelector('#p48-add-input'),addOutputBtn=root.querySelector('#p48-add-output');
 
 let nodes=new Map(),links=[],selectedId=null,seq=8,undo=[],redo=[],currentId='proc-1',processes={};
 
@@ -176,7 +198,32 @@ function center(el){return[(parseFloat(el.style.left)||0)+el.offsetWidth/2,(pars
 function anchor(el,side){const x=parseFloat(el.style.left)||0,y=parseFloat(el.style.top)||0,w=el.offsetWidth,h=el.offsetHeight;if(side==='left')return[x,y+h/2];if(side==='top')return[x+w/2,y];if(side==='bottom')return[x+w/2,y+h];return[x+w,y+h/2]}
 function targetSide(a,b){const[ax,ay]=center(a),[bx,by]=center(b),dx=bx-ax,dy=by-ay;if(Math.abs(dx)>=Math.abs(dy))return dx>=0?'left':'right';return dy>=0?'top':'bottom'}
 function select(el){for(const x of nodes.values())x.el.classList.remove('selected');selectedId=el.dataset.id;el.classList.add('selected');refreshControls()}
-function refreshControls(){const item=selectedId?nodes.get(selectedId):null;if(!item){empty.hidden=false;controls.hidden=true;return}empty.hidden=true;controls.hidden=false;const s=styleOf(item.data);font.value=s.fontFamily;size.value=s.fontSize;textColor.value=s.textColor;bgColor.value=s.bgColor;bold.classList.toggle('active',s.fontWeight==='700');italic.classList.toggle('active',s.fontStyle==='italic');under.classList.toggle('active',s.textDecoration==='underline');root.querySelectorAll('[data-align]').forEach(b=>b.classList.toggle('active',b.dataset.align===s.textAlign))}
+
+function ensureIO(item){
+  if(!Array.isArray(item.data.inputs))item.data.inputs=[];
+  if(!Array.isArray(item.data.outputs))item.data.outputs=[];
+}
+function renderNodeIO(item){
+  if(!item.io){const io=document.createElement('div');io.className='p48-node-io';item.el.appendChild(io);item.io=io;}
+  ensureIO(item);item.io.innerHTML='';
+  if(item.data.inputs.length){const s=document.createElement('span');s.textContent='In: '+item.data.inputs.join(', ');item.io.appendChild(s);}
+  if(item.data.outputs.length){const s=document.createElement('span');s.textContent='Out: '+item.data.outputs.join(', ');item.io.appendChild(s);}
+  item.io.style.display=(item.data.inputs.length||item.data.outputs.length)?'grid':'none';
+}
+function renderIOEditor(item){
+  inputsBox.innerHTML='';outputsBox.innerHTML='';ensureIO(item);
+  const row=(value,index,kind)=>{
+    const r=document.createElement('div');r.className='p48-io-row';
+    const inp=document.createElement('input');inp.value=value;inp.placeholder=kind==='inputs'?'Input':'Output';
+    inp.addEventListener('change',()=>{pushUndo();item.data[kind][index]=inp.value.trim();item.data[kind]=item.data[kind].filter(Boolean);renderNodeIO(item);drawLinks();persist();refreshControls();});
+    const del=document.createElement('button');del.type='button';del.textContent='×';
+    del.addEventListener('click',()=>{pushUndo();item.data[kind].splice(index,1);renderNodeIO(item);drawLinks();persist();refreshControls();});
+    r.append(inp,del);return r;
+  };
+  item.data.inputs.forEach((v,i)=>inputsBox.appendChild(row(v,i,'inputs')));
+  item.data.outputs.forEach((v,i)=>outputsBox.appendChild(row(v,i,'outputs')));
+}
+function refreshControls(){const item=selectedId?nodes.get(selectedId):null;if(!item){empty.hidden=false;controls.hidden=true;return}empty.hidden=true;controls.hidden=false;const s=styleOf(item.data);font.value=s.fontFamily;size.value=s.fontSize;textColor.value=s.textColor;bgColor.value=s.bgColor;bold.classList.toggle('active',s.fontWeight==='700');italic.classList.toggle('active',s.fontStyle==='italic');under.classList.toggle('active',s.textDecoration==='underline');root.querySelectorAll('[data-align]').forEach(b=>b.classList.toggle('active',b.dataset.align===s.textAlign));renderIOEditor(item)}
 function updateStyle(patch){const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();Object.assign(item.data,patch);applyStyle(item);drawLinks();persist();refreshControls()}
 function beginInlineEdit(el){
   const item=nodes.get(el.dataset.id);
@@ -208,10 +255,11 @@ function finishInlineEdit(el){
 }
 
 function makeNode(data){
-const d=clone(data),el=document.createElement('div');el.className='p48-node '+d.type;el.dataset.id=d.id;el.style.left=d.x+'px';el.style.top=d.y+'px';el.tabIndex=0;
+const d=clone(data),el=document.createElement('div');el.className='p48-node '+d.type;el.dataset.id=d.id;el.style.left=d.x+'px';el.style.top=d.y+'px';el.tabIndex=0;if(d.width)el.style.width=d.width+'px';if(d.height)el.style.minHeight=d.height+'px';
 const label=document.createElement('span');label.className='p48-label';label.textContent=d.text;label.contentEditable='false';label.spellcheck=true;el.appendChild(label);
 const handles={};for(const side of ['right','left','top','bottom']){const h=document.createElement('span');h.className='p48-handle '+side;h.dataset.side=side;el.appendChild(h);handles[side]=h}
-canvas.appendChild(el);nodes.set(d.id,{el,data:d,label,handles});applyStyle(nodes.get(d.id));
+const resizeHandles={};for(const corner of ['se','sw','ne','nw']){const rh=document.createElement('span');rh.className='p48-resize '+corner;rh.dataset.corner=corner;el.appendChild(rh);resizeHandles[corner]=rh}
+canvas.appendChild(el);nodes.set(d.id,{el,data:d,label,handles,resizeHandles,io:null});applyStyle(nodes.get(d.id));renderNodeIO(nodes.get(d.id));
 el.addEventListener('dblclick',e=>{e.stopPropagation();beginInlineEdit(el)});
 label.addEventListener('click',e=>{e.stopPropagation();select(el)});
 label.addEventListener('dblclick',e=>{e.stopPropagation();beginInlineEdit(el)});
@@ -222,7 +270,25 @@ label.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();finishInlineEdit(el);el.focus();}
 });
 el.addEventListener('click',e=>{e.stopPropagation();select(el)});
-el.addEventListener('pointerdown',e=>{if(e.button!==0||e.target.classList.contains('p48-handle')||e.target.classList.contains('p48-label'))return;select(el);pushUndo();const sx=e.clientX,sy=e.clientY,ox=parseFloat(el.style.left)||0,oy=parseFloat(el.style.top)||0;el.setPointerCapture(e.pointerId);const mv=ev=>{place(el,ox+ev.clientX-sx,oy+ev.clientY-sy);sync(el);drawLinks()};const up=()=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);persist()};el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up)});
+el.addEventListener('pointerdown',e=>{if(e.button!==0||e.target.classList.contains('p48-handle')||e.target.classList.contains('p48-label')||e.target.classList.contains('p48-resize'))return;select(el);pushUndo();const sx=e.clientX,sy=e.clientY,ox=parseFloat(el.style.left)||0,oy=parseFloat(el.style.top)||0;el.setPointerCapture(e.pointerId);const mv=ev=>{place(el,ox+ev.clientX-sx,oy+ev.clientY-sy);sync(el);drawLinks()};const up=()=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);persist()};el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up)});
+
+Object.values(resizeHandles).forEach(rh=>rh.addEventListener('pointerdown',e=>{
+  e.stopPropagation();e.preventDefault();select(el);pushUndo();
+  const corner=rh.dataset.corner,sx=e.clientX,sy=e.clientY;
+  const ox=parseFloat(el.style.left)||0,oy=parseFloat(el.style.top)||0,ow=el.offsetWidth,oh=el.offsetHeight;
+  const mv=ev=>{
+    const dx=ev.clientX-sx,dy=ev.clientY-sy;
+    let w=ow+(corner.includes('e')?dx:-dx),h=oh+(corner.includes('s')?dy:-dy);
+    w=Math.max(120,Math.min(700,w));h=Math.max(54,Math.min(500,h));
+    if(corner.includes('w'))el.style.left=(ox+ow-w)+'px';
+    if(corner.includes('n'))el.style.top=(oy+oh-h)+'px';
+    el.style.width=w+'px';el.style.minHeight=h+'px';
+    sync(el);const item=nodes.get(el.dataset.id);item.data.width=w;item.data.height=h;drawLinks();
+  };
+  const up=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);persist()};
+  document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up);
+}));
+
 Object.values(handles).forEach(h=>h.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();const side=h.dataset.side,[x1,y1]=anchor(el,side);temp.hidden=false;temp.setAttribute('d',`M${x1},${y1} L${x1},${y1}`);const mv=ev=>{const r=canvas.getBoundingClientRect(),x2=ev.clientX-r.left+scroll.scrollLeft,y2=ev.clientY-r.top+scroll.scrollTop;temp.setAttribute('d',`M${x1},${y1} L${x2},${y2}`)};const up=ev=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);temp.hidden=true;const target=document.elementFromPoint(ev.clientX,ev.clientY)?.closest('.p48-node');if(target&&target!==el){pushUndo();links.push([el.dataset.id,target.dataset.id,side]);drawLinks();persist()}};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)}));
 return el}
 
@@ -250,11 +316,43 @@ root.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(e.
 font.addEventListener('change',()=>updateStyle({fontFamily:font.value}));size.addEventListener('change',()=>updateStyle({fontSize:Math.max(10,Math.min(36,Number(size.value)||13))}));textColor.addEventListener('input',()=>updateStyle({textColor:textColor.value}));bgColor.addEventListener('input',()=>updateStyle({bgColor:bgColor.value}));
 bold.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({fontWeight:styleOf(x.data).fontWeight==='700'?'400':'700'})});italic.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({fontStyle:styleOf(x.data).fontStyle==='italic'?'normal':'italic'})});under.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({textDecoration:styleOf(x.data).textDecoration==='underline'?'none':'underline'})});root.querySelectorAll('[data-align]').forEach(b=>b.addEventListener('click',()=>updateStyle({textAlign:b.dataset.align})));
 
+
+addInputBtn.addEventListener('click',()=>{const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();ensureIO(item);item.data.inputs.push('Ny input');renderNodeIO(item);persist();refreshControls();});
+addOutputBtn.addEventListener('click',()=>{const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();ensureIO(item);item.data.outputs.push('Ny output');renderNodeIO(item);persist();refreshControls();});
+
 if(!loadLocal()){processes[starter.id]=clone(starter);currentId=starter.id}
 openProcess(currentId);renderProcesses();refreshControls();msg('Klar');
 })();
 </script>
 </div>
 """
+
+# Google OAuth callback
+if google_docs.configured(st) and st.query_params.get("code") and not st.session_state.get("google_token"):
+    try:
+        st.session_state["google_token"] = google_docs.exchange(st, st.query_params["code"])
+        st.query_params.clear()
+        st.toast("Google-kontot är anslutet.")
+    except Exception as exc:
+        st.error(f"Google-inloggningen misslyckades: {exc}")
+
+with st.expander("Google Docs", expanded=False):
+    if not google_docs.configured(st):
+        st.info("Lägg in Google OAuth-uppgifter i Streamlit Secrets för att aktivera direkt skapande av Google Docs.")
+        st.code('[google_oauth]\nclient_id = "..."\\nclient_secret = "..."\\nredirect_uri = "https://DIN-APP.streamlit.app"', language="toml")
+    elif not google_docs.creds(st):
+        st.link_button("Anslut Google-konto", google_docs.auth_url(st))
+    else:
+        st.success("Google-kontot är anslutet.")
+        title = st.text_input("Dokumentnamn", value="Maplini process")
+        body = st.text_area("Text till Google Doc", value="Dokument skapat från Maplini.", height=80)
+        if st.button("Skapa Google Doc"):
+            try:
+                doc_id = google_docs.create_doc(st, title, body)
+                st.success("Google Doc skapat.")
+                st.link_button("Öppna dokumentet", f"https://docs.google.com/document/d/{doc_id}/edit")
+            except Exception as exc:
+                st.error(f"Kunde inte skapa Google Doc: {exc}")
+
 html = html.replace("__MAPLINI_LOGO__", f"data:image/png;base64,{_LOGO_B64}")
 components.html(html, height=1000, scrolling=True)
