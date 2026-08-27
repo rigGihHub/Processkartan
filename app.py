@@ -5,12 +5,12 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.7.0"
+APP_VERSION = "0.7.1"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
 _SUPABASE_URL = _SUPABASE.get("url", "")
-_SUPABASE_ANON_KEY = _SUPABASE.get("anon_key", "")
+_SUPABASE_ANON_KEY = _SUPABASE.get("publishable_key", _SUPABASE.get("anon_key", ""))
 _PUBLIC_APP_URL = st.secrets.get("app", {}).get("public_url", "https://processkartan.streamlit.app")
 _CLOUD_ENABLED = bool(_SUPABASE_URL and _SUPABASE_ANON_KEY)
 
@@ -187,6 +187,8 @@ html = r"""
       </div>
       <div id="p48-cloud-badge" class="p48-cloud-badge off">Lokal lagring</div>
       <div id="p48-cloud-help" class="p48-small">Supabase är inte konfigurerat.</div>
+      <div id="p48-auth-error" class="p48-small" style="display:none;margin-top:7px;padding:7px;border-radius:7px;background:#fff1ef;color:#8c3029;border:1px solid #efc6c1"></div>
+      <button type="button" class="p48-mini" id="p48-test-supabase" style="width:100%;margin-top:7px">Testa Supabase-anslutning</button>
     </div>
     <div class="p48-section">
       <div class="p48-title">Sparade processer</div>
@@ -262,6 +264,7 @@ const emailInput=root.querySelector('#p48-email'),passwordInput=root.querySelect
 const loginBtn=root.querySelector('#p48-login'),signupBtn=root.querySelector('#p48-signup'),logoutBtn=root.querySelector('#p48-logout');
 const signedOut=root.querySelector('#p48-account-signedout'),signedIn=root.querySelector('#p48-account-signedin'),userEmail=root.querySelector('#p48-user-email');
 const cloudBadge=root.querySelector('#p48-cloud-badge'),cloudHelp=root.querySelector('#p48-cloud-help');
+const authError=root.querySelector('#p48-auth-error'),testSupabaseBtn=root.querySelector('#p48-test-supabase');
 const cloudSaveBtn=root.querySelector('#p48-cloud-save'),shareBtn=root.querySelector('#p48-share'),shareBox=root.querySelector('#p48-sharebox'),shareUrlInput=root.querySelector('#p48-share-url'),copyShareBtn=root.querySelector('#p48-copy-share');
 const marquee=root.querySelector('#p48-marquee');
 const selectToolBtn=root.querySelector('#p48-select-tool');
@@ -292,16 +295,125 @@ function updateAccountUi(){
 }
 function loadCloudSession(){try{cloudSession=JSON.parse(localStorage.getItem(cloudKey())||'null')}catch(e){cloudSession=null}updateAccountUi()}
 function saveCloudSession(v){cloudSession=v||null;try{cloudSession?localStorage.setItem(cloudKey(),JSON.stringify(cloudSession)):localStorage.removeItem(cloudKey())}catch(e){}updateAccountUi()}
-async function sb(path,opt={},auth=true){
- if(!CLOUD_ENABLED)throw new Error('Supabase saknas');
- const headers=Object.assign({'apikey':SUPABASE_ANON_KEY,'Content-Type':'application/json'},opt.headers||{});
- if(auth&&cloudSession?.access_token)headers.Authorization='Bearer '+cloudSession.access_token;
- const r=await fetch(SUPABASE_URL+path,Object.assign({},opt,{headers})),raw=await r.text();let d=null;try{d=raw?JSON.parse(raw):null}catch(e){d=raw}
- if(!r.ok)throw new Error(d?.msg||d?.message||d?.error_description||String(d||r.status));return d;
+function clearAuthError(){authError.style.display='none';authError.textContent=''}
+function showAuthError(prefix,err){
+  const detail=(err&&err.message)?err.message:String(err||'Okänt fel');
+  authError.textContent=prefix+': '+detail;
+  authError.style.display='block';
 }
-async function signIn(){try{const email=emailInput.value.trim(),password=passwordInput.value;if(!email||!password)return msg('Fyll i e-post och lösenord');const d=await sb('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})},false);saveCloudSession(d);msg('Inloggad');await loadCloudProcesses()}catch(e){console.error(e);msg('Inloggning misslyckades')}}
-async function signUp(){try{const email=emailInput.value.trim(),password=passwordInput.value;if(!email||password.length<6)return msg('Minst 6 tecken krävs');const d=await sb('/auth/v1/signup',{method:'POST',body:JSON.stringify({email,password})},false);if(d.access_token)saveCloudSession(d);msg(d.access_token?'Konto skapat':'Kontrollera e-posten')}catch(e){console.error(e);msg('Kunde inte skapa konto')}}
-function signOut(){saveCloudSession(null);msg('Utloggad')}
+function friendlyAuthMessage(err){
+  const t=((err&&err.message)||String(err||'')).toLowerCase();
+  if(t.includes('already registered')||t.includes('already exists')||t.includes('user already'))return 'Kontot finns redan. Använd Logga in.';
+  if(t.includes('invalid login credentials'))return 'Fel e-postadress eller lösenord.';
+  if(t.includes('email not confirmed'))return 'E-postadressen är inte bekräftad ännu.';
+  if(t.includes('signup is disabled'))return 'Registrering är avstängd i Supabase Authentication.';
+  if(t.includes('invalid api key')||t.includes('apikey'))return 'Den publika Supabase-nyckeln verkar vara fel.';
+  if(t.includes('failed to fetch')||t.includes('network'))return 'Maplini kunde inte nå Supabase. Kontrollera Project URL och internetanslutning.';
+  return (err&&err.message)?err.message:String(err||'Okänt fel');
+}
+async function sb(path,opt={},auth=true){
+  if(!CLOUD_ENABLED)throw new Error('Supabase är inte konfigurerat i Streamlit Secrets.');
+  const headers=Object.assign({
+    'apikey':SUPABASE_ANON_KEY,
+    'Accept':'application/json',
+    'Content-Type':'application/json'
+  },opt.headers||{});
+  if(auth&&cloudSession?.access_token)headers.Authorization='Bearer '+cloudSession.access_token;
+  const r=await fetch(SUPABASE_URL+path,Object.assign({},opt,{headers}));
+  const raw=await r.text();
+  let d=null;
+  try{d=raw?JSON.parse(raw):null}catch(e){d=raw}
+  if(!r.ok){
+    const detail=(d&&(
+      d.msg||d.message||d.error_description||d.error||
+      (Array.isArray(d.errors)&&d.errors.map(x=>x.message||x).join(', '))
+    ))||raw||('HTTP '+r.status);
+    const err=new Error(detail);
+    err.status=r.status;
+    err.payload=d;
+    throw err;
+  }
+  return d;
+}
+async function testSupabaseConnection(){
+  clearAuthError();
+  if(!CLOUD_ENABLED){showAuthError('Supabase-test',new Error('Supabase saknas i Streamlit Secrets.'));return}
+  try{
+    await sb('/auth/v1/settings',{method:'GET'},false);
+    cloudBadge.className='p48-cloud-badge';
+    cloudBadge.textContent='Supabase nåbar';
+    cloudHelp.textContent='Project URL och publishable key fungerar.';
+    msg('Supabase-anslutning OK');
+  }catch(e){
+    console.error(e);
+    showAuthError('Supabase-test',new Error(friendlyAuthMessage(e)));
+    msg('Supabase-test misslyckades');
+  }
+}
+async function validateSession(){
+  if(!cloudSession?.access_token)return false;
+  try{
+    const u=await sb('/auth/v1/user',{method:'GET'},true);
+    if(u&&u.id){
+      cloudSession.user=u;
+      saveCloudSession(cloudSession);
+      return true;
+    }
+  }catch(e){
+    console.warn('Session invalid',e);
+    saveCloudSession(null);
+  }
+  return false;
+}
+async function signIn(){
+  clearAuthError();
+  const email=emailInput.value.trim(),password=passwordInput.value;
+  if(!email||!password){msg('Fyll i e-post och lösenord');return}
+  try{
+    const d=await sb('/auth/v1/token?grant_type=password',{
+      method:'POST',
+      body:JSON.stringify({email,password})
+    },false);
+    if(!d?.access_token)throw new Error('Supabase returnerade ingen access token.');
+    saveCloudSession(d);
+    await validateSession();
+    msg('Inloggad');
+    await loadCloudProcesses();
+  }catch(e){
+    console.error(e);
+    const text=friendlyAuthMessage(e);
+    showAuthError('Inloggning',new Error(text));
+    msg(text);
+  }
+}
+async function signUp(){
+  clearAuthError();
+  const email=emailInput.value.trim(),password=passwordInput.value;
+  if(!email||password.length<6){msg('Ange e-post och minst 6 tecken');return}
+  try{
+    const d=await sb('/auth/v1/signup',{
+      method:'POST',
+      body:JSON.stringify({email,password})
+    },false);
+    if(d?.access_token){
+      saveCloudSession(d);
+      await validateSession();
+      msg('Konto skapat och inloggat');
+      await loadCloudProcesses();
+    }else if(d?.user){
+      msg('Konto skapat – kontrollera din e-post innan du loggar in');
+      cloudHelp.textContent='Konto skapat. Bekräfta e-postadressen om Supabase kräver det.';
+    }else{
+      throw new Error('Supabase skapade inget konto och returnerade ingen användare.');
+    }
+  }catch(e){
+    console.error(e);
+    const text=friendlyAuthMessage(e);
+    showAuthError('Skapa konto',new Error(text));
+    msg(text);
+  }
+}
+function signOut(){clearAuthError();saveCloudSession(null);msg('Utloggad')}
 function ownerId(){return cloudSession?.user?.id||null}
 async function saveCurrentToCloud(){if(!ownerId())throw new Error('Logga in först');persist();await sb('/rest/v1/processes?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:currentId,owner_id:ownerId(),name:state().name,data:state(),updated_at:new Date().toISOString()})});msg('Sparad i molnet')}
 async function loadCloudProcesses(){if(!ownerId())return;try{const rows=await sb('/rest/v1/processes?select=id,name,data&order=updated_at.desc');for(const row of(rows||[]))if(row.data&&row.id)processes[row.id]=Object.assign({},row.data,{id:row.id,name:row.name||row.data.name});saveLocal();renderProcesses()}catch(e){console.error(e);msg('Kunde inte läsa molnet')}}
@@ -833,7 +945,8 @@ root.querySelector('#p48-new').addEventListener('click',newProcess);
 root.querySelector('#p48-save').addEventListener('click',async()=>{persist(true);if(ownerId())try{await saveCurrentToCloud()}catch(e){console.error(e)}});
 cloudSaveBtn.addEventListener('click',async()=>{try{await saveCurrentToCloud()}catch(e){console.error(e);msg('Molnsparning misslyckades')}});
 shareBtn.addEventListener('click',shareCurrent);copyShareBtn.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(shareUrlInput.value);msg('Länk kopierad')}catch(e){shareUrlInput.select();document.execCommand('copy')}});
-loginBtn.addEventListener('click',signIn);signupBtn.addEventListener('click',signUp);logoutBtn.addEventListener('click',signOut);root.querySelector('#p48-pdf').addEventListener('click',exportPdf);root.querySelector('#p48-doc').addEventListener('click',exportDoc);
+loginBtn.addEventListener('click',signIn);signupBtn.addEventListener('click',signUp);logoutBtn.addEventListener('click',signOut);
+testSupabaseBtn.addEventListener('click',testSupabaseConnection);root.querySelector('#p48-pdf').addEventListener('click',exportPdf);root.querySelector('#p48-doc').addEventListener('click',exportDoc);
 root.querySelector('#p48-undo').addEventListener('click',()=>{if(!undo.length)return;redo.push(JSON.stringify(state()));restore(undo.pop());persist()});
 root.querySelector('#p48-redo').addEventListener('click',()=>{if(!redo.length)return;undo.push(JSON.stringify(state()));restore(redo.pop());persist()});
 root.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;if(e.key==='Delete'){if(selectedIds.size>1)deleteSelectedMany();else deleteSelected()}});
@@ -851,7 +964,10 @@ const SHARE_TOKEN="__SHARE_TOKEN__";
  if(SHARE_TOKEN&&await loadShared(SHARE_TOKEN))return;
  if(!loadLocal()){processes[starter.id]=clone(starter);currentId=starter.id}
  openProcess(currentId);renderProcesses();refreshControls();updateSelectionUi();updateAccountUi();msg('Klar');
- if(ownerId())await loadCloudProcesses();
+ if(ownerId()){
+   const valid=await validateSession();
+   if(valid)await loadCloudProcesses();
+ }
 })();
 })();
 </script>
