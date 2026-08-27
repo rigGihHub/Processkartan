@@ -1,20 +1,19 @@
-# Processkartan v0.4.4
+# Processkartan v0.4.7
 
-Hotfix/rebuild efter att v0.4.2–v0.4.3 hade trasig JavaScript-logik.
+## Nytt
+- All text hålls inne i rutorna.
+- Rutorna växer automatiskt efter textens längd.
+- Långa ord radbryts i stället för att sticka utanför rutan.
+- Formateringspanel i vänsterkolumnen för markerad ruta.
+- Val av typsnitt.
+- Textstorlek 10–36 px.
+- Textfärg.
+- Bakgrundsfärg på rutan.
+- Fet, kursiv och understruken text.
+- Vänster-, center- och högerjustering.
+- Formateringen sparas tillsammans med processen.
+- Sparade processer ligger kvar klickbara i vänsterkolumnen.
+- Google Docs-export (.docx) finns kvar.
 
-## Testat
-- Python-syntax
-- JavaScript-syntax via Node.js
-- Inga borttagna UI-element refereras från JavaScript
-
-## Funktioner
-- Drag-and-drop av Start, Aktivitet, Beslut, Slut, Delprocess, Grupp och Anteckning
-- Flytta rutor
-- Raka pilar från fyra anslutningspunkter
-- Redigera text
-- Namnge process
-- Ny tom process
-- Spara process i webbläsarens lokala lagring
-- Ångra/Gör om
-- Google Docs-export
-- Delete för markerad ruta
+## Uppdatera
+Packa upp ZIP → GitHub Desktop → Show in Explorer → ersätt filer → Commit to main → Push origin.

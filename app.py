@@ -8,7 +8,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-APP_VERSION = "0.4.4"
+APP_VERSION = "0.4.5"
 
 st.markdown("""
 <style>
@@ -72,7 +72,7 @@ html = r"""
   <button type="button" class="pk-btn" id="pk-undo">↶ Ångra</button>
   <button type="button" class="pk-btn" id="pk-redo">↷ Gör om</button>
   <span class="pk-spacer"></span>
-  <button type="button" class="pk-btn primary" id="pk-doc">Exportera till Google Docs</button>
+  <button type="button" class="pk-btn primary" id="pk-doc">Exportera till Google Docs (.docx)</button>
   <span id="pk-status" class="pk-status" aria-live="polite"></span>
 </div>
 
@@ -496,41 +496,173 @@ html = r"""
     setStatus('Ny process skapad');
   }
 
+  function xmlEscape(value) {
+    return String(value ?? '').replace(/[&<>"]/g, ch => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'
+    }[ch]));
+  }
+
+  function crc32(bytes) {
+    let crc = 0 ^ (-1);
+    for (let i = 0; i < bytes.length; i++) {
+      crc = crc ^ bytes[i];
+      for (let j = 0; j < 8; j++) {
+        crc = (crc >>> 1) ^ (0xEDB88320 & -(crc & 1));
+      }
+    }
+    return (crc ^ (-1)) >>> 0;
+  }
+
+  function u16(n) {
+    return new Uint8Array([n & 255, (n >>> 8) & 255]);
+  }
+
+  function u32(n) {
+    return new Uint8Array([
+      n & 255,
+      (n >>> 8) & 255,
+      (n >>> 16) & 255,
+      (n >>> 24) & 255
+    ]);
+  }
+
+  function concatBytes(parts) {
+    const total = parts.reduce((sum, p) => sum + p.length, 0);
+    const out = new Uint8Array(total);
+    let offset = 0;
+    for (const part of parts) {
+      out.set(part, offset);
+      offset += part.length;
+    }
+    return out;
+  }
+
+  function makeZip(files) {
+    const encoder = new TextEncoder();
+    const locals = [];
+    const centrals = [];
+    let offset = 0;
+
+    for (const file of files) {
+      const nameBytes = encoder.encode(file.name);
+      const dataBytes = typeof file.data === 'string' ? encoder.encode(file.data) : file.data;
+      const crc = crc32(dataBytes);
+
+      const local = concatBytes([
+        u32(0x04034b50), u16(20), u16(0), u16(0), u16(0), u16(0),
+        u32(crc), u32(dataBytes.length), u32(dataBytes.length),
+        u16(nameBytes.length), u16(0), nameBytes, dataBytes
+      ]);
+      locals.push(local);
+
+      const central = concatBytes([
+        u32(0x02014b50), u16(20), u16(20), u16(0), u16(0), u16(0), u16(0),
+        u32(crc), u32(dataBytes.length), u32(dataBytes.length),
+        u16(nameBytes.length), u16(0), u16(0), u16(0), u16(0),
+        u32(0), u32(offset), nameBytes
+      ]);
+      centrals.push(central);
+      offset += local.length;
+    }
+
+    const centralBytes = concatBytes(centrals);
+    const end = concatBytes([
+      u32(0x06054b50), u16(0), u16(0),
+      u16(files.length), u16(files.length),
+      u32(centralBytes.length), u32(offset), u16(0)
+    ]);
+
+    return concatBytes([...locals, centralBytes, end]);
+  }
+
+  function paragraph(text, bold=false) {
+    const safe = xmlEscape(text);
+    const runProps = bold ? '<w:rPr><w:b/></w:rPr>' : '';
+    return `<w:p><w:r>${runProps}<w:t xml:space="preserve">${safe}</w:t></w:r></w:p>`;
+  }
+
+  function tableCell(text, bold=false) {
+    const safe = xmlEscape(text);
+    const runProps = bold ? '<w:rPr><w:b/></w:rPr>' : '';
+    return `<w:tc><w:tcPr><w:tcW w:w="0" w:type="auto"/></w:tcPr><w:p><w:r>${runProps}<w:t xml:space="preserve">${safe}</w:t></w:r></w:p></w:tc>`;
+  }
+
   function exportGoogleDoc() {
     persistCurrent();
     const state = currentState();
     const ordered = Array.from(nodes.values()).sort((a,b) => a.data.y - b.data.y || a.data.x - b.data.x);
-    const esc = value => String(value ?? '').replace(/[&<>"]/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
     const typeName = {
-      start:'Start',process:'Aktivitet',decision:'Beslut',end:'Slut',
-      subprocess:'Delprocess',group:'Grupp / område',note:'Anteckning'
+      start:'Start', process:'Aktivitet', decision:'Beslut', end:'Slut',
+      subprocess:'Delprocess', group:'Grupp / område', note:'Anteckning'
     };
-    const rows = ordered.map((item, index) =>
-      `<tr><td>${index+1}</td><td>${esc(item.data.text)}</td><td>${esc(typeName[item.data.type] || item.data.type)}</td></tr>`
-    ).join('');
-    const connections = links.map(link => {
+
+    let body = paragraph(state.name, true);
+    body += paragraph('');
+    body += paragraph('Processsteg', true);
+
+    body += '<w:tbl><w:tblPr><w:tblBorders>' +
+      '<w:top w:val="single" w:sz="4" w:color="999999"/>' +
+      '<w:left w:val="single" w:sz="4" w:color="999999"/>' +
+      '<w:bottom w:val="single" w:sz="4" w:color="999999"/>' +
+      '<w:right w:val="single" w:sz="4" w:color="999999"/>' +
+      '<w:insideH w:val="single" w:sz="4" w:color="BBBBBB"/>' +
+      '<w:insideV w:val="single" w:sz="4" w:color="BBBBBB"/>' +
+      '</w:tblBorders></w:tblPr>';
+
+    body += '<w:tr>' + tableCell('#', true) + tableCell('Steg', true) + tableCell('Typ', true) + '</w:tr>';
+    ordered.forEach((item, index) => {
+      body += '<w:tr>' +
+        tableCell(String(index + 1)) +
+        tableCell(item.data.text) +
+        tableCell(typeName[item.data.type] || item.data.type) +
+        '</w:tr>';
+    });
+    body += '</w:tbl>';
+
+    body += paragraph('');
+    body += paragraph('Kopplingar', true);
+    links.forEach(link => {
       const a = nodes.get(link[0])?.data.text || link[0];
       const b = nodes.get(link[1])?.data.text || link[1];
-      return `<li>${esc(a)} → ${esc(b)}</li>`;
-    }).join('');
+      body += paragraph('• ' + a + ' → ' + b);
+    });
 
-    const doc = `<!doctype html><html><head><meta charset="utf-8"><style>
-      body{font-family:Arial,sans-serif;color:#222}h1{font-size:22px}h2{font-size:16px;margin-top:24px}
-      table{border-collapse:collapse;width:100%}th,td{border:1px solid #aaa;padding:7px;font-size:10pt}th{background:#eee}
-    </style></head><body>
-      <h1>${esc(state.name)}</h1>
-      <h2>Processsteg</h2>
-      <table><tr><th>#</th><th>Steg</th><th>Typ</th></tr>${rows}</table>
-      <h2>Kopplingar</h2><ul>${connections}</ul>
-    </body></html>`;
+    const documentXml =
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+      '<w:body>' + body +
+      '<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1440" w:right="1440" w:bottom="1440" w:left="1440"/></w:sectPr>' +
+      '</w:body></w:document>';
 
-    const blob = new Blob([doc], {type:'application/msword'});
+    const contentTypes =
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">' +
+      '<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>' +
+      '<Default Extension="xml" ContentType="application/xml"/>' +
+      '<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>' +
+      '</Types>';
+
+    const rels =
+      '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
+      '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>' +
+      '</Relationships>';
+
+    const zipBytes = makeZip([
+      {name:'[Content_Types].xml', data:contentTypes},
+      {name:'_rels/.rels', data:rels},
+      {name:'word/document.xml', data:documentXml}
+    ]);
+
+    const blob = new Blob([zipBytes], {
+      type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
-    a.download = (state.name.replace(/[^a-z0-9åäö_-]+/gi,'_') || 'Processkartan') + '_Google_Docs.doc';
+    a.download = (state.name.replace(/[^a-z0-9åäö_-]+/gi,'_') || 'Processkartan') + '.docx';
     a.click();
     setTimeout(() => URL.revokeObjectURL(a.href), 1200);
-    setStatus('Google Docs-export skapad');
+    setStatus('DOCX skapad');
   }
 
   root.querySelectorAll('.pk-item').forEach(item => {

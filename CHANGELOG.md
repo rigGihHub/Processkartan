@@ -1,7 +1,13 @@
 # Changelog
 
-## v0.4.4
-- Ren ombyggnad av klientkoden.
-- Fixar att drag-and-drop och Spara inte fungerade i v0.4.2/v0.4.3.
-- JavaScript-syntax kontrolleras separat före leverans.
-- Behåller det förenklade gränssnittet.
+## v0.4.7
+- Automatisk textanpassning i processrutorna.
+- Dynamisk rutstorlek.
+- Ny formateringspanel.
+- Typsnitt, textstorlek, textfärg och bakgrundsfärg.
+- Fet/kursiv/understruken text.
+- Textjustering vänster/center/höger.
+- Formatering sparas per ruta.
+
+## v0.4.6
+- Sparade processer i vänsterkolumnen.
