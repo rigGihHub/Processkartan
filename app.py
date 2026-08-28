@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.7.1"
+APP_VERSION = "0.8.1"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -83,6 +83,13 @@ html = r"""
 .p48-empty{font-size:11px;color:#75818d;line-height:1.4}
 .p48-scroll{overflow:auto;background:#e9eef3}
 #p48-canvas{position:relative;width:2400px;height:1400px;background:#fff;touch-action:none;background-image:radial-gradient(#dce2e8 1px,transparent 1px);background-size:20px 20px}
+.p48-print-frame{position:absolute;left:40px;top:40px;width:1123px;height:794px;border:2px dashed rgba(31,111,85,.55);background:rgba(31,111,85,.025);pointer-events:none;z-index:1;display:none}
+.p48-print-frame::before{content:"PDF A3 liggande";position:absolute;left:10px;top:8px;font:800 11px system-ui;color:#1f6f55;background:#fff;padding:3px 6px;border-radius:5px}
+.p48-print-frame.on{display:block}
+.p48-workspace{border:1px solid #d8e0e7;background:#fff;border-radius:10px;padding:9px;margin-bottom:12px}
+.p48-workspace select,.p48-workspace input{width:100%;border:1px solid #cfd7df;border-radius:7px;padding:7px 8px;font:12px system-ui;margin-top:5px}
+.p48-role{display:inline-flex;font-size:10px;font-weight:800;padding:3px 7px;border-radius:999px;background:#eef3f7;color:#425466;margin-top:5px}
+
 .p48-marquee{position:absolute;border:2px dashed #2c7be5;background:rgba(44,123,229,.10);z-index:20;pointer-events:none;display:none}
 .p48-node.multi-selected{outline:3px solid #2c7be5;outline-offset:3px}
 .p48-node.decision.multi-selected{outline:none}
@@ -161,16 +168,25 @@ html = r"""
   <div class="p48-sharebox" id="p48-sharebox"><input id="p48-share-url" readonly><button type="button" class="p48-mini" id="p48-copy-share">Kopiera länk</button></div>
   <button type="button" class="p48-btn" id="p48-undo">↶ Ångra</button>
   <button type="button" class="p48-btn" id="p48-redo">↷ Gör om</button>
+  <button type="button" class="p48-btn" id="p48-print-preview">Visa PDF-yta</button>
   <button type="button" class="p48-btn" id="p48-select-tool">Markera område</button>
   <button type="button" class="p48-btn" id="p48-delete-selection" disabled>Ta bort markerat</button>
   <span class="p48-spacer"></span>
   <button type="button" class="p48-btn primary" id="p48-pdf">Exportera PDF</button>
   <button type="button" class="p48-btn" id="p48-doc">Exportera DOCX</button>
+  <button type="button" class="p48-btn" id="p48-sheets">Exportera Google Sheets</button>
   <span id="p48-status" class="p48-status"></span>
 </div>
 
 <div class="p48-body">
   <aside class="p48-side">
+    <div class="p48-workspace">
+      <div class="p48-title">Workspace</div>
+      <select id="p48-workspace-select"><option value="">Personligt</option></select>
+      <input id="p48-workspace-name" placeholder="Nytt workspace">
+      <button type="button" class="p48-mini" id="p48-create-workspace" style="width:100%;margin-top:6px">Skapa workspace</button>
+      <div id="p48-role" class="p48-role">Owner</div>
+    </div>
     <div class="p48-account">
       <div class="p48-title">Konto & moln</div>
       <div id="p48-account-signedout">
@@ -242,7 +258,7 @@ html = r"""
   </aside>
 
   <main class="p48-scroll" id="p48-scroll">
-    <div id="p48-canvas">
+    <div id="p48-canvas"><div id="p48-print-frame" class="p48-print-frame"></div>
       <div id="p48-marquee" class="p48-marquee"></div>
       <svg id="p48-svg" viewBox="0 0 2400 1400">
         <defs><marker id="p48-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0,0 10,4 0,8" fill="#687584"></polygon></marker></defs>
@@ -264,6 +280,8 @@ const emailInput=root.querySelector('#p48-email'),passwordInput=root.querySelect
 const loginBtn=root.querySelector('#p48-login'),signupBtn=root.querySelector('#p48-signup'),logoutBtn=root.querySelector('#p48-logout');
 const signedOut=root.querySelector('#p48-account-signedout'),signedIn=root.querySelector('#p48-account-signedin'),userEmail=root.querySelector('#p48-user-email');
 const cloudBadge=root.querySelector('#p48-cloud-badge'),cloudHelp=root.querySelector('#p48-cloud-help');
+const printPreviewBtn=root.querySelector('#p48-print-preview'),printFrame=root.querySelector('#p48-print-frame');
+const workspaceSelect=root.querySelector('#p48-workspace-select'),workspaceName=root.querySelector('#p48-workspace-name'),createWorkspaceBtn=root.querySelector('#p48-create-workspace'),roleBadge=root.querySelector('#p48-role');
 const authError=root.querySelector('#p48-auth-error'),testSupabaseBtn=root.querySelector('#p48-test-supabase');
 const cloudSaveBtn=root.querySelector('#p48-cloud-save'),shareBtn=root.querySelector('#p48-share'),shareBox=root.querySelector('#p48-sharebox'),shareUrlInput=root.querySelector('#p48-share-url'),copyShareBtn=root.querySelector('#p48-copy-share');
 const marquee=root.querySelector('#p48-marquee');
@@ -276,6 +294,7 @@ let nodes=new Map(),links=[],selectedId=null,selectedIds=new Set(),selectionMode
 const SUPABASE_URL="__SUPABASE_URL__", SUPABASE_ANON_KEY="__SUPABASE_ANON_KEY__", PUBLIC_APP_URL="__PUBLIC_APP_URL__";
 const CLOUD_ENABLED=SUPABASE_URL.length>0&&SUPABASE_ANON_KEY.length>0;
 let cloudSession=null,sharedView=false;
+let currentWorkspaceId=null,currentRole='owner',printPreview=false;
 
 
 const starter={id:'proc-1',name:'Exempel – upphandlingsprocess',nodes:[
@@ -415,12 +434,54 @@ async function signUp(){
 }
 function signOut(){clearAuthError();saveCloudSession(null);msg('Utloggad')}
 function ownerId(){return cloudSession?.user?.id||null}
-async function saveCurrentToCloud(){if(!ownerId())throw new Error('Logga in först');persist();await sb('/rest/v1/processes?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:currentId,owner_id:ownerId(),name:state().name,data:state(),updated_at:new Date().toISOString()})});msg('Sparad i molnet')}
-async function loadCloudProcesses(){if(!ownerId())return;try{const rows=await sb('/rest/v1/processes?select=id,name,data&order=updated_at.desc');for(const row of(rows||[]))if(row.data&&row.id)processes[row.id]=Object.assign({},row.data,{id:row.id,name:row.name||row.data.name});saveLocal();renderProcesses()}catch(e){console.error(e);msg('Kunde inte läsa molnet')}}
+async function saveCurrentToCloud(){if(!ownerId())throw new Error('Logga in först');persist();await sb('/rest/v1/processes?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:currentId,owner_id:ownerId(),workspace_id:currentWorkspaceId,name:state().name,data:state(),updated_at:new Date().toISOString()})});msg('Sparad i molnet')}
+async function loadCloudProcesses(){if(!ownerId())return;try{const q=currentWorkspaceId
+      ?('/rest/v1/processes?select=id,name,data&workspace_id=eq.'+encodeURIComponent(currentWorkspaceId)+'&order=updated_at.desc')
+      :('/rest/v1/processes?select=id,name,data&workspace_id=is.null&order=updated_at.desc');
+    const rows=await sb(q);for(const row of(rows||[]))if(row.data&&row.id)processes[row.id]=Object.assign({},row.data,{id:row.id,name:row.name||row.data.name});saveLocal();renderProcesses()}catch(e){console.error(e);msg('Kunde inte läsa molnet')}}
 function shareToken(){return crypto?.randomUUID?crypto.randomUUID().replace(/-/g,''):Math.random().toString(36).slice(2)+Date.now().toString(36)}
 async function shareCurrent(){try{await saveCurrentToCloud();const rows=await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(currentId)+'&select=share_token');const token=rows?.[0]?.share_token||shareToken();await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(currentId),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({share_token:token,share_mode:'view'})});shareUrlInput.value=PUBLIC_APP_URL.replace(/\/$/,'')+'?share='+token;shareBox.style.display='block';msg('Delningslänk skapad')}catch(e){console.error(e);msg('Delning misslyckades')}}
 async function loadShared(token){if(!CLOUD_ENABLED||!token)return false;try{const rows=await sb('/rest/v1/processes?share_token=eq.'+encodeURIComponent(token)+'&share_mode=eq.view&select=id,name,data',{},false);if(rows?.length){const row=rows[0];sharedView=true;currentId=row.id;processes={[row.id]:Object.assign({},row.data,{id:row.id,name:row.name||row.data.name})};restore(processes[row.id]);renderProcesses();root.querySelectorAll('.p48-item,.p48-format input,.p48-format select,.p48-format button,.p48-step-io input,.p48-step-io button').forEach(el=>{el.style.pointerEvents='none';el.style.opacity='.5'});root.querySelector('#p48-new').disabled=true;root.querySelector('#p48-save').disabled=true;updateAccountUi();msg('Delad process – endast visning');return true}}catch(e){console.error(e)}return false}
 async function deleteCloud(id){if(ownerId())try{await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:{Prefer:'return=minimal'}})}catch(e){console.error(e)}}
+
+
+function canEdit(){return !sharedView&&(currentRole==='owner'||currentRole==='editor')}
+function applyRoleUi(){
+  roleBadge.textContent=currentRole.charAt(0).toUpperCase()+currentRole.slice(1);
+  const editable=canEdit();
+  root.querySelectorAll('.p48-item,.p48-format input,.p48-format select,.p48-format button,.p48-step-io input,.p48-step-io button').forEach(el=>{
+    el.style.pointerEvents=editable?'':'none';el.style.opacity=editable?'':'0.5';
+  });
+  root.querySelector('#p48-new').disabled=!editable;
+  root.querySelector('#p48-save').disabled=!editable;
+  cloudSaveBtn.disabled=!editable||!ownerId()||!CLOUD_ENABLED;
+}
+async function loadWorkspaces(){
+  if(!ownerId())return;
+  try{
+    const rows=await sb('/rest/v1/workspace_members?select=role,workspace_id,workspaces(id,name)&user_id=eq.'+encodeURIComponent(ownerId()));
+    workspaceSelect.innerHTML='<option value="">Personligt</option>';
+    for(const row of(rows||[])){if(!row.workspaces)continue;const o=document.createElement('option');o.value=row.workspace_id;o.textContent=row.workspaces.name;o.dataset.role=row.role;workspaceSelect.appendChild(o)}
+    if(currentWorkspaceId)workspaceSelect.value=currentWorkspaceId;
+  }catch(e){console.error(e)}
+}
+async function createWorkspace(){
+  if(!ownerId())return msg('Logga in först');
+  const name=workspaceName.value.trim();if(!name)return msg('Ange namn');
+  try{
+    const id=crypto?.randomUUID?crypto.randomUUID():('ws-'+Date.now());
+    await sb('/rest/v1/workspaces',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({id,name,owner_id:ownerId()})});
+    await sb('/rest/v1/workspace_members',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({workspace_id:id,user_id:ownerId(),role:'owner'})});
+    currentWorkspaceId=id;currentRole='owner';workspaceName.value='';await loadWorkspaces();workspaceSelect.value=id;applyRoleUi();msg('Workspace skapat');
+  }catch(e){console.error(e);msg('Kunde inte skapa workspace')}
+}
+workspaceSelect.addEventListener('change',()=>{
+  currentWorkspaceId=workspaceSelect.value||null;
+  const opt=workspaceSelect.selectedOptions[0];
+  currentRole=currentWorkspaceId?(opt?.dataset.role||'viewer'):'owner';
+  applyRoleUi();loadCloudProcesses();
+});
+createWorkspaceBtn.addEventListener('click',createWorkspace);
 
 function clone(v){return JSON.parse(JSON.stringify(v))}
 function uid(){return 'proc-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7)}
@@ -659,6 +720,169 @@ function mkzip(files){
   const cb=cat(centrals),end=cat([u32(0x06054b50),u16(0),u16(0),u16(files.length),u16(files.length),u32(cb.length),u32(off),u16(0)]);
   return cat([...locals,cb,end]);
 }
+
+
+function xmlEscape(v){
+  return String(v??'')
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&apos;');
+}
+function colName(n){
+  let s='';while(n>0){n--;s=String.fromCharCode(65+(n%26))+s;n=Math.floor(n/26)}return s;
+}
+function xlsxInlineCell(ref,value,style=0){
+  const v=String(value??'');
+  const preserve=/^\s|\s$|\n/.test(v)?' xml:space="preserve"':'';
+  return `<c r="${ref}" t="inlineStr"${style?` s="${style}"`:''}><is><t${preserve}>${xmlEscape(v)}</t></is></c>`;
+}
+function xlsxNumberCell(ref,value,style=0){
+  const n=Number(value);
+  return `<c r="${ref}"${style?` s="${style}"`:''}><v>${Number.isFinite(n)?n:0}</v></c>`;
+}
+function typeLabel(type){
+  return ({
+    start:'Start',
+    activity:'Aktivitet',
+    decision:'Beslut',
+    end:'Slut',
+    subprocess:'Delprocess',
+    note:'Anteckning'
+  })[type]||String(type||'');
+}
+function processRowsForSheet(){
+  const ordered=[...nodes.values()]
+    .map(item=>item.data)
+    .sort((a,b)=>((a.y||0)-(b.y||0))||((a.x||0)-(b.x||0)));
+  const nodeById=new Map(ordered.map(n=>[n.id,n]));
+  return ordered.map((d,index)=>{
+    const outgoing=links.filter(l=>l[0]===d.id).map(l=>nodeById.get(l[1])?.text||l[1]);
+    const incoming=links.filter(l=>l[1]===d.id).map(l=>nodeById.get(l[0])?.text||l[0]);
+    return [
+      index+1,
+      d.id||'',
+      typeLabel(d.type),
+      d.text||'',
+      Array.isArray(d.inputs)?d.inputs.filter(Boolean).join(' | '):'',
+      Array.isArray(d.outputs)?d.outputs.filter(Boolean).join(' | '):'',
+      outgoing.join(' | '),
+      incoming.join(' | '),
+      d.x||0,
+      d.y||0,
+      d.width||'',
+      d.height||''
+    ];
+  });
+}
+function buildSheetXml(headers,rows,widths){
+  const rowXml=[];
+  rowXml.push(`<row r="1" ht="24" customHeight="1">${headers.map((h,i)=>xlsxInlineCell(colName(i+1)+'1',h,1)).join('')}</row>`);
+  rows.forEach((row,ri)=>{
+    const r=ri+2;
+    const cells=row.map((v,ci)=>{
+      const ref=colName(ci+1)+r;
+      return (typeof v==='number')?xlsxNumberCell(ref,v,0):xlsxInlineCell(ref,v,0);
+    }).join('');
+    rowXml.push(`<row r="${r}">${cells}</row>`);
+  });
+  const cols=(widths||headers.map(()=>18)).map((w,i)=>`<col min="${i+1}" max="${i+1}" width="${w}" customWidth="1"/>`).join('');
+  const last=colName(headers.length)+(rows.length+1);
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<dimension ref="A1:${last}"/>
+<sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>
+<cols>${cols}</cols>
+<sheetData>${rowXml.join('')}</sheetData>
+<autoFilter ref="A1:${last}"/>
+</worksheet>`;
+}
+function buildGoogleSheetsXlsx(){
+  persist();
+  const s=state();
+  const stepHeaders=['Ordning','ID','Typ','Text','Inputs','Outputs','Nästa steg','Föregående steg','X','Y','Bredd','Höjd'];
+  const stepRows=processRowsForSheet();
+  const nodeMap=new Map((s.nodes||[]).map(n=>[n.id,n]));
+  const linkHeaders=['Från ID','Från steg','Till ID','Till steg','Anslutning'];
+  const linkRows=(s.links||[]).map(l=>[
+    l[0],
+    nodeMap.get(l[0])?.text||'',
+    l[1],
+    nodeMap.get(l[1])?.text||'',
+    l[2]||'right'
+  ]);
+
+  const sheet1=buildSheetXml(stepHeaders,stepRows,[9,12,14,36,28,28,30,30,10,10,10,10]);
+  const sheet2=buildSheetXml(linkHeaders,linkRows,[14,34,14,34,14]);
+
+  const contentTypes=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+<Default Extension="xml" ContentType="application/xml"/>
+<Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+<Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+<Override PartName="/xl/worksheets/sheet2.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+</Types>`;
+  const rootRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`;
+  const workbook=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+<sheets>
+<sheet name="Processsteg" sheetId="1" r:id="rId1"/>
+<sheet name="Kopplingar" sheetId="2" r:id="rId2"/>
+</sheets>
+</workbook>`;
+  const workbookRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet2.xml"/>
+<Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`;
+  const styles=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<fonts count="2">
+<font><sz val="11"/><name val="Arial"/></font>
+<font><b/><color rgb="FFFFFFFF"/><sz val="11"/><name val="Arial"/></font>
+</fonts>
+<fills count="3">
+<fill><patternFill patternType="none"/></fill>
+<fill><patternFill patternType="gray125"/></fill>
+<fill><patternFill patternType="solid"><fgColor rgb="FF1F6F55"/><bgColor indexed="64"/></patternFill></fill>
+</fills>
+<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>
+<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+<cellXfs count="2">
+<xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+<xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/>
+</cellXfs>
+<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>`;
+
+  return mkzip([
+    {name:'[Content_Types].xml',data:contentTypes},
+    {name:'_rels/.rels',data:rootRels},
+    {name:'xl/workbook.xml',data:workbook},
+    {name:'xl/_rels/workbook.xml.rels',data:workbookRels},
+    {name:'xl/styles.xml',data:styles},
+    {name:'xl/worksheets/sheet1.xml',data:sheet1},
+    {name:'xl/worksheets/sheet2.xml',data:sheet2}
+  ]);
+}
+function exportGoogleSheets(){
+  try{
+    const bytes=buildGoogleSheetsXlsx();
+    downloadBytes(
+      bytes,
+      cleanFileName(state().name)+'_Google_Sheets.xlsx',
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    );
+    msg('Google Sheets-fil skapad');
+  }catch(err){
+    console.error(err);msg('Google Sheets-export misslyckades');
+  }
+}
+
 
 function cleanFileName(name){
   return (String(name||'Maplini_process').replace(/[^a-z0-9åäö_-]+/gi,'_').replace(/^_+|_+$/g,'')||'Maplini_process');
@@ -946,7 +1170,12 @@ root.querySelector('#p48-save').addEventListener('click',async()=>{persist(true)
 cloudSaveBtn.addEventListener('click',async()=>{try{await saveCurrentToCloud()}catch(e){console.error(e);msg('Molnsparning misslyckades')}});
 shareBtn.addEventListener('click',shareCurrent);copyShareBtn.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(shareUrlInput.value);msg('Länk kopierad')}catch(e){shareUrlInput.select();document.execCommand('copy')}});
 loginBtn.addEventListener('click',signIn);signupBtn.addEventListener('click',signUp);logoutBtn.addEventListener('click',signOut);
-testSupabaseBtn.addEventListener('click',testSupabaseConnection);root.querySelector('#p48-pdf').addEventListener('click',exportPdf);root.querySelector('#p48-doc').addEventListener('click',exportDoc);
+testSupabaseBtn.addEventListener('click',testSupabaseConnection);
+printPreviewBtn.addEventListener('click',()=>{
+  printPreview=!printPreview;printFrame.classList.toggle('on',printPreview);
+  printPreviewBtn.classList.toggle('primary',printPreview);
+  printPreviewBtn.textContent=printPreview?'Dölj PDF-yta':'Visa PDF-yta';
+});root.querySelector('#p48-pdf').addEventListener('click',exportPdf);root.querySelector('#p48-doc').addEventListener('click',exportDoc);root.querySelector('#p48-sheets').addEventListener('click',exportGoogleSheets);
 root.querySelector('#p48-undo').addEventListener('click',()=>{if(!undo.length)return;redo.push(JSON.stringify(state()));restore(undo.pop());persist()});
 root.querySelector('#p48-redo').addEventListener('click',()=>{if(!redo.length)return;undo.push(JSON.stringify(state()));restore(redo.pop());persist()});
 root.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;if(e.key==='Delete'){if(selectedIds.size>1)deleteSelectedMany();else deleteSelected()}});
@@ -966,7 +1195,7 @@ const SHARE_TOKEN="__SHARE_TOKEN__";
  openProcess(currentId);renderProcesses();refreshControls();updateSelectionUi();updateAccountUi();msg('Klar');
  if(ownerId()){
    const valid=await validateSession();
-   if(valid)await loadCloudProcesses();
+   if(valid){await loadWorkspaces();await loadCloudProcesses();applyRoleUi();}
  }
 })();
 })();

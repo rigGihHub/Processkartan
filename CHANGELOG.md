@@ -1,8 +1,6 @@
 # Changelog
 
-## v0.7.1
-- Fixad/robustare Supabase Authentication.
-- Stöd för publishable_key.
-- Sessionvalidering mot Supabase Auth.
-- Diagnostikknapp för Supabase.
-- Faktiska felmeddelanden i UI.
+## v0.8.1
+- Google Sheets-kompatibel XLSX-export.
+- Processsteg och kopplingar exporteras på separata flikar.
+- Rubrikrad, filter och fryst rubrikrad.
