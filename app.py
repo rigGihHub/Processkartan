@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.10.2"
+APP_VERSION = "0.10.5"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -217,6 +217,23 @@ header[data-testid="stHeader"]{height:2rem}
 html = r"""
 <div id="pk48">
 <style>
+/* v0.10.5 reliable connector selection */
+.p48-link-hit-segment{z-index:5}
+.p48-link-hit-segment:hover{background:rgba(44,123,229,.12)}
+.p48-link-selected .p48-link-visible{filter:drop-shadow(0 0 1px rgba(44,123,229,.65))}
+
+/* v0.10.3 Processyta toolbar popover */
+.p48-canvas-menu{position:relative;display:inline-block}
+.p48-canvas-menu>summary{list-style:none;cursor:pointer;user-select:none}
+.p48-canvas-menu>summary::-webkit-details-marker{display:none}
+.p48-canvas-popover{
+ position:absolute;top:calc(100% + 7px);left:0;z-index:220;
+ width:260px;padding:12px;background:#fff;border:1px solid #ccd6df;
+ border-radius:10px;box-shadow:0 10px 30px rgba(30,45,60,.18);
+}
+.p48-pop-title{font-weight:800;margin-bottom:9px}
+.p48-canvas-popover label{display:block}
+
 /* v0.10.2 — DOM-correct editor layout */
 .p48-body{
   display:grid;
@@ -471,8 +488,8 @@ html = r"""
   <strong>Process</strong>
   <input id="p48-name" class="p48-name" value="Exempel – upphandlingsprocess" aria-label="Processnamn">
   <button type="button" class="p48-btn primary" id="p48-new">+ Ny process</button>
-  <button type="button" class="p48-btn" id="p48-save">Spara</button>
-  <button type="button" class="p48-btn" id="p48-cloud-save">Spara i molnet</button>
+  <button type="button" class="p48-btn" id="p48-save" title="Sparar lokalt. När du är inloggad synkas processen även till molnet.">Spara</button>
+  
   <button type="button" class="p48-btn" id="p48-share">Dela</button>
   <div class="p48-sharebox" id="p48-sharebox"><input id="p48-share-url" readonly><button type="button" class="p48-mini" id="p48-copy-share">Kopiera länk</button></div>
   <button type="button" class="p48-btn" id="p48-undo">↶ Ångra</button>
@@ -494,7 +511,87 @@ html = r"""
   <button type="button" class="p48-btn" id="p48-select-tool">Markera område</button>
   <button type="button" class="p48-btn" id="p48-delete-selection" disabled>Ta bort markerat</button>
   <span class="p48-spacer"></span>
-  <button type="button" class="p48-btn primary" id="p48-pdf">Exportera PDF</button>
+  <details class="p48-canvas-menu">
+  <summary class="p48-btn">Processyta ▾</summary>
+  <div class="p48-canvas-popover">
+    <div class="p48-pop-title">Processyta</div>
+    
+          <div class="p48-format-grid-clean">
+            <label>Bakgrundsfärg
+              <input id="p48-canvas-bg" type="color" value="#ffffff">
+            </label>
+            <label>Logotypstorlek
+              <select id="p48-logo-size">
+                <option value="120">Liten</option>
+                <option value="180" selected>Normal</option>
+                <option value="240">Stor</option>
+              </select>
+            </label>
+          </div>
+          <div class="p48-logo-controls">
+            <label class="p48-logo-upload">Ladda upp logotype
+              <input id="p48-logo-file" type="file" accept="image/png,image/jpeg,image/webp">
+            </label>
+            <button type="button" class="p48-btn" id="p48-logo-remove">Ta bort logotype</button>
+          </div>
+          <label class="p48-hide-row">
+            <input id="p48-logo-hide" type="checkbox">
+            Dölj logotype
+          </label>
+        </div>
+<div class="p48-point-settings">
+          <div class="p48-title">Kopplingspunkter</div>
+          <div class="p48-point-grid">
+            <label>Storlek
+              <select id="p48-point-size">
+                <option value="6">6 px</option>
+                <option value="8" selected>8 px</option>
+                <option value="10">10 px</option>
+                <option value="12">12 px</option>
+                <option value="14">14 px</option>
+              </select>
+            </label>
+            <label>Färg
+              <input id="p48-point-color" type="color" value="#1f6f55">
+            </label>
+          </div>
+          <label class="p48-hide-row">
+            <input id="p48-hide-points" type="checkbox">
+            Dölj kopplingspunkter
+          </label>
+        </div>
+          
+          <div><label>Textfärg</label><input id="p48-textcolor" type="color" value="#17202a"></div>
+          <div><label>Bakgrund</label><input id="p48-bgcolor" type="color" value="#ffffff"></div>
+          <div><label>Kantfärg</label><input id="p48-bordercolor" type="color" value="#637387"></div>
+          <div><label>Kanttjocklek</label><select id="p48-borderwidth"><option value="1">1 px</option><option value="2" selected>2 px</option><option value="3">3 px</option><option value="4">4 px</option><option value="6">6 px</option></select></div>
+        </div>
+        <div class="p48-actions">
+          <button type="button" class="p48-mini" id="p48-bold"><b>B</b></button>
+          <button type="button" class="p48-mini" id="p48-italic"><i>I</i></button>
+          <button type="button" class="p48-mini" id="p48-under"><u>U</u></button>
+        </div>
+        <div class="p48-actions">
+          <button type="button" class="p48-mini" data-align="left">Vänster</button>
+          <button type="button" class="p48-mini" data-align="center">Centrera</button>
+          <button type="button" class="p48-mini" data-align="right">Höger</button>
+        </div>
+        <button type="button" class="p48-btn" id="p48-delete-node" style="width:100%;margin-top:10px;color:#a43d34;border-color:#e0c4c1">Ta bort markerad ruta</button>
+
+        <div id="p48-link-format" class="p48-link-format">
+          <div class="p48-title">Formatera koppling</div>
+          <div class="p48-small" style="margin-bottom:7px">Kantfärg och kanttjocklek ovan används även för markerad koppling.</div>
+          <div class="p48-link-format-grid">
+            <label>Slutmarkör<select id="p48-link-end"><option value="arrow" selected>Pil</option><option value="none">Ingen</option><option value="circle">Cirkel</option><option value="diamond">Diamant</option></select></label>
+            <label>Linjetyp<select id="p48-link-dash"><option value="solid" selected>Heldragen</option><option value="dashed">Streckad</option><option value="dotted">Prickad</option></select></label>
+          </div>
+          <button type="button" class="p48-btn" id="p48-delete-link" style="width:100%;margin-top:8px;color:#a43d34;border-color:#e0c4c1">Ta bort koppling</button>
+        </div>
+
+      
+  </div>
+</details>
+<button type="button" class="p48-btn primary" id="p48-pdf">Exportera PDF</button>
   <button type="button" class="p48-btn" id="p48-doc">Exportera DOCX</button>
   <details class="p48-sheets-menu">
     <summary class="p48-btn">Google Sheets ▾</summary>
@@ -617,81 +714,7 @@ html = r"""
         <button type="button" class="p48-btn" id="p48-font-all" style="width:100%;margin-top:7px">Använd typsnitt på all text</button>
         
         <div class="p48-process-style">
-          <div class="p48-title">Processyta</div>
-          <div class="p48-format-grid-clean">
-            <label>Bakgrundsfärg
-              <input id="p48-canvas-bg" type="color" value="#ffffff">
-            </label>
-            <label>Logotypstorlek
-              <select id="p48-logo-size">
-                <option value="120">Liten</option>
-                <option value="180" selected>Normal</option>
-                <option value="240">Stor</option>
-              </select>
-            </label>
-          </div>
-          <div class="p48-logo-controls">
-            <label class="p48-logo-upload">Ladda upp logotype
-              <input id="p48-logo-file" type="file" accept="image/png,image/jpeg,image/webp">
-            </label>
-            <button type="button" class="p48-btn" id="p48-logo-remove">Ta bort logotype</button>
-          </div>
-          <label class="p48-hide-row">
-            <input id="p48-logo-hide" type="checkbox">
-            Dölj logotype
-          </label>
-        </div>
-<div class="p48-point-settings">
-          <div class="p48-title">Kopplingspunkter</div>
-          <div class="p48-point-grid">
-            <label>Storlek
-              <select id="p48-point-size">
-                <option value="6">6 px</option>
-                <option value="8" selected>8 px</option>
-                <option value="10">10 px</option>
-                <option value="12">12 px</option>
-                <option value="14">14 px</option>
-              </select>
-            </label>
-            <label>Färg
-              <input id="p48-point-color" type="color" value="#1f6f55">
-            </label>
-          </div>
-          <label class="p48-hide-row">
-            <input id="p48-hide-points" type="checkbox">
-            Dölj kopplingspunkter
-          </label>
-        </div>
-          
-          <div><label>Textfärg</label><input id="p48-textcolor" type="color" value="#17202a"></div>
-          <div><label>Bakgrund</label><input id="p48-bgcolor" type="color" value="#ffffff"></div>
-          <div><label>Kantfärg</label><input id="p48-bordercolor" type="color" value="#637387"></div>
-          <div><label>Kanttjocklek</label><select id="p48-borderwidth"><option value="1">1 px</option><option value="2" selected>2 px</option><option value="3">3 px</option><option value="4">4 px</option><option value="6">6 px</option></select></div>
-        </div>
-        <div class="p48-actions">
-          <button type="button" class="p48-mini" id="p48-bold"><b>B</b></button>
-          <button type="button" class="p48-mini" id="p48-italic"><i>I</i></button>
-          <button type="button" class="p48-mini" id="p48-under"><u>U</u></button>
-        </div>
-        <div class="p48-actions">
-          <button type="button" class="p48-mini" data-align="left">Vänster</button>
-          <button type="button" class="p48-mini" data-align="center">Centrera</button>
-          <button type="button" class="p48-mini" data-align="right">Höger</button>
-        </div>
-        <button type="button" class="p48-btn" id="p48-delete-node" style="width:100%;margin-top:10px;color:#a43d34;border-color:#e0c4c1">Ta bort markerad ruta</button>
-
-        <div id="p48-link-format" class="p48-link-format">
-          <div class="p48-title">Formatera koppling</div>
-          <div class="p48-small" style="margin-bottom:7px">Kantfärg och kanttjocklek ovan används även för markerad koppling.</div>
-          <div class="p48-link-format-grid">
-            <label>Slutmarkör<select id="p48-link-end"><option value="arrow" selected>Pil</option><option value="none">Ingen</option><option value="circle">Cirkel</option><option value="diamond">Diamant</option></select></label>
-            <label>Linjetyp<select id="p48-link-dash"><option value="solid" selected>Heldragen</option><option value="dashed">Streckad</option><option value="dotted">Prickad</option></select></label>
-          </div>
-          <button type="button" class="p48-btn" id="p48-delete-link" style="width:100%;margin-top:8px;color:#a43d34;border-color:#e0c4c1">Ta bort koppling</button>
-        </div>
-
-      </div>
-  </aside>
+          </aside>
 
   <main class="p48-scroll" id="p48-scroll">
     <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><img id="p48-process-logo" class="p48-process-logo" alt="Processlogotype"><div id="p48-link-hit-layer" class="p48-link-hit-layer"></div><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-print-frame" class="p48-print-frame"></div>
@@ -729,7 +752,7 @@ const printFrame=root.querySelector('#p48-print-frame');
 const pdfViewSelect=root.querySelector('#p48-pdf-view'),pageCountSelect=root.querySelector('#p48-page-count');
 const workspaceSelect=root.querySelector('#p48-workspace-select'),workspaceName=root.querySelector('#p48-workspace-name'),createWorkspaceBtn=root.querySelector('#p48-create-workspace'),roleBadge=root.querySelector('#p48-role');
 const authError=root.querySelector('#p48-auth-error');
-const cloudSaveBtn=root.querySelector('#p48-cloud-save'),shareBtn=root.querySelector('#p48-share'),shareBox=root.querySelector('#p48-sharebox'),shareUrlInput=root.querySelector('#p48-share-url'),copyShareBtn=root.querySelector('#p48-copy-share');
+const shareBtn=root.querySelector('#p48-share'),shareBox=root.querySelector('#p48-sharebox'),shareUrlInput=root.querySelector('#p48-share-url'),copyShareBtn=root.querySelector('#p48-copy-share');
 const marquee=root.querySelector('#p48-marquee');
 const selectToolBtn=root.querySelector('#p48-select-tool');
 const deleteSelectionBtn=root.querySelector('#p48-delete-selection');
@@ -739,7 +762,7 @@ const linkFormat=root.querySelector('#p48-link-format'),linkEnd=root.querySelect
 const addInputBtn=root.querySelector('#p48-add-input'),addOutputBtn=root.querySelector('#p48-add-output'),deleteNodeBtn=root.querySelector('#p48-delete-node');
 
 let nodes=new Map(),links=[],selectedId=null,selectedIds=new Set(),selectionMode=false,seq=8,undo=[],redo=[],currentId='proc-1',processes={};
-let selectedLinkIndex=null;
+let selectedLinkIndex=null,selectedLinkIndices=new Set();
 const nodeGeomCache=new Map();
 let geomVersion=0;
 let connectorPointSize=8,connectorPointColor='#1f6f55',connectorPointsHidden=false;
@@ -1198,13 +1221,24 @@ function updateSelectionUi(){
     if(selectedId===item.data.id)item.el.classList.add('selected');
     else item.el.classList.remove('selected');
   }
-  deleteSelectionBtn.disabled=selectedIds.size===0;
+  deleteSelectionBtn.disabled=(selectedIds.size===0&&selectedLinkIndices.size===0);
   selectToolBtn.classList.toggle('primary',selectionMode);
   selectToolBtn.textContent=selectionMode?'Avsluta markering':'Markera område';
 
 }
 function clearSelection(){
-  selectedIds.clear();selectedId=null;refreshControls();updateSelectionUi();
+  const hadLinks=(selectedLinkIndex!=null||selectedLinkIndices.size>0);
+  selectedIds.clear();
+  selectedLinkIndices.clear();
+  selectedLinkIndex=null;
+  selectedId=null;
+  refreshControls();
+  refreshLinkControls();
+  updateSelectionUi();
+  if(hadLinks){
+    fullLinkRenderNeeded=true;
+    renderAllLinksNow();
+  }
 }
 function selectMany(ids){
   selectedIds=new Set(ids);
@@ -1212,18 +1246,32 @@ function selectMany(ids){
   refreshControls();updateSelectionUi();
 }
 function deleteSelectedMany(){
-  if(!selectedIds.size)return;
+  if(!selectedIds.size&&!selectedLinkIndices.size)return;
   pushUndo();
   const doomed=new Set(selectedIds);
   for(const id of doomed){
     const item=nodes.get(id);
     if(item){item.el.remove();nodes.delete(id);}
   }
-  links=links.filter(l=>!doomed.has(l[0])&&!doomed.has(l[1]));
-  selectedIds.clear();selectedId=null;drawLinks();persist();refreshControls();updateSelectionUi();msg('Markerat borttaget');
+  links=links.filter((l,i)=>!doomed.has(l[0])&&!doomed.has(l[1])&&!selectedLinkIndices.has(i));
+  selectedIds.clear();selectedLinkIndices.clear();selectedId=null;selectedLinkIndex=null;
+  requestFullLinkRender();persist();refreshControls();refreshLinkControls();updateSelectionUi();msg('Markerat område borttaget');
 }
 function rectsIntersect(a,b){
   return !(a.right<b.left||a.left>b.right||a.bottom<b.top||a.top>b.bottom);
+}
+function linksInSelectionRect(selRect){
+  const hits=[];
+  for(const [index,entry] of linkDomByIndex.entries()){
+    const path=entry&&entry.visible;
+    if(!path||typeof path.getBBox!=='function')continue;
+    try{
+      const b=path.getBBox();
+      const lr={left:b.x,top:b.y,right:b.x+b.width,bottom:b.y+b.height};
+      if(rectsIntersect(selRect,lr))hits.push(index);
+    }catch(_){}
+  }
+  return hits;
 }
 function finishTempArrow(){
   temp.hidden=true;
@@ -1231,8 +1279,19 @@ function finishTempArrow(){
 }
 
 function select(el){
-  selectedLinkIndex=null;refreshLinkControls();selectedIds.clear();selectedId=el.dataset.id;selectedIds.add(selectedId);
-  refreshControls();updateSelectionUi();
+  const hadLinkSelection=(selectedLinkIndex!=null||selectedLinkIndices.size>0);
+  selectedLinkIndex=null;
+  selectedLinkIndices.clear();
+  refreshLinkControls();
+  selectedIds.clear();
+  selectedId=el.dataset.id;
+  selectedIds.add(selectedId);
+  refreshControls();
+  updateSelectionUi();
+  if(hadLinkSelection){
+    fullLinkRenderNeeded=true;
+    renderAllLinksNow();
+  }
 }
 
 function ensureIO(item){
@@ -1414,8 +1473,39 @@ function refreshLinkControls(){
   linkEnd.value=st.end||'arrow';
   linkDash.value=st.dash||'solid';
 }
-function selectLink(i){selectedLinkIndex=i;selectedId=null;selectedIds.clear();refreshControls();updateSelectionUi();refreshLinkControls();drawLinks(true)}
-function clearLinkSelection(){selectedLinkIndex=null;refreshLinkControls();drawLinks(true)}
+function selectLink(i){
+  if(i==null||!links[i])return;
+
+  // Selection is UI state, not geometry state. Never let the dirty-link cache
+  // suppress a visual selection change.
+  const previous=selectedLinkIndex;
+  selectedLinkIndices.clear();
+  selectedLinkIndex=i;
+  selectedId=null;
+  selectedIds.clear();
+
+  refreshControls();
+  updateSelectionUi();
+  refreshLinkControls();
+
+  // Force a complete connector repaint on selection change.
+  // This is cheap compared with drag operations and guarantees the halo,
+  // hit areas and formatting panel always correspond to the clicked arrow.
+  fullLinkRenderNeeded=true;
+  renderAllLinksNow();
+
+  if(previous!==i)msg('Koppling markerad');
+}
+function clearLinkSelection(){
+  const hadSelection=(selectedLinkIndex!=null||selectedLinkIndices.size>0);
+  selectedLinkIndex=null;
+  selectedLinkIndices.clear();
+  refreshLinkControls();
+  if(hadSelection){
+    fullLinkRenderNeeded=true;
+    renderAllLinksNow();
+  }
+}
 function markerFor(st,x,y,ang){
   const ns='http://www.w3.org/2000/svg';
   if(st.end==='none')return null;
@@ -1483,9 +1573,9 @@ function renderAllLinksNow(){
     }
 
     const g=document.createElementNS('http://www.w3.org/2000/svg','g');
-    if(selectedLinkIndex===index)g.setAttribute('class','p48-link-selected');
+    if(selectedLinkIndex===index||selectedLinkIndices.has(index))g.setAttribute('class','p48-link-selected');
 
-    if(selectedLinkIndex===index){
+    if(selectedLinkIndex===index||selectedLinkIndices.has(index)){
       const halo=document.createElementNS('http://www.w3.org/2000/svg','path');
       halo.setAttribute('class','p48-link-selection');
       halo.setAttribute('d',d);
@@ -2159,8 +2249,14 @@ canvas.addEventListener('pointerdown',e=>{
       const nr={left:item.data.x||0,top:item.data.y||0,right:(item.data.x||0)+item.el.offsetWidth,bottom:(item.data.y||0)+item.el.offsetHeight};
       if(rectsIntersect(selRect,nr))ids.push(item.data.id);
     }
+    selectedLinkIndex=null;
+    selectedLinkIndices=new Set(linksInSelectionRect(selRect));
     marquee.style.display='none';
     selectMany(ids);
+    refreshLinkControls();
+    fullLinkRenderNeeded=true;
+    renderAllLinksNow();
+    updateSelectionUi();
   };
   document.addEventListener('pointermove',move);document.addEventListener('pointerup',up);
 });
@@ -2180,8 +2276,21 @@ canvas.addEventListener('click',e=>{
 });
 nameInput.addEventListener('change',()=>{persist(false,true);msg('Namn sparat')});
 root.querySelector('#p48-new').addEventListener('click',newProcess);
-root.querySelector('#p48-save').addEventListener('click',async()=>{persist(true);if(ownerId())try{await saveCurrentToCloud()}catch(e){console.error(e)}});
-cloudSaveBtn.addEventListener('click',async()=>{try{await saveCurrentToCloud()}catch(e){console.error(e);msg('Molnsparning misslyckades')}});
+root.querySelector('#p48-save').addEventListener('click',async()=>{
+  persist(false);
+  if(ownerId()){
+    try{
+      await saveCurrentToCloud();
+      msg('Sparad lokalt och i molnet');
+    }catch(e){
+      console.error(e);
+      msg('Sparad lokalt · molnsynk misslyckades');
+    }
+  }else{
+    saveLocal(true);
+    msg('Sparad lokalt');
+  }
+});
 shareBtn.addEventListener('click',shareCurrent);copyShareBtn.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(shareUrlInput.value);msg('Länk kopierad')}catch(e){shareUrlInput.select();document.execCommand('copy')}});
 loginBtn.addEventListener('click',signIn);signupBtn.addEventListener('click',signUp);logoutBtn.addEventListener('click',signOut);
 

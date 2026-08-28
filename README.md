@@ -1,17 +1,13 @@
-# Maplini v0.10.2 — DOM structure fix
+# Maplini v0.10.5
 
-Det verkliga layoutfelet var en extra `</div>` före `</aside>`.
+## Spara
+Det finns nu bara en `Spara`-knapp.
 
-Den extra stängtaggen stängde `.p48-body` för tidigt, så `<main id="p48-scroll">`
-med canvasen hamnade utanför editor-layouten. Det gav den stora grå ytan och
-förskjutna canvasen.
+- Utloggad: sparar lokalt.
+- Inloggad: sparar lokalt och synkar till Supabase/molnet.
+- Om molnsynken misslyckas ligger den lokala sparningen kvar.
 
-## Fix
-- Felaktig extra `</div>` borttagen.
-- Sidebar och canvas-main är nu direkta syskon i `.p48-body`.
-- Layout-CSS förenklad till vanlig tvåkolumns-grid.
-- Tidigare top/left/absolute-hack borttagna.
-- Automatisk HTML-strukturtest tillagd i releasebygget.
-
-## Versionsnummer
-Visas under loggan och är nu `v. 0.10.2`.
+## Pilmarkering
+Pilmarkering använder inte längre den optimerade dirty-link-cachen för UI-state.
+Varje gång en ny pil klickas renderas connector-lagret om direkt, så markering,
+halo och formateringspanel ska följa den pil som faktiskt klickades.
