@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.9.0"
+APP_VERSION = "0.9.1"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -217,6 +217,22 @@ header[data-testid="stHeader"]{height:2rem}
 html = r"""
 <div id="pk48">
 <style>
+/* v0.9.1 critical editor rules inside iframe */
+.p48-link-hit-layer{position:absolute;inset:0;z-index:4;pointer-events:none}
+.p48-link-hit-segment{position:absolute;height:28px;transform-origin:0 50%;pointer-events:auto!important;cursor:pointer!important;background:transparent}
+.p48-link-hit-segment:hover{background:rgba(44,123,229,.10)}
+.p48-link-selection{fill:none;stroke:#2c7be5;stroke-width:10;opacity:.32;pointer-events:none}
+.p48-node .p48-handle{opacity:0!important;pointer-events:none!important}
+.p48-node.selected .p48-handle{opacity:1!important;pointer-events:auto!important}
+.p48-node.multi-selected:not(.selected) .p48-handle{opacity:0!important;pointer-events:none!important}
+#p48-canvas.p48-hide-points .p48-handle{display:none!important}
+.p48-point-settings{margin-top:10px;padding-top:10px;border-top:1px solid #e1e7ed}
+.p48-point-settings .p48-point-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.p48-point-settings label{font:700 10px system-ui;color:#657281}
+.p48-point-settings input,.p48-point-settings select{width:100%;margin-top:4px;border:1px solid #cfd7df;border-radius:7px;padding:6px;font:12px system-ui;background:#fff}
+.p48-hide-row{display:flex!important;align-items:center;gap:7px;margin-top:8px;font:600 11px system-ui!important;color:#445565!important}
+.p48-hide-row input{width:auto!important;margin:0!important}
+
 #pk48{font-family:Inter,system-ui,sans-serif;color:#17202a;background:#eef2f6;border:1px solid #dce2e8;border-radius:12px;overflow:hidden}
 #pk48 *{box-sizing:border-box}
 .p48-brand{height:94px;background:#fff;border-bottom:1px solid #e1e7ed;display:flex;align-items:center;padding:8px 18px}
@@ -814,6 +830,16 @@ createWorkspaceBtn.addEventListener('click',createWorkspace);
 
 
 function applyConnectorPointSettings(){
+  for(const item of nodes.values()){
+    for(const h of Object.values(item.handles||{})){
+      h.style.width=connectorPointSize+'px';
+      h.style.height=connectorPointSize+'px';
+      h.style.background=connectorPointColor;
+      h.style.border='1px solid #fff';
+      h.style.boxShadow='0 0 0 1px '+connectorPointColor;
+      h.style.display=connectorPointsHidden?'none':'';
+    }
+  }
   canvas.style.setProperty('--p48-point-size',connectorPointSize+'px');
   canvas.style.setProperty('--p48-point-color',connectorPointColor);
   canvas.classList.toggle('p48-hide-points',connectorPointsHidden);
@@ -915,6 +941,8 @@ function updateSelectionUi(){
   deleteSelectionBtn.disabled=selectedIds.size===0;
   selectToolBtn.classList.toggle('primary',selectionMode);
   selectToolBtn.textContent=selectionMode?'Avsluta markering':'Markera område';
+
+  applyConnectorPointSettings();
 }
 function clearSelection(){
   selectedIds.clear();selectedId=null;refreshControls();updateSelectionUi();
@@ -1024,6 +1052,14 @@ const label=document.createElement('span');label.className='p48-label';label.tex
 const handles={};for(const side of ['right','left','top','bottom']){const h=document.createElement('span');h.className='p48-handle '+side;h.dataset.side=side;el.appendChild(h);handles[side]=h}
 const resizeHandles={};for(const corner of ['se','sw','ne','nw']){const rh=document.createElement('span');rh.className='p48-resize '+corner;rh.dataset.corner=corner;el.appendChild(rh);resizeHandles[corner]=rh}
 canvas.appendChild(el);nodes.set(d.id,{el,data:d,label,handles,resizeHandles,io:null});applyStyle(nodes.get(d.id));renderNodeIO(nodes.get(d.id));
+for(const h of Object.values(handles)){
+  h.style.width=connectorPointSize+'px';
+  h.style.height=connectorPointSize+'px';
+  h.style.background=connectorPointColor;
+  h.style.border='1px solid #fff';
+  h.style.boxShadow='0 0 0 1px '+connectorPointColor;
+  h.style.display=connectorPointsHidden?'none':'';
+}
 el.addEventListener('dblclick',e=>{e.stopPropagation();beginInlineEdit(el)});
 label.addEventListener('click',e=>{e.stopPropagation();select(el)});
 label.addEventListener('dblclick',e=>{e.stopPropagation();beginInlineEdit(el)});
@@ -1096,7 +1132,7 @@ function hitTestLink(clientX,clientY){
     const d=linkDistanceAt(i,x,y);
     if(d<bestDist){bestDist=d;best=i}
   });
-  return bestDist<=14?best:null;
+  return bestDist<=22?best:null;
 }
 
 function linkStyle(link){if(!link[3]||typeof link[3]!=='object')link[3]={};return Object.assign({color:'#687584',width:2,end:'arrow',dash:'solid',viaX:null,viaY:null},link[3])}
@@ -1108,6 +1144,8 @@ function refreshLinkControls(){
   linkHandle.classList.toggle('on',!!link);
   if(!link)return;
   const st=linkStyle(link);
+  borderColor.disabled=false;
+  borderWidth.disabled=false;
   borderColor.value=st.color||'#687584';
   borderWidth.value=String(Number(st.width)||2);
   linkEnd.value=st.end||'arrow';
@@ -1145,19 +1183,19 @@ function addHtmlLinkHitSegment(index,x1,y1,x2,y2){
   seg.className='p48-link-hit-segment';
   seg.dataset.linkIndex=String(index);
   seg.style.left=x1+'px';
-  seg.style.top=(y1-12)+'px';
+  seg.style.top=(y1-14)+'px';
   seg.style.width=len+'px';
+  seg.style.height='28px';
   seg.style.transform=`rotate(${Math.atan2(dy,dx)}rad)`;
-  seg.addEventListener('pointerdown',e=>{
+  seg.style.transformOrigin='0 50%';
+  seg.style.pointerEvents='auto';
+  const choose=e=>{
     e.preventDefault();
     e.stopPropagation();
     selectLink(index);
-  });
-  seg.addEventListener('click',e=>{
-    e.preventDefault();
-    e.stopPropagation();
-    selectLink(index);
-  });
+  };
+  seg.addEventListener('pointerdown',choose);
+  seg.addEventListener('click',choose);
   linkHitLayer.appendChild(seg);
 }
 
@@ -1247,8 +1285,12 @@ function drawLinks(){
   }
 }
 
-canvas.addEventListener('pointerdown',e=>{
+
+
+
+document.addEventListener('pointerdown',e=>{
   if(e.button!==0)return;
+  if(!canvas.contains(e.target))return;
   if(e.target.closest&&e.target.closest('.p48-node'))return;
   if(e.target===linkHandle)return;
   const hit=hitTestLink(e.clientX,e.clientY);
