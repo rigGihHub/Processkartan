@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.9.6"
+APP_VERSION = "0.9.7"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -217,13 +217,62 @@ header[data-testid="stHeader"]{height:2rem}
 html = r"""
 <div id="pk48">
 <style>
+/* v0.9.7 export toolbar cleanup */
+.p48-toolbar{align-items:center}
+.p48-toolbar .p48-export-group{display:flex;gap:8px;margin-left:auto;align-items:center}
+
+/* v0.9.7 canvas visibility fix */
+.p48-app{
+  display:grid;
+  grid-template-rows:auto 1fr;
+  height:auto!important;
+  min-height:980px!important;
+}
+.p48-main{
+  display:grid;
+  grid-template-columns:220px minmax(0,1fr);
+  min-height:760px!important;
+  overflow:visible!important;
+}
+.p48-side{
+  height:760px;
+  overflow-y:auto;
+  overflow-x:hidden;
+}
+.p48-scroll{
+  display:block!important;
+  height:760px!important;
+  min-height:760px!important;
+  max-height:760px!important;
+  overflow:auto!important;
+  background:#fff!important;
+}
+.p48-canvas-wrap{
+  display:block!important;
+  min-width:2400px!important;
+  min-height:1400px!important;
+  height:1400px!important;
+  overflow:visible!important;
+}
+#p48-canvas{
+  display:block!important;
+  visibility:visible!important;
+  opacity:1!important;
+  width:2400px!important;
+  min-width:2400px!important;
+  height:1400px!important;
+  min-height:1400px!important;
+  background-color:var(--p48-canvas-bg,#fff);
+}
+#p48-canvas > *{visibility:visible}
+
 /* v0.9.6 safe performance + layout stabilization */
-html,body{margin:0;padding:0;overflow:hidden}
-#p48-root{height:100%;min-height:0;overflow:hidden}
-.p48-app{height:100%;min-height:0;overflow:hidden}
-.p48-main{min-height:0;overflow:hidden}
-.p48-scroll{min-height:0;overflow:auto!important}
-.p48-canvas-wrap{min-height:0}
+html,body{margin:0;padding:0;overflow:auto}
+#p48-root{min-height:980px;overflow:visible}
+.p48-app{min-height:980px;overflow:visible}
+.p48-main{min-height:760px;overflow:visible}
+.p48-scroll{height:760px;min-height:760px;overflow:auto!important;position:relative}
+.p48-canvas-wrap{min-height:1400px}
 #p48-canvas{position:relative;min-width:2400px;min-height:1400px}
 .p48-node{will-change:left,top,width,height}
 .p48-link-visible,.p48-link-selection{vector-effect:non-scaling-stroke}
@@ -434,10 +483,13 @@ html,body{margin:0;padding:0;overflow:hidden}
   <button type="button" class="p48-btn" id="p48-select-tool">Markera område</button>
   <button type="button" class="p48-btn" id="p48-delete-selection" disabled>Ta bort markerat</button>
   <span class="p48-spacer"></span>
+  <div class="p48-export-group">
   <button type="button" class="p48-btn primary" id="p48-pdf">Exportera PDF</button>
   <button type="button" class="p48-btn" id="p48-doc">Exportera DOCX</button>
   <button type="button" class="p48-btn" id="p48-sheets">Ladda ner Sheets-fil</button>
   <button type="button" class="p48-btn primary" id="p48-sheets-direct">Skapa Google Sheet</button>
+</div>
+  
   <span id="p48-status" class="p48-status"></span>
 </div>
 
@@ -2355,12 +2407,34 @@ const SHARE_TOKEN="__SHARE_TOKEN__";
 
 function stabilizeEditorLayout(){
   const app=root.querySelector('.p48-app');
+  const main=root.querySelector('.p48-main');
+  const wrap=root.querySelector('.p48-canvas-wrap');
   if(app){
-    app.style.height='100%';
-    app.style.minHeight='0';
-    app.style.overflow='hidden';
+    app.style.minHeight='980px';
+    app.style.height='auto';
+    app.style.overflow='visible';
   }
-  scroll.style.minHeight='0';
+  if(main){
+    main.style.minHeight='760px';
+    main.style.overflow='visible';
+  }
+  if(scroll){
+    scroll.style.height='760px';
+    scroll.style.minHeight='760px';
+    scroll.style.maxHeight='760px';
+    scroll.style.overflow='auto';
+  }
+  if(wrap){
+    wrap.style.minHeight='1400px';
+    wrap.style.height='1400px';
+  }
+  canvas.style.display='block';
+  canvas.style.visibility='visible';
+  canvas.style.opacity='1';
+  canvas.style.width='2400px';
+  canvas.style.height='1400px';
+  invalidateNodeGeom();
+  requestFullLinkRender();
   scheduleHorizontalNavSync();
 }
 requestAnimationFrame(stabilizeEditorLayout);
@@ -2423,4 +2497,4 @@ html = html.replace("__PUBLIC_APP_URL__", _PUBLIC_APP_URL)
 html = html.replace("__SHARE_TOKEN__", st.query_params.get("share", ""))
 if not _CLOUD_ENABLED:
     st.caption("Molnlagring är inte aktiverad ännu. Lägg Supabase-inställningarna i Streamlit Secrets enligt README.")
-components.html(html, height=980, scrolling=False)
+components.html(html, height=1120, scrolling=False)

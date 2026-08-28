@@ -1,23 +1,16 @@
-# Maplini v0.9.6 — Stabilization release
+# Maplini v0.9.7 — Canvas visibility + export toolbar fix
 
-Den här versionen backar de riskabla layoutoptimeringarna från v0.9.5 som kunde skapa en stor tom/grå yta och skjuta ned editorn.
+## Canvas
+- Återställer synlig processyta efter regressionen i v0.9.6.
+- Editor-scroll får fast, synlig höjd.
+- Canvas hålls på 2400 × 1400 px.
+- Overflow normaliseras så innehållet inte döljs bakom en grå yta.
+- Full länk/geometri-refresh körs efter initial layoutstabilisering.
 
-## Backat
-- content-visibility på noder
-- aggressiv CSS contain på sidebar/toolbar/processlista
-- contain: layout paint style på canvas
+## Exportknappar
+`Skapa Google Sheet` ligger nu tillsammans med:
+- Exportera PDF
+- Exportera DOCX
+- Ladda ner Sheets-fil
 
-## Behållna prestandavinster
-- partial link redraw
-- node/link caches
-- bounding-box prefilter för kopplingsträff
-- idle localStorage serialization
-- skip av identiska localStorage writes
-- processlist-signatur för att undvika onödiga rerenders
-- färre DOM-skrivningar
-
-## Stabilisering
-- fast editorhöjd i Streamlit-komponenten
-- overflow/min-height normaliseras inne i iframe
-- geometri och länkar invalideras vid resize
-- extra layout self-heal efter initial render
+Alla exporter är samlade till höger i toolbaren.
