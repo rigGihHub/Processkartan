@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.8.6"
+APP_VERSION = "0.8.7"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -78,6 +78,19 @@ header[data-testid="stHeader"]{height:2rem}
 .p48-hnav::-webkit-scrollbar-track{background:#e8edf1}
 .p48-hnav::-webkit-scrollbar-thumb{background:#8797a5;border-radius:8px;border:3px solid #e8edf1}
 .p48-hnav::-webkit-scrollbar-thumb:hover{background:#657684}
+
+
+/* v0.8.7: editable node borders and connectors */
+.p48-link-visible{fill:none;pointer-events:none}
+.p48-link-hit{fill:none;stroke:transparent;stroke-width:16;pointer-events:stroke;cursor:pointer}
+.p48-link-selected{filter:drop-shadow(0 0 2px rgba(44,123,229,.55))}
+.p48-link-handle{position:absolute;width:15px;height:15px;border-radius:50%;background:#fff;border:2px solid #2c7be5;z-index:36;display:none;transform:translate(-50%,-50%);cursor:move}
+.p48-link-handle.on{display:block}
+.p48-link-format{display:none;margin-top:12px;padding-top:10px;border-top:1px solid #e1e7ed}
+.p48-link-format.on{display:block}
+.p48-link-format-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.p48-link-format label{font:700 10px system-ui;color:#657281}
+.p48-link-format input,.p48-link-format select{width:100%;margin-top:4px;border:1px solid #cfd7df;border-radius:7px;padding:6px;font:12px system-ui;background:#fff}
 
 </style>
 """, unsafe_allow_html=True)
@@ -187,7 +200,7 @@ html = r"""
   transform:translate(-50%,-50%) rotate(45deg);
   transform-origin:center;
   background:var(--decision-bg,#fff8df);
-  border:2px solid #d69a18;
+  border:var(--decision-border-width,2px) solid var(--decision-border,#d69a18);
   box-sizing:border-box;
   z-index:-1;
 }
@@ -328,6 +341,8 @@ html = r"""
           <div><label>Storlek</label><input id="p48-size" type="number" min="10" max="36" value="13"></div>
           <div><label>Textfärg</label><input id="p48-textcolor" type="color" value="#17202a"></div>
           <div><label>Bakgrund</label><input id="p48-bgcolor" type="color" value="#ffffff"></div>
+          <div><label>Kantfärg</label><input id="p48-bordercolor" type="color" value="#637387"></div>
+          <div><label>Kanttjocklek</label><select id="p48-borderwidth"><option value="1">1 px</option><option value="2" selected>2 px</option><option value="3">3 px</option><option value="4">4 px</option><option value="6">6 px</option></select></div>
         </div>
         <div class="p48-actions">
           <button type="button" class="p48-mini" id="p48-bold"><b>B</b></button>
@@ -341,12 +356,24 @@ html = r"""
         </div>
         <button type="button" class="p48-btn" id="p48-delete-node" style="width:100%;margin-top:10px;color:#a43d34;border-color:#e0c4c1">Ta bort markerad ruta</button>
 
+        <div id="p48-link-format" class="p48-link-format">
+          <div class="p48-title">Formatera koppling</div>
+          <div class="p48-small" style="margin-bottom:7px">Klicka på en linje för att markera den.</div>
+          <div class="p48-link-format-grid">
+            <label>Färg<input id="p48-link-color" type="color" value="#687584"></label>
+            <label>Tjocklek<select id="p48-link-width"><option value="1">1 px</option><option value="2" selected>2 px</option><option value="3">3 px</option><option value="4">4 px</option><option value="6">6 px</option></select></label>
+            <label>Slutmarkör<select id="p48-link-end"><option value="arrow" selected>Pil</option><option value="none">Ingen</option><option value="circle">Cirkel</option><option value="diamond">Diamant</option></select></label>
+            <label>Linjetyp<select id="p48-link-dash"><option value="solid" selected>Heldragen</option><option value="dashed">Streckad</option><option value="dotted">Prickad</option></select></label>
+          </div>
+          <button type="button" class="p48-btn" id="p48-delete-link" style="width:100%;margin-top:8px;color:#a43d34;border-color:#e0c4c1">Ta bort koppling</button>
+        </div>
+
       </div>
     </div>
   </aside>
 
   <main class="p48-scroll" id="p48-scroll">
-    <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><div id="p48-print-frame" class="p48-print-frame"></div>
+    <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-print-frame" class="p48-print-frame"></div>
       <div id="p48-marquee" class="p48-marquee"></div>
       <svg id="p48-svg" viewBox="0 0 2400 1400">
         <defs><marker id="p48-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0,0 10,4 0,8" fill="#687584"></polygon></marker></defs>
@@ -382,9 +409,12 @@ const marquee=root.querySelector('#p48-marquee');
 const selectToolBtn=root.querySelector('#p48-select-tool');
 const deleteSelectionBtn=root.querySelector('#p48-delete-selection');
 const inputsBox=root.querySelector('#p48-inputs'),outputsBox=root.querySelector('#p48-outputs');
+const borderColor=root.querySelector('#p48-bordercolor'),borderWidth=root.querySelector('#p48-borderwidth');
+const linkFormat=root.querySelector('#p48-link-format'),linkColor=root.querySelector('#p48-link-color'),linkWidth=root.querySelector('#p48-link-width'),linkEnd=root.querySelector('#p48-link-end'),linkDash=root.querySelector('#p48-link-dash'),deleteLinkBtn=root.querySelector('#p48-delete-link'),linkHandle=root.querySelector('#p48-link-handle');
 const addInputBtn=root.querySelector('#p48-add-input'),addOutputBtn=root.querySelector('#p48-add-output'),deleteNodeBtn=root.querySelector('#p48-delete-node');
 
 let nodes=new Map(),links=[],selectedId=null,selectedIds=new Set(),selectionMode=false,seq=8,undo=[],redo=[],currentId='proc-1',processes={};
+let selectedLinkIndex=null;
 const SUPABASE_URL="__SUPABASE_URL__", SUPABASE_ANON_KEY="__SUPABASE_ANON_KEY__", PUBLIC_APP_URL="__PUBLIC_APP_URL__";
 const CLOUD_ENABLED=SUPABASE_URL.length>0&&SUPABASE_ANON_KEY.length>0;
 let cloudSession=null,sharedView=false;
@@ -614,8 +644,8 @@ function clone(v){return JSON.parse(JSON.stringify(v))}
 function uid(){return 'proc-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7)}
 function msg(t){status.textContent=t;setTimeout(()=>{if(status.textContent===t)status.textContent=''},1800)}
 function defBg(type){return {start:'#edf8f3',end:'#fff3f1',decision:'#fff8df',subprocess:'#f7f3ff',note:'#fffbe8',group:'#f8fafc'}[type]||'#ffffff'}
-function styleOf(d){return{fontFamily:d.fontFamily||'Arial',fontSize:Number(d.fontSize||13),textColor:d.textColor||'#17202a',bgColor:d.bgColor||defBg(d.type),fontWeight:d.fontWeight||'700',fontStyle:d.fontStyle||'normal',textDecoration:d.textDecoration||'none',textAlign:d.textAlign||'center'}}
-function applyStyle(item){const s=styleOf(item.data);Object.assign(item.data,s);item.label.style.fontFamily=s.fontFamily;item.label.style.fontSize=s.fontSize+'px';item.label.style.color=s.textColor;item.label.style.fontWeight=s.fontWeight;item.label.style.fontStyle=s.fontStyle;item.label.style.textDecoration=s.textDecoration;item.label.style.textAlign=s.textAlign;item.el.style.background=s.bgColor;item.el.style.setProperty('--decision-bg',s.bgColor)}
+function styleOf(d){return{fontFamily:d.fontFamily||'Arial',fontSize:Number(d.fontSize||13),textColor:d.textColor||'#17202a',bgColor:d.bgColor||defBg(d.type),fontWeight:d.fontWeight||'700',fontStyle:d.fontStyle||'normal',textDecoration:d.textDecoration||'none',textAlign:d.textAlign||'center',borderColor:d.borderColor||'#637387',borderWidth:Number(d.borderWidth||2)}}
+function applyStyle(item){const s=styleOf(item.data);Object.assign(item.data,s);item.label.style.fontFamily=s.fontFamily;item.label.style.fontSize=s.fontSize+'px';item.label.style.color=s.textColor;item.label.style.fontWeight=s.fontWeight;item.label.style.fontStyle=s.fontStyle;item.label.style.textDecoration=s.textDecoration;item.label.style.textAlign=s.textAlign;item.el.style.background=s.bgColor;item.el.style.setProperty('--decision-bg',s.bgColor);if(item.data.type==='decision'){item.el.style.setProperty('--decision-border',s.borderColor);item.el.style.setProperty('--decision-border-width',s.borderWidth+'px')}else{item.el.style.borderColor=s.borderColor;item.el.style.borderWidth=s.borderWidth+'px'}}
 function state(){return{id:currentId,name:nameInput.value.trim()||'Namnlös process',nodes:[...nodes.values()].map(x=>clone(x.data)),links:clone(links)}}
 function saveLocal(){try{localStorage.setItem('maplini_v050',JSON.stringify({currentId,processes}))}catch(e){}}
 function loadLocal(){
@@ -711,7 +741,7 @@ function finishTempArrow(){
 }
 
 function select(el){
-  selectedIds.clear();selectedId=el.dataset.id;selectedIds.add(selectedId);
+  selectedLinkIndex=null;refreshLinkControls();selectedIds.clear();selectedId=el.dataset.id;selectedIds.add(selectedId);
   refreshControls();updateSelectionUi();
 }
 
@@ -748,7 +778,7 @@ function setFormatEnabled(enabled){
   if(stepIO)stepIO.style.opacity=enabled?'1':'0.45';
 }
 
-function refreshControls(){const item=selectedId?nodes.get(selectedId):null;if(!item){setFormatEnabled(false);inputsBox.innerHTML='';outputsBox.innerHTML='';return}setFormatEnabled(true);const s=styleOf(item.data);font.value=s.fontFamily;size.value=s.fontSize;textColor.value=s.textColor;bgColor.value=s.bgColor;bold.classList.toggle('active',s.fontWeight==='700');italic.classList.toggle('active',s.fontStyle==='italic');under.classList.toggle('active',s.textDecoration==='underline');root.querySelectorAll('[data-align]').forEach(b=>b.classList.toggle('active',b.dataset.align===s.textAlign));renderIOEditor(item)}
+function refreshControls(){const item=selectedId?nodes.get(selectedId):null;if(!item){setFormatEnabled(false);inputsBox.innerHTML='';outputsBox.innerHTML='';return}setFormatEnabled(true);const s=styleOf(item.data);font.value=s.fontFamily;size.value=s.fontSize;textColor.value=s.textColor;bgColor.value=s.bgColor;borderColor.value=s.borderColor;borderWidth.value=String(s.borderWidth);bold.classList.toggle('active',s.fontWeight==='700');italic.classList.toggle('active',s.fontStyle==='italic');under.classList.toggle('active',s.textDecoration==='underline');root.querySelectorAll('[data-align]').forEach(b=>b.classList.toggle('active',b.dataset.align===s.textAlign));renderIOEditor(item)}
 function updateStyle(patch){const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();Object.assign(item.data,patch);applyStyle(item);drawLinks();persist();refreshControls()}
 function beginInlineEdit(el){
   const item=nodes.get(el.dataset.id);
@@ -819,11 +849,41 @@ Object.values(resizeHandles).forEach(rh=>rh.addEventListener('pointerdown',e=>{
   document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up);
 }));
 
-Object.values(handles).forEach(h=>h.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();const side=h.dataset.side,[x1,y1]=anchor(el,side);temp.hidden=false;temp.setAttribute('d',`M${x1},${y1} L${x1},${y1}`);const mv=ev=>{const r=canvas.getBoundingClientRect(),x2=ev.clientX-r.left+scroll.scrollLeft,y2=ev.clientY-r.top+scroll.scrollTop;temp.setAttribute('d',`M${x1},${y1} L${x2},${y2}`)};const up=ev=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);finishTempArrow();const target=document.elementFromPoint(ev.clientX,ev.clientY)?.closest('.p48-node');if(target&&target!==el){pushUndo();links.push([el.dataset.id,target.dataset.id,side]);drawLinks();persist()}};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)}));
+Object.values(handles).forEach(h=>h.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();const side=h.dataset.side,[x1,y1]=anchor(el,side);temp.hidden=false;temp.setAttribute('d',`M${x1},${y1} L${x1},${y1}`);const mv=ev=>{const r=canvas.getBoundingClientRect(),x2=ev.clientX-r.left+scroll.scrollLeft,y2=ev.clientY-r.top+scroll.scrollTop;temp.setAttribute('d',`M${x1},${y1} L${x2},${y2}`)};const up=ev=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);finishTempArrow();const target=document.elementFromPoint(ev.clientX,ev.clientY)?.closest('.p48-node');if(target&&target!==el){pushUndo();links.push([el.dataset.id,target.dataset.id,side,{color:'#687584',width:2,end:'arrow',dash:'solid',viaX:null,viaY:null}]);drawLinks();persist()}};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)}));
 return el}
 
 function addNode(type,x,y){pushUndo();seq++;const el=makeNode({id:'n'+seq,type,text:nodeText(type),x:x-90,y:y-38});place(el,x-90,y-38);sync(el);select(el);drawLinks();persist()}
-function drawLinks(){linkLayer.innerHTML='';for(const [a,b,side] of links){const A=nodes.get(a)?.el,B=nodes.get(b)?.el;if(!A||!B)continue;const s=side||'right',t=targetSide(A,B),[x1,y1]=anchor(A,s),[x2,y2]=anchor(B,t),p=document.createElementNS('http://www.w3.org/2000/svg','path');p.setAttribute('class','p48-link');p.setAttribute('marker-end','url(#p48-arrow)');p.setAttribute('d',`M${x1},${y1} L${x2},${y2}`);linkLayer.appendChild(p)}}
+
+function linkStyle(link){if(!link[3]||typeof link[3]!=='object')link[3]={};return Object.assign({color:'#687584',width:2,end:'arrow',dash:'solid',viaX:null,viaY:null},link[3])}
+function setLinkStyle(i,patch){if(i==null||!links[i])return;links[i][3]=Object.assign(linkStyle(links[i]),patch)}
+function dashArray(st){return st.dash==='dashed'?'10 7':st.dash==='dotted'?'2 6':''}
+function refreshLinkControls(){
+  const link=selectedLinkIndex!=null?links[selectedLinkIndex]:null;
+  linkFormat.classList.toggle('on',!!link);linkHandle.classList.toggle('on',!!link);
+  if(!link)return;
+  const st=linkStyle(link);linkColor.value=st.color;linkWidth.value=String(st.width);linkEnd.value=st.end;linkDash.value=st.dash;
+}
+function selectLink(i){selectedLinkIndex=i;selectedId=null;selectedIds.clear();refreshControls();updateSelectionUi();refreshLinkControls();drawLinks()}
+function clearLinkSelection(){selectedLinkIndex=null;refreshLinkControls();drawLinks()}
+function markerFor(st,x,y,ang){
+  const ns='http://www.w3.org/2000/svg';
+  if(st.end==='none')return null;
+  if(st.end==='circle'){const c=document.createElementNS(ns,'circle');c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',6+Number(st.width||2));c.setAttribute('fill','#fff');c.setAttribute('stroke',st.color);c.setAttribute('stroke-width',st.width);return c}
+  const p=document.createElementNS(ns,'polygon'),len=10+Number(st.width||2)*1.5,w=5+Number(st.width||2);
+  let pts;
+  if(st.end==='diamond')pts=[[0,0],[-len,w],[-2*len,0],[-len,-w]];
+  else pts=[[0,0],[-len,w],[-len,-w]];
+  p.setAttribute('points',pts.map(([px,py])=>{const rx=x+px*Math.cos(ang)-py*Math.sin(ang),ry=y+px*Math.sin(ang)+py*Math.cos(ang);return rx+','+ry}).join(' '));
+  p.setAttribute('fill',st.color);return p;
+}
+function selectedLinkMidpoint(){
+  const link=selectedLinkIndex!=null?links[selectedLinkIndex]:null;if(!link)return null;
+  const A=nodes.get(link[0])?.el,B=nodes.get(link[1])?.el;if(!A||!B)return null;
+  const side=link[2]||'right',t=targetSide(A,B),[x1,y1]=anchor(A,side),[x2,y2]=anchor(B,t),st=linkStyle(link);
+  return{x:st.viaX==null?(x1+x2)/2:st.viaX,y:st.viaY==null?(y1+y2)/2:st.viaY}
+}
+
+function drawLinks(){linkLayer.innerHTML='';links.forEach((link,index)=>{const[a,b,side]=link,A=nodes.get(a)?.el,B=nodes.get(b)?.el;if(!A||!B)return;const st=linkStyle(link),ss=side||'right',t=targetSide(A,B),[x1,y1]=anchor(A,ss),[x2,y2]=anchor(B,t),mx=st.viaX==null?(x1+x2)/2:st.viaX,my=st.viaY==null?(y1+y2)/2:st.viaY,bent=st.viaX!=null||st.viaY!=null,d=bent?`M${x1},${y1} L${mx},${my} L${x2},${y2}`:`M${x1},${y1} L${x2},${y2}`,g=document.createElementNS('http://www.w3.org/2000/svg','g'),v=document.createElementNS('http://www.w3.org/2000/svg','path'),hit=document.createElementNS('http://www.w3.org/2000/svg','path');if(selectedLinkIndex===index)g.setAttribute('class','p48-link-selected');v.setAttribute('class','p48-link-visible');v.setAttribute('d',d);v.setAttribute('stroke',st.color);v.setAttribute('stroke-width',st.width);const da=dashArray(st);if(da)v.setAttribute('stroke-dasharray',da);hit.setAttribute('class','p48-link-hit');hit.setAttribute('d',d);hit.addEventListener('click',e=>{e.stopPropagation();selectLink(index)});g.append(v,hit);const ang=bent?Math.atan2(y2-my,x2-mx):Math.atan2(y2-y1,x2-x1),mk=markerFor(st,x2,y2,ang);if(mk)g.appendChild(mk);linkLayer.appendChild(g)});if(selectedLinkIndex!=null){const m=selectedLinkMidpoint();if(m){linkHandle.style.left=m.x+'px';linkHandle.style.top=m.y+'px';linkHandle.classList.add('on')}}else linkHandle.classList.remove('on')}
 function deleteSelected(){
   if(selectedIds.size>1){deleteSelectedMany();return;}
   if(!selectedId||!nodes.has(selectedId))return;
@@ -1096,10 +1156,18 @@ async function renderMapSnapshot(){
   const ox=pad-b.minX,oy=header+pad-b.minY;
 
   // connectors
-  for(const [a,bid,side] of links){
-    const A=nodes.get(a)?.el,B=nodes.get(bid)?.el;if(!A||!B)continue;
-    const t=targetSide(A,B),[ax,ay]=anchor(A,side||'right'),[bx,by]=anchor(B,t);
-    drawArrow(ctx,ox+ax,oy+ay,ox+bx,oy+by);
+  for(const link of links){
+    const [a,bid,side]=link,A=nodes.get(a)?.el,B=nodes.get(bid)?.el;if(!A||!B)continue;
+    const st=linkStyle(link),t=targetSide(A,B),[ax,ay]=anchor(A,side||'right'),[bx,by]=anchor(B,t);
+    const mx=st.viaX==null?(ax+bx)/2:st.viaX,my=st.viaY==null?(ay+by)/2:st.viaY,bent=st.viaX!=null||st.viaY!=null;
+    ctx.save();ctx.strokeStyle=st.color;ctx.fillStyle=st.color;ctx.lineWidth=Number(st.width)||2;
+    if(st.dash==='dashed')ctx.setLineDash([10,7]);else if(st.dash==='dotted')ctx.setLineDash([2,6]);
+    ctx.beginPath();ctx.moveTo(ox+ax,oy+ay);if(bent)ctx.lineTo(ox+mx,oy+my);ctx.lineTo(ox+bx,oy+by);ctx.stroke();
+    const px=ox+bx,py=oy+by,ang=bent?Math.atan2(by-my,bx-mx):Math.atan2(by-ay,bx-ax),len=10+(Number(st.width)||2)*1.5,w=5+(Number(st.width)||2);
+    if(st.end==='arrow'){ctx.beginPath();ctx.moveTo(px,py);ctx.lineTo(px-len*Math.cos(ang)+w*Math.sin(ang),py-len*Math.sin(ang)-w*Math.cos(ang));ctx.lineTo(px-len*Math.cos(ang)-w*Math.sin(ang),py-len*Math.sin(ang)+w*Math.cos(ang));ctx.closePath();ctx.fill()}
+    else if(st.end==='circle'){ctx.beginPath();ctx.arc(px,py,6+(Number(st.width)||2),0,Math.PI*2);ctx.fillStyle='#fff';ctx.fill();ctx.stroke()}
+    else if(st.end==='diamond'){const pts=[[0,0],[-len,w],[-2*len,0],[-len,-w]];ctx.beginPath();pts.forEach(([qx,qy],i)=>{const rx=px+qx*Math.cos(ang)-qy*Math.sin(ang),ry=py+qx*Math.sin(ang)+qy*Math.cos(ang);i?ctx.lineTo(rx,ry):ctx.moveTo(rx,ry)});ctx.closePath();ctx.fillStyle=st.color;ctx.fill()}
+    ctx.restore();
   }
 
   // nodes
@@ -1107,13 +1175,7 @@ async function renderMapSnapshot(){
     const d=item.data,s=styleOf(d),x=ox+(d.x||0),y=oy+(d.y||0),w=item.el.offsetWidth,h=item.el.offsetHeight;
     ctx.save();
     ctx.fillStyle=s.bgColor||'#ffffff';
-    let stroke='#637387';
-    if(d.type==='start')stroke='#2b7b61';
-    else if(d.type==='end')stroke='#985148';
-    else if(d.type==='decision')stroke='#d69a18';
-    else if(d.type==='subprocess')stroke='#7556a6';
-    else if(d.type==='note')stroke='#b8973e';
-    ctx.strokeStyle=stroke;ctx.lineWidth=(d.type==='subprocess'?4:2);
+    ctx.strokeStyle=s.borderColor||'#637387';ctx.lineWidth=Number(s.borderWidth)||2;
 
     if(d.type==='decision'){
       ctx.beginPath();ctx.moveTo(x+w/2,y);ctx.lineTo(x+w,y+h/2);ctx.lineTo(x+w/2,y+h);ctx.lineTo(x,y+h/2);ctx.closePath();ctx.fill();ctx.stroke();
@@ -1331,7 +1393,7 @@ root.querySelectorAll('.p48-item').forEach(i=>i.addEventListener('dragstart',e=>
 canvas.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='copy'});
 canvas.addEventListener('drop',e=>{e.preventDefault();const type=e.dataTransfer.getData('text/plain');if(!type)return;const r=canvas.getBoundingClientRect();addNode(type,e.clientX-r.left+scroll.scrollLeft,e.clientY-r.top+scroll.scrollTop)});
 canvas.addEventListener('click',e=>{
-  if(e.target===canvas&&!selectionMode){clearSelection();finishTempArrow();}
+  if(e.target===canvas&&!selectionMode){clearSelection();clearLinkSelection();finishTempArrow();}
 });
 nameInput.addEventListener('change',()=>{persist();msg('Namn sparat')});
 root.querySelector('#p48-new').addEventListener('click',newProcess);
@@ -1412,14 +1474,22 @@ function createGoogleSheetDirect(){
 root.querySelector('#p48-pdf').addEventListener('click',exportPdf);root.querySelector('#p48-doc').addEventListener('click',exportDoc);root.querySelector('#p48-sheets').addEventListener('click',exportGoogleSheets);root.querySelector('#p48-sheets-direct').addEventListener('click',createGoogleSheetDirect);
 root.querySelector('#p48-undo').addEventListener('click',()=>{if(!undo.length)return;redo.push(JSON.stringify(state()));restore(undo.pop());persist()});
 root.querySelector('#p48-redo').addEventListener('click',()=>{if(!redo.length)return;undo.push(JSON.stringify(state()));restore(redo.pop());persist()});
-root.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;if(e.key==='Delete'){if(selectedIds.size>1)deleteSelectedMany();else deleteSelected()}});
-font.addEventListener('change',()=>updateStyle({fontFamily:font.value}));size.addEventListener('change',()=>updateStyle({fontSize:Math.max(10,Math.min(36,Number(size.value)||13))}));textColor.addEventListener('input',()=>updateStyle({textColor:textColor.value}));bgColor.addEventListener('input',()=>updateStyle({bgColor:bgColor.value}));
+root.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;if(e.key==='Delete'){if(selectedLinkIndex!=null){links.splice(selectedLinkIndex,1);selectedLinkIndex=null;drawLinks();persist();refreshLinkControls()}else if(selectedIds.size>1)deleteSelectedMany();else deleteSelected()}});
+font.addEventListener('change',()=>updateStyle({fontFamily:font.value}));size.addEventListener('change',()=>updateStyle({fontSize:Math.max(10,Math.min(36,Number(size.value)||13))}));textColor.addEventListener('input',()=>updateStyle({textColor:textColor.value}));bgColor.addEventListener('input',()=>updateStyle({bgColor:bgColor.value}));borderColor.addEventListener('input',()=>updateStyle({borderColor:borderColor.value}));borderWidth.addEventListener('change',()=>updateStyle({borderWidth:Number(borderWidth.value)}));
 bold.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({fontWeight:styleOf(x.data).fontWeight==='700'?'400':'700'})});italic.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({fontStyle:styleOf(x.data).fontStyle==='italic'?'normal':'italic'})});under.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({textDecoration:styleOf(x.data).textDecoration==='underline'?'none':'underline'})});root.querySelectorAll('[data-align]').forEach(b=>b.addEventListener('click',()=>updateStyle({textAlign:b.dataset.align})));
 
 
 addInputBtn.addEventListener('click',()=>{const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();ensureIO(item);item.data.inputs.push('Ny input');renderNodeIO(item);persist();refreshControls();});
 addOutputBtn.addEventListener('click',()=>{const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();ensureIO(item);item.data.outputs.push('Ny output');renderNodeIO(item);persist();refreshControls();});
+
 deleteNodeBtn.addEventListener('click',()=>deleteSelected());
+linkColor.addEventListener('input',()=>{if(selectedLinkIndex==null)return;pushUndo();setLinkStyle(selectedLinkIndex,{color:linkColor.value});drawLinks();persist()});
+linkWidth.addEventListener('change',()=>{if(selectedLinkIndex==null)return;pushUndo();setLinkStyle(selectedLinkIndex,{width:Number(linkWidth.value)});drawLinks();persist()});
+linkEnd.addEventListener('change',()=>{if(selectedLinkIndex==null)return;pushUndo();setLinkStyle(selectedLinkIndex,{end:linkEnd.value});drawLinks();persist()});
+linkDash.addEventListener('change',()=>{if(selectedLinkIndex==null)return;pushUndo();setLinkStyle(selectedLinkIndex,{dash:linkDash.value});drawLinks();persist()});
+deleteLinkBtn.addEventListener('click',()=>{if(selectedLinkIndex==null)return;pushUndo();links.splice(selectedLinkIndex,1);selectedLinkIndex=null;drawLinks();persist();refreshLinkControls();msg('Koppling borttagen')});
+linkHandle.addEventListener('pointerdown',e=>{if(selectedLinkIndex==null)return;e.preventDefault();e.stopPropagation();pushUndo();const r=canvas.getBoundingClientRect(),mv=ev=>{setLinkStyle(selectedLinkIndex,{viaX:ev.clientX-r.left+scroll.scrollLeft,viaY:ev.clientY-r.top+scroll.scrollTop});drawLinks()},up=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);persist()};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)});
+
 
 loadCloudSession();
 const SHARE_TOKEN="__SHARE_TOKEN__";

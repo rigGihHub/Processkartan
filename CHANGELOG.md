@@ -1,5 +1,7 @@
-# v0.8.6
-- Sammanfogad Konto & workspace-panel.
-- Supabase-testknapp borttagen från produkt-UI.
-- Fast horisontell navigator längst ned i arbetsytan.
-- Synkroniserad höger/vänster-scroll.
+# v0.8.7
+- Kantfärg/kanttjocklek för rutor.
+- Klickbara och redigerbara kopplingar.
+- Färg, tjocklek och linjetyp för kopplingar.
+- Pil / ingen / cirkel / diamant.
+- Draghandtag för att böja om kopplingen.
+- Export tar hänsyn till den nya formateringen.

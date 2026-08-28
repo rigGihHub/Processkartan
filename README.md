@@ -1,19 +1,23 @@
-# Maplini v0.8.6
+# Maplini v0.8.7
 
-## Konto & workspace
-- Tidigare separata boxar `Workspace` och `Konto & moln` är sammanslagna.
-- Utloggad användare ser bara inloggning/skapa konto.
-- Inloggad användare ser:
-  - e-post
-  - Logga ut
-  - aktuellt workspace
-  - roll
-  - möjlighet att skapa nytt workspace
-- `Testa Supabase-anslutning` är borttagen från vanliga användargränssnittet.
-- Google är fortsatt en separat exportintegration, inte en andra Maplini-inloggning.
+## Rutornas kanter
+Formateringspanelen innehåller nu:
+- Kantfärg
+- Kanttjocklek
 
-## Horisontell navigering
-- En egen horisontell rullist ligger fast längst ned i den synliga arbetsytan.
-- Den synkroniseras med canvasen.
-- Du behöver inte scrolla till botten av den höga canvasen för att komma åt den.
-- Shift + mushjul fungerar fortsatt för höger/vänster.
+Det gäller även beslutspunkter.
+
+## Kopplingar och pilar
+Klicka direkt på en linje för att markera den.
+
+Du kan ändra:
+- färg
+- tjocklek
+- linjetyp: heldragen, streckad eller prickad
+- slutmarkör: pil, ingen, cirkel eller diamant
+- radera kopplingen separat
+
+En markerad koppling får ett blått draghandtag. Dra handtaget för att ändra linjens bana.
+
+## Standard
+Pil är standard och är den vanligaste symbolen för ett riktat processflöde. I BPMN används normalt en solid linje med pilspets för sequence flow.
