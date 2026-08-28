@@ -1,23 +1,32 @@
-# Maplini v0.8.8
+# Maplini v0.8.9
 
-## Fixar
-1. Kopplingar/pilar är nu betydligt enklare att markera.
-   - Osynlig klickyta är 20 px bred.
-   - Klickytan ligger över den synliga linjen.
-   - Pointer events stoppas så canvasen inte tar klicket.
+## Fler typsnitt
+Maplini har nu ett större fontbibliotek, bland annat:
+Inter, Poppins, Montserrat, DM Sans, Manrope, Space Grotesk, Roboto,
+Open Sans, Lato, Nunito, Raleway, Rubik, Quicksand, Fira Sans, Ubuntu,
+Oswald, Bebas Neue, Playfair Display, Merriweather, Pacifico och Caveat.
 
-2. Gröna kopplingspunkter
-   - Dolda som standard.
-   - Visas endast på markerad ruta.
+`Använd typsnitt på all text` finns kvar.
 
-3. Kant- och linjeformatering
-   - Ett enda ställe används för färg och tjocklek:
-     `Kantfärg` + `Kanttjocklek`.
-   - Markerad ruta: ändrar rutans kant.
-   - Markerad koppling: ändrar linjens färg och tjocklek.
-   - Kopplingspanelen innehåller bara kopplingsspecifika val:
-     slutmarkör och linjetyp.
+## Kopplingar – ny markeringsmotor
+Kopplingar markeras inte längre enbart genom SVG-klick.
 
-4. Globalt typsnitt
-   - Ny knapp `Använd typsnitt på all text`.
-   - Välj typsnitt och klicka knappen för att uppdatera alla rutor i processen.
+Maplini gör nu även en geometrisk träfftestning:
+- klicka inom ca 14 px från en linje
+- närmaste koppling markeras
+- markerad koppling får en tydlig blå halo
+- detta fungerar även om SVG-lagret i webbläsaren missar klicket
+
+## Linjetyp och slutmarkör
+Ändringar renderas om direkt:
+- Heldragen
+- Streckad
+- Prickad
+
+Slutmarkör:
+- Pil
+- Ingen
+- Cirkel
+- Diamant
+
+Maplini visar också en bekräftelse när linjetyp/slutmarkör ändrats.

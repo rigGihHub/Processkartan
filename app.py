@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.8.8"
+APP_VERSION = "0.8.9"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -17,6 +17,8 @@ _CLOUD_ENABLED = bool(_SUPABASE_URL and _SUPABASE_ANON_KEY)
 
 st.markdown("""
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Caveat:wght@400;700&family=DM+Sans:wght@400;600;700&family=Fira+Sans:wght@400;600;700&family=Inter:wght@400;600;700;800&family=Lato:wght@400;700&family=Manrope:wght@400;600;700&family=Merriweather:wght@400;700&family=Montserrat:wght@400;600;700&family=Nunito:wght@400;600;700&family=Open+Sans:wght@400;600;700&family=Oswald:wght@400;600;700&family=Pacifico&family=Playfair+Display:wght@400;600;700&family=Poppins:wght@400;600;700&family=Quicksand:wght@400;600;700&family=Raleway:wght@400;600;700&family=Roboto:wght@400;500;700&family=Rubik:wght@400;600;700&family=Space+Grotesk:wght@400;600;700&family=Ubuntu:wght@400;500;700&display=swap');
+
 .block-container{padding:0.35rem 0.45rem 0.8rem;max-width:none}
 header[data-testid="stHeader"]{height:2rem}
 #MainMenu,footer{visibility:hidden}
@@ -81,7 +83,7 @@ header[data-testid="stHeader"]{height:2rem}
 
 
 /* v0.8.7: editable node borders and connectors */
-.p48-link-visible{fill:none;pointer-events:none}
+.p48-link-visible{fill:none;pointer-events:stroke}
 .p48-link-hit{fill:none;stroke:transparent;stroke-width:16;pointer-events:stroke;cursor:pointer}
 .p48-link-selected{filter:drop-shadow(0 0 2px rgba(44,123,229,.55))}
 .p48-link-handle{position:absolute;width:15px;height:15px;border-radius:50%;background:#fff;border:2px solid #2c7be5;z-index:36;display:none;transform:translate(-50%,-50%);cursor:move}
@@ -108,6 +110,15 @@ header[data-testid="stHeader"]{height:2rem}
   cursor:pointer;
 }
 #p48-links{pointer-events:auto}
+
+
+.p48-link-selection{
+  fill:none;
+  stroke:#2c7be5;
+  stroke-width:8;
+  opacity:.28;
+  pointer-events:none;
+}
 
 </style>
 """, unsafe_allow_html=True)
@@ -187,6 +198,8 @@ html = r"""
 .p48-node.decision.multi-selected::before{border-color:#2c7be5;box-shadow:none}
 
 #p48-svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}
+#p48-links{pointer-events:all!important}
+#p48-links *{pointer-events:visibleStroke}
 .p48-link{stroke:#687584;stroke-width:2.2;fill:none}.p48-temp{stroke:#df941e;stroke-width:2.4;fill:none;stroke-dasharray:6 5}
 .p48-node{position:absolute;min-width:160px;max-width:360px;width:max-content;min-height:64px;height:auto;padding:14px 26px;border:2px solid #637387;border-radius:10px;background:#fff;box-shadow:0 3px 9px rgba(31,42,55,.10);z-index:5;user-select:none;touch-action:none;display:flex;align-items:center;justify-content:center}
 .p48-label{display:block;width:100%;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;line-height:1.28;cursor:text;outline:none}
@@ -354,7 +367,35 @@ html = r"""
       <div class="p48-sub">Markera en ruta för att ändra dess text, färger och formatering.</div>
       <div id="p48-controls">
         <div class="p48-format-grid">
-          <div><label>Typsnitt</label><select id="p48-font"><option value="Arial">Arial</option><option value="Verdana">Verdana</option><option value="Georgia">Georgia</option><option value="Trebuchet MS">Trebuchet MS</option><option value="Courier New">Courier New</option><option value="system-ui">System</option></select></div>
+          <div><label>Typsnitt</label><select id="p48-font">
+<option value="Inter">Inter</option>
+<option value="Poppins">Poppins</option>
+<option value="Montserrat">Montserrat</option>
+<option value="DM Sans">DM Sans</option>
+<option value="Manrope">Manrope</option>
+<option value="Space Grotesk">Space Grotesk</option>
+<option value="Roboto">Roboto</option>
+<option value="Open Sans">Open Sans</option>
+<option value="Lato">Lato</option>
+<option value="Nunito">Nunito</option>
+<option value="Raleway">Raleway</option>
+<option value="Rubik">Rubik</option>
+<option value="Quicksand">Quicksand</option>
+<option value="Fira Sans">Fira Sans</option>
+<option value="Ubuntu">Ubuntu</option>
+<option value="Oswald">Oswald</option>
+<option value="Bebas Neue">Bebas Neue</option>
+<option value="Playfair Display">Playfair Display</option>
+<option value="Merriweather">Merriweather</option>
+<option value="Pacifico">Pacifico</option>
+<option value="Caveat">Caveat</option>
+<option value="Arial">Arial</option>
+<option value="Verdana">Verdana</option>
+<option value="Georgia">Georgia</option>
+<option value="Trebuchet MS">Trebuchet MS</option>
+<option value="Courier New">Courier New</option>
+<option value="system-ui">System</option>
+</select></div>
           <button type="button" class="p48-btn" id="p48-font-all" style="grid-column:1/-1;width:100%;margin-top:2px">Använd typsnitt på all text</button>
           <div><label>Storlek</label><input id="p48-size" type="number" min="10" max="36" value="13"></div>
           <div><label>Textfärg</label><input id="p48-textcolor" type="color" value="#17202a"></div>
@@ -661,7 +702,7 @@ function clone(v){return JSON.parse(JSON.stringify(v))}
 function uid(){return 'proc-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7)}
 function msg(t){status.textContent=t;setTimeout(()=>{if(status.textContent===t)status.textContent=''},1800)}
 function defBg(type){return {start:'#edf8f3',end:'#fff3f1',decision:'#fff8df',subprocess:'#f7f3ff',note:'#fffbe8',group:'#f8fafc'}[type]||'#ffffff'}
-function styleOf(d){return{fontFamily:d.fontFamily||'Arial',fontSize:Number(d.fontSize||13),textColor:d.textColor||'#17202a',bgColor:d.bgColor||defBg(d.type),fontWeight:d.fontWeight||'700',fontStyle:d.fontStyle||'normal',textDecoration:d.textDecoration||'none',textAlign:d.textAlign||'center',borderColor:d.borderColor||'#637387',borderWidth:Number(d.borderWidth||2)}}
+function styleOf(d){return{fontFamily:d.fontFamily||'Inter',fontSize:Number(d.fontSize||13),textColor:d.textColor||'#17202a',bgColor:d.bgColor||defBg(d.type),fontWeight:d.fontWeight||'700',fontStyle:d.fontStyle||'normal',textDecoration:d.textDecoration||'none',textAlign:d.textAlign||'center',borderColor:d.borderColor||'#637387',borderWidth:Number(d.borderWidth||2)}}
 function applyStyle(item){const s=styleOf(item.data);Object.assign(item.data,s);item.label.style.fontFamily=s.fontFamily;item.label.style.fontSize=s.fontSize+'px';item.label.style.color=s.textColor;item.label.style.fontWeight=s.fontWeight;item.label.style.fontStyle=s.fontStyle;item.label.style.textDecoration=s.textDecoration;item.label.style.textAlign=s.textAlign;item.el.style.background=s.bgColor;item.el.style.setProperty('--decision-bg',s.bgColor);if(item.data.type==='decision'){item.el.style.setProperty('--decision-border',s.borderColor);item.el.style.setProperty('--decision-border-width',s.borderWidth+'px')}else{item.el.style.borderColor=s.borderColor;item.el.style.borderWidth=s.borderWidth+'px'}}
 function state(){return{id:currentId,name:nameInput.value.trim()||'Namnlös process',nodes:[...nodes.values()].map(x=>clone(x.data)),links:clone(links)}}
 function saveLocal(){try{localStorage.setItem('maplini_v050',JSON.stringify({currentId,processes}))}catch(e){}}
@@ -877,6 +918,42 @@ return el}
 
 function addNode(type,x,y){pushUndo();seq++;const el=makeNode({id:'n'+seq,type,text:nodeText(type),x:x-90,y:y-38});place(el,x-90,y-38);sync(el);select(el);drawLinks();persist()}
 
+
+function distancePointToSegment(px,py,x1,y1,x2,y2){
+  const vx=x2-x1,vy=y2-y1,wx=px-x1,wy=py-y1;
+  const len2=vx*vx+vy*vy;
+  if(len2===0)return Math.hypot(px-x1,py-y1);
+  let t=(wx*vx+wy*vy)/len2;
+  t=Math.max(0,Math.min(1,t));
+  const qx=x1+t*vx,qy=y1+t*vy;
+  return Math.hypot(px-qx,py-qy);
+}
+function linkDistanceAt(index,x,y){
+  const link=links[index];if(!link)return Infinity;
+  const A=nodes.get(link[0])?.el,B=nodes.get(link[1])?.el;if(!A||!B)return Infinity;
+  const side=link[2]||'right',t=targetSide(A,B);
+  const [x1,y1]=anchor(A,side),[x2,y2]=anchor(B,t),st=linkStyle(link);
+  if(st.viaX!=null||st.viaY!=null){
+    const mx=st.viaX==null?(x1+x2)/2:st.viaX,my=st.viaY==null?(y1+y2)/2:st.viaY;
+    return Math.min(
+      distancePointToSegment(x,y,x1,y1,mx,my),
+      distancePointToSegment(x,y,mx,my,x2,y2)
+    );
+  }
+  return distancePointToSegment(x,y,x1,y1,x2,y2);
+}
+function hitTestLink(clientX,clientY){
+  const rect=canvas.getBoundingClientRect();
+  const x=clientX-rect.left+scroll.scrollLeft;
+  const y=clientY-rect.top+scroll.scrollTop;
+  let best=null,bestDist=Infinity;
+  links.forEach((_,i)=>{
+    const d=linkDistanceAt(i,x,y);
+    if(d<bestDist){bestDist=d;best=i}
+  });
+  return bestDist<=14?best:null;
+}
+
 function linkStyle(link){if(!link[3]||typeof link[3]!=='object')link[3]={};return Object.assign({color:'#687584',width:2,end:'arrow',dash:'solid',viaX:null,viaY:null},link[3])}
 function setLinkStyle(i,patch){if(i==null||!links[i])return;links[i][3]=Object.assign(linkStyle(links[i]),patch)}
 function dashArray(st){return st.dash==='dashed'?'10 7':st.dash==='dotted'?'2 6':''}
@@ -896,7 +973,7 @@ function clearLinkSelection(){selectedLinkIndex=null;refreshLinkControls();drawL
 function markerFor(st,x,y,ang){
   const ns='http://www.w3.org/2000/svg';
   if(st.end==='none')return null;
-  if(st.end==='circle'){const c=document.createElementNS(ns,'circle');c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',6+Number(st.width||2));c.setAttribute('fill','#fff');c.setAttribute('stroke',st.color);c.setAttribute('stroke-width',st.width);return c}
+  if(st.end==='circle'){const c=document.createElementNS(ns,'circle');c.setAttribute('cx',x);c.setAttribute('cy',y);c.setAttribute('r',8+Number(st.width||2));c.setAttribute('fill','#fff');c.setAttribute('stroke',st.color);c.setAttribute('stroke-width',st.width);return c}
   const p=document.createElementNS(ns,'polygon'),len=10+Number(st.width||2)*1.5,w=5+Number(st.width||2);
   let pts;
   if(st.end==='diamond')pts=[[0,0],[-len,w],[-2*len,0],[-len,-w]];
@@ -928,6 +1005,13 @@ function drawLinks(){
     const g=document.createElementNS('http://www.w3.org/2000/svg','g');
     if(selectedLinkIndex===index)g.setAttribute('class','p48-link-selected');
 
+    if(selectedLinkIndex===index){
+      const halo=document.createElementNS('http://www.w3.org/2000/svg','path');
+      halo.setAttribute('class','p48-link-selection');
+      halo.setAttribute('d',d);
+      g.appendChild(halo);
+    }
+
     const v=document.createElementNS('http://www.w3.org/2000/svg','path');
     v.setAttribute('class','p48-link-visible');
     v.setAttribute('d',d);
@@ -936,6 +1020,8 @@ function drawLinks(){
     v.setAttribute('fill','none');
     const da=dashArray(st);
     if(da)v.setAttribute('stroke-dasharray',da);
+    else v.removeAttribute('stroke-dasharray');
+    v.setAttribute('stroke-linecap',st.dash==='dotted'?'round':'butt');
 
     const hit=document.createElementNS('http://www.w3.org/2000/svg','path');
     hit.setAttribute('class','p48-link-hit');
@@ -981,6 +1067,19 @@ function drawLinks(){
     linkHandle.classList.remove('on');
   }
 }
+
+canvas.addEventListener('pointerdown',e=>{
+  if(e.button!==0)return;
+  if(e.target.closest&&e.target.closest('.p48-node'))return;
+  if(e.target===linkHandle)return;
+  const hit=hitTestLink(e.clientX,e.clientY);
+  if(hit!=null){
+    e.preventDefault();
+    e.stopPropagation();
+    selectLink(hit);
+  }
+},true);
+
 function deleteSelected(){
   if(selectedIds.size>1){deleteSelectedMany();return;}
   if(!selectedId||!nodes.has(selectedId))return;
@@ -1226,6 +1325,7 @@ function drawRoundedRect(ctx,x,y,w,h,r){
 }
 async function renderMapSnapshot(){
   persist();
+  if(document.fonts&&document.fonts.ready){try{await document.fonts.ready}catch(e){}}
   const b=exportBounds();if(!b)throw new Error('Processen är tom');
   const logoImg=new Image();
   const logoReady=new Promise(resolve=>{logoImg.onload=()=>resolve(true);logoImg.onerror=()=>resolve(false);});
@@ -1607,8 +1707,20 @@ addInputBtn.addEventListener('click',()=>{const item=selectedId?nodes.get(select
 addOutputBtn.addEventListener('click',()=>{const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();ensureIO(item);item.data.outputs.push('Ny output');renderNodeIO(item);persist();refreshControls();});
 
 deleteNodeBtn.addEventListener('click',()=>deleteSelected());
-linkEnd.addEventListener('change',()=>{if(selectedLinkIndex==null)return;pushUndo();setLinkStyle(selectedLinkIndex,{end:linkEnd.value});drawLinks();persist()});
-linkDash.addEventListener('change',()=>{if(selectedLinkIndex==null)return;pushUndo();setLinkStyle(selectedLinkIndex,{dash:linkDash.value});drawLinks();persist()});
+linkEnd.addEventListener('change',()=>{
+  if(selectedLinkIndex==null){msg('Markera först en koppling');return}
+  pushUndo();
+  setLinkStyle(selectedLinkIndex,{end:String(linkEnd.value)});
+  drawLinks();persist();refreshLinkControls();
+  msg('Slutmarkör ändrad');
+});
+linkDash.addEventListener('change',()=>{
+  if(selectedLinkIndex==null){msg('Markera först en koppling');return}
+  pushUndo();
+  setLinkStyle(selectedLinkIndex,{dash:String(linkDash.value)});
+  drawLinks();persist();refreshLinkControls();
+  msg('Linjetyp ändrad');
+});
 deleteLinkBtn.addEventListener('click',()=>{if(selectedLinkIndex==null)return;pushUndo();links.splice(selectedLinkIndex,1);selectedLinkIndex=null;drawLinks();persist();refreshLinkControls();msg('Koppling borttagen')});
 linkHandle.addEventListener('pointerdown',e=>{if(selectedLinkIndex==null)return;e.preventDefault();e.stopPropagation();pushUndo();const r=canvas.getBoundingClientRect(),mv=ev=>{setLinkStyle(selectedLinkIndex,{viaX:ev.clientX-r.left+scroll.scrollLeft,viaY:ev.clientY-r.top+scroll.scrollTop});drawLinks()},up=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);persist()};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)});
 

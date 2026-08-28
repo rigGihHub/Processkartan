@@ -1,5 +1,6 @@
-# v0.8.8
-- Stabil klickmarkering av kopplingar.
-- Kopplingspunkter visas bara på markerad ruta.
-- Gemensam färg/tjocklek för ruta eller koppling.
-- Global fontändring för all text.
+# v0.8.9
+- Stort nytt fontbibliotek.
+- Geometrisk träfftestning för kopplingar.
+- Tydlig blå markering av vald koppling.
+- Robustare renderingslogik för linjetyp och slutmarkör.
+- Google Fonts väntas in före dokumentexport.
