@@ -1,23 +1,23 @@
-# Maplini v0.8.7
+# Maplini v0.8.8
 
-## Rutornas kanter
-Formateringspanelen innehåller nu:
-- Kantfärg
-- Kanttjocklek
+## Fixar
+1. Kopplingar/pilar är nu betydligt enklare att markera.
+   - Osynlig klickyta är 20 px bred.
+   - Klickytan ligger över den synliga linjen.
+   - Pointer events stoppas så canvasen inte tar klicket.
 
-Det gäller även beslutspunkter.
+2. Gröna kopplingspunkter
+   - Dolda som standard.
+   - Visas endast på markerad ruta.
 
-## Kopplingar och pilar
-Klicka direkt på en linje för att markera den.
+3. Kant- och linjeformatering
+   - Ett enda ställe används för färg och tjocklek:
+     `Kantfärg` + `Kanttjocklek`.
+   - Markerad ruta: ändrar rutans kant.
+   - Markerad koppling: ändrar linjens färg och tjocklek.
+   - Kopplingspanelen innehåller bara kopplingsspecifika val:
+     slutmarkör och linjetyp.
 
-Du kan ändra:
-- färg
-- tjocklek
-- linjetyp: heldragen, streckad eller prickad
-- slutmarkör: pil, ingen, cirkel eller diamant
-- radera kopplingen separat
-
-En markerad koppling får ett blått draghandtag. Dra handtaget för att ändra linjens bana.
-
-## Standard
-Pil är standard och är den vanligaste symbolen för ett riktat processflöde. I BPMN används normalt en solid linje med pilspets för sequence flow.
+4. Globalt typsnitt
+   - Ny knapp `Använd typsnitt på all text`.
+   - Välj typsnitt och klicka knappen för att uppdatera alla rutor i processen.

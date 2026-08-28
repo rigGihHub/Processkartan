@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.8.7"
+APP_VERSION = "0.8.8"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -91,6 +91,23 @@ header[data-testid="stHeader"]{height:2rem}
 .p48-link-format-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .p48-link-format label{font:700 10px system-ui;color:#657281}
 .p48-link-format input,.p48-link-format select{width:100%;margin-top:4px;border:1px solid #cfd7df;border-radius:7px;padding:6px;font:12px system-ui;background:#fff}
+
+
+/* v0.8.8 interaction cleanup */
+.p48-handle{opacity:0;pointer-events:none;transition:opacity .12s ease}
+.p48-node.selected .p48-handle,
+.p48-node.multi-selected .p48-handle{opacity:1;pointer-events:auto}
+
+/* Make connector hit area unambiguously clickable and above visible SVG path */
+.p48-link-visible{pointer-events:none}
+.p48-link-hit{
+  fill:none;
+  stroke:rgba(0,0,0,0.001);
+  stroke-width:20;
+  pointer-events:stroke;
+  cursor:pointer;
+}
+#p48-links{pointer-events:auto}
 
 </style>
 """, unsafe_allow_html=True)
@@ -338,6 +355,7 @@ html = r"""
       <div id="p48-controls">
         <div class="p48-format-grid">
           <div><label>Typsnitt</label><select id="p48-font"><option value="Arial">Arial</option><option value="Verdana">Verdana</option><option value="Georgia">Georgia</option><option value="Trebuchet MS">Trebuchet MS</option><option value="Courier New">Courier New</option><option value="system-ui">System</option></select></div>
+          <button type="button" class="p48-btn" id="p48-font-all" style="grid-column:1/-1;width:100%;margin-top:2px">Använd typsnitt på all text</button>
           <div><label>Storlek</label><input id="p48-size" type="number" min="10" max="36" value="13"></div>
           <div><label>Textfärg</label><input id="p48-textcolor" type="color" value="#17202a"></div>
           <div><label>Bakgrund</label><input id="p48-bgcolor" type="color" value="#ffffff"></div>
@@ -358,10 +376,8 @@ html = r"""
 
         <div id="p48-link-format" class="p48-link-format">
           <div class="p48-title">Formatera koppling</div>
-          <div class="p48-small" style="margin-bottom:7px">Klicka på en linje för att markera den.</div>
+          <div class="p48-small" style="margin-bottom:7px">Kantfärg och kanttjocklek ovan används även för markerad koppling.</div>
           <div class="p48-link-format-grid">
-            <label>Färg<input id="p48-link-color" type="color" value="#687584"></label>
-            <label>Tjocklek<select id="p48-link-width"><option value="1">1 px</option><option value="2" selected>2 px</option><option value="3">3 px</option><option value="4">4 px</option><option value="6">6 px</option></select></label>
             <label>Slutmarkör<select id="p48-link-end"><option value="arrow" selected>Pil</option><option value="none">Ingen</option><option value="circle">Cirkel</option><option value="diamond">Diamant</option></select></label>
             <label>Linjetyp<select id="p48-link-dash"><option value="solid" selected>Heldragen</option><option value="dashed">Streckad</option><option value="dotted">Prickad</option></select></label>
           </div>
@@ -396,6 +412,7 @@ const hnav=root.querySelector('#p48-hnav'),hnavInner=root.querySelector('#p48-hn
 const nameInput=root.querySelector('#p48-name'),status=root.querySelector('#p48-status'),processBox=root.querySelector('#p48-processes');
 const controls=root.querySelector('#p48-controls'),font=root.querySelector('#p48-font'),size=root.querySelector('#p48-size'),textColor=root.querySelector('#p48-textcolor'),bgColor=root.querySelector('#p48-bgcolor');
 const bold=root.querySelector('#p48-bold'),italic=root.querySelector('#p48-italic'),under=root.querySelector('#p48-under');
+const fontAllBtn=root.querySelector('#p48-font-all');
 const emailInput=root.querySelector('#p48-email'),passwordInput=root.querySelector('#p48-password');
 const loginBtn=root.querySelector('#p48-login'),signupBtn=root.querySelector('#p48-signup'),logoutBtn=root.querySelector('#p48-logout');
 const signedOut=root.querySelector('#p48-account-signedout'),signedIn=root.querySelector('#p48-account-signedin'),userEmail=root.querySelector('#p48-user-email');
@@ -410,7 +427,7 @@ const selectToolBtn=root.querySelector('#p48-select-tool');
 const deleteSelectionBtn=root.querySelector('#p48-delete-selection');
 const inputsBox=root.querySelector('#p48-inputs'),outputsBox=root.querySelector('#p48-outputs');
 const borderColor=root.querySelector('#p48-bordercolor'),borderWidth=root.querySelector('#p48-borderwidth');
-const linkFormat=root.querySelector('#p48-link-format'),linkColor=root.querySelector('#p48-link-color'),linkWidth=root.querySelector('#p48-link-width'),linkEnd=root.querySelector('#p48-link-end'),linkDash=root.querySelector('#p48-link-dash'),deleteLinkBtn=root.querySelector('#p48-delete-link'),linkHandle=root.querySelector('#p48-link-handle');
+const linkFormat=root.querySelector('#p48-link-format'),linkEnd=root.querySelector('#p48-link-end'),linkDash=root.querySelector('#p48-link-dash'),deleteLinkBtn=root.querySelector('#p48-delete-link'),linkHandle=root.querySelector('#p48-link-handle');
 const addInputBtn=root.querySelector('#p48-add-input'),addOutputBtn=root.querySelector('#p48-add-output'),deleteNodeBtn=root.querySelector('#p48-delete-node');
 
 let nodes=new Map(),links=[],selectedId=null,selectedIds=new Set(),selectionMode=false,seq=8,undo=[],redo=[],currentId='proc-1',processes={};
@@ -771,14 +788,20 @@ function renderIOEditor(item){
 }
 
 function setFormatEnabled(enabled){
-  controls.querySelectorAll('select,input,button').forEach(el=>{el.disabled=!enabled;});
-  root.querySelectorAll('.p48-step-io input,.p48-step-io button').forEach(el=>{el.disabled=!enabled;});
-  controls.style.opacity=enabled?'1':'0.45';
+  const linkMode=selectedLinkIndex!=null;
+  controls.querySelectorAll('select,input,button').forEach(el=>{
+    const alwaysForLink=(el===borderColor||el===borderWidth);
+    el.disabled=linkMode?!alwaysForLink:!enabled;
+  });
+  root.querySelectorAll('.p48-step-io input,.p48-step-io button').forEach(el=>{
+    el.disabled=!enabled;
+  });
+  controls.style.opacity=(enabled||linkMode)?'1':'0.45';
   const stepIO=root.querySelector('.p48-step-io');
   if(stepIO)stepIO.style.opacity=enabled?'1':'0.45';
 }
 
-function refreshControls(){const item=selectedId?nodes.get(selectedId):null;if(!item){setFormatEnabled(false);inputsBox.innerHTML='';outputsBox.innerHTML='';return}setFormatEnabled(true);const s=styleOf(item.data);font.value=s.fontFamily;size.value=s.fontSize;textColor.value=s.textColor;bgColor.value=s.bgColor;borderColor.value=s.borderColor;borderWidth.value=String(s.borderWidth);bold.classList.toggle('active',s.fontWeight==='700');italic.classList.toggle('active',s.fontStyle==='italic');under.classList.toggle('active',s.textDecoration==='underline');root.querySelectorAll('[data-align]').forEach(b=>b.classList.toggle('active',b.dataset.align===s.textAlign));renderIOEditor(item)}
+function refreshControls(){const item=selectedId?nodes.get(selectedId):null;if(!item){setFormatEnabled(false);inputsBox.innerHTML='';outputsBox.innerHTML='';if(selectedLinkIndex!=null)refreshLinkControls();return}setFormatEnabled(true);const s=styleOf(item.data);font.value=s.fontFamily;size.value=s.fontSize;textColor.value=s.textColor;bgColor.value=s.bgColor;borderColor.value=s.borderColor;borderWidth.value=String(s.borderWidth);bold.classList.toggle('active',s.fontWeight==='700');italic.classList.toggle('active',s.fontStyle==='italic');under.classList.toggle('active',s.textDecoration==='underline');root.querySelectorAll('[data-align]').forEach(b=>b.classList.toggle('active',b.dataset.align===s.textAlign));renderIOEditor(item)}
 function updateStyle(patch){const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();Object.assign(item.data,patch);applyStyle(item);drawLinks();persist();refreshControls()}
 function beginInlineEdit(el){
   const item=nodes.get(el.dataset.id);
@@ -859,9 +882,14 @@ function setLinkStyle(i,patch){if(i==null||!links[i])return;links[i][3]=Object.a
 function dashArray(st){return st.dash==='dashed'?'10 7':st.dash==='dotted'?'2 6':''}
 function refreshLinkControls(){
   const link=selectedLinkIndex!=null?links[selectedLinkIndex]:null;
-  linkFormat.classList.toggle('on',!!link);linkHandle.classList.toggle('on',!!link);
+  linkFormat.classList.toggle('on',!!link);
+  linkHandle.classList.toggle('on',!!link);
   if(!link)return;
-  const st=linkStyle(link);linkColor.value=st.color;linkWidth.value=String(st.width);linkEnd.value=st.end;linkDash.value=st.dash;
+  const st=linkStyle(link);
+  borderColor.value=st.color||'#687584';
+  borderWidth.value=String(Number(st.width)||2);
+  linkEnd.value=st.end||'arrow';
+  linkDash.value=st.dash||'solid';
 }
 function selectLink(i){selectedLinkIndex=i;selectedId=null;selectedIds.clear();refreshControls();updateSelectionUi();refreshLinkControls();drawLinks()}
 function clearLinkSelection(){selectedLinkIndex=null;refreshLinkControls();drawLinks()}
@@ -883,7 +911,76 @@ function selectedLinkMidpoint(){
   return{x:st.viaX==null?(x1+x2)/2:st.viaX,y:st.viaY==null?(y1+y2)/2:st.viaY}
 }
 
-function drawLinks(){linkLayer.innerHTML='';links.forEach((link,index)=>{const[a,b,side]=link,A=nodes.get(a)?.el,B=nodes.get(b)?.el;if(!A||!B)return;const st=linkStyle(link),ss=side||'right',t=targetSide(A,B),[x1,y1]=anchor(A,ss),[x2,y2]=anchor(B,t),mx=st.viaX==null?(x1+x2)/2:st.viaX,my=st.viaY==null?(y1+y2)/2:st.viaY,bent=st.viaX!=null||st.viaY!=null,d=bent?`M${x1},${y1} L${mx},${my} L${x2},${y2}`:`M${x1},${y1} L${x2},${y2}`,g=document.createElementNS('http://www.w3.org/2000/svg','g'),v=document.createElementNS('http://www.w3.org/2000/svg','path'),hit=document.createElementNS('http://www.w3.org/2000/svg','path');if(selectedLinkIndex===index)g.setAttribute('class','p48-link-selected');v.setAttribute('class','p48-link-visible');v.setAttribute('d',d);v.setAttribute('stroke',st.color);v.setAttribute('stroke-width',st.width);const da=dashArray(st);if(da)v.setAttribute('stroke-dasharray',da);hit.setAttribute('class','p48-link-hit');hit.setAttribute('d',d);hit.addEventListener('click',e=>{e.stopPropagation();selectLink(index)});g.append(v,hit);const ang=bent?Math.atan2(y2-my,x2-mx):Math.atan2(y2-y1,x2-x1),mk=markerFor(st,x2,y2,ang);if(mk)g.appendChild(mk);linkLayer.appendChild(g)});if(selectedLinkIndex!=null){const m=selectedLinkMidpoint();if(m){linkHandle.style.left=m.x+'px';linkHandle.style.top=m.y+'px';linkHandle.classList.add('on')}}else linkHandle.classList.remove('on')}
+function drawLinks(){
+  linkLayer.innerHTML='';
+  links.forEach((link,index)=>{
+    const [a,b,side]=link;
+    const A=nodes.get(a)?.el,B=nodes.get(b)?.el;
+    if(!A||!B)return;
+
+    const st=linkStyle(link),ss=side||'right',t=targetSide(A,B);
+    const [x1,y1]=anchor(A,ss),[x2,y2]=anchor(B,t);
+    const mx=st.viaX==null?(x1+x2)/2:st.viaX;
+    const my=st.viaY==null?(y1+y2)/2:st.viaY;
+    const bent=st.viaX!=null||st.viaY!=null;
+    const d=bent?`M${x1},${y1} L${mx},${my} L${x2},${y2}`:`M${x1},${y1} L${x2},${y2}`;
+
+    const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    if(selectedLinkIndex===index)g.setAttribute('class','p48-link-selected');
+
+    const v=document.createElementNS('http://www.w3.org/2000/svg','path');
+    v.setAttribute('class','p48-link-visible');
+    v.setAttribute('d',d);
+    v.setAttribute('stroke',st.color);
+    v.setAttribute('stroke-width',st.width);
+    v.setAttribute('fill','none');
+    const da=dashArray(st);
+    if(da)v.setAttribute('stroke-dasharray',da);
+
+    const hit=document.createElementNS('http://www.w3.org/2000/svg','path');
+    hit.setAttribute('class','p48-link-hit');
+    hit.setAttribute('d',d);
+    hit.setAttribute('fill','none');
+    hit.setAttribute('stroke','rgba(0,0,0,0.001)');
+    hit.setAttribute('stroke-width','20');
+    hit.style.pointerEvents='stroke';
+    hit.style.cursor='pointer';
+    hit.addEventListener('pointerdown',e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      selectLink(index);
+    });
+    hit.addEventListener('click',e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      selectLink(index);
+    });
+
+    g.appendChild(v);
+
+    const ang=bent?Math.atan2(y2-my,x2-mx):Math.atan2(y2-y1,x2-x1);
+    const mk=markerFor(st,x2,y2,ang);
+    if(mk){
+      mk.style.pointerEvents='none';
+      g.appendChild(mk);
+    }
+
+    // hit path last = topmost click target
+    g.appendChild(hit);
+    linkLayer.appendChild(g);
+  });
+
+  if(selectedLinkIndex!=null){
+    const mp=selectedLinkMidpoint();
+    if(mp){
+      linkHandle.style.left=mp.x+'px';
+      linkHandle.style.top=mp.y+'px';
+      linkHandle.classList.add('on');
+    }
+  }else{
+    linkHandle.classList.remove('on');
+  }
+}
 function deleteSelected(){
   if(selectedIds.size>1){deleteSelectedMany();return;}
   if(!selectedId||!nodes.has(selectedId))return;
@@ -1393,7 +1490,7 @@ root.querySelectorAll('.p48-item').forEach(i=>i.addEventListener('dragstart',e=>
 canvas.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='copy'});
 canvas.addEventListener('drop',e=>{e.preventDefault();const type=e.dataTransfer.getData('text/plain');if(!type)return;const r=canvas.getBoundingClientRect();addNode(type,e.clientX-r.left+scroll.scrollLeft,e.clientY-r.top+scroll.scrollTop)});
 canvas.addEventListener('click',e=>{
-  if(e.target===canvas&&!selectionMode){clearSelection();clearLinkSelection();finishTempArrow();}
+  if((e.target===canvas||e.target===linkLayer)&&!selectionMode){clearSelection();clearLinkSelection();finishTempArrow();}
 });
 nameInput.addEventListener('change',()=>{persist();msg('Namn sparat')});
 root.querySelector('#p48-new').addEventListener('click',newProcess);
@@ -1475,7 +1572,34 @@ root.querySelector('#p48-pdf').addEventListener('click',exportPdf);root.querySel
 root.querySelector('#p48-undo').addEventListener('click',()=>{if(!undo.length)return;redo.push(JSON.stringify(state()));restore(undo.pop());persist()});
 root.querySelector('#p48-redo').addEventListener('click',()=>{if(!redo.length)return;undo.push(JSON.stringify(state()));restore(redo.pop());persist()});
 root.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;if(e.key==='Delete'){if(selectedLinkIndex!=null){links.splice(selectedLinkIndex,1);selectedLinkIndex=null;drawLinks();persist();refreshLinkControls()}else if(selectedIds.size>1)deleteSelectedMany();else deleteSelected()}});
-font.addEventListener('change',()=>updateStyle({fontFamily:font.value}));size.addEventListener('change',()=>updateStyle({fontSize:Math.max(10,Math.min(36,Number(size.value)||13))}));textColor.addEventListener('input',()=>updateStyle({textColor:textColor.value}));bgColor.addEventListener('input',()=>updateStyle({bgColor:bgColor.value}));borderColor.addEventListener('input',()=>updateStyle({borderColor:borderColor.value}));borderWidth.addEventListener('change',()=>updateStyle({borderWidth:Number(borderWidth.value)}));
+font.addEventListener('change',()=>updateStyle({fontFamily:font.value}));
+fontAllBtn.addEventListener('click',()=>{
+  if(!nodes.size)return;
+  pushUndo();
+  for(const item of nodes.values()){
+    item.data.fontFamily=font.value;
+    applyStyle(item);
+  }
+  persist();
+  msg('Typsnitt uppdaterat på all text');
+});size.addEventListener('change',()=>updateStyle({fontSize:Math.max(10,Math.min(36,Number(size.value)||13))}));textColor.addEventListener('input',()=>updateStyle({textColor:textColor.value}));bgColor.addEventListener('input',()=>updateStyle({bgColor:bgColor.value}));borderColor.addEventListener('input',()=>{
+  if(selectedLinkIndex!=null){
+    pushUndo();
+    setLinkStyle(selectedLinkIndex,{color:borderColor.value});
+    drawLinks();persist();refreshLinkControls();
+    return;
+  }
+  updateStyle({borderColor:borderColor.value});
+});
+borderWidth.addEventListener('change',()=>{
+  if(selectedLinkIndex!=null){
+    pushUndo();
+    setLinkStyle(selectedLinkIndex,{width:Number(borderWidth.value)});
+    drawLinks();persist();refreshLinkControls();
+    return;
+  }
+  updateStyle({borderWidth:Number(borderWidth.value)});
+});
 bold.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({fontWeight:styleOf(x.data).fontWeight==='700'?'400':'700'})});italic.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({fontStyle:styleOf(x.data).fontStyle==='italic'?'normal':'italic'})});under.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({textDecoration:styleOf(x.data).textDecoration==='underline'?'none':'underline'})});root.querySelectorAll('[data-align]').forEach(b=>b.addEventListener('click',()=>updateStyle({textAlign:b.dataset.align})));
 
 
@@ -1483,8 +1607,6 @@ addInputBtn.addEventListener('click',()=>{const item=selectedId?nodes.get(select
 addOutputBtn.addEventListener('click',()=>{const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();ensureIO(item);item.data.outputs.push('Ny output');renderNodeIO(item);persist();refreshControls();});
 
 deleteNodeBtn.addEventListener('click',()=>deleteSelected());
-linkColor.addEventListener('input',()=>{if(selectedLinkIndex==null)return;pushUndo();setLinkStyle(selectedLinkIndex,{color:linkColor.value});drawLinks();persist()});
-linkWidth.addEventListener('change',()=>{if(selectedLinkIndex==null)return;pushUndo();setLinkStyle(selectedLinkIndex,{width:Number(linkWidth.value)});drawLinks();persist()});
 linkEnd.addEventListener('change',()=>{if(selectedLinkIndex==null)return;pushUndo();setLinkStyle(selectedLinkIndex,{end:linkEnd.value});drawLinks();persist()});
 linkDash.addEventListener('change',()=>{if(selectedLinkIndex==null)return;pushUndo();setLinkStyle(selectedLinkIndex,{dash:linkDash.value});drawLinks();persist()});
 deleteLinkBtn.addEventListener('click',()=>{if(selectedLinkIndex==null)return;pushUndo();links.splice(selectedLinkIndex,1);selectedLinkIndex=null;drawLinks();persist();refreshLinkControls();msg('Koppling borttagen')});
