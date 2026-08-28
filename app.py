@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.9.8"
+APP_VERSION = "0.9.9"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -217,6 +217,48 @@ header[data-testid="stHeader"]{height:2rem}
 html = r"""
 <div id="pk48">
 <style>
+.p48-hnav{
+  grid-column:2!important;
+  grid-row:2!important;
+}
+
+/* v0.9.9 align sidebar + canvas directly under toolbar */
+.p48-app{
+  display:grid!important;
+  grid-template-rows:auto minmax(0,1fr)!important;
+}
+.p48-main{
+  display:grid!important;
+  grid-template-columns:220px minmax(0,1fr)!important;
+  align-items:stretch!important;
+  min-height:0!important;
+}
+.p48-side{
+  grid-column:1!important;
+  grid-row:1!important;
+  height:100%!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  align-self:stretch!important;
+}
+.p48-scroll{
+  grid-column:2!important;
+  grid-row:1!important;
+  margin-top:0!important;
+  padding-top:0!important;
+  align-self:stretch!important;
+  min-height:0!important;
+}
+.p48-canvas-wrap{
+  margin-top:0!important;
+  padding-top:0!important;
+}
+#p48-canvas{
+  margin-top:0!important;
+  top:0!important;
+}
+
 /* v0.9.8: safe toolbar/dropdown additions only — no editor geometry overrides */
 .p48-sheets-menu{
   position:relative;
@@ -2345,6 +2387,29 @@ renderProcesses();refreshControls();updateSelectionUi();updateAccountUi();msg('K
 })();
 
 window.addEventListener('beforeunload',()=>{try{saveLocal(true)}catch(e){}});
+
+function alignEditorTop(){
+  const main=root.querySelector('.p48-main');
+  const side=root.querySelector('.p48-side');
+  if(main){
+    main.style.display='grid';
+    main.style.gridTemplateColumns='220px minmax(0,1fr)';
+    main.style.alignItems='stretch';
+  }
+  if(side){
+    side.style.marginTop='0';
+    side.style.paddingTop=side.style.paddingTop||'0';
+  }
+  scroll.style.marginTop='0';
+  scroll.style.paddingTop='0';
+  const wrap=root.querySelector('.p48-canvas-wrap');
+  if(wrap){wrap.style.marginTop='0';wrap.style.paddingTop='0';}
+  canvas.style.marginTop='0';
+  scheduleHorizontalNavSync();
+}
+requestAnimationFrame(alignEditorTop);
+setTimeout(alignEditorTop,100);
+
 </script>
 </div>
 """
