@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.8.9"
+APP_VERSION = "0.9.0"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -119,6 +119,96 @@ header[data-testid="stHeader"]{height:2rem}
   opacity:.28;
   pointer-events:none;
 }
+
+
+/* v0.9.0: robust HTML hit layer for connectors */
+.p48-link-hit-layer{
+  position:absolute;
+  inset:0;
+  z-index:4;
+  pointer-events:none;
+}
+.p48-link-hit-segment{
+  position:absolute;
+  height:24px;
+  transform-origin:0 50%;
+  pointer-events:auto;
+  cursor:pointer;
+  background:transparent;
+}
+.p48-link-hit-segment:hover{
+  background:rgba(44,123,229,.07);
+}
+
+/* Smaller configurable connection points */
+#p48-canvas{
+  --p48-point-size:8px;
+  --p48-point-color:#1f6f55;
+}
+.p48-handle{
+  box-sizing:border-box!important;
+  width:var(--p48-point-size)!important;
+  height:var(--p48-point-size)!important;
+  background:var(--p48-point-color)!important;
+  border:1px solid #fff!important;
+  box-shadow:0 0 0 1px var(--p48-point-color)!important;
+}
+.p48-node .p48-handle.right{
+  right:calc(var(--p48-point-size) / -2)!important;
+}
+.p48-node .p48-handle.left{
+  left:calc(var(--p48-point-size) / -2)!important;
+}
+.p48-node .p48-handle.top{
+  top:calc(var(--p48-point-size) / -2)!important;
+}
+.p48-node .p48-handle.bottom{
+  bottom:calc(var(--p48-point-size) / -2)!important;
+}
+#p48-canvas.p48-hide-points .p48-handle{
+  display:none!important;
+}
+.p48-point-settings{
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid #e1e7ed;
+}
+.p48-point-settings .p48-point-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:7px;
+}
+.p48-point-settings label{
+  font:700 10px system-ui;
+  color:#657281;
+}
+.p48-point-settings input,
+.p48-point-settings select{
+  width:100%;
+  margin-top:4px;
+  border:1px solid #cfd7df;
+  border-radius:7px;
+  padding:6px;
+  font:12px system-ui;
+  background:#fff;
+}
+.p48-hide-row{
+  display:flex!important;
+  align-items:center;
+  gap:7px;
+  margin-top:8px;
+  font:600 11px system-ui!important;
+  color:#445565!important;
+}
+.p48-hide-row input{
+  width:auto!important;
+  margin:0!important;
+}
+
+
+.p48-node .p48-handle{opacity:0!important;pointer-events:none!important}
+.p48-node.selected .p48-handle{opacity:1!important;pointer-events:auto!important}
+.p48-node.multi-selected:not(.selected) .p48-handle{opacity:0!important;pointer-events:none!important}
 
 </style>
 """, unsafe_allow_html=True)
@@ -397,6 +487,27 @@ html = r"""
 <option value="system-ui">System</option>
 </select></div>
           <button type="button" class="p48-btn" id="p48-font-all" style="grid-column:1/-1;width:100%;margin-top:2px">Använd typsnitt på all text</button>
+        <div class="p48-point-settings">
+          <div class="p48-title">Kopplingspunkter</div>
+          <div class="p48-point-grid">
+            <label>Storlek
+              <select id="p48-point-size">
+                <option value="6">6 px</option>
+                <option value="8" selected>8 px</option>
+                <option value="10">10 px</option>
+                <option value="12">12 px</option>
+                <option value="14">14 px</option>
+              </select>
+            </label>
+            <label>Färg
+              <input id="p48-point-color" type="color" value="#1f6f55">
+            </label>
+          </div>
+          <label class="p48-hide-row">
+            <input id="p48-hide-points" type="checkbox">
+            Dölj kopplingspunkter
+          </label>
+        </div>
           <div><label>Storlek</label><input id="p48-size" type="number" min="10" max="36" value="13"></div>
           <div><label>Textfärg</label><input id="p48-textcolor" type="color" value="#17202a"></div>
           <div><label>Bakgrund</label><input id="p48-bgcolor" type="color" value="#ffffff"></div>
@@ -430,7 +541,7 @@ html = r"""
   </aside>
 
   <main class="p48-scroll" id="p48-scroll">
-    <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-print-frame" class="p48-print-frame"></div>
+    <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><div id="p48-link-hit-layer" class="p48-link-hit-layer"></div><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-print-frame" class="p48-print-frame"></div>
       <div id="p48-marquee" class="p48-marquee"></div>
       <svg id="p48-svg" viewBox="0 0 2400 1400">
         <defs><marker id="p48-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0,0 10,4 0,8" fill="#687584"></polygon></marker></defs>
@@ -449,11 +560,13 @@ html = r"""
 (()=>{
 const root=document.getElementById('pk48'); if(!root||root.dataset.ready==='1')return; root.dataset.ready='1';
 const canvas=root.querySelector('#p48-canvas'),scroll=root.querySelector('#p48-scroll'),linkLayer=root.querySelector('#p48-links'),temp=root.querySelector('#p48-temp');
+const linkHitLayer=root.querySelector('#p48-link-hit-layer');
 const hnav=root.querySelector('#p48-hnav'),hnavInner=root.querySelector('#p48-hnav-inner');
 const nameInput=root.querySelector('#p48-name'),status=root.querySelector('#p48-status'),processBox=root.querySelector('#p48-processes');
 const controls=root.querySelector('#p48-controls'),font=root.querySelector('#p48-font'),size=root.querySelector('#p48-size'),textColor=root.querySelector('#p48-textcolor'),bgColor=root.querySelector('#p48-bgcolor');
 const bold=root.querySelector('#p48-bold'),italic=root.querySelector('#p48-italic'),under=root.querySelector('#p48-under');
 const fontAllBtn=root.querySelector('#p48-font-all');
+const pointSize=root.querySelector('#p48-point-size'),pointColor=root.querySelector('#p48-point-color'),hidePoints=root.querySelector('#p48-hide-points');
 const emailInput=root.querySelector('#p48-email'),passwordInput=root.querySelector('#p48-password');
 const loginBtn=root.querySelector('#p48-login'),signupBtn=root.querySelector('#p48-signup'),logoutBtn=root.querySelector('#p48-logout');
 const signedOut=root.querySelector('#p48-account-signedout'),signedIn=root.querySelector('#p48-account-signedin'),userEmail=root.querySelector('#p48-user-email');
@@ -473,6 +586,7 @@ const addInputBtn=root.querySelector('#p48-add-input'),addOutputBtn=root.querySe
 
 let nodes=new Map(),links=[],selectedId=null,selectedIds=new Set(),selectionMode=false,seq=8,undo=[],redo=[],currentId='proc-1',processes={};
 let selectedLinkIndex=null;
+let connectorPointSize=8,connectorPointColor='#1f6f55',connectorPointsHidden=false;
 const SUPABASE_URL="__SUPABASE_URL__", SUPABASE_ANON_KEY="__SUPABASE_ANON_KEY__", PUBLIC_APP_URL="__PUBLIC_APP_URL__";
 const CLOUD_ENABLED=SUPABASE_URL.length>0&&SUPABASE_ANON_KEY.length>0;
 let cloudSession=null,sharedView=false;
@@ -698,13 +812,31 @@ workspaceSelect.addEventListener('change',()=>{
 });
 createWorkspaceBtn.addEventListener('click',createWorkspace);
 
+
+function applyConnectorPointSettings(){
+  canvas.style.setProperty('--p48-point-size',connectorPointSize+'px');
+  canvas.style.setProperty('--p48-point-color',connectorPointColor);
+  canvas.classList.toggle('p48-hide-points',connectorPointsHidden);
+  if(pointSize)pointSize.value=String(connectorPointSize);
+  if(pointColor)pointColor.value=connectorPointColor;
+  if(hidePoints)hidePoints.checked=connectorPointsHidden;
+}
+
 function clone(v){return JSON.parse(JSON.stringify(v))}
 function uid(){return 'proc-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7)}
 function msg(t){status.textContent=t;setTimeout(()=>{if(status.textContent===t)status.textContent=''},1800)}
 function defBg(type){return {start:'#edf8f3',end:'#fff3f1',decision:'#fff8df',subprocess:'#f7f3ff',note:'#fffbe8',group:'#f8fafc'}[type]||'#ffffff'}
 function styleOf(d){return{fontFamily:d.fontFamily||'Inter',fontSize:Number(d.fontSize||13),textColor:d.textColor||'#17202a',bgColor:d.bgColor||defBg(d.type),fontWeight:d.fontWeight||'700',fontStyle:d.fontStyle||'normal',textDecoration:d.textDecoration||'none',textAlign:d.textAlign||'center',borderColor:d.borderColor||'#637387',borderWidth:Number(d.borderWidth||2)}}
 function applyStyle(item){const s=styleOf(item.data);Object.assign(item.data,s);item.label.style.fontFamily=s.fontFamily;item.label.style.fontSize=s.fontSize+'px';item.label.style.color=s.textColor;item.label.style.fontWeight=s.fontWeight;item.label.style.fontStyle=s.fontStyle;item.label.style.textDecoration=s.textDecoration;item.label.style.textAlign=s.textAlign;item.el.style.background=s.bgColor;item.el.style.setProperty('--decision-bg',s.bgColor);if(item.data.type==='decision'){item.el.style.setProperty('--decision-border',s.borderColor);item.el.style.setProperty('--decision-border-width',s.borderWidth+'px')}else{item.el.style.borderColor=s.borderColor;item.el.style.borderWidth=s.borderWidth+'px'}}
-function state(){return{id:currentId,name:nameInput.value.trim()||'Namnlös process',nodes:[...nodes.values()].map(x=>clone(x.data)),links:clone(links)}}
+function state(){return{
+  id:currentId,
+  name:nameInput.value.trim()||'Namnlös process',
+  nodes:[...nodes.values()].map(x=>clone(x.data)),
+  links:clone(links),
+  connectorPointSize,
+  connectorPointColor,
+  connectorPointsHidden
+}}
 function saveLocal(){try{localStorage.setItem('maplini_v050',JSON.stringify({currentId,processes}))}catch(e){}}
 function loadLocal(){
   try{
@@ -732,8 +864,21 @@ function renderProcesses(){
 }
 function persist(show=false){const s=state();processes[currentId]=clone(s);saveLocal();renderProcesses();if(show)msg('Sparad');syncHorizontalNavWidth()}
 function pushUndo(){undo.push(JSON.stringify(state()));if(undo.length>50)undo.shift();redo=[]}
-function clearCanvas(){for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();linkLayer.innerHTML='';finishTempArrow();refreshControls();updateSelectionUi()}
-function restore(s){const d=typeof s==='string'?JSON.parse(s):clone(s);clearCanvas();currentId=d.id||currentId;nameInput.value=d.name||'Namnlös process';(d.nodes||[]).forEach(makeNode);links=d.links||[];seq=Math.max(0,...[...nodes.keys()].map(id=>parseInt(String(id).replace(/\D/g,''),10)||0));drawLinks()}
+function clearCanvas(){for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();linkLayer.innerHTML='';clearLinkHitLayer();finishTempArrow();refreshControls();updateSelectionUi()}
+function restore(s){
+  const d=typeof s==='string'?JSON.parse(s):clone(s);
+  clearCanvas();
+  currentId=d.id||currentId;
+  nameInput.value=d.name||'Namnlös process';
+  connectorPointSize=Number(d.connectorPointSize||8);
+  connectorPointColor=d.connectorPointColor||'#1f6f55';
+  connectorPointsHidden=Boolean(d.connectorPointsHidden);
+  applyConnectorPointSettings();
+  (d.nodes||[]).forEach(makeNode);
+  links=d.links||[];
+  seq=Math.max(0,...[...nodes.keys()].map(id=>parseInt(String(id).replace(/\D/g,''),10)||0));
+  drawLinks();
+}
 function openProcess(id){if(!processes[id])return;currentId=id;undo=[];redo=[];restore(processes[id]);saveLocal();renderProcesses();msg('Process öppnad')}
 function newProcess(){persist();const n=prompt('Namn på den nya processen:','Ny process');if(n===null)return;currentId=uid();processes[currentId]={id:currentId,name:n.trim()||'Ny process',nodes:[],links:[]};undo=[];redo=[];restore(processes[currentId]);saveLocal();renderProcesses();scroll.scrollLeft=0;scroll.scrollTop=0;msg('Ny process skapad')}
 function deleteProcess(id){
@@ -944,8 +1089,8 @@ function linkDistanceAt(index,x,y){
 }
 function hitTestLink(clientX,clientY){
   const rect=canvas.getBoundingClientRect();
-  const x=clientX-rect.left+scroll.scrollLeft;
-  const y=clientY-rect.top+scroll.scrollTop;
+  const x=clientX-rect.left;
+  const y=clientY-rect.top;
   let best=null,bestDist=Infinity;
   links.forEach((_,i)=>{
     const d=linkDistanceAt(i,x,y);
@@ -988,8 +1133,36 @@ function selectedLinkMidpoint(){
   return{x:st.viaX==null?(x1+x2)/2:st.viaX,y:st.viaY==null?(y1+y2)/2:st.viaY}
 }
 
+
+function clearLinkHitLayer(){
+  if(linkHitLayer)linkHitLayer.innerHTML='';
+}
+function addHtmlLinkHitSegment(index,x1,y1,x2,y2){
+  if(!linkHitLayer)return;
+  const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy);
+  if(len<1)return;
+  const seg=document.createElement('div');
+  seg.className='p48-link-hit-segment';
+  seg.dataset.linkIndex=String(index);
+  seg.style.left=x1+'px';
+  seg.style.top=(y1-12)+'px';
+  seg.style.width=len+'px';
+  seg.style.transform=`rotate(${Math.atan2(dy,dx)}rad)`;
+  seg.addEventListener('pointerdown',e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    selectLink(index);
+  });
+  seg.addEventListener('click',e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    selectLink(index);
+  });
+  linkHitLayer.appendChild(seg);
+}
+
 function drawLinks(){
-  linkLayer.innerHTML='';
+  linkLayer.innerHTML='';clearLinkHitLayer();
   links.forEach((link,index)=>{
     const [a,b,side]=link;
     const A=nodes.get(a)?.el,B=nodes.get(b)?.el;
@@ -1001,6 +1174,12 @@ function drawLinks(){
     const my=st.viaY==null?(y1+y2)/2:st.viaY;
     const bent=st.viaX!=null||st.viaY!=null;
     const d=bent?`M${x1},${y1} L${mx},${my} L${x2},${y2}`:`M${x1},${y1} L${x2},${y2}`;
+    if(bent){
+      addHtmlLinkHitSegment(index,x1,y1,mx,my);
+      addHtmlLinkHitSegment(index,mx,my,x2,y2);
+    }else{
+      addHtmlLinkHitSegment(index,x1,y1,x2,y2);
+    }
 
     const g=document.createElementNS('http://www.w3.org/2000/svg','g');
     if(selectedLinkIndex===index)g.setAttribute('class','p48-link-selected');
@@ -1682,7 +1861,24 @@ fontAllBtn.addEventListener('click',()=>{
   }
   persist();
   msg('Typsnitt uppdaterat på all text');
-});size.addEventListener('change',()=>updateStyle({fontSize:Math.max(10,Math.min(36,Number(size.value)||13))}));textColor.addEventListener('input',()=>updateStyle({textColor:textColor.value}));bgColor.addEventListener('input',()=>updateStyle({bgColor:bgColor.value}));borderColor.addEventListener('input',()=>{
+});
+
+pointSize.addEventListener('change',()=>{
+  connectorPointSize=Number(pointSize.value)||8;
+  applyConnectorPointSettings();
+  persist();
+});
+pointColor.addEventListener('input',()=>{
+  connectorPointColor=pointColor.value;
+  applyConnectorPointSettings();
+  persist();
+});
+hidePoints.addEventListener('change',()=>{
+  connectorPointsHidden=hidePoints.checked;
+  applyConnectorPointSettings();
+  persist();
+});
+size.addEventListener('change',()=>updateStyle({fontSize:Math.max(10,Math.min(36,Number(size.value)||13))}));textColor.addEventListener('input',()=>updateStyle({textColor:textColor.value}));bgColor.addEventListener('input',()=>updateStyle({bgColor:bgColor.value}));borderColor.addEventListener('input',()=>{
   if(selectedLinkIndex!=null){
     pushUndo();
     setLinkStyle(selectedLinkIndex,{color:borderColor.value});
@@ -1722,7 +1918,7 @@ linkDash.addEventListener('change',()=>{
   msg('Linjetyp ändrad');
 });
 deleteLinkBtn.addEventListener('click',()=>{if(selectedLinkIndex==null)return;pushUndo();links.splice(selectedLinkIndex,1);selectedLinkIndex=null;drawLinks();persist();refreshLinkControls();msg('Koppling borttagen')});
-linkHandle.addEventListener('pointerdown',e=>{if(selectedLinkIndex==null)return;e.preventDefault();e.stopPropagation();pushUndo();const r=canvas.getBoundingClientRect(),mv=ev=>{setLinkStyle(selectedLinkIndex,{viaX:ev.clientX-r.left+scroll.scrollLeft,viaY:ev.clientY-r.top+scroll.scrollTop});drawLinks()},up=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);persist()};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)});
+linkHandle.addEventListener('pointerdown',e=>{if(selectedLinkIndex==null)return;e.preventDefault();e.stopPropagation();pushUndo();const r=canvas.getBoundingClientRect(),mv=ev=>{setLinkStyle(selectedLinkIndex,{viaX:ev.clientX-r.left,viaY:ev.clientY-r.top});drawLinks()},up=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);persist()};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)});
 
 
 loadCloudSession();
