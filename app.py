@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.9.5"
+APP_VERSION = "0.9.6"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -217,16 +217,27 @@ header[data-testid="stHeader"]{height:2rem}
 html = r"""
 <div id="pk48">
 <style>
+/* v0.9.6 safe performance + layout stabilization */
+html,body{margin:0;padding:0;overflow:hidden}
+#p48-root{height:100%;min-height:0;overflow:hidden}
+.p48-app{height:100%;min-height:0;overflow:hidden}
+.p48-main{min-height:0;overflow:hidden}
+.p48-scroll{min-height:0;overflow:auto!important}
+.p48-canvas-wrap{min-height:0}
+#p48-canvas{position:relative;min-width:2400px;min-height:1400px}
+.p48-node{will-change:left,top,width,height}
+.p48-link-visible,.p48-link-selection{vector-effect:non-scaling-stroke}
+
 /* v0.9.5 ultra performance pass */
-.p48-node{content-visibility:auto;contain-intrinsic-size:180px 70px;transform:translateZ(0);backface-visibility:hidden}
-.p48-side{contain:layout style}
-.p48-toolbar{contain:layout style}
-.p48-processes{contain:content}
+
+
+
+
 
 /* v0.9.4 deeper performance pass */
-.p48-node{transform:translateZ(0);backface-visibility:hidden}
+
 .p48-link-visible,.p48-link-selection{vector-effect:non-scaling-stroke}
-#p48-canvas{contain:layout paint style}
+
 
 /* v0.9.3 performance hints */
 .p48-node{contain:layout style;will-change:transform,left,top}
@@ -712,7 +723,7 @@ scroll.addEventListener('wheel',(e)=>{
     if(hnav)hnav.scrollLeft=scroll.scrollLeft;
   }
 },{passive:false});
-window.addEventListener('resize',scheduleHorizontalNavSync);
+window.addEventListener('resize',()=>{invalidateNodeGeom();scheduleHorizontalNavSync();requestFullLinkRender();});
 setTimeout(scheduleHorizontalNavSync,0);
 
 
@@ -1089,6 +1100,7 @@ function restore(s){
   processLogoWidth=Number(d.processLogoWidth||180);
   applyConnectorPointSettings();
   applyProcessStyle();
+  invalidateNodeGeom();
   (d.nodes||[]).forEach(makeNode);
   links=d.links||[];
   seq=Math.max(0,...[...nodes.keys()].map(id=>parseInt(String(id).replace(/\D/g,''),10)||0));
@@ -1421,7 +1433,7 @@ function addHtmlLinkHitSegment(index,x1,y1,x2,y2){
   linkHitLayer.appendChild(seg);
 }
 
-function renderAllLinksNow(){perfStats.fullRenders++;
+function renderAllLinksNow(){perfStats.fullRenders++;invalidateLinkBBoxes();
   rebuildNodeLinkIndex();linkLayer.innerHTML='';clearLinkHitLayer();
   links.forEach((link,index)=>{
     const [a,b,side]=link;
@@ -2340,6 +2352,20 @@ const SHARE_TOKEN="__SHARE_TOKEN__";
 })();
 })();
 
+
+function stabilizeEditorLayout(){
+  const app=root.querySelector('.p48-app');
+  if(app){
+    app.style.height='100%';
+    app.style.minHeight='0';
+    app.style.overflow='hidden';
+  }
+  scroll.style.minHeight='0';
+  scheduleHorizontalNavSync();
+}
+requestAnimationFrame(stabilizeEditorLayout);
+setTimeout(stabilizeEditorLayout,120);
+
 window.addEventListener('beforeunload',()=>{try{saveLocal(true)}catch(e){}});
 </script>
 </div>
@@ -2397,4 +2423,4 @@ html = html.replace("__PUBLIC_APP_URL__", _PUBLIC_APP_URL)
 html = html.replace("__SHARE_TOKEN__", st.query_params.get("share", ""))
 if not _CLOUD_ENABLED:
     st.caption("Molnlagring är inte aktiverad ännu. Lägg Supabase-inställningarna i Streamlit Secrets enligt README.")
-components.html(html, height=1000, scrolling=True)
+components.html(html, height=980, scrolling=False)

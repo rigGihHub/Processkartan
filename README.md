@@ -1,14 +1,23 @@
-# Maplini v0.9.5 — Ultra performance pass
+# Maplini v0.9.6 — Stabilization release
 
-Det här varvet fokuserar på större processkartor.
+Den här versionen backar de riskabla layoutoptimeringarna från v0.9.5 som kunde skapa en stor tom/grå yta och skjuta ned editorn.
 
-- Bounding-box-cache före exakt länkträfftestning.
-- Node→link-index cache vid drag/resize.
-- Cache av formateringskontroller.
-- localStorage-serialisering via requestIdleCallback när möjligt.
-- Sparade-processer-listan byggs bara om när den faktiskt ändrats.
-- Färre DOM-style-skrivningar för kopplingspunkter.
-- Idle-persist för vissa processinställningar.
-- Mer aggressiv CSS containment/content-visibility.
+## Backat
+- content-visibility på noder
+- aggressiv CSS contain på sidebar/toolbar/processlista
+- contain: layout paint style på canvas
 
-Funktionaliteten är oförändrad.
+## Behållna prestandavinster
+- partial link redraw
+- node/link caches
+- bounding-box prefilter för kopplingsträff
+- idle localStorage serialization
+- skip av identiska localStorage writes
+- processlist-signatur för att undvika onödiga rerenders
+- färre DOM-skrivningar
+
+## Stabilisering
+- fast editorhöjd i Streamlit-komponenten
+- overflow/min-height normaliseras inne i iframe
+- geometri och länkar invalideras vid resize
+- extra layout self-heal efter initial render
