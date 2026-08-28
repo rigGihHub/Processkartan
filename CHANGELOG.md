@@ -1,4 +1,5 @@
-# v0.9.9
-- Sidebar och canvas låsta till samma vertikala start.
-- Sidebar får egen intern scroll.
-- Canvas margin/padding top normaliserad.
+# v0.10.0
+- Fix riktad mot riktiga `.p48-body`.
+- Sidebar/canvas separerade med deterministisk absolute layout.
+- Canvas startar alltid direkt under toolbaren.
+- Scrollposition återställs vid processbyte.

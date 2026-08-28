@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.9.9"
+APP_VERSION = "0.10.0"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -217,46 +217,74 @@ header[data-testid="stHeader"]{height:2rem}
 html = r"""
 <div id="pk48">
 <style>
-.p48-hnav{
-  grid-column:2!important;
-  grid-row:2!important;
-}
-
-/* v0.9.9 align sidebar + canvas directly under toolbar */
-.p48-app{
-  display:grid!important;
-  grid-template-rows:auto minmax(0,1fr)!important;
-}
-.p48-main{
-  display:grid!important;
-  grid-template-columns:220px minmax(0,1fr)!important;
-  align-items:stretch!important;
-  min-height:0!important;
+/* v0.10.0 deterministic editor layout — uses the real .p48-body wrapper */
+.p48-body{
+  position:relative!important;
+  display:block!important;
+  height:900px!important;
+  min-height:900px!important;
+  overflow:hidden!important;
 }
 .p48-side{
-  grid-column:1!important;
-  grid-row:1!important;
-  height:100%!important;
+  position:absolute!important;
+  left:0!important;
+  top:0!important;
+  width:220px!important;
+  height:900px!important;
   min-height:0!important;
+  max-height:900px!important;
   overflow-y:auto!important;
   overflow-x:hidden!important;
-  align-self:stretch!important;
+  margin:0!important;
+  z-index:20!important;
+  background:#fff!important;
 }
 .p48-scroll{
-  grid-column:2!important;
-  grid-row:1!important;
-  margin-top:0!important;
-  padding-top:0!important;
-  align-self:stretch!important;
-  min-height:0!important;
+  position:absolute!important;
+  left:220px!important;
+  right:0!important;
+  top:0!important;
+  bottom:0!important;
+  width:auto!important;
+  height:900px!important;
+  min-height:900px!important;
+  max-height:900px!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:auto!important;
+  background:#fff!important;
+  scrollbar-gutter:stable;
 }
 .p48-canvas-wrap{
-  margin-top:0!important;
-  padding-top:0!important;
+  position:relative!important;
+  display:block!important;
+  width:2400px!important;
+  min-width:2400px!important;
+  height:1400px!important;
+  min-height:1400px!important;
+  margin:0!important;
+  padding:0!important;
+  top:0!important;
+  left:0!important;
 }
 #p48-canvas{
-  margin-top:0!important;
+  position:relative!important;
+  display:block!important;
+  width:2400px!important;
+  min-width:2400px!important;
+  height:1400px!important;
+  min-height:1400px!important;
+  margin:0!important;
+  padding:0!important;
   top:0!important;
+  left:0!important;
+}
+.p48-hnav{
+  position:sticky!important;
+  left:0!important;
+  bottom:0!important;
+  width:100%!important;
+  z-index:90!important;
 }
 
 /* v0.9.8: safe toolbar/dropdown additions only — no editor geometry overrides */
@@ -1156,7 +1184,7 @@ function restore(s){
   seq=Math.max(0,...[...nodes.keys()].map(id=>parseInt(String(id).replace(/\D/g,''),10)||0));
   requestFullLinkRender(true);
 }
-function openProcess(id){if(!processes[id])return;currentId=id;undo=[];redo=[];restore(processes[id]);saveLocal(false);renderProcesses();msg('Process öppnad')}
+function openProcess(id){if(!processes[id])return;currentId=id;undo=[];redo=[];restore(processes[id]);saveLocal(false);renderProcesses();msg('Process öppnad');scroll.scrollTop=0;scroll.scrollLeft=0;requestAnimationFrame(alignEditorTop)}
 function newProcess(){persist();const n=prompt('Namn på den nya processen:','Ny process');if(n===null)return;currentId=uid();processes[currentId]={id:currentId,name:n.trim()||'Ny process',nodes:[],links:[]};undo=[];redo=[];restore(processes[currentId]);saveLocal(true);renderProcesses();scroll.scrollLeft=0;scroll.scrollTop=0;msg('Ny process skapad')}
 function deleteProcess(id){
   const proc=processes[id]; if(!proc)return;
@@ -2389,22 +2417,57 @@ renderProcesses();refreshControls();updateSelectionUi();updateAccountUi();msg('K
 window.addEventListener('beforeunload',()=>{try{saveLocal(true)}catch(e){}});
 
 function alignEditorTop(){
-  const main=root.querySelector('.p48-main');
+  const body=root.querySelector('.p48-body');
   const side=root.querySelector('.p48-side');
-  if(main){
-    main.style.display='grid';
-    main.style.gridTemplateColumns='220px minmax(0,1fr)';
-    main.style.alignItems='stretch';
+  const wrap=root.querySelector('.p48-canvas-wrap');
+
+  if(body){
+    body.style.position='relative';
+    body.style.display='block';
+    body.style.height='900px';
+    body.style.minHeight='900px';
+    body.style.overflow='hidden';
   }
   if(side){
-    side.style.marginTop='0';
-    side.style.paddingTop=side.style.paddingTop||'0';
+    side.style.position='absolute';
+    side.style.left='0';
+    side.style.top='0';
+    side.style.width='220px';
+    side.style.height='900px';
+    side.style.overflowY='auto';
   }
-  scroll.style.marginTop='0';
-  scroll.style.paddingTop='0';
-  const wrap=root.querySelector('.p48-canvas-wrap');
-  if(wrap){wrap.style.marginTop='0';wrap.style.paddingTop='0';}
-  canvas.style.marginTop='0';
+  if(scroll){
+    scroll.style.position='absolute';
+    scroll.style.left='220px';
+    scroll.style.right='0';
+    scroll.style.top='0';
+    scroll.style.bottom='0';
+    scroll.style.height='900px';
+    scroll.style.margin='0';
+    scroll.style.padding='0';
+    scroll.style.overflow='auto';
+  }
+  if(wrap){
+    wrap.style.position='relative';
+    wrap.style.top='0';
+    wrap.style.left='0';
+    wrap.style.width='2400px';
+    wrap.style.height='1400px';
+    wrap.style.margin='0';
+    wrap.style.padding='0';
+  }
+  canvas.style.position='relative';
+  canvas.style.top='0';
+  canvas.style.left='0';
+  canvas.style.margin='0';
+  canvas.style.width='2400px';
+  canvas.style.height='1400px';
+
+  // Ensure we do not inherit a stale vertical scroll position on process open.
+  if(scroll.scrollTop<0 || !Number.isFinite(scroll.scrollTop))scroll.scrollTop=0;
+
+  invalidateNodeGeom();
+  requestFullLinkRender();
   scheduleHorizontalNavSync();
 }
 requestAnimationFrame(alignEditorTop);

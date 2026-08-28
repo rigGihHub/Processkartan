@@ -1,12 +1,15 @@
-# Maplini v0.9.9 — Canvas alignment fix
+# Maplini v0.10.0 — Definitive canvas top alignment
 
-## Fix
-Canvasen börjar nu direkt under toolbaren.
+Grundorsaken hittades: tidigare layoutfixar riktade `.p48-main` / `.p48-app`,
+men den faktiska editorn använder `.p48-body`.
 
-Tidigare kunde vänsterpanelens höga formateringsinnehåll påverka den vertikala layouten så arbetsytan hamnade för långt ner.
+## Ny layout
+- `.p48-body` är den fasta editorcontainern.
+- vänsterpanelen ligger absolut på `top: 0`, `left: 0`
+- canvasområdet ligger absolut på `top: 0`, `left: 220px`
+- båda börjar därför exakt på samma höjd direkt under toolbaren
+- vänsterpanelen har egen vertikal scroll
+- canvasområdet har egen vertikal/horisontell scroll
+- canvasen kan inte längre skjutas ned av sidebarens innehåll
 
-Nu:
-- vänsterpanel och canvas ligger i samma grid-rad
-- vänsterpanelen scrollar internt
-- canvasens topp påverkas inte av sidebarens innehåll
-- horisontell navigator ligger kvar under canvasen
+När en process öppnas återställs även arbetsytans scrollposition till top-left.
