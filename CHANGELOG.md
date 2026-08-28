@@ -1,6 +1,8 @@
-# v0.9.1
-- Kritisk CSS flyttad in i iframe.
-- 22 px geometrisk träffyta för pilar.
-- 28 px HTML-klickkorridor.
-- Global punktstorlek/färg.
-- Dölj/visa punkter rättad.
+# v0.9.5
+- Connector bounding-box cache.
+- Node→link index cache.
+- Faster link hit testing.
+- Cached formatting controls.
+- Idle localStorage serialization.
+- Skip duplicate process-list renders.
+- Färre DOM writes.

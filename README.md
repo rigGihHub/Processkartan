@@ -1,16 +1,14 @@
-# Maplini v0.9.1 — Critical interaction fix
+# Maplini v0.9.5 — Ultra performance pass
 
-Grundfelet var att flera visuella regler låg utanför editor-iframe:n.
+Det här varvet fokuserar på större processkartor.
 
-## Pilar/kopplingar
-- Kritisk CSS ligger nu inne i editor-iframe:n.
-- Dokumentnivå-capture används för klick.
-- Närmaste koppling inom 22 px markeras.
-- HTML-klickkorridor är 28 px.
-- Markerad koppling får blå halo.
+- Bounding-box-cache före exakt länkträfftestning.
+- Node→link-index cache vid drag/resize.
+- Cache av formateringskontroller.
+- localStorage-serialisering via requestIdleCallback när möjligt.
+- Sparade-processer-listan byggs bara om när den faktiskt ändrats.
+- Färre DOM-style-skrivningar för kopplingspunkter.
+- Idle-persist för vissa processinställningar.
+- Mer aggressiv CSS containment/content-visibility.
 
-## Kopplingspunkter
-- Storlek appliceras explicit på alla punkter samtidigt.
-- Färg appliceras explicit på alla punkter samtidigt.
-- Dölj kopplingspunkter döljer alla direkt.
-- Nya rutor ärver aktuell punktinställning.
+Funktionaliteten är oförändrad.

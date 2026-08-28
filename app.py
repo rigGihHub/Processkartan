@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.9.1"
+APP_VERSION = "0.9.5"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -217,6 +217,34 @@ header[data-testid="stHeader"]{height:2rem}
 html = r"""
 <div id="pk48">
 <style>
+/* v0.9.5 ultra performance pass */
+.p48-node{content-visibility:auto;contain-intrinsic-size:180px 70px;transform:translateZ(0);backface-visibility:hidden}
+.p48-side{contain:layout style}
+.p48-toolbar{contain:layout style}
+.p48-processes{contain:content}
+
+/* v0.9.4 deeper performance pass */
+.p48-node{transform:translateZ(0);backface-visibility:hidden}
+.p48-link-visible,.p48-link-selection{vector-effect:non-scaling-stroke}
+#p48-canvas{contain:layout paint style}
+
+/* v0.9.3 performance hints */
+.p48-node{contain:layout style;will-change:transform,left,top}
+#p48-links{shape-rendering:geometricPrecision}
+.p48-link-hit-segment{will-change:transform}
+
+/* v0.9.2 formatting cleanup */
+.p48-format-grid-clean{display:grid;grid-template-columns:1fr 1fr;gap:8px;align-items:end}
+.p48-format-grid-clean label{font:700 10px system-ui;color:#657281}
+.p48-format-grid-clean input,.p48-format-grid-clean select{width:100%;margin-top:4px}
+.p48-process-style{margin-top:12px;padding-top:10px;border-top:1px solid #e1e7ed}
+.p48-logo-controls{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:7px}
+.p48-logo-controls button,.p48-logo-controls label{font:700 11px system-ui}
+.p48-logo-upload{display:block;border:1px dashed #b9c5cf;border-radius:7px;padding:7px;text-align:center;cursor:pointer}
+.p48-logo-upload input{display:none}
+.p48-process-logo{position:absolute;left:28px;top:28px;max-width:220px;max-height:90px;object-fit:contain;z-index:3;pointer-events:none;display:none}
+.p48-process-logo.on{display:block}
+
 /* v0.9.1 critical editor rules inside iframe */
 .p48-link-hit-layer{position:absolute;inset:0;z-index:4;pointer-events:none}
 .p48-link-hit-segment{position:absolute;height:28px;transform-origin:0 50%;pointer-events:auto!important;cursor:pointer!important;background:transparent}
@@ -472,8 +500,9 @@ html = r"""
       <div class="p48-title">Formatering</div>
       <div class="p48-sub">Markera en ruta för att ändra dess text, färger och formatering.</div>
       <div id="p48-controls">
-        <div class="p48-format-grid">
-          <div><label>Typsnitt</label><select id="p48-font">
+        <div class="p48-format-grid-clean">
+          <label>Typsnitt
+            <select id="p48-font">
 <option value="Inter">Inter</option>
 <option value="Poppins">Poppins</option>
 <option value="Montserrat">Montserrat</option>
@@ -501,9 +530,40 @@ html = r"""
 <option value="Trebuchet MS">Trebuchet MS</option>
 <option value="Courier New">Courier New</option>
 <option value="system-ui">System</option>
-</select></div>
-          <button type="button" class="p48-btn" id="p48-font-all" style="grid-column:1/-1;width:100%;margin-top:2px">Använd typsnitt på all text</button>
-        <div class="p48-point-settings">
+</select>
+          </label>
+          <label>Textstorlek
+            <input id="p48-size" type="number" min="10" max="36" value="13">
+          </label>
+        </div>
+        <button type="button" class="p48-btn" id="p48-font-all" style="width:100%;margin-top:7px">Använd typsnitt på all text</button>
+        
+        <div class="p48-process-style">
+          <div class="p48-title">Processyta</div>
+          <div class="p48-format-grid-clean">
+            <label>Bakgrundsfärg
+              <input id="p48-canvas-bg" type="color" value="#ffffff">
+            </label>
+            <label>Logotypstorlek
+              <select id="p48-logo-size">
+                <option value="120">Liten</option>
+                <option value="180" selected>Normal</option>
+                <option value="240">Stor</option>
+              </select>
+            </label>
+          </div>
+          <div class="p48-logo-controls">
+            <label class="p48-logo-upload">Ladda upp logotype
+              <input id="p48-logo-file" type="file" accept="image/png,image/jpeg,image/webp">
+            </label>
+            <button type="button" class="p48-btn" id="p48-logo-remove">Ta bort logotype</button>
+          </div>
+          <label class="p48-hide-row">
+            <input id="p48-logo-hide" type="checkbox">
+            Dölj logotype
+          </label>
+        </div>
+<div class="p48-point-settings">
           <div class="p48-title">Kopplingspunkter</div>
           <div class="p48-point-grid">
             <label>Storlek
@@ -524,7 +584,7 @@ html = r"""
             Dölj kopplingspunkter
           </label>
         </div>
-          <div><label>Storlek</label><input id="p48-size" type="number" min="10" max="36" value="13"></div>
+          
           <div><label>Textfärg</label><input id="p48-textcolor" type="color" value="#17202a"></div>
           <div><label>Bakgrund</label><input id="p48-bgcolor" type="color" value="#ffffff"></div>
           <div><label>Kantfärg</label><input id="p48-bordercolor" type="color" value="#637387"></div>
@@ -557,7 +617,7 @@ html = r"""
   </aside>
 
   <main class="p48-scroll" id="p48-scroll">
-    <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><div id="p48-link-hit-layer" class="p48-link-hit-layer"></div><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-print-frame" class="p48-print-frame"></div>
+    <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><img id="p48-process-logo" class="p48-process-logo" alt="Processlogotype"><div id="p48-link-hit-layer" class="p48-link-hit-layer"></div><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-print-frame" class="p48-print-frame"></div>
       <div id="p48-marquee" class="p48-marquee"></div>
       <svg id="p48-svg" viewBox="0 0 2400 1400">
         <defs><marker id="p48-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0,0 10,4 0,8" fill="#687584"></polygon></marker></defs>
@@ -582,7 +642,9 @@ const nameInput=root.querySelector('#p48-name'),status=root.querySelector('#p48-
 const controls=root.querySelector('#p48-controls'),font=root.querySelector('#p48-font'),size=root.querySelector('#p48-size'),textColor=root.querySelector('#p48-textcolor'),bgColor=root.querySelector('#p48-bgcolor');
 const bold=root.querySelector('#p48-bold'),italic=root.querySelector('#p48-italic'),under=root.querySelector('#p48-under');
 const fontAllBtn=root.querySelector('#p48-font-all');
+const cachedFormatControls=[...controls.querySelectorAll('select,input,button')];
 const pointSize=root.querySelector('#p48-point-size'),pointColor=root.querySelector('#p48-point-color'),hidePoints=root.querySelector('#p48-hide-points');
+const canvasBg=root.querySelector('#p48-canvas-bg'),logoFile=root.querySelector('#p48-logo-file'),logoRemove=root.querySelector('#p48-logo-remove'),logoHide=root.querySelector('#p48-logo-hide'),logoSize=root.querySelector('#p48-logo-size'),processLogo=root.querySelector('#p48-process-logo');
 const emailInput=root.querySelector('#p48-email'),passwordInput=root.querySelector('#p48-password');
 const loginBtn=root.querySelector('#p48-login'),signupBtn=root.querySelector('#p48-signup'),logoutBtn=root.querySelector('#p48-logout');
 const signedOut=root.querySelector('#p48-account-signedout'),signedIn=root.querySelector('#p48-account-signedin'),userEmail=root.querySelector('#p48-user-email');
@@ -602,7 +664,13 @@ const addInputBtn=root.querySelector('#p48-add-input'),addOutputBtn=root.querySe
 
 let nodes=new Map(),links=[],selectedId=null,selectedIds=new Set(),selectionMode=false,seq=8,undo=[],redo=[],currentId='proc-1',processes={};
 let selectedLinkIndex=null;
+const perfStats={fullRenders:0,partialRenders:0};
+const nodeGeomCache=new Map();
+const linkBBoxCache=new Map();
+let linkBBoxVersion=0;
+let geomVersion=0;
 let connectorPointSize=8,connectorPointColor='#1f6f55',connectorPointsHidden=false;
+let processBackground='#ffffff',processLogoData='',processLogoHidden=false,processLogoWidth=180;
 const SUPABASE_URL="__SUPABASE_URL__", SUPABASE_ANON_KEY="__SUPABASE_ANON_KEY__", PUBLIC_APP_URL="__PUBLIC_APP_URL__";
 const CLOUD_ENABLED=SUPABASE_URL.length>0&&SUPABASE_ANON_KEY.length>0;
 let cloudSession=null,sharedView=false;
@@ -613,6 +681,14 @@ function syncHorizontalNavWidth(){
   if(!hnav||!hnavInner)return;
   const w=Math.max(canvas.scrollWidth,canvas.offsetWidth,2400);
   hnavInner.style.width=w+'px';
+}
+let hnavSyncRaf=0;
+function scheduleHorizontalNavSync(){
+  if(hnavSyncRaf)return;
+  hnavSyncRaf=requestAnimationFrame(()=>{
+    hnavSyncRaf=0;
+    syncHorizontalNavWidth();
+  });
 }
 let syncingH=false;
 if(hnav){
@@ -636,8 +712,8 @@ scroll.addEventListener('wheel',(e)=>{
     if(hnav)hnav.scrollLeft=scroll.scrollLeft;
   }
 },{passive:false});
-window.addEventListener('resize',syncHorizontalNavWidth);
-setTimeout(syncHorizontalNavWidth,0);
+window.addEventListener('resize',scheduleHorizontalNavSync);
+setTimeout(scheduleHorizontalNavSync,0);
 
 
 
@@ -830,22 +906,68 @@ createWorkspaceBtn.addEventListener('click',createWorkspace);
 
 
 function applyConnectorPointSettings(){
+  const px=connectorPointSize+'px',display=connectorPointsHidden?'none':'';
   for(const item of nodes.values()){
     for(const h of Object.values(item.handles||{})){
-      h.style.width=connectorPointSize+'px';
-      h.style.height=connectorPointSize+'px';
-      h.style.background=connectorPointColor;
+      if(h.style.width!==px)h.style.width=px;
+      if(h.style.height!==px)h.style.height=px;
+      if(h.style.background!==connectorPointColor)h.style.background=connectorPointColor;
+      if(h.style.display!==display)h.style.display=display;
       h.style.border='1px solid #fff';
       h.style.boxShadow='0 0 0 1px '+connectorPointColor;
-      h.style.display=connectorPointsHidden?'none':'';
     }
   }
-  canvas.style.setProperty('--p48-point-size',connectorPointSize+'px');
+  canvas.style.setProperty('--p48-point-size',px);
   canvas.style.setProperty('--p48-point-color',connectorPointColor);
   canvas.classList.toggle('p48-hide-points',connectorPointsHidden);
-  if(pointSize)pointSize.value=String(connectorPointSize);
-  if(pointColor)pointColor.value=connectorPointColor;
-  if(hidePoints)hidePoints.checked=connectorPointsHidden;
+  if(pointSize&&pointSize.value!==String(connectorPointSize))pointSize.value=String(connectorPointSize);
+  if(pointColor&&pointColor.value!==connectorPointColor)pointColor.value=connectorPointColor;
+  if(hidePoints&&hidePoints.checked!==connectorPointsHidden)hidePoints.checked=connectorPointsHidden;
+}
+
+
+function applyProcessStyle(){
+  canvas.style.backgroundColor=processBackground;
+  if(canvasBg)canvasBg.value=processBackground;
+  if(logoSize)logoSize.value=String(processLogoWidth);
+  if(logoHide)logoHide.checked=processLogoHidden;
+  if(processLogoData){
+    processLogo.src=processLogoData;
+    processLogo.style.maxWidth=processLogoWidth+'px';
+    processLogo.classList.toggle('on',!processLogoHidden);
+  }else{
+    processLogo.removeAttribute('src');
+    processLogo.classList.remove('on');
+  }
+}
+
+
+function invalidateNodeGeom(id=null){
+  geomVersion++;invalidateLinkBBoxes();
+  if(id==null)nodeGeomCache.clear();
+  else nodeGeomCache.delete(id);
+}
+function nodeGeom(id){
+  const cached=nodeGeomCache.get(id);
+  if(cached&&cached.v===geomVersion)return cached;
+  const el=nodes.get(id)?.el;
+  if(!el)return null;
+  const g={
+    v:geomVersion,
+    left:el.offsetLeft,
+    top:el.offsetTop,
+    width:el.offsetWidth,
+    height:el.offsetHeight
+  };
+  nodeGeomCache.set(id,g);
+  return g;
+}
+function anchorCached(id,side){
+  const g=nodeGeom(id);if(!g)return[0,0];
+  if(side==='left')return[g.left,g.top+g.height/2];
+  if(side==='right')return[g.left+g.width,g.top+g.height/2];
+  if(side==='top')return[g.left+g.width/2,g.top];
+  return[g.left+g.width/2,g.top+g.height];
 }
 
 function clone(v){return JSON.parse(JSON.stringify(v))}
@@ -857,13 +979,38 @@ function applyStyle(item){const s=styleOf(item.data);Object.assign(item.data,s);
 function state(){return{
   id:currentId,
   name:nameInput.value.trim()||'Namnlös process',
-  nodes:[...nodes.values()].map(x=>clone(x.data)),
-  links:clone(links),
+  nodes:[...nodes.values()].map(x=>x.data),
+  links,
   connectorPointSize,
   connectorPointColor,
-  connectorPointsHidden
+  connectorPointsHidden,
+  processBackground,
+  processLogoData,
+  processLogoHidden,
+  processLogoWidth
 }}
-function saveLocal(){try{localStorage.setItem('maplini_v050',JSON.stringify({currentId,processes}))}catch(e){}}
+let localSaveTimer=null,localSaveDirty=false,lastLocalPayload='';
+function saveLocal(immediate=false){
+  localSaveDirty=true;
+  const flush=()=>{
+    if(!localSaveDirty)return;
+    localSaveDirty=false;
+    if(localSaveTimer){clearTimeout(localSaveTimer);localSaveTimer=null;}
+    try{
+      const payload=JSON.stringify({currentId,processes});
+      if(payload!==lastLocalPayload){
+        localStorage.setItem('maplini_v050',payload);
+        lastLocalPayload=payload;
+      }
+    }catch(e){}
+  };
+  if(immediate){flush();return}
+  if(localSaveTimer)clearTimeout(localSaveTimer);
+  localSaveTimer=setTimeout(()=>{
+    if('requestIdleCallback' in window)requestIdleCallback(flush,{timeout:300});
+    else flush();
+  },120);
+}
 function loadLocal(){
   try{
     const raw=localStorage.getItem('maplini_v050')||localStorage.getItem('processkartan_v048');
@@ -876,7 +1023,11 @@ function loadLocal(){
     return true;
   }catch(e){return false}
 }
+let lastProcessListSignature='';
 function renderProcesses(){
+  const sig=Object.values(processes).map(p=>String(p.id)+'|'+String(p.name)).join('~')+'|'+currentId;
+  if(sig===lastProcessListSignature)return;
+  lastProcessListSignature=sig;
   processBox.innerHTML='';
   Object.values(processes).sort((a,b)=>(a.name||'').localeCompare(b.name||'','sv')).forEach(p=>{
     const row=document.createElement('div');row.className='p48-proc-row';
@@ -888,9 +1039,42 @@ function renderProcesses(){
     row.append(b,del);processBox.appendChild(row);
   });
 }
-function persist(show=false){const s=state();processes[currentId]=clone(s);saveLocal();renderProcesses();if(show)msg('Sparad');syncHorizontalNavWidth()}
-function pushUndo(){undo.push(JSON.stringify(state()));if(undo.length>50)undo.shift();redo=[]}
-function clearCanvas(){for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();linkLayer.innerHTML='';clearLinkHitLayer();finishTempArrow();refreshControls();updateSelectionUi()}
+let lastProcessListName='';
+
+let idlePersistTimer=null;
+function persistAfterIdle(){
+  if(idlePersistTimer)clearTimeout(idlePersistTimer);
+  idlePersistTimer=setTimeout(()=>persist(false,false),120);
+}
+
+function persist(show=false,refreshList=false){
+  const st=state();
+  processes[currentId]=st;
+  saveLocal(false);
+  const currentName=st.name||'';
+  if(refreshList||currentName!==lastProcessListName){
+    lastProcessListName=currentName;
+    renderProcesses();
+  }
+  if(show)msg('Sparad');
+  scheduleHorizontalNavSync();
+}
+let lastUndoAt=0,lastUndoSnapshot='';
+function pushUndo(force=false){
+  const now=performance.now();
+  const snapshot=JSON.stringify(state());
+  if(!force && now-lastUndoAt<220 && lastUndoSnapshot){
+    // During sliders/colors/rapid UI input, keep one undo checkpoint
+    // rather than serializing dozens of nearly identical states.
+    return;
+  }
+  undo.push(snapshot);
+  lastUndoSnapshot=snapshot;
+  lastUndoAt=now;
+  if(undo.length>50)undo.shift();
+  redo=[];
+}
+function clearCanvas(){for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();linkLayer.innerHTML='';clearLinkHitLayer();linkDomByIndex.clear();finishTempArrow();refreshControls();updateSelectionUi()}
 function restore(s){
   const d=typeof s==='string'?JSON.parse(s):clone(s);
   clearCanvas();
@@ -899,14 +1083,19 @@ function restore(s){
   connectorPointSize=Number(d.connectorPointSize||8);
   connectorPointColor=d.connectorPointColor||'#1f6f55';
   connectorPointsHidden=Boolean(d.connectorPointsHidden);
+  processBackground=d.processBackground||'#ffffff';
+  processLogoData=d.processLogoData||'';
+  processLogoHidden=Boolean(d.processLogoHidden);
+  processLogoWidth=Number(d.processLogoWidth||180);
   applyConnectorPointSettings();
+  applyProcessStyle();
   (d.nodes||[]).forEach(makeNode);
   links=d.links||[];
   seq=Math.max(0,...[...nodes.keys()].map(id=>parseInt(String(id).replace(/\D/g,''),10)||0));
-  drawLinks();
+  requestFullLinkRender(true);
 }
-function openProcess(id){if(!processes[id])return;currentId=id;undo=[];redo=[];restore(processes[id]);saveLocal();renderProcesses();msg('Process öppnad')}
-function newProcess(){persist();const n=prompt('Namn på den nya processen:','Ny process');if(n===null)return;currentId=uid();processes[currentId]={id:currentId,name:n.trim()||'Ny process',nodes:[],links:[]};undo=[];redo=[];restore(processes[currentId]);saveLocal();renderProcesses();scroll.scrollLeft=0;scroll.scrollTop=0;msg('Ny process skapad')}
+function openProcess(id){if(!processes[id])return;currentId=id;undo=[];redo=[];restore(processes[id]);saveLocal(false);renderProcesses();msg('Process öppnad')}
+function newProcess(){persist();const n=prompt('Namn på den nya processen:','Ny process');if(n===null)return;currentId=uid();processes[currentId]={id:currentId,name:n.trim()||'Ny process',nodes:[],links:[]};undo=[];redo=[];restore(processes[currentId]);saveLocal(true);renderProcesses();scroll.scrollLeft=0;scroll.scrollTop=0;msg('Ny process skapad')}
 function deleteProcess(id){
   const proc=processes[id]; if(!proc)return;
   const label=proc.name||'Namnlös process';
@@ -929,7 +1118,13 @@ function nodeText(t){return{start:'Start',process:'Ny aktivitet',decision:'Beslu
 function place(el,x,y){const snap=20,nx=Math.round(x/snap)*snap,ny=Math.round(y/snap)*snap;el.style.left=Math.max(10,Math.min(2400-el.offsetWidth-10,nx))+'px';el.style.top=Math.max(10,Math.min(1400-el.offsetHeight-10,ny))+'px'}
 function sync(el){const x=nodes.get(el.dataset.id);if(x){x.data.x=parseFloat(el.style.left)||0;x.data.y=parseFloat(el.style.top)||0}}
 function center(el){return[(parseFloat(el.style.left)||0)+el.offsetWidth/2,(parseFloat(el.style.top)||0)+el.offsetHeight/2]}
-function anchor(el,side){const x=parseFloat(el.style.left)||0,y=parseFloat(el.style.top)||0,w=el.offsetWidth,h=el.offsetHeight;if(side==='left')return[x,y+h/2];if(side==='top')return[x+w/2,y];if(side==='bottom')return[x+w/2,y+h];return[x+w,y+h/2]}
+function anchor(el,side){
+  const x=el.offsetLeft,y=el.offsetTop,w=el.offsetWidth,h=el.offsetHeight;
+  if(side==='left')return[x,y+h/2];
+  if(side==='right')return[x+w,y+h/2];
+  if(side==='top')return[x+w/2,y];
+  return[x+w/2,y+h];
+}
 function targetSide(a,b){const[ax,ay]=center(a),[bx,by]=center(b),dx=bx-ax,dy=by-ay;if(Math.abs(dx)>=Math.abs(dy))return dx>=0?'left':'right';return dy>=0?'top':'bottom'}
 
 function updateSelectionUi(){
@@ -942,7 +1137,6 @@ function updateSelectionUi(){
   selectToolBtn.classList.toggle('primary',selectionMode);
   selectToolBtn.textContent=selectionMode?'Avsluta markering':'Markera område';
 
-  applyConnectorPointSettings();
 }
 function clearSelection(){
   selectedIds.clear();selectedId=null;refreshControls();updateSelectionUi();
@@ -1003,20 +1197,22 @@ function renderIOEditor(item){
 
 function setFormatEnabled(enabled){
   const linkMode=selectedLinkIndex!=null;
-  controls.querySelectorAll('select,input,button').forEach(el=>{
-    const alwaysForLink=(el===borderColor||el===borderWidth);
-    el.disabled=linkMode?!alwaysForLink:!enabled;
-  });
-  root.querySelectorAll('.p48-step-io input,.p48-step-io button').forEach(el=>{
-    el.disabled=!enabled;
-  });
-  controls.style.opacity=(enabled||linkMode)?'1':'0.45';
+  for(const el of cachedFormatControls){
+    const commonForLink=(el===borderColor||el===borderWidth||el===linkEnd||el===linkDash||el===deleteLinkBtn);
+    if(linkMode)el.disabled=!commonForLink;
+    else el.disabled=!enabled;
+  }
   const stepIO=root.querySelector('.p48-step-io');
-  if(stepIO)stepIO.style.opacity=enabled?'1':'0.45';
+  if(stepIO){
+    for(const el of stepIO.querySelectorAll('input,button'))el.disabled=!enabled;
+    stepIO.style.opacity=enabled?'1':'0.45';
+  }
+  controls.style.opacity=(enabled||linkMode)?'1':'0.45';
+  linkFormat.style.opacity=linkMode?'1':'';
 }
 
 function refreshControls(){const item=selectedId?nodes.get(selectedId):null;if(!item){setFormatEnabled(false);inputsBox.innerHTML='';outputsBox.innerHTML='';if(selectedLinkIndex!=null)refreshLinkControls();return}setFormatEnabled(true);const s=styleOf(item.data);font.value=s.fontFamily;size.value=s.fontSize;textColor.value=s.textColor;bgColor.value=s.bgColor;borderColor.value=s.borderColor;borderWidth.value=String(s.borderWidth);bold.classList.toggle('active',s.fontWeight==='700');italic.classList.toggle('active',s.fontStyle==='italic');under.classList.toggle('active',s.textDecoration==='underline');root.querySelectorAll('[data-align]').forEach(b=>b.classList.toggle('active',b.dataset.align===s.textAlign));renderIOEditor(item)}
-function updateStyle(patch){const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();Object.assign(item.data,patch);applyStyle(item);drawLinks();persist();refreshControls()}
+function updateStyle(patch){const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();Object.assign(item.data,patch);applyStyle(item);drawLinks();persist()}
 function beginInlineEdit(el){
   const item=nodes.get(el.dataset.id);
   if(!item)return;
@@ -1070,7 +1266,7 @@ label.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();finishInlineEdit(el);el.focus();}
 });
 el.addEventListener('click',e=>{e.stopPropagation();select(el)});
-el.addEventListener('pointerdown',e=>{if(e.button!==0||e.target.classList.contains('p48-handle')||e.target.classList.contains('p48-label')||e.target.classList.contains('p48-resize'))return;select(el);pushUndo();const sx=e.clientX,sy=e.clientY,ox=parseFloat(el.style.left)||0,oy=parseFloat(el.style.top)||0;el.setPointerCapture(e.pointerId);const mv=ev=>{place(el,ox+ev.clientX-sx,oy+ev.clientY-sy);sync(el);drawLinks()};const up=()=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);persist()};el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up)});
+el.addEventListener('pointerdown',e=>{if(e.button!==0||e.target.classList.contains('p48-handle')||e.target.classList.contains('p48-label')||e.target.classList.contains('p48-resize'))return;select(el);pushUndo(true);const sx=e.clientX,sy=e.clientY,ox=parseFloat(el.style.left)||0,oy=parseFloat(el.style.top)||0;el.setPointerCapture(e.pointerId);const mv=ev=>{place(el,ox+ev.clientX-sx,oy+ev.clientY-sy);sync(el);drawLinks()};const up=()=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);persist()};el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up)});
 
 Object.values(resizeHandles).forEach(rh=>rh.addEventListener('pointerdown',e=>{
   e.stopPropagation();e.preventDefault();select(el);pushUndo();
@@ -1094,11 +1290,32 @@ Object.values(resizeHandles).forEach(rh=>rh.addEventListener('pointerdown',e=>{
   document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up);
 }));
 
-Object.values(handles).forEach(h=>h.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();const side=h.dataset.side,[x1,y1]=anchor(el,side);temp.hidden=false;temp.setAttribute('d',`M${x1},${y1} L${x1},${y1}`);const mv=ev=>{const r=canvas.getBoundingClientRect(),x2=ev.clientX-r.left+scroll.scrollLeft,y2=ev.clientY-r.top+scroll.scrollTop;temp.setAttribute('d',`M${x1},${y1} L${x2},${y2}`)};const up=ev=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);finishTempArrow();const target=document.elementFromPoint(ev.clientX,ev.clientY)?.closest('.p48-node');if(target&&target!==el){pushUndo();links.push([el.dataset.id,target.dataset.id,side,{color:'#687584',width:2,end:'arrow',dash:'solid',viaX:null,viaY:null}]);drawLinks();persist()}};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)}));
+Object.values(handles).forEach(h=>h.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();const side=h.dataset.side,[x1,y1]=anchor(el,side);temp.hidden=false;temp.setAttribute('d',`M${x1},${y1} L${x1},${y1}`);const mv=ev=>{const r=canvas.getBoundingClientRect(),x2=ev.clientX-r.left+scroll.scrollLeft,y2=ev.clientY-r.top+scroll.scrollTop;temp.setAttribute('d',`M${x1},${y1} L${x2},${y2}`)};const up=ev=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);finishTempArrow();const target=document.elementFromPoint(ev.clientX,ev.clientY)?.closest('.p48-node');if(target&&target!==el){pushUndo();links.push([el.dataset.id,target.dataset.id,side,{color:'#687584',width:2,end:'arrow',dash:'solid',viaX:null,viaY:null}]);requestFullLinkRender();persist()}};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)}));
 return el}
 
 function addNode(type,x,y){pushUndo();seq++;const el=makeNode({id:'n'+seq,type,text:nodeText(type),x:x-90,y:y-38});place(el,x-90,y-38);sync(el);select(el);drawLinks();persist()}
 
+
+
+function invalidateLinkBBoxes(){
+  linkBBoxVersion++;
+  linkBBoxCache.clear();
+}
+function linkBBox(index){
+  const cached=linkBBoxCache.get(index);
+  if(cached&&cached.v===linkBBoxVersion)return cached;
+  const link=links[index];if(!link)return null;
+  const A=nodes.get(link[0])?.el,B=nodes.get(link[1])?.el;if(!A||!B)return null;
+  const side=link[2]||'right',t=targetSide(A,B);
+  const [x1,y1]=anchor(A,side),[x2,y2]=anchor(B,t),st=linkStyle(link);
+  const mx=st.viaX==null?(x1+x2)/2:st.viaX;
+  const my=st.viaY==null?(y1+y2)/2:st.viaY;
+  const bent=st.viaX!=null||st.viaY!=null;
+  const xs=bent?[x1,mx,x2]:[x1,x2],ys=bent?[y1,my,y2]:[y1,y2],pad=26;
+  const box={v:linkBBoxVersion,minX:Math.min(...xs)-pad,maxX:Math.max(...xs)+pad,minY:Math.min(...ys)-pad,maxY:Math.max(...ys)+pad};
+  linkBBoxCache.set(index,box);
+  return box;
+}
 
 function distancePointToSegment(px,py,x1,y1,x2,y2){
   const vx=x2-x1,vy=y2-y1,wx=px-x1,wy=py-y1;
@@ -1125,18 +1342,19 @@ function linkDistanceAt(index,x,y){
 }
 function hitTestLink(clientX,clientY){
   const rect=canvas.getBoundingClientRect();
-  const x=clientX-rect.left;
-  const y=clientY-rect.top;
+  const x=clientX-rect.left,y=clientY-rect.top;
   let best=null,bestDist=Infinity;
-  links.forEach((_,i)=>{
+  for(let i=0;i<links.length;i++){
+    const b=linkBBox(i);
+    if(!b||x<b.minX||x>b.maxX||y<b.minY||y>b.maxY)continue;
     const d=linkDistanceAt(i,x,y);
     if(d<bestDist){bestDist=d;best=i}
-  });
+  }
   return bestDist<=22?best:null;
 }
 
 function linkStyle(link){if(!link[3]||typeof link[3]!=='object')link[3]={};return Object.assign({color:'#687584',width:2,end:'arrow',dash:'solid',viaX:null,viaY:null},link[3])}
-function setLinkStyle(i,patch){if(i==null||!links[i])return;links[i][3]=Object.assign(linkStyle(links[i]),patch)}
+function setLinkStyle(i,patch){if(i==null||!links[i])return;links[i][3]=Object.assign(linkStyle(links[i]),patch);invalidateLinkBBoxes()}
 function dashArray(st){return st.dash==='dashed'?'10 7':st.dash==='dotted'?'2 6':''}
 function refreshLinkControls(){
   const link=selectedLinkIndex!=null?links[selectedLinkIndex]:null;
@@ -1144,15 +1362,19 @@ function refreshLinkControls(){
   linkHandle.classList.toggle('on',!!link);
   if(!link)return;
   const st=linkStyle(link);
+  setFormatEnabled(false);
   borderColor.disabled=false;
   borderWidth.disabled=false;
+  linkEnd.disabled=false;
+  linkDash.disabled=false;
+  deleteLinkBtn.disabled=false;
   borderColor.value=st.color||'#687584';
   borderWidth.value=String(Number(st.width)||2);
   linkEnd.value=st.end||'arrow';
   linkDash.value=st.dash||'solid';
 }
-function selectLink(i){selectedLinkIndex=i;selectedId=null;selectedIds.clear();refreshControls();updateSelectionUi();refreshLinkControls();drawLinks()}
-function clearLinkSelection(){selectedLinkIndex=null;refreshLinkControls();drawLinks()}
+function selectLink(i){selectedLinkIndex=i;selectedId=null;selectedIds.clear();refreshControls();updateSelectionUi();refreshLinkControls();drawLinks(true)}
+function clearLinkSelection(){selectedLinkIndex=null;refreshLinkControls();drawLinks(true)}
 function markerFor(st,x,y,ang){
   const ns='http://www.w3.org/2000/svg';
   if(st.end==='none')return null;
@@ -1199,8 +1421,8 @@ function addHtmlLinkHitSegment(index,x1,y1,x2,y2){
   linkHitLayer.appendChild(seg);
 }
 
-function drawLinks(){
-  linkLayer.innerHTML='';clearLinkHitLayer();
+function renderAllLinksNow(){perfStats.fullRenders++;
+  rebuildNodeLinkIndex();linkLayer.innerHTML='';clearLinkHitLayer();
   links.forEach((link,index)=>{
     const [a,b,side]=link;
     const A=nodes.get(a)?.el,B=nodes.get(b)?.el;
@@ -1270,7 +1492,7 @@ function drawLinks(){
 
     // hit path last = topmost click target
     g.appendChild(hit);
-    linkLayer.appendChild(g);
+    linkDomByIndex.set(index,{group:g,visible:v,hit,halo:(selectedLinkIndex===index?g.querySelector('.p48-link-selection'):null),marker:mk||null});linkLayer.appendChild(g);
   });
 
   if(selectedLinkIndex!=null){
@@ -1284,6 +1506,104 @@ function drawLinks(){
     linkHandle.classList.remove('on');
   }
 }
+
+const linkDomByIndex=new Map();
+const nodeLinkIndex=new Map();
+let dirtyLinks=new Set();
+let fullLinkRenderNeeded=true;
+
+function rebuildNodeLinkIndex(){
+  nodeLinkIndex.clear();
+  for(let i=0;i<links.length;i++){
+    const l=links[i];
+    if(!nodeLinkIndex.has(l[0]))nodeLinkIndex.set(l[0],[]);
+    if(!nodeLinkIndex.has(l[1]))nodeLinkIndex.set(l[1],[]);
+    nodeLinkIndex.get(l[0]).push(i);
+    nodeLinkIndex.get(l[1]).push(i);
+  }
+}
+function linksForNode(id){return nodeLinkIndex.get(id)||[]}
+
+function markNodeLinksDirty(id){
+  for(const i of linksForNode(id))dirtyLinks.add(i);
+}
+
+function redrawSingleLink(index){perfStats.partialRenders++;
+  // Small-path update; if DOM entry isn't available, fall back to full render.
+  const entry=linkDomByIndex.get(index);
+  const link=links[index];
+  if(!entry||!link){fullLinkRenderNeeded=true;return}
+  const [a,b,side]=link;
+  const A=nodes.get(a)?.el,B=nodes.get(b)?.el;
+  if(!A||!B){fullLinkRenderNeeded=true;return}
+  const st=linkStyle(link),ss=side||'right',t=targetSide(A,B);
+  const [x1,y1]=anchor(A,ss),[x2,y2]=anchor(B,t);
+  const mx=st.viaX==null?(x1+x2)/2:st.viaX;
+  const my=st.viaY==null?(y1+y2)/2:st.viaY;
+  const bent=st.viaX!=null||st.viaY!=null;
+  const d=bent?`M${x1},${y1} L${mx},${my} L${x2},${y2}`:`M${x1},${y1} L${x2},${y2}`;
+  entry.visible.setAttribute('d',d);
+  entry.hit.setAttribute('d',d);
+  if(entry.halo)entry.halo.setAttribute('d',d);
+
+  // update HTML hit segments only for this link
+  for(const el of linkHitLayer.querySelectorAll(`[data-link-index="${index}"]`))el.remove();
+  if(bent){
+    addHtmlLinkHitSegment(index,x1,y1,mx,my);
+    addHtmlLinkHitSegment(index,mx,my,x2,y2);
+  }else addHtmlLinkHitSegment(index,x1,y1,x2,y2);
+
+  const oldMarker=entry.marker;
+  if(oldMarker&&oldMarker.parentNode)oldMarker.parentNode.removeChild(oldMarker);
+  const ang=bent?Math.atan2(y2-my,x2-mx):Math.atan2(y2-y1,x2-x1);
+  const mk=markerFor(st,x2,y2,ang);
+  if(mk){
+    mk.style.pointerEvents='none';
+    entry.group.appendChild(mk);
+    entry.marker=mk;
+  }else entry.marker=null;
+
+  if(selectedLinkIndex===index){
+    const mp={x:mx,y:my};
+    linkHandle.style.left=mp.x+'px';
+    linkHandle.style.top=mp.y+'px';
+  }
+}
+
+function renderDirtyLinksNow(){
+  if(fullLinkRenderNeeded){
+    fullLinkRenderNeeded=false;
+    renderAllLinksNow();
+    return;
+  }
+  if(!dirtyLinks.size)return;
+  const items=[...dirtyLinks];
+  dirtyLinks.clear();
+  for(const i of items)redrawSingleLink(i);
+}
+
+
+
+
+function requestFullLinkRender(immediate=false){
+  invalidateLinkBBoxes();fullLinkRenderNeeded=true;
+  drawLinks(immediate);
+}
+
+let linkRenderRaf=0;
+function drawLinks(immediate=false){
+  if(immediate){
+    if(linkRenderRaf){cancelAnimationFrame(linkRenderRaf);linkRenderRaf=0;}
+    renderDirtyLinksNow();
+    return;
+  }
+  if(linkRenderRaf)return;
+  linkRenderRaf=requestAnimationFrame(()=>{
+    linkRenderRaf=0;
+    renderDirtyLinksNow();
+  });
+}
+
 
 
 
@@ -1573,6 +1893,14 @@ async function renderMapSnapshot(){
 
   const ox=pad-b.minX,oy=header+pad-b.minY;
 
+  if(processLogoData&&!processLogoHidden){
+    try{
+      const logoImg=await loadImage(processLogoData);
+      const maxW=Math.min(processLogoWidth,260),scale=Math.min(maxW/logoImg.width,90/logoImg.height,1);
+      ctx.drawImage(logoImg,pad,pad,logoImg.width*scale,logoImg.height*scale);
+    }catch(e){}
+  }
+
   // connectors
   for(const link of links){
     const [a,bid,side]=link,A=nodes.get(a)?.el,B=nodes.get(bid)?.el;if(!A||!B)continue;
@@ -1813,7 +2141,7 @@ canvas.addEventListener('drop',e=>{e.preventDefault();const type=e.dataTransfer.
 canvas.addEventListener('click',e=>{
   if((e.target===canvas||e.target===linkLayer)&&!selectionMode){clearSelection();clearLinkSelection();finishTempArrow();}
 });
-nameInput.addEventListener('change',()=>{persist();msg('Namn sparat')});
+nameInput.addEventListener('change',()=>{persist(false,true);msg('Namn sparat')});
 root.querySelector('#p48-new').addEventListener('click',newProcess);
 root.querySelector('#p48-save').addEventListener('click',async()=>{persist(true);if(ownerId())try{await saveCurrentToCloud()}catch(e){console.error(e)}});
 cloudSaveBtn.addEventListener('click',async()=>{try{await saveCurrentToCloud()}catch(e){console.error(e);msg('Molnsparning misslyckades')}});
@@ -1920,6 +2248,40 @@ hidePoints.addEventListener('change',()=>{
   applyConnectorPointSettings();
   persist();
 });
+
+canvasBg.addEventListener('input',()=>{
+  processBackground=canvasBg.value;
+  canvas.style.backgroundColor=processBackground;persistAfterIdle();
+});
+logoSize.addEventListener('change',()=>{
+  processLogoWidth=Number(logoSize.value)||180;
+  applyProcessStyle();persistAfterIdle();
+});
+logoHide.addEventListener('change',()=>{
+  processLogoHidden=logoHide.checked;
+  applyProcessStyle();persistAfterIdle();
+});
+logoRemove.addEventListener('click',()=>{
+  processLogoData='';
+  processLogoHidden=false;
+  logoFile.value='';
+  applyProcessStyle();persistAfterIdle();
+  msg('Logotype borttagen');
+});
+logoFile.addEventListener('change',()=>{
+  const file=logoFile.files&&logoFile.files[0];
+  if(!file)return;
+  if(!/^image\/(png|jpeg|webp)$/.test(file.type)){msg('Välj PNG, JPG eller WebP');return}
+  const reader=new FileReader();
+  reader.onload=()=>{
+    processLogoData=String(reader.result||'');
+    processLogoHidden=false;
+    applyProcessStyle();persistAfterIdle();
+    msg('Logotype tillagd');
+  };
+  reader.readAsDataURL(file);
+});
+
 size.addEventListener('change',()=>updateStyle({fontSize:Math.max(10,Math.min(36,Number(size.value)||13))}));textColor.addEventListener('input',()=>updateStyle({textColor:textColor.value}));bgColor.addEventListener('input',()=>updateStyle({bgColor:bgColor.value}));borderColor.addEventListener('input',()=>{
   if(selectedLinkIndex!=null){
     pushUndo();
@@ -1949,18 +2311,18 @@ linkEnd.addEventListener('change',()=>{
   if(selectedLinkIndex==null){msg('Markera först en koppling');return}
   pushUndo();
   setLinkStyle(selectedLinkIndex,{end:String(linkEnd.value)});
-  drawLinks();persist();refreshLinkControls();
+  dirtyLinks.add(selectedLinkIndex);drawLinks();persist();refreshLinkControls();
   msg('Slutmarkör ändrad');
 });
 linkDash.addEventListener('change',()=>{
   if(selectedLinkIndex==null){msg('Markera först en koppling');return}
   pushUndo();
   setLinkStyle(selectedLinkIndex,{dash:String(linkDash.value)});
-  drawLinks();persist();refreshLinkControls();
+  dirtyLinks.add(selectedLinkIndex);drawLinks();persist();refreshLinkControls();
   msg('Linjetyp ändrad');
 });
-deleteLinkBtn.addEventListener('click',()=>{if(selectedLinkIndex==null)return;pushUndo();links.splice(selectedLinkIndex,1);selectedLinkIndex=null;drawLinks();persist();refreshLinkControls();msg('Koppling borttagen')});
-linkHandle.addEventListener('pointerdown',e=>{if(selectedLinkIndex==null)return;e.preventDefault();e.stopPropagation();pushUndo();const r=canvas.getBoundingClientRect(),mv=ev=>{setLinkStyle(selectedLinkIndex,{viaX:ev.clientX-r.left,viaY:ev.clientY-r.top});drawLinks()},up=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);persist()};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)});
+deleteLinkBtn.addEventListener('click',()=>{if(selectedLinkIndex==null)return;pushUndo();links.splice(selectedLinkIndex,1);selectedLinkIndex=null;requestFullLinkRender();persist();refreshLinkControls();msg('Koppling borttagen')});
+linkHandle.addEventListener('pointerdown',e=>{if(selectedLinkIndex==null)return;e.preventDefault();e.stopPropagation();pushUndo(true);const r=canvas.getBoundingClientRect(),mv=ev=>{setLinkStyle(selectedLinkIndex,{viaX:ev.clientX-r.left,viaY:ev.clientY-r.top});dirtyLinks.add(selectedLinkIndex);drawLinks()},up=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);persist()};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)});
 
 
 loadCloudSession();
@@ -1969,6 +2331,7 @@ const SHARE_TOKEN="__SHARE_TOKEN__";
  if(SHARE_TOKEN&&await loadShared(SHARE_TOKEN))return;
  if(!loadLocal()){processes[starter.id]=clone(starter);currentId=starter.id}
  openProcess(currentId);renderProcesses();refreshControls();updateSelectionUi();updateAccountUi();msg('Klar');
+ applyProcessStyle();
  renderPrintPages();
  if(ownerId()){
    const valid=await validateSession();
@@ -1976,6 +2339,8 @@ const SHARE_TOKEN="__SHARE_TOKEN__";
  }
 })();
 })();
+
+window.addEventListener('beforeunload',()=>{try{saveLocal(true)}catch(e){}});
 </script>
 </div>
 """
