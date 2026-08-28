@@ -1,7 +1,11 @@
-# v0.10.6
-- Rebuilt from verified v0.10.2 DOM structure.
-- Processyta moved safely to toolbar without breaking sidebar.
-- One Save button.
-- Area delete includes arrows.
-- Arrow selection bypasses dirty-render cache.
-- Release DOM tests verify formatting controls stay inside sidebar.
+# v0.10.9
+- Responsiv mobilvy för Android och iPhone.
+- Vänsterspalten blir mobil verktygslåda/drawer.
+- Canvas använder hela mobilbredden och kan panoreras med touch.
+- Minst 44 px touchytor.
+- 16 px inputtext för att undvika Safari auto-zoom.
+- Safe-area-stöd för iPhone.
+- Toolbar är horisontellt scrollbar på mobil.
+- Processyta/Google Sheets-popovers hålls inom mobilskärmen.
+- Orientation/resize synkar canvas och kopplingar.
+- Desktop-DOM verifierad oförändrad.
