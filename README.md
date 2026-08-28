@@ -1,18 +1,17 @@
-# Maplini v0.10.1 — Layout recovery + visible version
+# Maplini v0.10.2 — DOM structure fix
 
-## Layout
-v0.10.0 använde absolut positionering för sidebar/canvas. Det löste ett problem
-men gjorde att canvasen kunde lägga sig ovanpå header och toolbar.
+Det verkliga layoutfelet var en extra `</div>` före `</aside>`.
 
-v0.10.1 återgår till en stabil grid:
-- toolbar/header ligger normalt ovanför editorn
-- sidebar och canvas ligger i samma grid-rad
-- båda startar direkt under toolbaren
-- sidebar har egen scroll
-- canvasområdet har egen scroll
-- inga absoluta top/left-positioner används
+Den extra stängtaggen stängde `.p48-body` för tidigt, så `<main id="p48-scroll">`
+med canvasen hamnade utanför editor-layouten. Det gav den stora grå ytan och
+förskjutna canvasen.
+
+## Fix
+- Felaktig extra `</div>` borttagen.
+- Sidebar och canvas-main är nu direkta syskon i `.p48-body`.
+- Layout-CSS förenklad till vanlig tvåkolumns-grid.
+- Tidigare top/left/absolute-hack borttagna.
+- Automatisk HTML-strukturtest tillagd i releasebygget.
 
 ## Versionsnummer
-Aktuell version visas nu under Maplini-payoffen, exempelvis:
-
-`v. 0.10.1`
+Visas under loggan och är nu `v. 0.10.2`.

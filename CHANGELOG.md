@@ -1,5 +1,5 @@
-# v0.10.1
-- Tog bort absolut editorlayout från v0.10.0.
-- Återställde stabil grid-layout.
-- Sidebar/canvas börjar på samma höjd utan att överlappa toolbar.
-- Synligt versionsnummer under loggan.
+# v0.10.2
+- Fixat felaktigt HTML-nestningsfel.
+- Canvas-main åter inuti `.p48-body`.
+- Förenklad grid-layout.
+- Regressionstest verifierar DOM-hierarkin.

@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.10.1"
+APP_VERSION = "0.10.2"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -217,76 +217,41 @@ header[data-testid="stHeader"]{height:2rem}
 html = r"""
 <div id="pk48">
 <style>
-/* v0.10.1 — stable editor layout */
+/* v0.10.2 — DOM-correct editor layout */
 .p48-body{
-  display:grid!important;
-  grid-template-columns:220px minmax(0,1fr)!important;
-  grid-template-rows:900px!important;
-  align-items:stretch!important;
-  min-height:900px!important;
-  height:900px!important;
-  overflow:hidden!important;
-  position:relative!important;
+  display:grid;
+  grid-template-columns:220px minmax(0,1fr);
+  height:900px;
+  min-height:900px;
+  overflow:hidden;
 }
 .p48-side{
-  position:relative!important;
-  grid-column:1!important;
-  grid-row:1!important;
-  width:auto!important;
-  height:900px!important;
-  min-height:0!important;
-  max-height:900px!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  margin:0!important;
-  top:auto!important;
-  left:auto!important;
+  grid-column:1;
+  min-width:0;
+  height:900px;
+  overflow-y:auto;
+  overflow-x:hidden;
 }
 .p48-scroll{
-  position:relative!important;
-  grid-column:2!important;
-  grid-row:1!important;
-  left:auto!important;
-  right:auto!important;
-  top:auto!important;
-  bottom:auto!important;
-  width:auto!important;
-  height:900px!important;
-  min-height:900px!important;
-  max-height:900px!important;
-  margin:0!important;
-  padding:0!important;
-  overflow:auto!important;
-  background:#fff!important;
+  grid-column:2;
+  min-width:0;
+  height:900px;
+  overflow:auto;
+  background:#e9eef3;
 }
 .p48-canvas-wrap{
-  position:relative!important;
-  width:2400px!important;
-  min-width:2400px!important;
-  height:1400px!important;
-  min-height:1400px!important;
-  margin:0!important;
-  padding:0!important;
-  top:auto!important;
-  left:auto!important;
+  position:relative;
+  width:2400px;
+  height:1400px;
+  margin:0;
+  padding:0;
 }
 #p48-canvas{
-  position:relative!important;
-  display:block!important;
-  width:2400px!important;
-  min-width:2400px!important;
-  height:1400px!important;
-  min-height:1400px!important;
-  margin:0!important;
-  padding:0!important;
-  top:auto!important;
-  left:auto!important;
-}
-.p48-hnav{
-  position:sticky!important;
-  left:0!important;
-  bottom:0!important;
-  z-index:90!important;
+  position:relative;
+  width:2400px;
+  height:1400px;
+  margin:0;
+  padding:0;
 }
 
 /* visible version */
@@ -726,7 +691,6 @@ html = r"""
         </div>
 
       </div>
-    </div>
   </aside>
 
   <main class="p48-scroll" id="p48-scroll">
@@ -2428,49 +2392,6 @@ renderProcesses();refreshControls();updateSelectionUi();updateAccountUi();msg('K
 window.addEventListener('beforeunload',()=>{try{saveLocal(true)}catch(e){}});
 
 function alignEditorTop(){
-  const body=root.querySelector('.p48-body');
-  const side=root.querySelector('.p48-side');
-  const wrap=root.querySelector('.p48-canvas-wrap');
-
-  if(body){
-    body.style.display='grid';
-    body.style.gridTemplateColumns='220px minmax(0,1fr)';
-    body.style.gridTemplateRows='900px';
-    body.style.height='900px';
-    body.style.minHeight='900px';
-    body.style.overflow='hidden';
-  }
-  if(side){
-    side.style.position='relative';
-    side.style.height='900px';
-    side.style.maxHeight='900px';
-    side.style.overflowY='auto';
-    side.style.top='auto';
-    side.style.left='auto';
-  }
-  if(scroll){
-    scroll.style.position='relative';
-    scroll.style.height='900px';
-    scroll.style.minHeight='900px';
-    scroll.style.maxHeight='900px';
-    scroll.style.margin='0';
-    scroll.style.padding='0';
-    scroll.style.overflow='auto';
-    scroll.style.top='auto';
-    scroll.style.left='auto';
-  }
-  if(wrap){
-    wrap.style.position='relative';
-    wrap.style.width='2400px';
-    wrap.style.height='1400px';
-    wrap.style.margin='0';
-    wrap.style.padding='0';
-  }
-  canvas.style.position='relative';
-  canvas.style.width='2400px';
-  canvas.style.height='1400px';
-  canvas.style.margin='0';
-
   invalidateNodeGeom();
   requestFullLinkRender();
   scheduleHorizontalNavSync();
