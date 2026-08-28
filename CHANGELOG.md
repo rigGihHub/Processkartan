@@ -1,6 +1,6 @@
-# Changelog
-
-## v0.8.1
-- Google Sheets-kompatibel XLSX-export.
-- Processsteg och kopplingar exporteras på separata flikar.
-- Rubrikrad, filter och fryst rubrikrad.
+# v0.8.3
+- A4/A3-val för PDF.
+- Flersidig PDF-export.
+- Auto eller manuellt antal sidor.
+- Förhandsgranskning med flera sidramar.
+- Tydligare single-login-strategi.

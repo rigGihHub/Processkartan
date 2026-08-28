@@ -1,32 +1,24 @@
-# Maplini v0.8.1 — Google Sheets export
+# Maplini v0.8.3 — A4/A3 + flersidig PDF + enklare inloggning
 
-## Nytt
-- Ny knapp `Exportera Google Sheets`.
-- Exporten skapar en `.xlsx` som kan öppnas direkt i Google Sheets.
-- Filen innehåller två flikar:
+## PDF
+- Välj `A4` eller `A3`.
+- Välj:
+  - Auto sidor
+  - 1 sida
+  - 2 sidor
+  - 3 sidor
+  - 4 sidor
+- `Visa PDF-yta` visar sidramarna direkt på canvasen.
+- Vid flera sidor visas ramarna bredvid varandra.
+- PDF-exporten skapar motsvarande antal PDF-sidor.
+- Auto-läget räknar ut hur många sidor som behövs utifrån processens bredd.
+- Varje sida skalas för god passning.
 
-### Processsteg
-Varje processsteg blir en rad med:
-- Ordning
-- ID
-- Typ
-- Text
-- Inputs
-- Outputs
-- Nästa steg
-- Föregående steg
-- X/Y-position
-- Bredd/höjd
+## Inloggning
+- Maplini/Supabase är huvudkontot.
+- Google är **inte** ett andra obligatoriskt konto.
+- Google behöver bara anslutas om användaren vill skapa Google Docs/Sheets direkt i sitt Drive.
+- Lokal PDF/DOCX/XLSX-export fungerar utan Google.
 
-### Kopplingar
-Varje pil/koppling blir en rad med:
-- Från ID
-- Från steg
-- Till ID
-- Till steg
-- Anslutningssida
-
-## Varför tabellformat?
-PDF och DOCX är visuella exporter. Google Sheets-exporten är avsedd för analys, sortering, filtrering och vidare processarbete.
-
-Google Sheets kan öppna `.xlsx` direkt via Arkiv → Importera eller genom att ladda upp filen i Google Drive.
+## Rekommenderad nästa nivå
+På sikt kan Maplini använda Google som SSO via Supabase, så att samma Google-inloggning används både för Maplini och Google-export.

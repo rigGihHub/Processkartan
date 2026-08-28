@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.8.1"
+APP_VERSION = "0.8.3"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -83,9 +83,11 @@ html = r"""
 .p48-empty{font-size:11px;color:#75818d;line-height:1.4}
 .p48-scroll{overflow:auto;background:#e9eef3}
 #p48-canvas{position:relative;width:2400px;height:1400px;background:#fff;touch-action:none;background-image:radial-gradient(#dce2e8 1px,transparent 1px);background-size:20px 20px}
-.p48-print-frame{position:absolute;left:40px;top:40px;width:1123px;height:794px;border:2px dashed rgba(31,111,85,.55);background:rgba(31,111,85,.025);pointer-events:none;z-index:1;display:none}
-.p48-print-frame::before{content:"PDF A3 liggande";position:absolute;left:10px;top:8px;font:800 11px system-ui;color:#1f6f55;background:#fff;padding:3px 6px;border-radius:5px}
+.p48-print-frame{position:absolute;pointer-events:none;z-index:1;display:none;border:2px dashed rgba(31,111,85,.55);background:rgba(31,111,85,.018)}
 .p48-print-frame.on{display:block}
+.p48-print-frame::before{content:attr(data-label);position:absolute;left:10px;top:8px;font:800 11px system-ui;color:#1f6f55;background:#fff;padding:3px 6px;border-radius:5px}
+.p48-print-page{position:absolute;border:2px dashed rgba(31,111,85,.55);background:rgba(31,111,85,.018);pointer-events:none;z-index:1}
+.p48-print-page::before{content:attr(data-label);position:absolute;left:10px;top:8px;font:800 11px system-ui;color:#1f6f55;background:#fff;padding:3px 6px;border-radius:5px}
 .p48-workspace{border:1px solid #d8e0e7;background:#fff;border-radius:10px;padding:9px;margin-bottom:12px}
 .p48-workspace select,.p48-workspace input{width:100%;border:1px solid #cfd7df;border-radius:7px;padding:7px 8px;font:12px system-ui;margin-top:5px}
 .p48-role{display:inline-flex;font-size:10px;font-weight:800;padding:3px 7px;border-radius:999px;background:#eef3f7;color:#425466;margin-top:5px}
@@ -169,12 +171,24 @@ html = r"""
   <button type="button" class="p48-btn" id="p48-undo">↶ Ångra</button>
   <button type="button" class="p48-btn" id="p48-redo">↷ Gör om</button>
   <button type="button" class="p48-btn" id="p48-print-preview">Visa PDF-yta</button>
+  <select id="p48-page-size" class="p48-btn" title="PDF-format">
+    <option value="A4">A4</option>
+    <option value="A3" selected>A3</option>
+  </select>
+  <select id="p48-page-count" class="p48-btn" title="Antal PDF-sidor">
+    <option value="auto" selected>Auto sidor</option>
+    <option value="1">1 sida</option>
+    <option value="2">2 sidor</option>
+    <option value="3">3 sidor</option>
+    <option value="4">4 sidor</option>
+  </select>
   <button type="button" class="p48-btn" id="p48-select-tool">Markera område</button>
   <button type="button" class="p48-btn" id="p48-delete-selection" disabled>Ta bort markerat</button>
   <span class="p48-spacer"></span>
   <button type="button" class="p48-btn primary" id="p48-pdf">Exportera PDF</button>
   <button type="button" class="p48-btn" id="p48-doc">Exportera DOCX</button>
-  <button type="button" class="p48-btn" id="p48-sheets">Exportera Google Sheets</button>
+  <button type="button" class="p48-btn" id="p48-sheets">Ladda ner Sheets-fil</button>
+  <button type="button" class="p48-btn primary" id="p48-sheets-direct">Skapa Google Sheet</button>
   <span id="p48-status" class="p48-status"></span>
 </div>
 
@@ -202,7 +216,7 @@ html = r"""
         <button type="button" class="p48-mini" id="p48-logout" style="width:100%;margin-top:6px">Logga ut</button>
       </div>
       <div id="p48-cloud-badge" class="p48-cloud-badge off">Lokal lagring</div>
-      <div id="p48-cloud-help" class="p48-small">Supabase är inte konfigurerat.</div>
+      <div id="p48-cloud-help" class="p48-small">Maplini-kontot är huvudkontot. Google ansluts bara vid direkt export.</div>
       <div id="p48-auth-error" class="p48-small" style="display:none;margin-top:7px;padding:7px;border-radius:7px;background:#fff1ef;color:#8c3029;border:1px solid #efc6c1"></div>
       <button type="button" class="p48-mini" id="p48-test-supabase" style="width:100%;margin-top:7px">Testa Supabase-anslutning</button>
     </div>
@@ -281,6 +295,7 @@ const loginBtn=root.querySelector('#p48-login'),signupBtn=root.querySelector('#p
 const signedOut=root.querySelector('#p48-account-signedout'),signedIn=root.querySelector('#p48-account-signedin'),userEmail=root.querySelector('#p48-user-email');
 const cloudBadge=root.querySelector('#p48-cloud-badge'),cloudHelp=root.querySelector('#p48-cloud-help');
 const printPreviewBtn=root.querySelector('#p48-print-preview'),printFrame=root.querySelector('#p48-print-frame');
+const pageSizeSelect=root.querySelector('#p48-page-size'),pageCountSelect=root.querySelector('#p48-page-count');
 const workspaceSelect=root.querySelector('#p48-workspace-select'),workspaceName=root.querySelector('#p48-workspace-name'),createWorkspaceBtn=root.querySelector('#p48-create-workspace'),roleBadge=root.querySelector('#p48-role');
 const authError=root.querySelector('#p48-auth-error'),testSupabaseBtn=root.querySelector('#p48-test-supabase');
 const cloudSaveBtn=root.querySelector('#p48-cloud-save'),shareBtn=root.querySelector('#p48-share'),shareBox=root.querySelector('#p48-sharebox'),shareUrlInput=root.querySelector('#p48-share-url'),copyShareBtn=root.querySelector('#p48-copy-share');
@@ -295,6 +310,7 @@ const SUPABASE_URL="__SUPABASE_URL__", SUPABASE_ANON_KEY="__SUPABASE_ANON_KEY__"
 const CLOUD_ENABLED=SUPABASE_URL.length>0&&SUPABASE_ANON_KEY.length>0;
 let cloudSession=null,sharedView=false;
 let currentWorkspaceId=null,currentRole='owner',printPreview=false;
+let pageSize='A3',pageCountMode='auto';
 
 
 const starter={id:'proc-1',name:'Exempel – upphandlingsprocess',nodes:[
@@ -1027,26 +1043,64 @@ function canvasJpegBytes(canvas,quality=.92){
 }
 function asciiBytes(s){return new TextEncoder().encode(s)}
 function buildPdfFromJpeg(jpeg,imgW,imgH){
-  // A3 landscape
-  const pageW=1190.55,pageH=841.89,margin=30;
-  const scale=Math.min((pageW-2*margin)/imgW,(pageH-2*margin)/imgH);
-  const w=imgW*scale,h=imgH*scale,x=(pageW-w)/2,y=(pageH-h)/2;
-  const content=asciiBytes(`q\n${w.toFixed(3)} 0 0 ${h.toFixed(3)} ${x.toFixed(3)} ${y.toFixed(3)} cm\n/Im1 Do\nQ\n`);
-  const parts=[asciiBytes('%PDF-1.4\n%Maplini\n')],offsets=[0];
+  // Kept for compatibility; current export uses buildMultiPagePdfFromCanvas.
+  const spec=pageSpec();
+  return buildMultiPagePdfFromCanvas(null,jpeg,imgW,imgH,spec,1);
+}
+function buildMultiPagePdfFromCanvas(canvasEl,jpeg,imgW,imgH,spec,count){
+  const pageW=spec.pdfW,pageH=spec.pdfH,margin=28;
+  const parts=[asciiBytes('%PDF-1.4\n%Maplini\n')],offsets={};
   const addObj=(num,chunks)=>{
     offsets[num]=parts.reduce((n,p)=>n+p.length,0);
     parts.push(asciiBytes(`${num} 0 obj\n`),...chunks,asciiBytes('\nendobj\n'));
   };
+
+  const pageObjs=[],contentObjs=[],imageObjs=[];
+  let nextObj=3;
+
+  // If we have a canvas, slice it into equal-width image pages.
+  const slices=[];
+  if(canvasEl){
+    const sliceW=Math.ceil(canvasEl.width/count);
+    for(let i=0;i<count;i++){
+      const x=i*sliceW;
+      const w=Math.min(sliceW,canvasEl.width-x);
+      const c=document.createElement('canvas');
+      c.width=w;c.height=canvasEl.height;
+      const cx=c.getContext('2d');
+      cx.fillStyle='#fff';cx.fillRect(0,0,w,c.height);
+      cx.drawImage(canvasEl,x,0,w,canvasEl.height,0,0,w,canvasEl.height);
+      slices.push({jpeg:canvasJpegBytes(c,.94),w,h:c.height});
+    }
+  }else{
+    slices.push({jpeg,w:imgW,h:imgH});
+  }
+
+  slices.forEach((sl,idx)=>{
+    const pageObj=nextObj++,contentObj=nextObj++,imageObj=nextObj++;
+    pageObjs.push(pageObj);contentObjs.push(contentObj);imageObjs.push(imageObj);
+  });
+
   addObj(1,[asciiBytes('<< /Type /Catalog /Pages 2 0 R >>')]);
-  addObj(2,[asciiBytes('<< /Type /Pages /Kids [3 0 R] /Count 1 >>')]);
-  addObj(3,[asciiBytes(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageW} ${pageH}] /Resources << /XObject << /Im1 5 0 R >> >> /Contents 4 0 R >>`)]);
-  addObj(4,[asciiBytes(`<< /Length ${content.length} >>\nstream\n`),content,asciiBytes('endstream')]);
-  addObj(5,[asciiBytes(`<< /Type /XObject /Subtype /Image /Width ${imgW} /Height ${imgH} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${jpeg.length} >>\nstream\n`),jpeg,asciiBytes('\nendstream')]);
+  addObj(2,[asciiBytes(`<< /Type /Pages /Kids [${pageObjs.map(x=>x+' 0 R').join(' ')}] /Count ${pageObjs.length} >>`)]);
+
+  slices.forEach((sl,idx)=>{
+    const pageObj=pageObjs[idx],contentObj=contentObjs[idx],imageObj=imageObjs[idx];
+    const sc=Math.min((pageW-2*margin)/sl.w,(pageH-2*margin)/sl.h);
+    const w=sl.w*sc,h=sl.h*sc,x=(pageW-w)/2,y=(pageH-h)/2;
+    const content=asciiBytes(`q\n${w.toFixed(3)} 0 0 ${h.toFixed(3)} ${x.toFixed(3)} ${y.toFixed(3)} cm\n/Im${idx+1} Do\nQ\n`);
+    addObj(pageObj,[asciiBytes(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pageW} ${pageH}] /Resources << /XObject << /Im${idx+1} ${imageObj} 0 R >> >> /Contents ${contentObj} 0 R >>`)]);
+    addObj(contentObj,[asciiBytes(`<< /Length ${content.length} >>\nstream\n`),content,asciiBytes('endstream')]);
+    addObj(imageObj,[asciiBytes(`<< /Type /XObject /Subtype /Image /Width ${sl.w} /Height ${sl.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${sl.jpeg.length} >>\nstream\n`),sl.jpeg,asciiBytes('\nendstream')]);
+  });
+
+  const totalObjs=nextObj-1;
   const xref=parts.reduce((n,p)=>n+p.length,0);
-  let tail='xref\n0 6\n0000000000 65535 f \n';
-  for(let i=1;i<=5;i++)tail+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';
-  tail+=`trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
-  parts.push(asciiBytes(tail));return cat(parts);
+  let tail=`xref\n0 ${totalObjs+1}\n0000000000 65535 f \n`;
+  for(let i=1;i<=totalObjs;i++)tail+=String(offsets[i]).padStart(10,'0')+' 00000 n \n';
+  tail+=`trailer\n<< /Size ${totalObjs+1} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+  parts.push(asciiBytes(tail));
+  return cat(parts);
 }
 function buildDocxWithJpeg(jpeg,imgW,imgH,title){
   const maxCx=9144000,maxCy=6400800; // roughly 10 x 7 in
@@ -1102,9 +1156,13 @@ function downloadBytes(bytes,name,type){
 }
 async function exportPdf(){
   try{
-    const shot=await renderMapSnapshot(),jpeg=canvasJpegBytes(shot,.94);
-    const pdf=buildPdfFromJpeg(jpeg,shot.width,shot.height);
-    downloadBytes(pdf,cleanFileName(state().name)+'.pdf','application/pdf');msg('PDF skapad');
+    const shot=await renderMapSnapshot();
+    const spec=pageSpec();
+    const count=desiredPageCount();
+    const jpeg=canvasJpegBytes(shot,.94);
+    const pdf=buildMultiPagePdfFromCanvas(shot,jpeg,shot.width,shot.height,spec,count);
+    downloadBytes(pdf,cleanFileName(state().name)+`_${spec.name}_${count}sidor.pdf`,'application/pdf');
+    msg(`PDF skapad · ${spec.name} · ${count} sida${count>1?'or':''}`);
   }catch(err){console.error(err);msg('PDF-export misslyckades')}
 }
 async function exportDoc(){
@@ -1171,11 +1229,79 @@ cloudSaveBtn.addEventListener('click',async()=>{try{await saveCurrentToCloud()}c
 shareBtn.addEventListener('click',shareCurrent);copyShareBtn.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(shareUrlInput.value);msg('Länk kopierad')}catch(e){shareUrlInput.select();document.execCommand('copy')}});
 loginBtn.addEventListener('click',signIn);signupBtn.addEventListener('click',signUp);logoutBtn.addEventListener('click',signOut);
 testSupabaseBtn.addEventListener('click',testSupabaseConnection);
+
+function pageSpec(){
+  // Preview dimensions maintain ISO ratio in landscape.
+  return pageSize==='A4'
+    ? {name:'A4',w:900,h:636,pdfW:841.89,pdfH:595.28}
+    : {name:'A3',w:1123,h:794,pdfW:1190.55,pdfH:841.89};
+}
+function contentExtent(){
+  const b=exportBounds();
+  if(!b)return {width:0,height:0,minX:0,minY:0,maxX:0,maxY:0};
+  return b;
+}
+function desiredPageCount(){
+  const spec=pageSpec(),b=contentExtent();
+  if(pageCountMode!=='auto')return Math.max(1,parseInt(pageCountMode)||1);
+  const usableW=spec.w-80;
+  const pages=Math.max(1,Math.ceil((b.width||1)/usableW));
+  return Math.min(8,pages);
+}
+function renderPrintPages(){
+  if(!printFrame)return;
+  printFrame.innerHTML='';
+  if(!printPreview){printFrame.classList.remove('on');return}
+  const spec=pageSpec(),count=desiredPageCount(),gap=24,left=40,top=40;
+  printFrame.classList.add('on');
+  printFrame.style.left='0px';printFrame.style.top='0px';
+  printFrame.style.width='1px';printFrame.style.height='1px';
+  for(let i=0;i<count;i++){
+    const pg=document.createElement('div');pg.className='p48-print-page';
+    pg.dataset.label=`PDF ${spec.name} · sida ${i+1}/${count}`;
+    pg.style.left=(left+i*(spec.w+gap))+'px';pg.style.top=top+'px';
+    pg.style.width=spec.w+'px';pg.style.height=spec.h+'px';
+    canvas.appendChild(pg);
+  }
+}
+function clearPrintPages(){
+  canvas.querySelectorAll('.p48-print-page').forEach(x=>x.remove());
+}
+
 printPreviewBtn.addEventListener('click',()=>{
-  printPreview=!printPreview;printFrame.classList.toggle('on',printPreview);
+  printPreview=!printPreview;
+  clearPrintPages();
+  if(printPreview)renderPrintPages();
   printPreviewBtn.classList.toggle('primary',printPreview);
   printPreviewBtn.textContent=printPreview?'Dölj PDF-yta':'Visa PDF-yta';
-});root.querySelector('#p48-pdf').addEventListener('click',exportPdf);root.querySelector('#p48-doc').addEventListener('click',exportDoc);root.querySelector('#p48-sheets').addEventListener('click',exportGoogleSheets);
+});
+pageSizeSelect.addEventListener('change',()=>{pageSize=pageSizeSelect.value;clearPrintPages();if(printPreview)renderPrintPages();});
+pageCountSelect.addEventListener('change',()=>{pageCountMode=pageCountSelect.value;clearPrintPages();if(printPreview)renderPrintPages();});
+function directGoogleSheetPayload(){
+  persist();
+  const st=state();
+  const ordered=[...nodes.values()].map(x=>x.data).sort((a,b)=>((a.y||0)-(b.y||0))||((a.x||0)-(b.x||0)));
+  const byId=new Map(ordered.map(n=>[n.id,n]));
+  const step_rows=ordered.map((d,i)=>[
+    i+1,d.id||'',typeLabel(d.type),d.text||'',
+    Array.isArray(d.inputs)?d.inputs.filter(Boolean).join(' | '):'',
+    Array.isArray(d.outputs)?d.outputs.filter(Boolean).join(' | '):'',
+    links.filter(l=>l[0]===d.id).map(l=>byId.get(l[1])?.text||l[1]).join(' | '),
+    links.filter(l=>l[1]===d.id).map(l=>byId.get(l[0])?.text||l[0]).join(' | '),
+    d.x||0,d.y||0,d.width||'',d.height||''
+  ]);
+  const link_rows=(st.links||[]).map(l=>[l[0],byId.get(l[0])?.text||'',l[1],byId.get(l[1])?.text||'',l[2]||'right']);
+  return {title:st.name,step_rows,link_rows};
+}
+function createGoogleSheetDirect(){
+  try{
+    const url=new URL(window.parent.location.href);
+    url.searchParams.set('gs_payload',JSON.stringify(directGoogleSheetPayload()));
+    window.parent.location.href=url.toString();
+  }catch(e){console.error(e);msg('Kunde inte starta Google Sheets-export')}
+}
+
+root.querySelector('#p48-pdf').addEventListener('click',exportPdf);root.querySelector('#p48-doc').addEventListener('click',exportDoc);root.querySelector('#p48-sheets').addEventListener('click',exportGoogleSheets);root.querySelector('#p48-sheets-direct').addEventListener('click',createGoogleSheetDirect);
 root.querySelector('#p48-undo').addEventListener('click',()=>{if(!undo.length)return;redo.push(JSON.stringify(state()));restore(undo.pop());persist()});
 root.querySelector('#p48-redo').addEventListener('click',()=>{if(!redo.length)return;undo.push(JSON.stringify(state()));restore(redo.pop());persist()});
 root.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;if(e.key==='Delete'){if(selectedIds.size>1)deleteSelectedMany();else deleteSelected()}});
@@ -1208,18 +1334,33 @@ if google_docs.configured(st) and st.query_params.get("code") and not st.session
     try:
         st.session_state["google_token"] = google_docs.exchange(st, st.query_params["code"])
         st.query_params.clear()
-        st.toast("Google-kontot är anslutet.")
+        st.toast("Google är anslutet för export.")
     except Exception as exc:
         st.error(f"Google-inloggningen misslyckades: {exc}")
 
-with st.expander("Google Docs", expanded=False):
+with st.expander("Google-integration (valfri)", expanded=False):
     if not google_docs.configured(st):
         st.info("Lägg in Google OAuth-uppgifter i Streamlit Secrets för att aktivera direkt skapande av Google Docs.")
         st.code('[google_oauth]\nclient_id = "..."\\nclient_secret = "..."\\nredirect_uri = "https://DIN-APP.streamlit.app"', language="toml")
     elif not google_docs.creds(st):
         st.link_button("Anslut Google-konto", google_docs.auth_url(st))
     else:
-        st.success("Google-kontot är anslutet.")
+        st.success("Google är anslutet för export.")
+        if st.query_params.get("gs_payload"):
+            try:
+                import json as _json
+                payload = _json.loads(st.query_params["gs_payload"])
+                _, sheet_url = google_docs.create_sheet(
+                    st,
+                    payload.get("title") or "Maplini process",
+                    payload.get("step_rows") or [],
+                    payload.get("link_rows") or [],
+                )
+                st.success("Google Sheet skapat.")
+                st.link_button("Öppna Google Sheet", sheet_url)
+                st.query_params.pop("gs_payload", None)
+            except Exception as exc:
+                st.error(f"Kunde inte skapa Google Sheet: {exc}")
         title = st.text_input("Dokumentnamn", value="Maplini process")
         body = st.text_area("Text till Google Doc", value="Dokument skapat från Maplini.", height=80)
         if st.button("Skapa Google Doc"):
