@@ -1,5 +1,5 @@
-# v0.10.0
-- Fix riktad mot riktiga `.p48-body`.
-- Sidebar/canvas separerade med deterministisk absolute layout.
-- Canvas startar alltid direkt under toolbaren.
-- Scrollposition återställs vid processbyte.
+# v0.10.1
+- Tog bort absolut editorlayout från v0.10.0.
+- Återställde stabil grid-layout.
+- Sidebar/canvas börjar på samma höjd utan att överlappa toolbar.
+- Synligt versionsnummer under loggan.

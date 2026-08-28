@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.10.0"
+APP_VERSION = "0.10.1"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -217,34 +217,39 @@ header[data-testid="stHeader"]{height:2rem}
 html = r"""
 <div id="pk48">
 <style>
-/* v0.10.0 deterministic editor layout — uses the real .p48-body wrapper */
+/* v0.10.1 — stable editor layout */
 .p48-body{
-  position:relative!important;
-  display:block!important;
-  height:900px!important;
+  display:grid!important;
+  grid-template-columns:220px minmax(0,1fr)!important;
+  grid-template-rows:900px!important;
+  align-items:stretch!important;
   min-height:900px!important;
+  height:900px!important;
   overflow:hidden!important;
+  position:relative!important;
 }
 .p48-side{
-  position:absolute!important;
-  left:0!important;
-  top:0!important;
-  width:220px!important;
+  position:relative!important;
+  grid-column:1!important;
+  grid-row:1!important;
+  width:auto!important;
   height:900px!important;
   min-height:0!important;
   max-height:900px!important;
   overflow-y:auto!important;
   overflow-x:hidden!important;
   margin:0!important;
-  z-index:20!important;
-  background:#fff!important;
+  top:auto!important;
+  left:auto!important;
 }
 .p48-scroll{
-  position:absolute!important;
-  left:220px!important;
-  right:0!important;
-  top:0!important;
-  bottom:0!important;
+  position:relative!important;
+  grid-column:2!important;
+  grid-row:1!important;
+  left:auto!important;
+  right:auto!important;
+  top:auto!important;
+  bottom:auto!important;
   width:auto!important;
   height:900px!important;
   min-height:900px!important;
@@ -253,19 +258,17 @@ html = r"""
   padding:0!important;
   overflow:auto!important;
   background:#fff!important;
-  scrollbar-gutter:stable;
 }
 .p48-canvas-wrap{
   position:relative!important;
-  display:block!important;
   width:2400px!important;
   min-width:2400px!important;
   height:1400px!important;
   min-height:1400px!important;
   margin:0!important;
   padding:0!important;
-  top:0!important;
-  left:0!important;
+  top:auto!important;
+  left:auto!important;
 }
 #p48-canvas{
   position:relative!important;
@@ -276,15 +279,22 @@ html = r"""
   min-height:1400px!important;
   margin:0!important;
   padding:0!important;
-  top:0!important;
-  left:0!important;
+  top:auto!important;
+  left:auto!important;
 }
 .p48-hnav{
   position:sticky!important;
   left:0!important;
   bottom:0!important;
-  width:100%!important;
   z-index:90!important;
+}
+
+/* visible version */
+.p48-version{
+  margin-top:2px;
+  font:700 10px system-ui;
+  color:#7a8792;
+  letter-spacing:.03em;
 }
 
 /* v0.9.8: safe toolbar/dropdown additions only — no editor geometry overrides */
@@ -489,6 +499,7 @@ html = r"""
   <div class="p48-brand-inner">
     <div class="p48-logo-crop"><img src="__MAPLINI_LOGO__" alt="Maplini"></div>
     <div class="p48-tagline">MAP · UNDERSTAND · IMPROVE</div>
+    <div class="p48-version">v. __MAPLINI_VERSION__</div>
   </div>
 </div>
 <div class="p48-top">
@@ -2422,49 +2433,43 @@ function alignEditorTop(){
   const wrap=root.querySelector('.p48-canvas-wrap');
 
   if(body){
-    body.style.position='relative';
-    body.style.display='block';
+    body.style.display='grid';
+    body.style.gridTemplateColumns='220px minmax(0,1fr)';
+    body.style.gridTemplateRows='900px';
     body.style.height='900px';
     body.style.minHeight='900px';
     body.style.overflow='hidden';
   }
   if(side){
-    side.style.position='absolute';
-    side.style.left='0';
-    side.style.top='0';
-    side.style.width='220px';
+    side.style.position='relative';
     side.style.height='900px';
+    side.style.maxHeight='900px';
     side.style.overflowY='auto';
+    side.style.top='auto';
+    side.style.left='auto';
   }
   if(scroll){
-    scroll.style.position='absolute';
-    scroll.style.left='220px';
-    scroll.style.right='0';
-    scroll.style.top='0';
-    scroll.style.bottom='0';
+    scroll.style.position='relative';
     scroll.style.height='900px';
+    scroll.style.minHeight='900px';
+    scroll.style.maxHeight='900px';
     scroll.style.margin='0';
     scroll.style.padding='0';
     scroll.style.overflow='auto';
+    scroll.style.top='auto';
+    scroll.style.left='auto';
   }
   if(wrap){
     wrap.style.position='relative';
-    wrap.style.top='0';
-    wrap.style.left='0';
     wrap.style.width='2400px';
     wrap.style.height='1400px';
     wrap.style.margin='0';
     wrap.style.padding='0';
   }
   canvas.style.position='relative';
-  canvas.style.top='0';
-  canvas.style.left='0';
-  canvas.style.margin='0';
   canvas.style.width='2400px';
   canvas.style.height='1400px';
-
-  // Ensure we do not inherit a stale vertical scroll position on process open.
-  if(scroll.scrollTop<0 || !Number.isFinite(scroll.scrollTop))scroll.scrollTop=0;
+  canvas.style.margin='0';
 
   invalidateNodeGeom();
   requestFullLinkRender();
@@ -2523,6 +2528,7 @@ else:
     st.caption("Google-export är inte konfigurerad ännu. Övriga exporter fungerar utan Google.")
 
 html = html.replace("__MAPLINI_LOGO__", f"data:image/png;base64,{_LOGO_B64}")
+html = html.replace("__MAPLINI_VERSION__", APP_VERSION)
 html = html.replace("__SUPABASE_URL__", _SUPABASE_URL)
 html = html.replace("__SUPABASE_ANON_KEY__", _SUPABASE_ANON_KEY)
 html = html.replace("__PUBLIC_APP_URL__", _PUBLIC_APP_URL)
