@@ -1,16 +1,22 @@
-# Maplini v0.9.7 — Canvas visibility + export toolbar fix
+# Maplini v0.9.8 — Canvas recovery + combined Google Sheets
 
 ## Canvas
-- Återställer synlig processyta efter regressionen i v0.9.6.
-- Editor-scroll får fast, synlig höjd.
-- Canvas hålls på 2400 × 1400 px.
-- Overflow normaliseras så innehållet inte döljs bakom en grå yta.
-- Full länk/geometri-refresh körs efter initial layoutstabilisering.
+v0.9.8 är återbaserad på v0.9.4, den sista fungerande editorbasen före
+layoutregressionerna i v0.9.5–v0.9.7.
 
-## Exportknappar
-`Skapa Google Sheet` ligger nu tillsammans med:
-- Exportera PDF
-- Exportera DOCX
-- Ladda ner Sheets-fil
+Det innebär att de riskabla senare layoutreglerna inte följer med.
+De säkra prestandavinsterna från v0.9.4 finns kvar.
 
-Alla exporter är samlade till höger i toolbaren.
+Dessutom finns ett skydd så att ett trasigt sparat processobjekt inte ska
+kunna göra hela editorn tom; i så fall öppnas en tom process och felet loggas.
+
+## Google Sheets
+De två tidigare knapparna är sammanslagna till en enda meny:
+
+`Google Sheets ▾`
+
+Val:
+- `Skapa i Google Drive` — skapar ett riktigt Google Sheet via Google API.
+- `Ladda ner .xlsx` — skapar en lokal fil som kan öppnas/importeras i Google Sheets.
+
+Funktionerna är alltså olika, men presenteras nu på ett enda ställe i toolbaren.
