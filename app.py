@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.10.11"
+APP_VERSION = "0.10.12"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -221,19 +221,31 @@ html = r"""
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <div id="pk48">
 <style>
-/* v0.10.11 mobile shell — real DOM selectors */
+/* v0.10.12 mobile shell — real DOM + vertical scrolling */
 .p48-mobile-tools-btn,.p48-mobile-backdrop{display:none}
 .p48-node,.p48-handle,.p48-resize-handle,.p48-link-hit-segment{touch-action:none}
 .p48-scroll{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 button,summary,select,input{-webkit-tap-highlight-color:transparent}
 
 @media (max-width:900px), (pointer:coarse) and (max-width:1100px){
-  html,body{width:100%;max-width:100%;overflow-x:hidden;overscroll-behavior:none}
-  #pk48{width:100%;max-width:100%;overflow:hidden}
+  html,body{
+    width:100%;
+    max-width:100%;
+    overflow-x:hidden;
+    overflow-y:visible!important;
+    overscroll-behavior-y:auto;
+    touch-action:pan-y;
+  }
+  #pk48{
+    width:100%;
+    max-width:100%;
+    overflow-x:hidden;
+    overflow-y:visible!important;
+  }
 
   .p48-brand{height:68px!important;min-height:68px!important;padding:5px max(8px,env(safe-area-inset-right)) 5px max(8px,env(safe-area-inset-left))!important}
-  .p48-logo-crop{width:205px!important;height:38px!important}
-  .p48-logo-crop img{width:205px!important}
+  .p48-logo-crop{width:205px!important;height:46px!important;overflow:visible!important}
+  .p48-logo-crop img{width:205px!important;height:auto!important;object-fit:contain!important;transform:none!important}
   .p48-tagline{font-size:9px!important;line-height:1!important}
   .p48-version{font-size:9px!important;line-height:1!important}
 
@@ -261,15 +273,30 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   }
 
   .p48-body{
-    display:block!important;position:relative!important;width:100%!important;
-    height:820px!important;min-height:620px!important;overflow:hidden!important;
+    display:block!important;
+    position:relative!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
   }
   .p48-scroll{
-    position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
-    max-height:none!important;min-height:0!important;overflow:auto!important;background:#e9eef3!important;
-    touch-action:pan-x pan-y;scrollbar-gutter:auto;z-index:1!important;
+    position:relative!important;
+    inset:auto!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:620px!important;
+    max-height:none!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    background:#e9eef3!important;
+    touch-action:pan-x pan-y;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-gutter:auto;
+    z-index:1!important;
   }
   .p48-canvas-wrap,#p48-canvas{width:2400px!important;min-width:2400px!important;height:1400px!important;min-height:1400px!important}
+  .p48-canvas-wrap{padding-bottom:24px!important}
 
   .p48-side{
     display:block!important;position:absolute!important;top:0!important;left:0!important;bottom:0!important;
@@ -301,10 +328,11 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 }
 @media (max-width:480px){
   .p48-brand{height:62px!important;min-height:62px!important}
-  .p48-logo-crop{width:180px!important;height:34px!important}
-  .p48-logo-crop img{width:180px!important}
+  .p48-logo-crop{width:180px!important;height:42px!important;overflow:visible!important}
+  .p48-logo-crop img{width:180px!important;height:auto!important;object-fit:contain!important;transform:none!important}
   #p48-name{width:125px!important;min-width:125px!important;max-width:125px!important}
-  .p48-body{height:820px!important;min-height:600px!important}
+  .p48-body{height:auto!important;min-height:0!important}
+  .p48-scroll{min-height:560px!important}
 }
 
 .p48-canvas-menu{position:relative;display:inline-block}
@@ -1872,6 +1900,8 @@ function setMobileTools(open){
   mobileBackdrop.classList.toggle('on',on);
   mobileToolsBtn.setAttribute('aria-expanded',on?'true':'false');
   mobileToolsBtn.textContent=on?'✕ Stäng':'☰ Verktyg';
+  document.documentElement.style.overflowY='visible';
+  document.body.style.overflowY='visible';
 }
 if(mobileToolsBtn)mobileToolsBtn.addEventListener('click',()=>setMobileTools(!sidePanel.classList.contains('p48-mobile-open')));
 if(mobileBackdrop)mobileBackdrop.addEventListener('click',()=>setMobileTools(false));
@@ -2719,4 +2749,4 @@ html = html.replace("__PUBLIC_APP_URL__", _PUBLIC_APP_URL)
 html = html.replace("__SHARE_TOKEN__", st.query_params.get("share", ""))
 if not _CLOUD_ENABLED:
     st.caption("Molnlagring är inte aktiverad ännu. Lägg Supabase-inställningarna i Streamlit Secrets enligt README.")
-components.html(html, height=1000, scrolling=True)
+components.html(html, height=1650, scrolling=True)

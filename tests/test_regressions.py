@@ -107,7 +107,7 @@ def test_mobile_css_targets_real_dom_not_old_nonexistent_selectors():
     assert soup.select_one(".p48-brand") is not None
     assert soup.select_one(".p48-logo-crop") is not None
     assert soup.select_one("#p48-name") is not None
-    mobile = html[html.index("/* v0.10.11 mobile shell"):html.index(".p48-canvas-menu{")]
+    mobile = html[html.index("/* v0.10.12 mobile shell"):html.index(".p48-canvas-menu{")]
     assert ".p48-top{" in mobile
     assert ".p48-brand{" in mobile
     assert ".p48-logo-crop{" in mobile
@@ -118,11 +118,12 @@ def test_mobile_css_targets_real_dom_not_old_nonexistent_selectors():
 
 def test_mobile_toolbar_cannot_wrap_canvas_offscreen():
     html = _template()
-    mobile = html[html.index("/* v0.10.11 mobile shell"):html.index(".p48-canvas-menu{")]
+    mobile = html[html.index("/* v0.10.12 mobile shell"):html.index(".p48-canvas-menu{")]
     assert "flex-wrap:nowrap!important" in mobile
     assert "overflow-x:auto!important" in mobile
     assert "#p48-mobile-tools{order:-30}" in mobile
-    assert "height:820px!important" in mobile
+    assert "height:auto!important" in mobile
+    assert "overflow:visible!important" in mobile
 
 def test_connector_core_is_extracted_and_wired():
     assert "MapliniConnectorCore" in CONNECTOR_CORE
@@ -140,3 +141,28 @@ def test_connector_core_javascript_syntax_when_node_available():
         return
     result = subprocess.run([node, "--check", str(ROOT / "maplini_connector_core.js")], capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
+
+
+def test_mobile_allows_vertical_page_scroll():
+    html = _template()
+    mobile = html[html.index("/* v0.10.12 mobile shell"):html.index(".p48-canvas-menu{")]
+    assert "overflow-y:visible!important" in mobile
+    assert "overscroll-behavior-y:auto" in mobile
+    assert "height:auto!important" in mobile
+    assert "overflow:visible!important" in mobile
+
+def test_mobile_canvas_keeps_horizontal_pan_without_vertical_scroll_lock():
+    html = _template()
+    mobile = html[html.index("/* v0.10.12 mobile shell"):html.index(".p48-canvas-menu{")]
+    assert "overflow-x:auto!important" in mobile
+    assert "overflow-y:hidden!important" in mobile
+    assert "-webkit-overflow-scrolling:touch" in mobile
+
+def test_mobile_logo_uses_contain_and_is_not_crop_locked():
+    html = _template()
+    mobile = html[html.index("/* v0.10.12 mobile shell"):html.index(".p48-canvas-menu{")]
+    assert "object-fit:contain!important" in mobile
+    assert "overflow:visible!important" in mobile
+
+def test_streamlit_component_is_tall_enough_for_mobile_page_scroll():
+    assert "components.html(html, height=1650" in APP

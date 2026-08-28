@@ -1,13 +1,8 @@
-# Maplini v0.10.11
-Mobil- och connector-stabilisering.
+# Maplini v0.10.12
 
-Mobil:
-- Verktyg ligger först i toppraden.
-- Toppraden scrollas horisontellt istället för att radbrytas.
-- Canvasen ligger direkt under header/topprad.
-- Vänsterpanelen öppnas som drawer.
-- Touchytor och iPhone safe-area behålls.
-
-Teknik:
-- Connector helpers ligger i `maplini_connector_core.js`.
-- Regressionstester skyddar mobilens riktiga DOM/CSS och connector wiring.
+Mobilfix:
+- normal scroll upp/ned på Android och iPhone,
+- fortsatt horisontell panorering av canvas,
+- Verktyg öppnar vänsterpanelen,
+- toppraden ligger kvar som en rad,
+- loggan kapas inte längre på samma sätt.

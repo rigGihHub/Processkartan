@@ -1,8 +1,9 @@
-# v0.10.11 — MOBILE + CONNECTOR STABILIZATION
-- Rättar mobilgrundorsaken: v0.10.9 använde CSS-selektorer som inte motsvarade den riktiga DOM:en.
-- Mobil-CSS använder nu `.p48-top`, `.p48-brand`, `.p48-logo-crop` och `#p48-name`.
-- Toppraden kan inte radbrytas och skjuta canvasen ur bild; den scrollas horisontellt.
-- Verktyg ligger först på mobil och öppnar vänsterpanelen som drawer.
-- Canvasen hålls synlig och panorerbar med touch.
-- Connector utilities är utbrutna till `maplini_connector_core.js`.
-- Utökade regressions- och syntaxkontroller.
+# v0.10.12 — MOBILE SCROLL FIX
+
+- Rättar mobilproblemet där sidan inte gick att scrolla upp och ned.
+- Tar bort vertikal scroll-lock från html/body, #pk48 och .p48-body.
+- Canvasbehållaren behåller horisontell panorering men fångar inte längre normal sidscroll.
+- Streamlit-komponentens höjd höjs från 1000 till 1650 px så yttersidan kan scrollas naturligt.
+- Vänsterpanelen via Verktyg behålls.
+- Mobilens logga använder contain/overflow-visible så den inte kapas.
+- Nya regressionstester för mobilscroll, canvaspanorering, logga och komponenthöjd.
