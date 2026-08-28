@@ -1,28 +1,19 @@
-# Maplini v0.8.4 — PDF-format + enklare konto
+# Maplini v0.8.6
 
-## PDF-yta
-Ett enda val styr både visning och format:
+## Konto & workspace
+- Tidigare separata boxar `Workspace` och `Konto & moln` är sammanslagna.
+- Utloggad användare ser bara inloggning/skapa konto.
+- Inloggad användare ser:
+  - e-post
+  - Logga ut
+  - aktuellt workspace
+  - roll
+  - möjlighet att skapa nytt workspace
+- `Testa Supabase-anslutning` är borttagen från vanliga användargränssnittet.
+- Google är fortsatt en separat exportintegration, inte en andra Maplini-inloggning.
 
-- PDF-yta: Av
-- A4 stående
-- A4 liggande
-- A3 stående
-- A3 liggande
-
-När ett format väljs visas sidytan direkt.
-När `Av` väljs försvinner den.
-
-Antal sidor väljs separat:
-- Auto
-- 1
-- 2
-- 3
-- 4
-
-PDF-exporten följer valt format och orientering.
-
-## Inloggning
-- Maplini/Supabase är den enda riktiga inloggningen.
-- Google visas inte längre som en separat loginruta.
-- Google är bara ett kompakt, valfritt exporttillägg för direkt skapande av Docs/Sheets i Drive.
-- PDF, DOCX och lokal Sheets-export fungerar utan Google.
+## Horisontell navigering
+- En egen horisontell rullist ligger fast längst ned i den synliga arbetsytan.
+- Den synkroniseras med canvasen.
+- Du behöver inte scrolla till botten av den höga canvasen för att komma åt den.
+- Shift + mushjul fungerar fortsatt för höger/vänster.

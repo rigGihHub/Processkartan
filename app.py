@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.8.4"
+APP_VERSION = "0.8.6"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -20,6 +20,65 @@ st.markdown("""
 .block-container{padding:0.35rem 0.45rem 0.8rem;max-width:none}
 header[data-testid="stHeader"]{height:2rem}
 #MainMenu,footer{visibility:hidden}
+
+/* v0.8.5: permanent horizontal navigation for wide process maps */
+.p48-main,.p48-stage,.p48-canvas-wrap{min-width:0}
+.p48-canvas-wrap{
+  overflow-x:scroll !important;
+  overflow-y:auto !important;
+  scrollbar-gutter:stable both-edges;
+  max-width:100%;
+  padding-bottom:10px;
+}
+.p48-canvas-wrap::-webkit-scrollbar{height:14px;width:14px}
+.p48-canvas-wrap::-webkit-scrollbar-track{background:#eef2f5;border-radius:8px}
+.p48-canvas-wrap::-webkit-scrollbar-thumb{background:#9aa8b4;border-radius:8px;border:3px solid #eef2f5}
+.p48-canvas-wrap::-webkit-scrollbar-thumb:hover{background:#748491}
+#p48-canvas{min-width:2400px}
+
+
+.p48-account-unified{background:#fff}
+.p48-userline{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.p48-userline #p48-logout{min-height:30px;padding:5px 8px;white-space:nowrap}
+.p48-account-divider{height:1px;background:#e2e7ec;margin:10px 0}
+.p48-account-unified select{width:100%;border:1px solid #cfd7df;border-radius:7px;padding:7px 8px;font:12px system-ui;margin-top:5px;background:#fff}
+.p48-new-workspace{margin-top:8px;border-top:1px solid #e7ebef;padding-top:7px}
+.p48-new-workspace summary{cursor:pointer;font:700 11px system-ui;color:#445565;user-select:none}
+.p48-new-workspace input{margin-top:7px}
+
+
+/* v0.8.6: the main work area owns scrolling; a sticky horizontal navigator
+   remains visible at the bottom of the editor viewport. */
+.p48-scroll{
+  overflow:auto !important;
+  position:relative;
+  height:900px;
+  background:#e9eef3;
+  scrollbar-gutter:stable;
+}
+.p48-canvas-wrap{
+  overflow:visible !important;
+  max-width:none !important;
+  padding-bottom:0 !important;
+}
+.p48-hnav{
+  position:sticky;
+  left:0;
+  bottom:0;
+  z-index:90;
+  height:22px;
+  overflow-x:scroll;
+  overflow-y:hidden;
+  background:#f6f8fa;
+  border-top:1px solid #cfd7df;
+  box-shadow:0 -2px 6px rgba(28,43,58,.08);
+}
+.p48-hnav-inner{height:1px;width:2400px}
+.p48-hnav::-webkit-scrollbar{height:16px}
+.p48-hnav::-webkit-scrollbar-track{background:#e8edf1}
+.p48-hnav::-webkit-scrollbar-thumb{background:#8797a5;border-radius:8px;border:3px solid #e8edf1}
+.p48-hnav::-webkit-scrollbar-thumb:hover{background:#657684}
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -196,16 +255,11 @@ html = r"""
 
 <div class="p48-body">
   <aside class="p48-side">
-    <div class="p48-workspace">
-      <div class="p48-title">Workspace</div>
-      <select id="p48-workspace-select"><option value="">Personligt</option></select>
-      <input id="p48-workspace-name" placeholder="Nytt workspace">
-      <button type="button" class="p48-mini" id="p48-create-workspace" style="width:100%;margin-top:6px">Skapa workspace</button>
-      <div id="p48-role" class="p48-role">Owner</div>
-    </div>
-    <div class="p48-account">
-      <div class="p48-title">Konto & moln</div>
+    <div class="p48-account p48-account-unified">
+      <div class="p48-title">Konto & workspace</div>
+
       <div id="p48-account-signedout">
+        <div class="p48-small" style="margin-bottom:5px">Logga in för molnlagring, delning och workspaces.</div>
         <input id="p48-email" type="email" placeholder="E-post">
         <input id="p48-password" type="password" placeholder="Lösenord">
         <div class="p48-account-actions">
@@ -213,15 +267,33 @@ html = r"""
           <button type="button" class="p48-mini" id="p48-signup">Skapa konto</button>
         </div>
       </div>
+
       <div id="p48-account-signedin" hidden>
-        <div id="p48-user-email" style="font-size:12px;font-weight:800"></div>
-        <button type="button" class="p48-mini" id="p48-logout" style="width:100%;margin-top:6px">Logga ut</button>
+        <div class="p48-userline">
+          <div>
+            <div class="p48-small">Inloggad som</div>
+            <div id="p48-user-email" style="font-size:12px;font-weight:800"></div>
+          </div>
+          <button type="button" class="p48-mini" id="p48-logout">Logga ut</button>
+        </div>
+
+        <div class="p48-account-divider"></div>
+        <div class="p48-small">Aktuellt workspace</div>
+        <select id="p48-workspace-select"><option value="">Personligt</option></select>
+        <div id="p48-role" class="p48-role">Owner</div>
+
+        <details class="p48-new-workspace">
+          <summary>+ Nytt workspace</summary>
+          <input id="p48-workspace-name" placeholder="Namn på workspace">
+          <button type="button" class="p48-mini" id="p48-create-workspace" style="width:100%;margin-top:6px">Skapa workspace</button>
+        </details>
       </div>
-      <div id="p48-cloud-badge" class="p48-cloud-badge off">Lokal lagring</div>
-      <div id="p48-cloud-help" class="p48-small">Ett Maplini-konto räcker. Google ansluts bara som exporttillägg.</div>
+
+      <div id="p48-cloud-badge" class="p48-cloud-badge off">Ej inloggad</div>
+      <div id="p48-cloud-help" class="p48-small">Ett Maplini-konto räcker. Google används bara som exportintegration.</div>
       <div id="p48-auth-error" class="p48-small" style="display:none;margin-top:7px;padding:7px;border-radius:7px;background:#fff1ef;color:#8c3029;border:1px solid #efc6c1"></div>
-      <button type="button" class="p48-mini" id="p48-test-supabase" style="width:100%;margin-top:7px">Testa Supabase-anslutning</button>
     </div>
+
     <div class="p48-section">
       <div class="p48-title">Sparade processer</div>
       <div id="p48-processes" class="p48-list"></div>
@@ -274,7 +346,7 @@ html = r"""
   </aside>
 
   <main class="p48-scroll" id="p48-scroll">
-    <div id="p48-canvas"><div id="p48-print-frame" class="p48-print-frame"></div>
+    <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><div id="p48-print-frame" class="p48-print-frame"></div>
       <div id="p48-marquee" class="p48-marquee"></div>
       <svg id="p48-svg" viewBox="0 0 2400 1400">
         <defs><marker id="p48-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0,0 10,4 0,8" fill="#687584"></polygon></marker></defs>
@@ -282,13 +354,18 @@ html = r"""
         <path id="p48-temp" class="p48-temp" hidden></path>
       </svg>
     </div>
-  </main>
+  </div>
+  <div id="p48-hnav" class="p48-hnav" aria-label="Horisontell navigering">
+    <div id="p48-hnav-inner" class="p48-hnav-inner"></div>
+  </div>
+</main>
 </div>
 
 <script>
 (()=>{
 const root=document.getElementById('pk48'); if(!root||root.dataset.ready==='1')return; root.dataset.ready='1';
 const canvas=root.querySelector('#p48-canvas'),scroll=root.querySelector('#p48-scroll'),linkLayer=root.querySelector('#p48-links'),temp=root.querySelector('#p48-temp');
+const hnav=root.querySelector('#p48-hnav'),hnavInner=root.querySelector('#p48-hnav-inner');
 const nameInput=root.querySelector('#p48-name'),status=root.querySelector('#p48-status'),processBox=root.querySelector('#p48-processes');
 const controls=root.querySelector('#p48-controls'),font=root.querySelector('#p48-font'),size=root.querySelector('#p48-size'),textColor=root.querySelector('#p48-textcolor'),bgColor=root.querySelector('#p48-bgcolor');
 const bold=root.querySelector('#p48-bold'),italic=root.querySelector('#p48-italic'),under=root.querySelector('#p48-under');
@@ -299,7 +376,7 @@ const cloudBadge=root.querySelector('#p48-cloud-badge'),cloudHelp=root.querySele
 const printFrame=root.querySelector('#p48-print-frame');
 const pdfViewSelect=root.querySelector('#p48-pdf-view'),pageCountSelect=root.querySelector('#p48-page-count');
 const workspaceSelect=root.querySelector('#p48-workspace-select'),workspaceName=root.querySelector('#p48-workspace-name'),createWorkspaceBtn=root.querySelector('#p48-create-workspace'),roleBadge=root.querySelector('#p48-role');
-const authError=root.querySelector('#p48-auth-error'),testSupabaseBtn=root.querySelector('#p48-test-supabase');
+const authError=root.querySelector('#p48-auth-error');
 const cloudSaveBtn=root.querySelector('#p48-cloud-save'),shareBtn=root.querySelector('#p48-share'),shareBox=root.querySelector('#p48-sharebox'),shareUrlInput=root.querySelector('#p48-share-url'),copyShareBtn=root.querySelector('#p48-copy-share');
 const marquee=root.querySelector('#p48-marquee');
 const selectToolBtn=root.querySelector('#p48-select-tool');
@@ -313,6 +390,38 @@ const CLOUD_ENABLED=SUPABASE_URL.length>0&&SUPABASE_ANON_KEY.length>0;
 let cloudSession=null,sharedView=false;
 let currentWorkspaceId=null,currentRole='owner',printPreview=false;
 let pdfView='A3L',pageCountMode='auto';
+
+function syncHorizontalNavWidth(){
+  if(!hnav||!hnavInner)return;
+  const w=Math.max(canvas.scrollWidth,canvas.offsetWidth,2400);
+  hnavInner.style.width=w+'px';
+}
+let syncingH=false;
+if(hnav){
+  hnav.addEventListener('scroll',()=>{
+    if(syncingH)return;
+    syncingH=true;
+    scroll.scrollLeft=hnav.scrollLeft;
+    requestAnimationFrame(()=>{syncingH=false});
+  });
+}
+scroll.addEventListener('scroll',()=>{
+  if(!hnav||syncingH)return;
+  syncingH=true;
+  hnav.scrollLeft=scroll.scrollLeft;
+  requestAnimationFrame(()=>{syncingH=false});
+});
+scroll.addEventListener('wheel',(e)=>{
+  if(e.shiftKey){
+    e.preventDefault();
+    scroll.scrollLeft += (Math.abs(e.deltaY)>Math.abs(e.deltaX)?e.deltaY:e.deltaX);
+    if(hnav)hnav.scrollLeft=scroll.scrollLeft;
+  }
+},{passive:false});
+window.addEventListener('resize',syncHorizontalNavWidth);
+setTimeout(syncHorizontalNavWidth,0);
+
+
 
 
 const starter={id:'proc-1',name:'Exempel – upphandlingsprocess',nodes:[
@@ -465,7 +574,7 @@ async function deleteCloud(id){if(ownerId())try{await sb('/rest/v1/processes?id=
 
 function canEdit(){return !sharedView&&(currentRole==='owner'||currentRole==='editor')}
 function applyRoleUi(){
-  roleBadge.textContent=currentRole.charAt(0).toUpperCase()+currentRole.slice(1);
+  if(roleBadge)roleBadge.textContent=currentRole.charAt(0).toUpperCase()+currentRole.slice(1);
   const editable=canEdit();
   root.querySelectorAll('.p48-item,.p48-format input,.p48-format select,.p48-format button,.p48-step-io input,.p48-step-io button').forEach(el=>{
     el.style.pointerEvents=editable?'':'none';el.style.opacity=editable?'':'0.5';
@@ -533,7 +642,7 @@ function renderProcesses(){
     row.append(b,del);processBox.appendChild(row);
   });
 }
-function persist(show=false){const s=state();processes[currentId]=clone(s);saveLocal();renderProcesses();if(show)msg('Sparad')}
+function persist(show=false){const s=state();processes[currentId]=clone(s);saveLocal();renderProcesses();if(show)msg('Sparad');syncHorizontalNavWidth()}
 function pushUndo(){undo.push(JSON.stringify(state()));if(undo.length>50)undo.shift();redo=[]}
 function clearCanvas(){for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();linkLayer.innerHTML='';finishTempArrow();refreshControls();updateSelectionUi()}
 function restore(s){const d=typeof s==='string'?JSON.parse(s):clone(s);clearCanvas();currentId=d.id||currentId;nameInput.value=d.name||'Namnlös process';(d.nodes||[]).forEach(makeNode);links=d.links||[];seq=Math.max(0,...[...nodes.keys()].map(id=>parseInt(String(id).replace(/\D/g,''),10)||0));drawLinks()}
@@ -1230,7 +1339,7 @@ root.querySelector('#p48-save').addEventListener('click',async()=>{persist(true)
 cloudSaveBtn.addEventListener('click',async()=>{try{await saveCurrentToCloud()}catch(e){console.error(e);msg('Molnsparning misslyckades')}});
 shareBtn.addEventListener('click',shareCurrent);copyShareBtn.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(shareUrlInput.value);msg('Länk kopierad')}catch(e){shareUrlInput.select();document.execCommand('copy')}});
 loginBtn.addEventListener('click',signIn);signupBtn.addEventListener('click',signUp);logoutBtn.addEventListener('click',signOut);
-testSupabaseBtn.addEventListener('click',testSupabaseConnection);
+
 
 function pageSpec(){
   const specs={
