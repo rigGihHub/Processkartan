@@ -1,24 +1,28 @@
-# Maplini v0.8.3 — A4/A3 + flersidig PDF + enklare inloggning
+# Maplini v0.8.4 — PDF-format + enklare konto
 
-## PDF
-- Välj `A4` eller `A3`.
-- Välj:
-  - Auto sidor
-  - 1 sida
-  - 2 sidor
-  - 3 sidor
-  - 4 sidor
-- `Visa PDF-yta` visar sidramarna direkt på canvasen.
-- Vid flera sidor visas ramarna bredvid varandra.
-- PDF-exporten skapar motsvarande antal PDF-sidor.
-- Auto-läget räknar ut hur många sidor som behövs utifrån processens bredd.
-- Varje sida skalas för god passning.
+## PDF-yta
+Ett enda val styr både visning och format:
+
+- PDF-yta: Av
+- A4 stående
+- A4 liggande
+- A3 stående
+- A3 liggande
+
+När ett format väljs visas sidytan direkt.
+När `Av` väljs försvinner den.
+
+Antal sidor väljs separat:
+- Auto
+- 1
+- 2
+- 3
+- 4
+
+PDF-exporten följer valt format och orientering.
 
 ## Inloggning
-- Maplini/Supabase är huvudkontot.
-- Google är **inte** ett andra obligatoriskt konto.
-- Google behöver bara anslutas om användaren vill skapa Google Docs/Sheets direkt i sitt Drive.
-- Lokal PDF/DOCX/XLSX-export fungerar utan Google.
-
-## Rekommenderad nästa nivå
-På sikt kan Maplini använda Google som SSO via Supabase, så att samma Google-inloggning används både för Maplini och Google-export.
+- Maplini/Supabase är den enda riktiga inloggningen.
+- Google visas inte längre som en separat loginruta.
+- Google är bara ett kompakt, valfritt exporttillägg för direkt skapande av Docs/Sheets i Drive.
+- PDF, DOCX och lokal Sheets-export fungerar utan Google.

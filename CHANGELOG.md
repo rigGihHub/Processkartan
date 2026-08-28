@@ -1,6 +1,5 @@
-# v0.8.3
-- A4/A3-val för PDF.
-- Flersidig PDF-export.
-- Auto eller manuellt antal sidor.
-- Förhandsgranskning med flera sidramar.
-- Tydligare single-login-strategi.
+# v0.8.4
+- A4 stående/liggande.
+- A3 stående/liggande.
+- Integrerat Visa/Dölj PDF-yta i samma formatväljare.
+- Förenklad Google-anslutning utan separat loginruta.

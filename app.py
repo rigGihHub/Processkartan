@@ -5,7 +5,7 @@ import base64
 import google_docs
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.8.3"
+APP_VERSION = "0.8.4"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -170,10 +170,12 @@ html = r"""
   <div class="p48-sharebox" id="p48-sharebox"><input id="p48-share-url" readonly><button type="button" class="p48-mini" id="p48-copy-share">Kopiera länk</button></div>
   <button type="button" class="p48-btn" id="p48-undo">↶ Ångra</button>
   <button type="button" class="p48-btn" id="p48-redo">↷ Gör om</button>
-  <button type="button" class="p48-btn" id="p48-print-preview">Visa PDF-yta</button>
-  <select id="p48-page-size" class="p48-btn" title="PDF-format">
-    <option value="A4">A4</option>
-    <option value="A3" selected>A3</option>
+  <select id="p48-pdf-view" class="p48-btn" title="PDF-yta">
+    <option value="off">PDF-yta: Av</option>
+    <option value="A4P">A4 stående</option>
+    <option value="A4L">A4 liggande</option>
+    <option value="A3P">A3 stående</option>
+    <option value="A3L" selected>A3 liggande</option>
   </select>
   <select id="p48-page-count" class="p48-btn" title="Antal PDF-sidor">
     <option value="auto" selected>Auto sidor</option>
@@ -216,7 +218,7 @@ html = r"""
         <button type="button" class="p48-mini" id="p48-logout" style="width:100%;margin-top:6px">Logga ut</button>
       </div>
       <div id="p48-cloud-badge" class="p48-cloud-badge off">Lokal lagring</div>
-      <div id="p48-cloud-help" class="p48-small">Maplini-kontot är huvudkontot. Google ansluts bara vid direkt export.</div>
+      <div id="p48-cloud-help" class="p48-small">Ett Maplini-konto räcker. Google ansluts bara som exporttillägg.</div>
       <div id="p48-auth-error" class="p48-small" style="display:none;margin-top:7px;padding:7px;border-radius:7px;background:#fff1ef;color:#8c3029;border:1px solid #efc6c1"></div>
       <button type="button" class="p48-mini" id="p48-test-supabase" style="width:100%;margin-top:7px">Testa Supabase-anslutning</button>
     </div>
@@ -294,8 +296,8 @@ const emailInput=root.querySelector('#p48-email'),passwordInput=root.querySelect
 const loginBtn=root.querySelector('#p48-login'),signupBtn=root.querySelector('#p48-signup'),logoutBtn=root.querySelector('#p48-logout');
 const signedOut=root.querySelector('#p48-account-signedout'),signedIn=root.querySelector('#p48-account-signedin'),userEmail=root.querySelector('#p48-user-email');
 const cloudBadge=root.querySelector('#p48-cloud-badge'),cloudHelp=root.querySelector('#p48-cloud-help');
-const printPreviewBtn=root.querySelector('#p48-print-preview'),printFrame=root.querySelector('#p48-print-frame');
-const pageSizeSelect=root.querySelector('#p48-page-size'),pageCountSelect=root.querySelector('#p48-page-count');
+const printFrame=root.querySelector('#p48-print-frame');
+const pdfViewSelect=root.querySelector('#p48-pdf-view'),pageCountSelect=root.querySelector('#p48-page-count');
 const workspaceSelect=root.querySelector('#p48-workspace-select'),workspaceName=root.querySelector('#p48-workspace-name'),createWorkspaceBtn=root.querySelector('#p48-create-workspace'),roleBadge=root.querySelector('#p48-role');
 const authError=root.querySelector('#p48-auth-error'),testSupabaseBtn=root.querySelector('#p48-test-supabase');
 const cloudSaveBtn=root.querySelector('#p48-cloud-save'),shareBtn=root.querySelector('#p48-share'),shareBox=root.querySelector('#p48-sharebox'),shareUrlInput=root.querySelector('#p48-share-url'),copyShareBtn=root.querySelector('#p48-copy-share');
@@ -310,7 +312,7 @@ const SUPABASE_URL="__SUPABASE_URL__", SUPABASE_ANON_KEY="__SUPABASE_ANON_KEY__"
 const CLOUD_ENABLED=SUPABASE_URL.length>0&&SUPABASE_ANON_KEY.length>0;
 let cloudSession=null,sharedView=false;
 let currentWorkspaceId=null,currentRole='owner',printPreview=false;
-let pageSize='A3',pageCountMode='auto';
+let pdfView='A3L',pageCountMode='auto';
 
 
 const starter={id:'proc-1',name:'Exempel – upphandlingsprocess',nodes:[
@@ -1161,7 +1163,7 @@ async function exportPdf(){
     const count=desiredPageCount();
     const jpeg=canvasJpegBytes(shot,.94);
     const pdf=buildMultiPagePdfFromCanvas(shot,jpeg,shot.width,shot.height,spec,count);
-    downloadBytes(pdf,cleanFileName(state().name)+`_${spec.name}_${count}sidor.pdf`,'application/pdf');
+    downloadBytes(pdf,cleanFileName(state().name)+`_${spec.code}_${count}sidor.pdf`,'application/pdf');
     msg(`PDF skapad · ${spec.name} · ${count} sida${count>1?'or':''}`);
   }catch(err){console.error(err);msg('PDF-export misslyckades')}
 }
@@ -1231,10 +1233,13 @@ loginBtn.addEventListener('click',signIn);signupBtn.addEventListener('click',sig
 testSupabaseBtn.addEventListener('click',testSupabaseConnection);
 
 function pageSpec(){
-  // Preview dimensions maintain ISO ratio in landscape.
-  return pageSize==='A4'
-    ? {name:'A4',w:900,h:636,pdfW:841.89,pdfH:595.28}
-    : {name:'A3',w:1123,h:794,pdfW:1190.55,pdfH:841.89};
+  const specs={
+    A4P:{name:'A4 stående',code:'A4P',w:636,h:900,pdfW:595.28,pdfH:841.89},
+    A4L:{name:'A4 liggande',code:'A4L',w:900,h:636,pdfW:841.89,pdfH:595.28},
+    A3P:{name:'A3 stående',code:'A3P',w:794,h:1123,pdfW:841.89,pdfH:1190.55},
+    A3L:{name:'A3 liggande',code:'A3L',w:1123,h:794,pdfW:1190.55,pdfH:841.89}
+  };
+  return specs[pdfView]||specs.A3L;
 }
 function contentExtent(){
   const b=exportBounds();
@@ -1248,35 +1253,29 @@ function desiredPageCount(){
   const pages=Math.max(1,Math.ceil((b.width||1)/usableW));
   return Math.min(8,pages);
 }
+function clearPrintPages(){
+  canvas.querySelectorAll('.p48-print-page').forEach(x=>x.remove());
+}
 function renderPrintPages(){
-  if(!printFrame)return;
-  printFrame.innerHTML='';
-  if(!printPreview){printFrame.classList.remove('on');return}
+  clearPrintPages();
+  if(pdfView==='off')return;
   const spec=pageSpec(),count=desiredPageCount(),gap=24,left=40,top=40;
-  printFrame.classList.add('on');
-  printFrame.style.left='0px';printFrame.style.top='0px';
-  printFrame.style.width='1px';printFrame.style.height='1px';
   for(let i=0;i<count;i++){
     const pg=document.createElement('div');pg.className='p48-print-page';
-    pg.dataset.label=`PDF ${spec.name} · sida ${i+1}/${count}`;
+    pg.dataset.label=`${spec.name} · sida ${i+1}/${count}`;
     pg.style.left=(left+i*(spec.w+gap))+'px';pg.style.top=top+'px';
     pg.style.width=spec.w+'px';pg.style.height=spec.h+'px';
     canvas.appendChild(pg);
   }
 }
-function clearPrintPages(){
-  canvas.querySelectorAll('.p48-print-page').forEach(x=>x.remove());
-}
-
-printPreviewBtn.addEventListener('click',()=>{
-  printPreview=!printPreview;
-  clearPrintPages();
-  if(printPreview)renderPrintPages();
-  printPreviewBtn.classList.toggle('primary',printPreview);
-  printPreviewBtn.textContent=printPreview?'Dölj PDF-yta':'Visa PDF-yta';
+pdfViewSelect.addEventListener('change',()=>{
+  pdfView=pdfViewSelect.value;
+  renderPrintPages();
 });
-pageSizeSelect.addEventListener('change',()=>{pageSize=pageSizeSelect.value;clearPrintPages();if(printPreview)renderPrintPages();});
-pageCountSelect.addEventListener('change',()=>{pageCountMode=pageCountSelect.value;clearPrintPages();if(printPreview)renderPrintPages();});
+pageCountSelect.addEventListener('change',()=>{
+  pageCountMode=pageCountSelect.value;
+  renderPrintPages();
+});
 function directGoogleSheetPayload(){
   persist();
   const st=state();
@@ -1319,6 +1318,7 @@ const SHARE_TOKEN="__SHARE_TOKEN__";
  if(SHARE_TOKEN&&await loadShared(SHARE_TOKEN))return;
  if(!loadLocal()){processes[starter.id]=clone(starter);currentId=starter.id}
  openProcess(currentId);renderProcesses();refreshControls();updateSelectionUi();updateAccountUi();msg('Klar');
+ renderPrintPages();
  if(ownerId()){
    const valid=await validateSession();
    if(valid){await loadWorkspaces();await loadCloudProcesses();applyRoleUi();}
@@ -1338,14 +1338,24 @@ if google_docs.configured(st) and st.query_params.get("code") and not st.session
     except Exception as exc:
         st.error(f"Google-inloggningen misslyckades: {exc}")
 
-with st.expander("Google-integration (valfri)", expanded=False):
-    if not google_docs.configured(st):
-        st.info("Lägg in Google OAuth-uppgifter i Streamlit Secrets för att aktivera direkt skapande av Google Docs.")
-        st.code('[google_oauth]\nclient_id = "..."\\nclient_secret = "..."\\nredirect_uri = "https://DIN-APP.streamlit.app"', language="toml")
-    elif not google_docs.creds(st):
-        st.link_button("Anslut Google-konto", google_docs.auth_url(st))
+# Google OAuth callback
+if google_docs.configured(st) and st.query_params.get("code") and not st.session_state.get("google_token"):
+    try:
+        st.session_state["google_token"] = google_docs.exchange(st, st.query_params["code"])
+        st.query_params.clear()
+        st.toast("Google är anslutet för export.")
+    except Exception as exc:
+        st.error(f"Google-anslutningen misslyckades: {exc}")
+
+if google_docs.configured(st):
+    if not google_docs.creds(st):
+        c1, c2 = st.columns([1, 5])
+        with c1:
+            st.link_button("Anslut Google-export", google_docs.auth_url(st), use_container_width=True)
+        with c2:
+            st.caption("Valfritt. Behövs bara för att skapa Google Docs/Sheets direkt i Drive.")
     else:
-        st.success("Google är anslutet för export.")
+        st.caption("Google-export ansluten ✓")
         if st.query_params.get("gs_payload"):
             try:
                 import json as _json
@@ -1361,15 +1371,8 @@ with st.expander("Google-integration (valfri)", expanded=False):
                 st.query_params.pop("gs_payload", None)
             except Exception as exc:
                 st.error(f"Kunde inte skapa Google Sheet: {exc}")
-        title = st.text_input("Dokumentnamn", value="Maplini process")
-        body = st.text_area("Text till Google Doc", value="Dokument skapat från Maplini.", height=80)
-        if st.button("Skapa Google Doc"):
-            try:
-                doc_id = google_docs.create_doc(st, title, body)
-                st.success("Google Doc skapat.")
-                st.link_button("Öppna dokumentet", f"https://docs.google.com/document/d/{doc_id}/edit")
-            except Exception as exc:
-                st.error(f"Kunde inte skapa Google Doc: {exc}")
+else:
+    st.caption("Google-export är inte konfigurerad ännu. Övriga exporter fungerar utan Google.")
 
 html = html.replace("__MAPLINI_LOGO__", f"data:image/png;base64,{_LOGO_B64}")
 html = html.replace("__SUPABASE_URL__", _SUPABASE_URL)
