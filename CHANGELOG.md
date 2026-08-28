@@ -1,11 +1,8 @@
-# v0.10.9
-- Responsiv mobilvy för Android och iPhone.
-- Vänsterspalten blir mobil verktygslåda/drawer.
-- Canvas använder hela mobilbredden och kan panoreras med touch.
-- Minst 44 px touchytor.
-- 16 px inputtext för att undvika Safari auto-zoom.
-- Safe-area-stöd för iPhone.
-- Toolbar är horisontellt scrollbar på mobil.
-- Processyta/Google Sheets-popovers hålls inom mobilskärmen.
-- Orientation/resize synkar canvas och kopplingar.
-- Desktop-DOM verifierad oförändrad.
+# v0.10.11 — MOBILE + CONNECTOR STABILIZATION
+- Rättar mobilgrundorsaken: v0.10.9 använde CSS-selektorer som inte motsvarade den riktiga DOM:en.
+- Mobil-CSS använder nu `.p48-top`, `.p48-brand`, `.p48-logo-crop` och `#p48-name`.
+- Toppraden kan inte radbrytas och skjuta canvasen ur bild; den scrollas horisontellt.
+- Verktyg ligger först på mobil och öppnar vänsterpanelen som drawer.
+- Canvasen hålls synlig och panorerbar med touch.
+- Connector utilities är utbrutna till `maplini_connector_core.js`.
+- Utökade regressions- och syntaxkontroller.

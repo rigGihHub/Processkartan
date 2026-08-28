@@ -1,10 +1,13 @@
-# Maplini v0.10.9 — Mobile responsive
+# Maplini v0.10.11
+Mobil- och connector-stabilisering.
 
-På Android/iPhone:
-- `Verktyg` öppnar sidopanelen som drawer.
-- Canvasen får hela bredden och panoreras med finger.
-- Toolbaren scrollas horisontellt.
-- Kontroller har större touchytor.
-- iPhone safe-area och Safari-inputzoom hanteras.
+Mobil:
+- Verktyg ligger först i toppraden.
+- Toppraden scrollas horisontellt istället för att radbrytas.
+- Canvasen ligger direkt under header/topprad.
+- Vänsterpanelen öppnas som drawer.
+- Touchytor och iPhone safe-area behålls.
 
-Laptop/Desktop behåller tvåkolumnslayouten.
+Teknik:
+- Connector helpers ligger i `maplini_connector_core.js`.
+- Regressionstester skyddar mobilens riktiga DOM/CSS och connector wiring.

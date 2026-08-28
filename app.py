@@ -3,9 +3,10 @@ import streamlit.components.v1 as components
 from pathlib import Path
 import base64
 import google_docs
+import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.10.9"
+APP_VERSION = "0.10.11"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -13,6 +14,8 @@ _SUPABASE_URL = _SUPABASE.get("url", "")
 _SUPABASE_ANON_KEY = _SUPABASE.get("publishable_key", _SUPABASE.get("anon_key", ""))
 _PUBLIC_APP_URL = st.secrets.get("app", {}).get("public_url", "https://processkartan.streamlit.app")
 _CLOUD_ENABLED = bool(_SUPABASE_URL and _SUPABASE_ANON_KEY)
+_CONNECTOR_CORE_PATH = Path(__file__).resolve().parent / "maplini_connector_core.js"
+_CONNECTOR_CORE_JS = _CONNECTOR_CORE_PATH.read_text(encoding="utf-8") if _CONNECTOR_CORE_PATH.exists() else ""
 
 
 st.markdown("""
@@ -218,142 +221,90 @@ html = r"""
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
 <div id="pk48">
 <style>
-/* v0.10.9 responsive + touch */
+/* v0.10.11 mobile shell — real DOM selectors */
 .p48-mobile-tools-btn,.p48-mobile-backdrop{display:none}
 .p48-node,.p48-handle,.p48-resize-handle,.p48-link-hit-segment{touch-action:none}
 .p48-scroll{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 button,summary,select,input{-webkit-tap-highlight-color:transparent}
 
 @media (max-width:900px), (pointer:coarse) and (max-width:1100px){
-  html,body{width:100%;max-width:100%;overflow:hidden;overscroll-behavior:none}
+  html,body{width:100%;max-width:100%;overflow-x:hidden;overscroll-behavior:none}
   #pk48{width:100%;max-width:100%;overflow:hidden}
 
-  .p48-header{
-    padding-left:max(10px,env(safe-area-inset-left));
-    padding-right:max(10px,env(safe-area-inset-right));
-  }
-  .p48-logo{max-width:190px}
+  .p48-brand{height:68px!important;min-height:68px!important;padding:5px max(8px,env(safe-area-inset-right)) 5px max(8px,env(safe-area-inset-left))!important}
+  .p48-logo-crop{width:205px!important;height:38px!important}
+  .p48-logo-crop img{width:205px!important}
+  .p48-tagline{font-size:9px!important;line-height:1!important}
+  .p48-version{font-size:9px!important;line-height:1!important}
 
-  .p48-toolbar{
-    position:sticky!important;
-    top:0!important;
-    z-index:180!important;
-    display:flex!important;
-    flex-wrap:nowrap!important;
-    gap:7px!important;
-    overflow-x:auto!important;
-    overflow-y:hidden!important;
-    padding:8px max(8px,env(safe-area-inset-right)) 8px max(8px,env(safe-area-inset-left))!important;
-    scrollbar-width:none;
-    -webkit-overflow-scrolling:touch;
-    background:#fff;
+  .p48-top{
+    position:relative!important;z-index:180!important;display:flex!important;align-items:center!important;
+    flex-wrap:nowrap!important;gap:7px!important;width:100%!important;max-width:100%!important;min-height:56px!important;
+    overflow-x:auto!important;overflow-y:hidden!important;
+    padding:6px max(8px,env(safe-area-inset-right)) 6px max(8px,env(safe-area-inset-left))!important;
+    scrollbar-width:none;-webkit-overflow-scrolling:touch;background:#fff;
   }
-  .p48-toolbar::-webkit-scrollbar{display:none}
-  .p48-toolbar>*{flex:0 0 auto!important}
-  .p48-toolbar .p48-btn,.p48-toolbar select,.p48-toolbar input{
-    min-height:44px!important;
-    font-size:16px!important;
-  }
-  #p48-process-name{width:190px!important;min-width:190px!important}
+  .p48-top::-webkit-scrollbar{display:none}
+  .p48-top>*{flex:0 0 auto!important}
+  .p48-top>strong{display:none!important}
+  .p48-top .p48-btn,.p48-top select,.p48-top input{min-height:44px!important;font-size:16px!important}
+
+  #p48-mobile-tools{order:-30}
+  #p48-name{order:-29;width:145px!important;min-width:145px!important;max-width:145px!important}
+  #p48-save{order:-28}
+  #p48-new{order:-27}
 
   .p48-mobile-tools-btn{
-    display:inline-flex!important;
-    align-items:center;
-    justify-content:center;
-    position:sticky;
-    left:0;
-    z-index:5;
+    display:inline-flex!important;align-items:center!important;justify-content:center!important;
+    position:sticky!important;left:0!important;z-index:8!important;background:#fff!important;
+    box-shadow:5px 0 8px rgba(255,255,255,.95);
   }
 
   .p48-body{
-    display:block!important;
-    position:relative!important;
-    width:100%!important;
-    height:calc(100dvh - 170px)!important;
-    min-height:520px!important;
-    overflow:hidden!important;
+    display:block!important;position:relative!important;width:100%!important;
+    height:820px!important;min-height:620px!important;overflow:hidden!important;
   }
-
   .p48-scroll{
-    position:absolute!important;
-    inset:0!important;
-    width:100%!important;
-    height:100%!important;
-    max-height:none!important;
-    min-height:0!important;
-    overflow:auto!important;
-    background:#e9eef3!important;
-    touch-action:pan-x pan-y;
-    scrollbar-gutter:auto;
+    position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+    max-height:none!important;min-height:0!important;overflow:auto!important;background:#e9eef3!important;
+    touch-action:pan-x pan-y;scrollbar-gutter:auto;z-index:1!important;
   }
-
-  .p48-canvas-wrap,#p48-canvas{
-    width:2400px!important;
-    min-width:2400px!important;
-    height:1400px!important;
-    min-height:1400px!important;
-  }
+  .p48-canvas-wrap,#p48-canvas{width:2400px!important;min-width:2400px!important;height:1400px!important;min-height:1400px!important}
 
   .p48-side{
-    display:block!important;
-    position:absolute!important;
-    top:0!important;left:0!important;bottom:0!important;
-    width:min(86vw,340px)!important;
-    height:100%!important;
-    max-height:none!important;
-    transform:translateX(-105%);
-    transition:transform .18s ease;
-    z-index:250!important;
-    overflow-y:auto!important;
-    overflow-x:hidden!important;
-    padding-bottom:calc(20px + env(safe-area-inset-bottom))!important;
-    background:#fff!important;
+    display:block!important;position:absolute!important;top:0!important;left:0!important;bottom:0!important;
+    width:min(88vw,350px)!important;height:100%!important;max-height:none!important;
+    transform:translateX(-102%);visibility:hidden;pointer-events:none;
+    transition:transform .18s ease,visibility 0s linear .18s;z-index:250!important;
+    overflow-y:auto!important;overflow-x:hidden!important;
+    padding-bottom:calc(20px + env(safe-area-inset-bottom))!important;background:#fff!important;
     box-shadow:0 12px 40px rgba(20,35,50,.24);
   }
-  .p48-side.p48-mobile-open{transform:translateX(0)}
+  .p48-side.p48-mobile-open{transform:translateX(0);visibility:visible;pointer-events:auto;transition:transform .18s ease,visibility 0s}
 
-  .p48-mobile-backdrop{
-    display:none;
-    position:absolute;
-    inset:0;
-    z-index:240;
-    border:0;
-    padding:0;
-    margin:0;
-    background:rgba(18,35,50,.28);
-  }
+  .p48-mobile-backdrop{display:none;position:absolute;inset:0;z-index:240;border:0;padding:0;margin:0;background:rgba(18,35,50,.28)}
   .p48-mobile-backdrop.on{display:block}
 
-  .p48-side button,.p48-side select,.p48-side input{
-    min-height:44px;
-    font-size:16px!important;
-  }
+  .p48-side button,.p48-side select,.p48-side input{min-height:44px;font-size:16px!important}
   .p48-side input[type="color"]{min-height:44px}
   .p48-item{min-height:48px}
-
   .p48-node.selected .p48-handle{min-width:12px!important;min-height:12px!important}
   .p48-resize-handle{min-width:16px!important;min-height:16px!important}
 
   .p48-canvas-popover,.p48-sheets-popover{
-    position:fixed!important;
-    left:10px!important;right:10px!important;
-    top:auto!important;
-    bottom:max(12px,env(safe-area-inset-bottom))!important;
-    width:auto!important;max-width:none!important;max-height:70dvh;
-    overflow:auto;
-    z-index:320!important;
+    position:fixed!important;left:10px!important;right:10px!important;top:auto!important;
+    bottom:max(12px,env(safe-area-inset-bottom))!important;width:auto!important;max-width:none!important;
+    max-height:70vh!important;max-height:70dvh!important;overflow:auto!important;z-index:320!important;
   }
   .p48-link-hit-segment{height:34px!important}
   .p48-hnav{display:none!important}
 }
-
 @media (max-width:480px){
-  .p48-header{min-height:76px}
-  .p48-logo{max-width:165px}
-  .p48-tagline{font-size:10px!important}
-  .p48-version{font-size:9px!important}
-  #p48-process-name{width:150px!important;min-width:150px!important}
-  .p48-body{height:calc(100dvh - 155px)!important}
+  .p48-brand{height:62px!important;min-height:62px!important}
+  .p48-logo-crop{width:180px!important;height:34px!important}
+  .p48-logo-crop img{width:180px!important}
+  #p48-name{width:125px!important;min-width:125px!important;max-width:125px!important}
+  .p48-body{height:820px!important;min-height:600px!important}
 }
 
 .p48-canvas-menu{position:relative;display:inline-block}
@@ -885,6 +836,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 </main>
 </div>
 
+<script>__MAPLINI_CONNECTOR_CORE__</script>
 <script>
 (()=>{
 const root=document.getElementById('pk48'); if(!root||root.dataset.ready==='1')return; root.dataset.ready='1';
@@ -906,7 +858,7 @@ const printFrame=root.querySelector('#p48-print-frame');
 const pdfViewSelect=root.querySelector('#p48-pdf-view'),pageCountSelect=root.querySelector('#p48-page-count');
 const workspaceSelect=root.querySelector('#p48-workspace-select'),workspaceName=root.querySelector('#p48-workspace-name'),createWorkspaceBtn=root.querySelector('#p48-create-workspace'),roleBadge=root.querySelector('#p48-role');
 const authError=root.querySelector('#p48-auth-error');
-const cloudSaveBtn=root.querySelector('#p48-cloud-save'),shareBtn=root.querySelector('#p48-share'),shareBox=root.querySelector('#p48-sharebox'),shareUrlInput=root.querySelector('#p48-share-url'),copyShareBtn=root.querySelector('#p48-copy-share');
+const shareBtn=root.querySelector('#p48-share'),shareBox=root.querySelector('#p48-sharebox'),shareUrlInput=root.querySelector('#p48-share-url'),copyShareBtn=root.querySelector('#p48-copy-share');
 const marquee=root.querySelector('#p48-marquee');
 const selectToolBtn=root.querySelector('#p48-select-tool');
 const deleteSelectionBtn=root.querySelector('#p48-delete-selection');
@@ -978,7 +930,7 @@ function updateAccountUi(){
  const logged=!!(cloudSession?.access_token&&cloudSession?.user);
  signedOut.hidden=logged;signedIn.hidden=!logged;
  if(logged)userEmail.textContent=cloudSession.user.email||'Inloggad';
- cloudSaveBtn.disabled=!logged||!CLOUD_ENABLED||sharedView;shareBtn.disabled=!logged||!CLOUD_ENABLED||sharedView;
+ shareBtn.disabled=!logged||!CLOUD_ENABLED||sharedView;
  if(CLOUD_ENABLED&&logged){cloudBadge.className='p48-cloud-badge';cloudBadge.textContent='Moln anslutet';cloudHelp.textContent='Spara och dela mellan enheter.'}
  else if(CLOUD_ENABLED){cloudBadge.className='p48-cloud-badge off';cloudBadge.textContent='Ej inloggad';cloudHelp.textContent='Logga in för molnlagring.'}
  else{cloudBadge.className='p48-cloud-badge off';cloudBadge.textContent='Lokal lagring';cloudHelp.textContent='Lägg in Supabase i Streamlit Secrets.'}
@@ -1125,7 +1077,6 @@ function applyRoleUi(){
   });
   root.querySelector('#p48-new').disabled=!editable;
   root.querySelector('#p48-save').disabled=!editable;
-  cloudSaveBtn.disabled=!editable||!ownerId()||!CLOUD_ENABLED;
 }
 async function loadWorkspaces(){
   if(!ownerId())return;
@@ -1441,13 +1392,11 @@ function deleteSelectedMany(){
     const item=nodes.get(id);
     if(item){item.el.remove();nodes.delete(id);}
   }
-  links=links.filter((l,i)=>!doomed.has(l[0])&&!doomed.has(l[1])&&!selectedLinkIndices.has(i));
+  links=MapliniConnectorCore.removeSelected(links,doomed,selectedLinkIndices);
   selectedIds.clear();selectedLinkIndices.clear();selectedId=null;selectedLinkIndex=null;
   requestFullLinkRender();persist();refreshControls();refreshLinkControls();updateSelectionUi();msg('Markerat område borttaget');
 }
-function rectsIntersect(a,b){
-  return !(a.right<b.left||a.left>b.right||a.bottom<b.top||a.top>b.bottom);
-}
+function rectsIntersect(a,b){return MapliniConnectorCore.rectsIntersect(a,b);}
 function linksInSelectionRect(selRect){
   const hits=[];
   for(const [index,entry] of linkDomByIndex.entries()){
@@ -1633,8 +1582,8 @@ function hitTestLink(clientX,clientY){
   return bestDist<=22?best:null;
 }
 
-function linkStyle(link){if(!link[3]||typeof link[3]!=='object')link[3]={};return Object.assign({color:'#687584',width:2,end:'arrow',dash:'solid',viaX:null,viaY:null},link[3])}
-function setLinkStyle(i,patch){if(i==null||!links[i])return;links[i][3]=Object.assign(linkStyle(links[i]),patch)}
+function linkStyle(link){return MapliniConnectorCore.style(link)}
+function setLinkStyle(i,patch){return MapliniConnectorCore.setStyle(links,i,patch)}
 function dashArray(st){return st.dash==='dashed'?'10 7':st.dash==='dotted'?'2 6':''}
 function refreshLinkControls(){
   const link=selectedLinkIndex!=null?links[selectedLinkIndex]:null;
@@ -1924,8 +1873,8 @@ function setMobileTools(open){
   mobileToolsBtn.setAttribute('aria-expanded',on?'true':'false');
   mobileToolsBtn.textContent=on?'✕ Stäng':'☰ Verktyg';
 }
-mobileToolsBtn.addEventListener('click',()=>setMobileTools(!sidePanel.classList.contains('p48-mobile-open')));
-mobileBackdrop.addEventListener('click',()=>setMobileTools(false));
+if(mobileToolsBtn)mobileToolsBtn.addEventListener('click',()=>setMobileTools(!sidePanel.classList.contains('p48-mobile-open')));
+if(mobileBackdrop)mobileBackdrop.addEventListener('click',()=>setMobileTools(false));
 window.addEventListener('keydown',e=>{if(e.key==='Escape')setMobileTools(false)});
 root.addEventListener('click',e=>{
   if(!isMobileLayout())return;
@@ -2735,6 +2684,7 @@ renderProcesses();refreshControls();updateSelectionUi();updateAccountUi();msg('K
 
 function syncResponsiveLayout(){
   if(!isMobileLayout())setMobileTools(false);
+  if(scroll){scroll.style.visibility='visible';scroll.style.pointerEvents='auto';}
   invalidateNodeGeom();
   requestFullLinkRender();
   scheduleHorizontalNavSync();
@@ -2757,53 +2707,12 @@ setTimeout(alignEditorTop,100);
 </div>
 """
 
-# Google OAuth callback
-if google_docs.configured(st) and st.query_params.get("code") and not st.session_state.get("google_token"):
-    try:
-        st.session_state["google_token"] = google_docs.exchange(st, st.query_params["code"])
-        st.query_params.clear()
-        st.toast("Google är anslutet för export.")
-    except Exception as exc:
-        st.error(f"Google-inloggningen misslyckades: {exc}")
-
-# Google OAuth callback
-if google_docs.configured(st) and st.query_params.get("code") and not st.session_state.get("google_token"):
-    try:
-        st.session_state["google_token"] = google_docs.exchange(st, st.query_params["code"])
-        st.query_params.clear()
-        st.toast("Google är anslutet för export.")
-    except Exception as exc:
-        st.error(f"Google-anslutningen misslyckades: {exc}")
-
-if google_docs.configured(st):
-    if not google_docs.creds(st):
-        c1, c2 = st.columns([1, 5])
-        with c1:
-            st.link_button("Anslut Google-export", google_docs.auth_url(st), use_container_width=True)
-        with c2:
-            st.caption("Valfritt. Behövs bara för att skapa Google Docs/Sheets direkt i Drive.")
-    else:
-        st.caption("Google-export ansluten ✓")
-        if st.query_params.get("gs_payload"):
-            try:
-                import json as _json
-                payload = _json.loads(st.query_params["gs_payload"])
-                _, sheet_url = google_docs.create_sheet(
-                    st,
-                    payload.get("title") or "Maplini process",
-                    payload.get("step_rows") or [],
-                    payload.get("link_rows") or [],
-                )
-                st.success("Google Sheet skapat.")
-                st.link_button("Öppna Google Sheet", sheet_url)
-                st.query_params.pop("gs_payload", None)
-            except Exception as exc:
-                st.error(f"Kunde inte skapa Google Sheet: {exc}")
-else:
-    st.caption("Google-export är inte konfigurerad ännu. Övriga exporter fungerar utan Google.")
+# Google export integration (OAuth callback + optional Drive connection UI)
+maplini_google_ui.render_google_export_ui(st, google_docs)
 
 html = html.replace("__MAPLINI_LOGO__", f"data:image/png;base64,{_LOGO_B64}")
 html = html.replace("__MAPLINI_VERSION__", APP_VERSION)
+html = html.replace("__MAPLINI_CONNECTOR_CORE__", _CONNECTOR_CORE_JS)
 html = html.replace("__SUPABASE_URL__", _SUPABASE_URL)
 html = html.replace("__SUPABASE_ANON_KEY__", _SUPABASE_ANON_KEY)
 html = html.replace("__PUBLIC_APP_URL__", _PUBLIC_APP_URL)
