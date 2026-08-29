@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.10.34"
+APP_VERSION = "0.10.37"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -237,6 +237,26 @@ header[data-testid="stHeader"]{height:2rem}
 .p48-node.selected .p48-handle{opacity:1!important;pointer-events:auto!important}
 .p48-node.multi-selected:not(.selected) .p48-handle{opacity:0!important;pointer-events:none!important}
 
+
+/* v0.10.35 fixes */
+.p48-node.selected{outline:2px solid #2c7be5!important;outline-offset:2px!important;box-shadow:0 0 0 1px rgba(37,99,235,.10)!important}
+.p48-node.multi-selected{outline:2px solid #2c7be5!important;outline-offset:2px!important;box-shadow:0 0 0 1px rgba(14,165,233,.08)!important}
+.p48-node.decision.selected,.p48-node.decision.multi-selected{outline:none!important}
+.p48-node.decision.selected::before{border-color:#2c7be5!important;box-shadow:0 0 0 1px rgba(44,123,229,.16)!important}
+.p48-link-selection{stroke-width:5px!important;opacity:.22!important}
+.p48-scroll-bottom-spacer{width:1px;height:56px;pointer-events:none}
+.p48-side::after{content:"";display:block;height:56px;pointer-events:none}
+.p48-document-open-editor{display:inline-block;margin-top:7px;color:#245d8d;font:700 11px system-ui;text-decoration:none}
+.p48-document-open-editor:hover{text-decoration:underline}
+
+/* v0.10.36 canvas scale + connector dragging */
+.p48-zoom-controls{display:inline-flex;align-items:center;gap:3px}
+.p48-zoom-controls .p48-btn{min-width:38px;padding-left:8px;padding-right:8px}
+.p48-zoom-controls .p48-zoom-value{min-width:58px;font-variant-numeric:tabular-nums}
+.p48-canvas-wrap{width:var(--p48-canvas-visual-width,2400px)!important;height:var(--p48-canvas-visual-height,1400px)!important}
+#p48-canvas{width:2400px!important;height:1400px!important;transform:scale(var(--p48-canvas-scale,1));transform-origin:0 0}
+.p48-link-handle{width:18px;height:18px;z-index:80;touch-action:none;pointer-events:auto}
+.p48-link-hit-segment.p48-selected-link-hit{cursor:move!important}
 </style>
 """, unsafe_allow_html=True)
 
@@ -328,7 +348,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
     scrollbar-gutter:auto;
     z-index:1!important;
   }
-  .p48-canvas-wrap,#p48-canvas{width:2400px!important;min-width:2400px!important;height:1400px!important;min-height:1400px!important}
+  .p48-canvas-wrap{width:var(--p48-canvas-visual-width,2400px)!important;min-width:0!important;height:var(--p48-canvas-visual-height,1400px)!important;min-height:0!important} #p48-canvas{width:2400px!important;min-width:2400px!important;height:1400px!important;min-height:1400px!important}
   #p48-canvas{touch-action:pan-x pan-y!important}
   #p48-canvas.p48-selection-mode{touch-action:none!important}
   .p48-canvas-wrap{padding-bottom:24px!important}
@@ -667,6 +687,17 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-document-link-editor label{display:block;font:700 10px system-ui;color:#657281;margin:5px 0 3px}
 .p48-document-link-editor input{width:100%;border:1px solid #cfd7df;border-radius:7px;padding:7px;font:12px system-ui}
 
+/* v0.10.35 fixes */
+.p48-node.selected{outline:2px solid #2c7be5!important;outline-offset:2px!important;box-shadow:0 0 0 1px rgba(37,99,235,.10)!important}
+.p48-node.multi-selected{outline:2px solid #2c7be5!important;outline-offset:2px!important;box-shadow:0 0 0 1px rgba(14,165,233,.08)!important}
+.p48-node.decision.selected,.p48-node.decision.multi-selected{outline:none!important}
+.p48-node.decision.selected::before{border-color:#2c7be5!important;box-shadow:0 0 0 1px rgba(44,123,229,.16)!important}
+.p48-link-selection{stroke-width:5px!important;opacity:.22!important}
+.p48-scroll-bottom-spacer{width:1px;height:56px;pointer-events:none}
+.p48-side::after{content:"";display:block;height:56px;pointer-events:none}
+.p48-document-open-editor{display:inline-block;margin-top:7px;color:#245d8d;font:700 11px system-ui;text-decoration:none}
+.p48-document-open-editor:hover{text-decoration:underline}
+
 .p48-node.selected{outline:3px solid #2c7be5;outline-offset:3px}
 .p48-node.decision.selected{outline:none}
 .p48-node.decision.selected::before{
@@ -695,6 +726,18 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-node.multi-selected{box-shadow:0 0 0 3px rgba(14,165,233,.14)}
 .p48-runtime-error{display:inline-flex;align-items:center;max-width:520px;padding:6px 9px;border:1px solid #fecaca;border-radius:8px;background:#fff7f7;color:#991b1b;font-size:12px;font-weight:600;white-space:normal}
 .p48-runtime-error[hidden]{display:none!important}
+
+.p48-bg-advanced{display:none;margin-top:10px;padding-top:10px;border-top:1px solid #e1e7ed}
+.p48-bg-advanced.on{display:block}
+.p48-bg-wide{display:block;font:700 10px system-ui;color:#657281}
+.p48-bg-wide input{width:100%;margin-top:4px;border:1px solid #cfd7df;border-radius:7px;padding:7px;font:12px system-ui}
+.p48-bg-range{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:8px;margin-top:8px;font:700 10px system-ui;color:#657281}
+.p48-bg-range input{width:100%}
+.p48-bg-separator{height:1px;background:#e1e7ed;margin:11px 0}
+.p48-canvas-watermark{position:absolute;inset:0;z-index:1;pointer-events:none;display:none;align-items:center;justify-content:center;overflow:hidden}
+.p48-canvas-watermark.on{display:flex}
+.p48-canvas-watermark span{font:800 76px/1.05 Inter,system-ui,sans-serif;letter-spacing:.08em;transform:rotate(-28deg);white-space:nowrap;text-align:center;max-width:80%;overflow:hidden;text-overflow:ellipsis}
+.p48-canvas-watermark img{max-width:42%;max-height:36%;object-fit:contain;transform:rotate(-18deg)}
 </style>
 
 <div class="p48-brand">
@@ -715,6 +758,11 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   <div class="p48-sharebox" id="p48-sharebox"><input id="p48-share-url" readonly><button type="button" class="p48-mini" id="p48-copy-share">Kopiera länk</button></div>
   <button type="button" class="p48-btn" id="p48-undo" title="Ångra (Ctrl/Cmd+Z)">↶ Ångra</button>
   <button type="button" class="p48-btn" id="p48-redo" title="Gör om (Ctrl/Cmd+Shift+Z eller Ctrl/Cmd+Y)">↷ Gör om</button>
+  <div class="p48-zoom-controls" role="group" aria-label="Storlek på canvasinnehåll">
+    <button type="button" class="p48-btn" id="p48-zoom-out" title="Minska allt innehåll på canvasen">−</button>
+    <button type="button" class="p48-btn p48-zoom-value" id="p48-zoom-reset" title="Återställ till 100%">100%</button>
+    <button type="button" class="p48-btn" id="p48-zoom-in" title="Öka allt innehåll på canvasen">+</button>
+  </div>
   <details class="p48-canvas-menu">
   <summary class="p48-btn">Processyta ▾</summary>
   <div class="p48-canvas-popover">
@@ -722,20 +770,35 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
     
           
           <div class="p48-format-grid-clean">
-            <label>Bakgrundsfärg
-              <input id="p48-canvas-bg" type="color" value="#ffffff">
-            </label>
             <label>Bakgrundstyp
               <select id="p48-bg-type">
-                <option value="solid" selected>Enfärgad</option>
-                <option value="dots">Prickar</option>
-                <option value="grid">Rutnät</option>
-                <option value="lines">Horisontella linjer</option>
-                <option value="crosshatch">Korslinjer</option>
-                <option value="diagonal">Diagonalt rutmönster</option>
-                <option value="technical">Tekniskt rutnät</option>
-                <option value="none">Ingen bakgrund</option>
+                <optgroup label="Mönstrade">
+                  <option value="dots">Prickar (Dot grid)</option>
+                  <option value="grid">Rutor (Rutat/Graf)</option>
+                  <option value="lines">Linjer (Linjerat)</option>
+                </optgroup>
+                <optgroup label="Enfärgade och tonade">
+                  <option value="solid" selected>Solid färg</option>
+                  <option value="gradient">Gradient (Färgtoning)</option>
+                </optgroup>
+                <optgroup label="Grafiska">
+                  <option value="image">Bild</option>
+                  <option value="watermark">Vattenstämpel</option>
+                  <option value="texture-paper">Textur · Gammalt papper</option>
+                  <option value="texture-parchment">Textur · Pergament</option>
+                  <option value="texture-canvas">Textur · Canvas</option>
+                  <option value="texture-concrete">Textur · Betong</option>
+                </optgroup>
+                <optgroup label="Avancerade mönster">
+                  <option value="crosshatch">Korslinjer</option>
+                  <option value="diagonal">Diagonalt rutmönster</option>
+                  <option value="technical">Tekniskt rutnät</option>
+                  <option value="none">Ingen bakgrund</option>
+                </optgroup>
               </select>
+            </label>
+            <label>Bakgrundsfärg
+              <input id="p48-canvas-bg" type="color" value="#ffffff">
             </label>
             <label>Mönsterfärg
               <input id="p48-bg-pattern-color" type="color" value="#d7e1e8">
@@ -747,6 +810,39 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
                 <option value="32">Gles</option>
               </select>
             </label>
+          </div>
+          <div id="p48-gradient-controls" class="p48-bg-advanced">
+            <div class="p48-title">Gradient</div>
+            <div class="p48-format-grid-clean">
+              <label>Från färg<input id="p48-gradient-start" type="color" value="#ffffff"></label>
+              <label>Till färg<input id="p48-gradient-end" type="color" value="#e7f1ff"></label>
+              <label>Riktning
+                <select id="p48-gradient-angle">
+                  <option value="0">Nedifrån → upp</option>
+                  <option value="45" selected>Diagonal</option>
+                  <option value="90">Vänster → höger</option>
+                  <option value="135">Diagonal omvänd</option>
+                  <option value="180">Uppifrån → ned</option>
+                </select>
+              </label>
+            </div>
+          </div>
+          <div id="p48-image-bg-controls" class="p48-bg-advanced">
+            <div class="p48-title">Bakgrundsbild</div>
+            <div class="p48-logo-controls">
+              <label class="p48-logo-upload">Ladda upp bild<input id="p48-bg-image-file" type="file" accept="image/png,image/jpeg,image/webp"></label>
+              <button type="button" class="p48-btn" id="p48-bg-image-remove">Ta bort bild</button>
+            </div>
+            <label class="p48-bg-range">Opacitet <input id="p48-bg-image-opacity" type="range" min="5" max="100" step="5" value="25"><span id="p48-bg-image-opacity-value">25%</span></label>
+          </div>
+          <div id="p48-watermark-controls" class="p48-bg-advanced">
+            <div class="p48-title">Vattenstämpel</div>
+            <label class="p48-bg-wide">Text<input id="p48-watermark-text" type="text" maxlength="80" placeholder="UTKAST / KONFIDENTIELLT"></label>
+            <label class="p48-hide-row"><input id="p48-watermark-use-logo" type="checkbox">Använd uppladdad processlogga som vattenstämpel</label>
+            <label class="p48-bg-range">Opacitet <input id="p48-watermark-opacity" type="range" min="5" max="40" step="5" value="15"><span id="p48-watermark-opacity-value">15%</span></label>
+          </div>
+          <div class="p48-bg-separator"></div>
+          <div class="p48-format-grid-clean">
             <label>Logotypstorlek
               <select id="p48-logo-size">
                 <option value="120">Liten</option>
@@ -951,6 +1047,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
           <div class="p48-title">Dokument</div>
           <label for="p48-document-url">Dokumentlänk</label>
           <input id="p48-document-url" type="url" inputmode="url" autocomplete="off" placeholder="https://…">
+          <a id="p48-document-open-editor" class="p48-document-open-editor" target="_blank" rel="noopener noreferrer" hidden>↗ Öppna dokumentlänk</a>
           <div class="p48-small">Länka till exempelvis Google Drive, SharePoint, OneDrive eller annan webbadress.</div>
         </div>
         <button type="button" class="p48-btn p48-node-only" id="p48-delete-node" style="width:100%;margin-top:10px;color:#a43d34;border-color:#e0c4c1">Ta bort markerad ruta</button>
@@ -971,7 +1068,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 
   <button type="button" class="p48-mobile-backdrop" id="p48-mobile-backdrop" aria-label="Stäng verktyg"></button>
   <main class="p48-scroll" id="p48-scroll">
-    <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><img id="p48-process-logo" class="p48-process-logo" alt="Processlogotype"><div id="p48-link-hit-layer" class="p48-link-hit-layer"></div><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-print-frame" class="p48-print-frame"></div>
+    <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><div id="p48-canvas-watermark" class="p48-canvas-watermark" aria-hidden="true"></div><img id="p48-process-logo" class="p48-process-logo" alt="Processlogotype"><div id="p48-link-hit-layer" class="p48-link-hit-layer"></div><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-print-frame" class="p48-print-frame"></div>
       <div id="p48-marquee" class="p48-marquee"></div>
       <svg id="p48-svg" viewBox="0 0 2400 1400">
         <defs><marker id="p48-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0,0 10,4 0,8" fill="#687584"></polygon></marker></defs>
@@ -980,6 +1077,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
       </svg>
     </div>
   </div>
+  <div class="p48-scroll-bottom-spacer" aria-hidden="true"></div>
   <div id="p48-hnav" class="p48-hnav" aria-label="Horisontell navigering">
     <div id="p48-hnav-inner" class="p48-hnav-inner"></div>
   </div>
@@ -1023,10 +1121,13 @@ const hnav=root.querySelector('#p48-hnav'),hnavInner=root.querySelector('#p48-hn
 const nameInput=root.querySelector('#p48-name'),status=root.querySelector('#p48-status'),processBox=root.querySelector('#p48-processes');
 const controls=root.querySelector('#p48-controls'),formatPanel=root.querySelector('#p48-format-panel'),formatHint=root.querySelector('#p48-format-hint'),font=root.querySelector('#p48-font'),size=root.querySelector('#p48-size'),textColor=root.querySelector('#p48-textcolor'),bgColor=root.querySelector('#p48-bgcolor');
 const bold=root.querySelector('#p48-bold'),italic=root.querySelector('#p48-italic'),under=root.querySelector('#p48-under');
-const documentLinkEditor=root.querySelector('#p48-document-link-editor'),documentUrlInput=root.querySelector('#p48-document-url');
+const documentLinkEditor=root.querySelector('#p48-document-link-editor'),documentUrlInput=root.querySelector('#p48-document-url'),documentOpenEditor=root.querySelector('#p48-document-open-editor');
 const fontAllBtn=root.querySelector('#p48-font-all');
 const pointSize=root.querySelector('#p48-point-size'),pointColor=root.querySelector('#p48-point-color'),hidePoints=root.querySelector('#p48-hide-points');
 const canvasBg=root.querySelector('#p48-canvas-bg'),bgType=root.querySelector('#p48-bg-type'),bgPatternColor=root.querySelector('#p48-bg-pattern-color'),bgDensity=root.querySelector('#p48-bg-density'),logoFile=root.querySelector('#p48-logo-file'),logoRemove=root.querySelector('#p48-logo-remove'),logoHide=root.querySelector('#p48-logo-hide'),logoSize=root.querySelector('#p48-logo-size'),processLogo=root.querySelector('#p48-process-logo');
+const gradientControls=root.querySelector('#p48-gradient-controls'),gradientStart=root.querySelector('#p48-gradient-start'),gradientEnd=root.querySelector('#p48-gradient-end'),gradientAngle=root.querySelector('#p48-gradient-angle');
+const imageBgControls=root.querySelector('#p48-image-bg-controls'),bgImageFile=root.querySelector('#p48-bg-image-file'),bgImageRemove=root.querySelector('#p48-bg-image-remove'),bgImageOpacity=root.querySelector('#p48-bg-image-opacity'),bgImageOpacityValue=root.querySelector('#p48-bg-image-opacity-value');
+const watermarkControls=root.querySelector('#p48-watermark-controls'),watermarkText=root.querySelector('#p48-watermark-text'),watermarkUseLogo=root.querySelector('#p48-watermark-use-logo'),watermarkOpacity=root.querySelector('#p48-watermark-opacity'),watermarkOpacityValue=root.querySelector('#p48-watermark-opacity-value'),canvasWatermark=root.querySelector('#p48-canvas-watermark');
 const emailInput=root.querySelector('#p48-email'),passwordInput=root.querySelector('#p48-password');
 const loginBtn=root.querySelector('#p48-login'),signupBtn=root.querySelector('#p48-signup'),logoutBtn=root.querySelector('#p48-logout');
 const signedOut=root.querySelector('#p48-account-signedout'),signedIn=root.querySelector('#p48-account-signedin'),userEmail=root.querySelector('#p48-user-email');
@@ -1039,6 +1140,7 @@ const shareBtn=root.querySelector('#p48-share'),shareBox=root.querySelector('#p4
 const marquee=root.querySelector('#p48-marquee');
 const selectToolBtn=root.querySelector('#p48-select-tool');
 const deleteSelectionBtn=root.querySelector('#p48-delete-selection');
+const zoomOutBtn=root.querySelector('#p48-zoom-out'),zoomResetBtn=root.querySelector('#p48-zoom-reset'),zoomInBtn=root.querySelector('#p48-zoom-in');
 const inputsBox=root.querySelector('#p48-inputs'),outputsBox=root.querySelector('#p48-outputs');
 const borderColor=root.querySelector('#p48-bordercolor'),borderWidth=root.querySelector('#p48-borderwidth');
 const linkFormat=root.querySelector('#p48-link-format'),linkColor=root.querySelector('#p48-link-color'),linkEnd=root.querySelector('#p48-link-end'),linkDash=root.querySelector('#p48-link-dash'),deleteLinkBtn=root.querySelector('#p48-delete-link'),linkHandle=root.querySelector('#p48-link-handle');
@@ -1049,18 +1151,51 @@ let selectedLinkIndex=null,selectedLinkIndices=new Set();
 const nodeGeomCache=new Map();
 let geomVersion=0;
 let connectorPointSize=8,connectorPointColor='#1f6f55',connectorPointsHidden=false;
-let processBackground='#ffffff',processBackgroundType='solid',processPatternColor='#d7e1e8',processPatternDensity=20,processLogoData='',processLogoHidden=false,processLogoWidth=180,processLogoX=28,processLogoY=28;
+let processBackground='#ffffff',processBackgroundType='solid',processPatternColor='#d7e1e8',processPatternDensity=20,processGradientStart='#ffffff',processGradientEnd='#e7f1ff',processGradientAngle=45,processBackgroundImageData='',processBackgroundImageOpacity=.25,processWatermarkText='UTKAST',processWatermarkOpacity=.15,processWatermarkUseLogo=false,processLogoData='',processLogoHidden=false,processLogoWidth=180,processLogoX=28,processLogoY=28;
 const SUPABASE_URL="__SUPABASE_URL__", SUPABASE_ANON_KEY="__SUPABASE_ANON_KEY__", PUBLIC_APP_URL="__PUBLIC_APP_URL__";
 const CLOUD_ENABLED=SUPABASE_URL.length>0&&SUPABASE_ANON_KEY.length>0;
 let cloudSession=null,sharedView=false;
 let cloudLoadedProcessIds=new Set();
 let cloudLoadedProcessScopes=new Map();
 let currentWorkspaceId=null,currentRole='owner',printPreview=false;
-let pdfView='A3L',pageCountMode='auto';
+let pdfView='A3L',pageCountMode='auto',canvasScale=1;
+
+
+function clampCanvasScale(value){return Math.max(0.5,Math.min(1.5,Math.round(Number(value)*10)/10))}
+function applyCanvasScale(next,keepCenter=true){
+  const old=canvasScale;
+  const value=clampCanvasScale(next);
+  if(value===old&&canvas.style.getPropertyValue('--p48-canvas-scale'))return value;
+  let logicalCenterX=0,logicalCenterY=0;
+  if(keepCenter&&scroll){
+    logicalCenterX=(scroll.scrollLeft+scroll.clientWidth/2)/old;
+    logicalCenterY=(scroll.scrollTop+scroll.clientHeight/2)/old;
+  }
+  canvasScale=value;
+  canvas.style.setProperty('--p48-canvas-scale',String(value));
+  const wrap=canvas.parentElement;
+  if(wrap){
+    wrap.style.setProperty('--p48-canvas-visual-width',(2400*value)+'px');
+    wrap.style.setProperty('--p48-canvas-visual-height',(1400*value)+'px');
+  }
+  if(zoomResetBtn)zoomResetBtn.textContent=Math.round(value*100)+'%';
+  if(zoomOutBtn)zoomOutBtn.disabled=value<=0.5;
+  if(zoomInBtn)zoomInBtn.disabled=value>=1.5;
+  if(keepCenter&&scroll){
+    requestAnimationFrame(()=>{
+      scroll.scrollLeft=Math.max(0,logicalCenterX*value-scroll.clientWidth/2);
+      scroll.scrollTop=Math.max(0,logicalCenterY*value-scroll.clientHeight/2);
+      if(hnav)hnav.scrollLeft=scroll.scrollLeft;
+    });
+  }
+  scheduleHorizontalNavSync();
+  return value;
+}
+function screenDeltaToCanvas(dx,dy){return{dx:dx/canvasScale,dy:dy/canvasScale}}
 
 function syncHorizontalNavWidth(){
   if(!hnav||!hnavInner)return;
-  const w=Math.max(canvas.scrollWidth,canvas.offsetWidth,2400);
+  const w=Math.max(2400*canvasScale,scroll?.scrollWidth||0);
   hnavInner.style.width=w+'px';
 }
 let hnavSyncRaf=0;
@@ -1395,7 +1530,8 @@ function applyRoleUi(){
   const mutationSelectors=[
     '#p48-name','#p48-new','#p48-save','#p48-undo','#p48-redo','#p48-delete-selection',
     '#p48-canvas-bg','#p48-bg-type','#p48-bg-pattern-color','#p48-bg-density',
-    '#p48-logo-file','#p48-logo-remove','#p48-logo-hide','#p48-logo-size'
+    '#p48-logo-file','#p48-logo-remove','#p48-logo-hide','#p48-logo-size',
+    '#p48-gradient-start','#p48-gradient-end','#p48-gradient-angle','#p48-bg-image-file','#p48-bg-image-remove','#p48-bg-image-opacity','#p48-watermark-text','#p48-watermark-use-logo','#p48-watermark-opacity'
   ];
   mutationSelectors.forEach(sel=>{const el=root.querySelector(sel);if(el)el.disabled=!editable});
   if(shareBtn)shareBtn.disabled=!editable||!ownerId()||!CLOUD_ENABLED||sharedView;
@@ -1483,6 +1619,8 @@ let lastProcessStyleSignature='';
 function applyProcessStyle(force=false){
   const signature=MapliniPerformanceCore.signature([
     processBackground,processBackgroundType,processPatternColor,processPatternDensity,
+    processGradientStart,processGradientEnd,processGradientAngle,processBackgroundImageData,processBackgroundImageOpacity,
+    processWatermarkText,processWatermarkOpacity,processWatermarkUseLogo,
     processLogoData,processLogoHidden,processLogoWidth,processLogoX,processLogoY
   ]);
   if(!force&&signature===lastProcessStyleSignature)return false;
@@ -1490,40 +1628,90 @@ function applyProcessStyle(force=false){
   const d=Math.max(8,Number(processPatternDensity)||20);
   const c=processPatternColor||'#d7e1e8';
   const bg=processBackground||'#ffffff';
+  const type=processBackgroundType||'solid';
 
-  canvas.style.backgroundColor=(processBackgroundType==='none')?'transparent':bg;
+  canvas.style.backgroundColor=(type==='none')?'transparent':bg;
   canvas.style.backgroundImage='none';
   canvas.style.backgroundSize='';
   canvas.style.backgroundPosition='';
+  canvas.style.backgroundRepeat='';
 
-  if(processBackgroundType==='dots'){
+  if(type==='dots'){
     canvas.style.backgroundImage=`radial-gradient(circle, ${c} 1.2px, transparent 1.3px)`;
     canvas.style.backgroundSize=`${d}px ${d}px`;
-  }else if(processBackgroundType==='grid'){
+  }else if(type==='grid'){
     canvas.style.backgroundImage=`linear-gradient(${c} 1px, transparent 1px),linear-gradient(90deg, ${c} 1px, transparent 1px)`;
     canvas.style.backgroundSize=`${d}px ${d}px`;
-  }else if(processBackgroundType==='lines'){
+  }else if(type==='lines'){
     canvas.style.backgroundImage=`linear-gradient(${c} 1px, transparent 1px)`;
     canvas.style.backgroundSize=`100% ${d}px`;
-  }else if(processBackgroundType==='crosshatch'){
+  }else if(type==='crosshatch'){
     canvas.style.backgroundImage=`linear-gradient(${c} 1px, transparent 1px),linear-gradient(90deg, ${c} 1px, transparent 1px)`;
     canvas.style.backgroundSize=`${d*2}px ${d}px`;
-  }else if(processBackgroundType==='diagonal'){
+  }else if(type==='diagonal'){
     canvas.style.backgroundImage=`repeating-linear-gradient(45deg, transparent 0, transparent ${d-1}px, ${c} ${d-1}px, ${c} ${d}px),
                                   repeating-linear-gradient(-45deg, transparent 0, transparent ${d-1}px, ${c} ${d-1}px, ${c} ${d}px)`;
-  }else if(processBackgroundType==='technical'){
+  }else if(type==='technical'){
     const major=d*5;
     canvas.style.backgroundImage=`linear-gradient(${c} 1px, transparent 1px),
                                   linear-gradient(90deg, ${c} 1px, transparent 1px),
                                   linear-gradient(${c} 1.5px, transparent 1.5px),
                                   linear-gradient(90deg, ${c} 1.5px, transparent 1.5px)`;
     canvas.style.backgroundSize=`${d}px ${d}px,${d}px ${d}px,${major}px ${major}px,${major}px ${major}px`;
+  }else if(type==='gradient'){
+    canvas.style.backgroundImage=`linear-gradient(${Number(processGradientAngle)||0}deg, ${processGradientStart}, ${processGradientEnd})`;
+  }else if(type==='image'&&processBackgroundImageData){
+    const a=Math.max(.05,Math.min(1,Number(processBackgroundImageOpacity)||.25));
+    canvas.style.backgroundImage=`linear-gradient(rgba(255,255,255,${1-a}),rgba(255,255,255,${1-a})),url("${processBackgroundImageData}")`;
+    canvas.style.backgroundSize='cover';
+    canvas.style.backgroundPosition='center';
+    canvas.style.backgroundRepeat='no-repeat';
+  }else if(type==='texture-paper'){
+    canvas.style.backgroundColor='#f4efe4';
+    canvas.style.backgroundImage='radial-gradient(circle at 20% 20%,rgba(126,93,55,.08) 0 1px,transparent 1.5px),radial-gradient(circle at 70% 65%,rgba(92,67,40,.06) 0 1px,transparent 1.5px),linear-gradient(90deg,rgba(111,82,47,.035),transparent 35%,rgba(111,82,47,.025))';
+    canvas.style.backgroundSize='17px 19px,23px 29px,100% 100%';
+  }else if(type==='texture-parchment'){
+    canvas.style.backgroundColor='#f3dfb2';
+    canvas.style.backgroundImage='radial-gradient(ellipse at center,rgba(255,255,255,.42),rgba(132,84,31,.12)),repeating-linear-gradient(8deg,rgba(123,84,40,.025) 0 1px,transparent 1px 7px)';
+  }else if(type==='texture-canvas'){
+    canvas.style.backgroundColor='#ece8dc';
+    canvas.style.backgroundImage='repeating-linear-gradient(0deg,rgba(93,85,66,.07) 0 1px,transparent 1px 4px),repeating-linear-gradient(90deg,rgba(93,85,66,.055) 0 1px,transparent 1px 5px)';
+  }else if(type==='texture-concrete'){
+    canvas.style.backgroundColor='#dedfdf';
+    canvas.style.backgroundImage='radial-gradient(circle at 15% 25%,rgba(70,75,78,.08) 0 1px,transparent 2px),radial-gradient(circle at 72% 44%,rgba(255,255,255,.28) 0 2px,transparent 3px),linear-gradient(135deg,rgba(85,90,92,.07),transparent 35%,rgba(255,255,255,.18))';
+    canvas.style.backgroundSize='31px 27px,41px 37px,100% 100%';
+  }
+
+  if(canvasWatermark){
+    canvasWatermark.innerHTML='';
+    const show=type==='watermark';
+    canvasWatermark.classList.toggle('on',show);
+    canvasWatermark.style.opacity=String(Math.max(.05,Math.min(.4,Number(processWatermarkOpacity)||.15)));
+    if(show){
+      if(processWatermarkUseLogo&&processLogoData){
+        const img=document.createElement('img');img.src=processLogoData;img.alt='';canvasWatermark.appendChild(img);
+      }else{
+        const span=document.createElement('span');span.textContent=(processWatermarkText||'UTKAST').slice(0,80);span.style.color=processPatternColor||'#64748b';canvasWatermark.appendChild(span);
+      }
+    }
   }
 
   if(canvasBg)canvasBg.value=processBackground;
-  if(bgType)bgType.value=processBackgroundType;
+  if(bgType)bgType.value=type;
   if(bgPatternColor)bgPatternColor.value=processPatternColor;
   if(bgDensity)bgDensity.value=String(processPatternDensity);
+  if(gradientStart)gradientStart.value=processGradientStart;
+  if(gradientEnd)gradientEnd.value=processGradientEnd;
+  if(gradientAngle)gradientAngle.value=String(processGradientAngle);
+  if(bgImageOpacity)bgImageOpacity.value=String(Math.round(processBackgroundImageOpacity*100));
+  if(bgImageOpacityValue)bgImageOpacityValue.textContent=Math.round(processBackgroundImageOpacity*100)+'%';
+  if(watermarkText)watermarkText.value=processWatermarkText;
+  if(watermarkUseLogo)watermarkUseLogo.checked=processWatermarkUseLogo;
+  if(watermarkOpacity)watermarkOpacity.value=String(Math.round(processWatermarkOpacity*100));
+  if(watermarkOpacityValue)watermarkOpacityValue.textContent=Math.round(processWatermarkOpacity*100)+'%';
+  if(gradientControls)gradientControls.classList.toggle('on',type==='gradient');
+  if(imageBgControls)imageBgControls.classList.toggle('on',type==='image');
+  if(watermarkControls)watermarkControls.classList.toggle('on',type==='watermark');
   if(logoSize)logoSize.value=String(processLogoWidth);
   if(logoHide)logoHide.checked=processLogoHidden;
 
@@ -1539,7 +1727,6 @@ function applyProcessStyle(force=false){
   }
   return true;
 }
-
 
 function invalidateNodeGeom(id=null){
   geomVersion++;
@@ -1589,19 +1776,19 @@ function renderDocumentLink(item){
   if(!item||item.data.type!=='document')return;
   let btn=item.docOpen;
   if(!btn){
-    btn=document.createElement('button');
-    btn.type='button';btn.className='p48-doc-open';
+    btn=document.createElement('a');
+    btn.className='p48-doc-open';
+    btn.target='_blank';btn.rel='noopener noreferrer';
     btn.addEventListener('pointerdown',e=>{e.stopPropagation()});
     btn.addEventListener('click',e=>{
-      e.preventDefault();e.stopPropagation();
+      e.stopPropagation();
       const url=safeDocumentUrl(item.data.documentUrl);
-      if(!url){msg('Lägg först till en giltig dokumentlänk');return}
-      const win=window.open(url,'_blank','noopener,noreferrer');
-      if(!win)msg('Webbläsaren blockerade öppningen');
+      if(!url){e.preventDefault();select(item.el);msg('Lägg först till en giltig dokumentlänk');}
     });
     item.el.appendChild(btn);item.docOpen=btn;
   }
   const valid=safeDocumentUrl(item.data.documentUrl);
+  if(valid)btn.href=valid;else btn.removeAttribute('href');
   btn.textContent=valid?'↗ Öppna dokument':'+ Lägg till dokumentlänk';
   btn.title=valid?valid:'Markera rutan och lägg till en dokumentlänk';
 }
@@ -1620,6 +1807,14 @@ function state(){
     processBackgroundType,
     processPatternColor,
     processPatternDensity,
+    processGradientStart,
+    processGradientEnd,
+    processGradientAngle,
+    processBackgroundImageData,
+    processBackgroundImageOpacity,
+    processWatermarkText,
+    processWatermarkOpacity,
+    processWatermarkUseLogo,
     processLogoData,
     processLogoHidden,
     processLogoWidth,
@@ -1775,6 +1970,14 @@ function restore(s){
   processBackgroundType=d.processBackgroundType||'solid';
   processPatternColor=d.processPatternColor||'#d7e1e8';
   processPatternDensity=Number(d.processPatternDensity||20);
+  processGradientStart=d.processGradientStart||'#ffffff';
+  processGradientEnd=d.processGradientEnd||'#e7f1ff';
+  processGradientAngle=Number(d.processGradientAngle||45);
+  processBackgroundImageData=d.processBackgroundImageData||'';
+  processBackgroundImageOpacity=Math.max(.05,Math.min(1,Number(d.processBackgroundImageOpacity||.25)));
+  processWatermarkText=d.processWatermarkText||'UTKAST';
+  processWatermarkOpacity=Math.max(.05,Math.min(.4,Number(d.processWatermarkOpacity||.15)));
+  processWatermarkUseLogo=Boolean(d.processWatermarkUseLogo);
   processLogoData=d.processLogoData||'';
   processLogoHidden=Boolean(d.processLogoHidden);
   processLogoWidth=Number(d.processLogoWidth||180);
@@ -1983,6 +2186,7 @@ function refreshControls(){
     setFormatEnabled(false);inputsBox.innerHTML='';outputsBox.innerHTML='';
     if(documentLinkEditor)documentLinkEditor.hidden=true;
     if(documentUrlInput)documentUrlInput.value='';
+    if(documentOpenEditor){documentOpenEditor.hidden=true;documentOpenEditor.removeAttribute('href');}
     if(selectedLinkIndex!=null)refreshLinkControls();return
   }
   setFormatEnabled(true);
@@ -1992,6 +2196,7 @@ function refreshControls(){
   root.querySelectorAll('[data-align]').forEach(b=>b.classList.toggle('active',b.dataset.align===s.textAlign));
   if(documentLinkEditor)documentLinkEditor.hidden=item.data.type!=='document';
   if(documentUrlInput)documentUrlInput.value=item.data.type==='document'?(item.data.documentUrl||''):'';
+  if(documentOpenEditor){const u=item.data.type==='document'?safeDocumentUrl(item.data.documentUrl):'';documentOpenEditor.hidden=!u;if(u)documentOpenEditor.href=u;else documentOpenEditor.removeAttribute('href');}
   renderIOEditor(item)
 }
 function updateStyle(patch){if(!requireEdit())return;const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();Object.assign(item.data,patch);applyStyle(item);drawLinks();persist()}
@@ -2063,9 +2268,10 @@ el.addEventListener('pointerdown',e=>{
   let mutated=false;
   try{el.setPointerCapture(e.pointerId)}catch(ignore){}
   const mv=ev=>{
-    const dx=ev.clientX-sx,dy=ev.clientY-sy;
-    if(!mutated&&MapliniMobileCore.movedEnough(dx,dy,pointerType)){pushUndo(true);mutated=true}
+    const screenDx=ev.clientX-sx,screenDy=ev.clientY-sy;
+    if(!mutated&&MapliniMobileCore.movedEnough(screenDx,screenDy,pointerType)){pushUndo(true);mutated=true}
     if(!mutated)return;
+    const {dx,dy}=screenDeltaToCanvas(screenDx,screenDy);
     place(el,ox+dx,oy+dy);sync(el);drawLinks();
   };
   const done=()=>{
@@ -2083,9 +2289,10 @@ Object.values(resizeHandles).forEach(rh=>rh.addEventListener('pointerdown',e=>{
   const ox=parseFloat(el.style.left)||0,oy=parseFloat(el.style.top)||0,ow=el.offsetWidth,oh=el.offsetHeight;
   let mutated=false;
   const mv=ev=>{
-    const dx=ev.clientX-sx,dy=ev.clientY-sy;
-    if(!mutated&&MapliniMobileCore.movedEnough(dx,dy,e.pointerType||'mouse')){pushUndo(true);mutated=true}
+    const screenDx=ev.clientX-sx,screenDy=ev.clientY-sy;
+    if(!mutated&&MapliniMobileCore.movedEnough(screenDx,screenDy,e.pointerType||'mouse')){pushUndo(true);mutated=true}
     if(!mutated)return;
+    const {dx,dy}=screenDeltaToCanvas(screenDx,screenDy);
     const box=MapliniCanvasCore.resize({x:ox,y:oy,width:ow,height:oh},corner,dx,dy,el.classList.contains('decision')?'decision':'process');
     el.style.left=box.x+'px';el.style.top=box.y+'px';el.style.width=box.width+'px';el.style.height=box.height+'px';el.style.minHeight=box.height+'px';
     sync(el);const item=nodes.get(el.dataset.id);item.data.width=box.width;item.data.height=box.height;drawLinks();
@@ -2223,6 +2430,34 @@ function selectedLinkMidpoint(){
 function clearLinkHitLayer(){
   if(linkHitLayer)linkHitLayer.innerHTML='';
 }
+
+function startSelectedLinkDrag(index,e){
+  if(!canEdit()||index==null||!links[index])return false;
+  e.preventDefault();e.stopPropagation();
+  if(selectedLinkIndex!==index)selectLink(index);
+  const sx=e.clientX,sy=e.clientY,pointerType=e.pointerType||'mouse';
+  let mutated=false;
+  const move=ev=>{
+    const screenDx=ev.clientX-sx,screenDy=ev.clientY-sy;
+    if(!mutated&&MapliniMobileCore.movedEnough(screenDx,screenDy,pointerType)){pushUndo(true);mutated=true}
+    if(!mutated)return;
+    const p=clientToCanvas(ev.clientX,ev.clientY);
+    MapliniConnectorCore.setVia(links,index,p.x,p.y);
+    dirtyLinks.add(index);
+    drawLinks();
+  };
+  const finish=()=>{
+    document.removeEventListener('pointermove',move);
+    document.removeEventListener('pointerup',finish);
+    document.removeEventListener('pointercancel',finish);
+    if(mutated)persist();
+  };
+  document.addEventListener('pointermove',move);
+  document.addEventListener('pointerup',finish);
+  document.addEventListener('pointercancel',finish);
+  return true;
+}
+
 function addHtmlLinkHitSegment(index,x1,y1,x2,y2){
   if(!linkHitLayer)return;
   const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy);
@@ -2240,10 +2475,16 @@ function addHtmlLinkHitSegment(index,x1,y1,x2,y2){
   const choose=e=>{
     e.preventDefault();
     e.stopPropagation();
+    if(selectedLinkIndex===index&&canEdit()){
+      seg.classList.add('p48-selected-link-hit');
+      startSelectedLinkDrag(index,e);
+      return;
+    }
     selectLink(index);
   };
+  if(selectedLinkIndex===index)seg.classList.add('p48-selected-link-hit');
   seg.addEventListener('pointerdown',choose);
-  seg.addEventListener('click',choose);
+  seg.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(selectedLinkIndex!==index)selectLink(index)});
   linkHitLayer.appendChild(seg);
 }
 
@@ -2435,8 +2676,13 @@ document.addEventListener('pointerdown',e=>{
   if(!canvas.contains(e.target))return;
   if(e.target.closest&&e.target.closest('.p48-node'))return;
   if(e.target===linkHandle)return;
-  const hit=hitTestLink(e.clientX,e.clientY);
-  if(hit!=null){
+  const segment=e.target.closest&&e.target.closest('.p48-link-hit-segment');
+  const hit=segment?Number(segment.dataset.linkIndex):hitTestLink(e.clientX,e.clientY);
+  if(hit!=null&&Number.isInteger(hit)&&links[hit]){
+    if(selectedLinkIndex===hit&&canEdit()){
+      startSelectedLinkDrag(hit,e);
+      return;
+    }
     e.preventDefault();
     e.stopPropagation();
     selectLink(hit);
@@ -2448,7 +2694,8 @@ function isMobileLayout(){
   return window.matchMedia('(max-width:900px), (pointer:coarse) and (max-width:1100px)').matches;
 }
 function clientToCanvas(clientX,clientY){
-  return MapliniMobileCore.clientToLocal(clientX,clientY,canvas.getBoundingClientRect());
+  const p=MapliniMobileCore.clientToLocal(clientX,clientY,canvas.getBoundingClientRect());
+  return {x:p.x/canvasScale,y:p.y/canvasScale};
 }
 function setMobileTools(open){
   if(!sidePanel||!mobileToolsBtn||!mobileBackdrop)return;
@@ -2730,32 +2977,39 @@ function drawProcessBackgroundPattern(ctx,x,y,w,h){
   const bg=processBackground||'#ffffff';
 
   ctx.save();
-  ctx.fillStyle=(type==='none')?'#ffffff':bg;
-  ctx.fillRect(x,y,w,h);
+  if(type==='gradient'){
+    const angle=(Number(processGradientAngle)||0)*Math.PI/180,dx=Math.cos(angle),dy=Math.sin(angle);
+    const cx=x+w/2,cy=y+h/2,len=Math.abs(w*dx)+Math.abs(h*dy);
+    const g=ctx.createLinearGradient(cx-dx*len/2,cy-dy*len/2,cx+dx*len/2,cy+dy*len/2);
+    g.addColorStop(0,processGradientStart||'#ffffff');g.addColorStop(1,processGradientEnd||'#e7f1ff');
+    ctx.fillStyle=g;ctx.fillRect(x,y,w,h);
+  }else{
+    const base=type==='texture-paper'?'#f4efe4':type==='texture-parchment'?'#f3dfb2':type==='texture-canvas'?'#ece8dc':type==='texture-concrete'?'#dedfdf':(type==='none'?'#ffffff':bg);
+    ctx.fillStyle=base;ctx.fillRect(x,y,w,h);
+  }
 
-  if(type!=='solid'&&type!=='none'){
-    ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
-    ctx.strokeStyle=c;ctx.fillStyle=c;ctx.lineWidth=1;
+  ctx.beginPath();ctx.rect(x,y,w,h);ctx.clip();
+  ctx.strokeStyle=c;ctx.fillStyle=c;ctx.lineWidth=1;
 
-    if(type==='dots'){
-      for(let px=x;px<x+w;px+=d)for(let py=y;py<y+h;py+=d){
-        ctx.beginPath();ctx.arc(px,py,1.2,0,Math.PI*2);ctx.fill();
-      }
-    }else if(type==='grid'||type==='technical'||type==='crosshatch'){
-      const xStep=(type==='crosshatch')?d*2:d;
-      for(let px=x;px<x+w;px+=xStep){ctx.beginPath();ctx.moveTo(px,y);ctx.lineTo(px,y+h);ctx.stroke();}
-      for(let py=y;py<y+h;py+=d){ctx.beginPath();ctx.moveTo(x,py);ctx.lineTo(x+w,py);ctx.stroke();}
-      if(type==='technical'){
-        const major=d*5;ctx.lineWidth=1.5;
-        for(let px=x;px<x+w;px+=major){ctx.beginPath();ctx.moveTo(px,y);ctx.lineTo(px,y+h);ctx.stroke();}
-        for(let py=y;py<y+h;py+=major){ctx.beginPath();ctx.moveTo(x,py);ctx.lineTo(x+w,py);ctx.stroke();}
-      }
-    }else if(type==='lines'){
-      for(let py=y;py<y+h;py+=d){ctx.beginPath();ctx.moveTo(x,py);ctx.lineTo(x+w,py);ctx.stroke();}
-    }else if(type==='diagonal'){
-      for(let k=-h;k<w;k+=d){ctx.beginPath();ctx.moveTo(x+k,y);ctx.lineTo(x+k+h,y+h);ctx.stroke();}
-      for(let k=0;k<w+h;k+=d){ctx.beginPath();ctx.moveTo(x+k,y);ctx.lineTo(x+k-h,y+h);ctx.stroke();}
-    }
+  if(type==='dots'){
+    for(let px=x;px<x+w;px+=d)for(let py=y;py<y+h;py+=d){ctx.beginPath();ctx.arc(px,py,1.2,0,Math.PI*2);ctx.fill();}
+  }else if(type==='grid'||type==='technical'||type==='crosshatch'){
+    const xStep=(type==='crosshatch')?d*2:d;
+    for(let px=x;px<x+w;px+=xStep){ctx.beginPath();ctx.moveTo(px,y);ctx.lineTo(px,y+h);ctx.stroke();}
+    for(let py=y;py<y+h;py+=d){ctx.beginPath();ctx.moveTo(x,py);ctx.lineTo(x+w,py);ctx.stroke();}
+    if(type==='technical'){const major=d*5;ctx.lineWidth=1.5;for(let px=x;px<x+w;px+=major){ctx.beginPath();ctx.moveTo(px,y);ctx.lineTo(px,y+h);ctx.stroke();}for(let py=y;py<y+h;py+=major){ctx.beginPath();ctx.moveTo(x,py);ctx.lineTo(x+w,py);ctx.stroke();}}
+  }else if(type==='lines'){
+    for(let py=y;py<y+h;py+=d){ctx.beginPath();ctx.moveTo(x,py);ctx.lineTo(x+w,py);ctx.stroke();}
+  }else if(type==='diagonal'){
+    for(let k=-h;k<w;k+=d){ctx.beginPath();ctx.moveTo(x+k,y);ctx.lineTo(x+k+h,y+h);ctx.stroke();}
+    for(let k=0;k<w+h;k+=d){ctx.beginPath();ctx.moveTo(x+k,y);ctx.lineTo(x+k-h,y+h);ctx.stroke();}
+  }else if(type.startsWith('texture-')){
+    ctx.globalAlpha=.14;ctx.strokeStyle='#765f43';ctx.lineWidth=.7;
+    if(type==='texture-canvas'){for(let py=y;py<y+h;py+=5){ctx.beginPath();ctx.moveTo(x,py);ctx.lineTo(x+w,py);ctx.stroke()}for(let px=x;px<x+w;px+=5){ctx.beginPath();ctx.moveTo(px,y);ctx.lineTo(px,y+h);ctx.stroke()}}
+    else {for(let i=0;i<Math.min(1300,Math.floor(w*h/2400));i++){const px=x+((i*73)%Math.max(1,w)),py=y+((i*151)%Math.max(1,h));ctx.beginPath();ctx.arc(px,py,type==='texture-concrete'?1.7:1,0,Math.PI*2);ctx.stroke()}}
+    ctx.globalAlpha=1;
+  }else if(type==='watermark'&&!processWatermarkUseLogo){
+    ctx.save();ctx.globalAlpha=Math.max(.05,Math.min(.4,Number(processWatermarkOpacity)||.15));ctx.fillStyle=processPatternColor||'#64748b';ctx.font='800 74px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.translate(x+w/2,y+h/2);ctx.rotate(-28*Math.PI/180);ctx.fillText((processWatermarkText||'UTKAST').slice(0,80),0,0,Math.max(300,w*.78));ctx.restore();
   }
   ctx.restore();
 }
@@ -2789,6 +3043,22 @@ async function renderMapSnapshot(){
 
   const ox=pad-b.minX,oy=header+pad-b.minY;
   drawProcessBackgroundPattern(ctx,0,header,width/scale,(height/scale)-header);
+  if(processBackgroundType==='image'&&processBackgroundImageData){
+    try{
+      const bgImg=await loadImage(processBackgroundImageData);
+      const areaW=width/scale,areaH=(height/scale)-header;
+      const r=Math.max(areaW/bgImg.width,areaH/bgImg.height),dw=bgImg.width*r,dh=bgImg.height*r;
+      ctx.save();ctx.globalAlpha=Math.max(.05,Math.min(1,Number(processBackgroundImageOpacity)||.25));
+      ctx.drawImage(bgImg,(areaW-dw)/2,header+(areaH-dh)/2,dw,dh);ctx.restore();
+    }catch(e){}
+  }
+  if(processBackgroundType==='watermark'&&processWatermarkUseLogo&&processLogoData){
+    try{
+      const wm=await loadImage(processLogoData),areaW=width/scale,areaH=(height/scale)-header,maxW=areaW*.42,maxH=areaH*.36,r=Math.min(maxW/wm.width,maxH/wm.height);
+      ctx.save();ctx.globalAlpha=Math.max(.05,Math.min(.4,Number(processWatermarkOpacity)||.15));
+      ctx.translate(areaW/2,header+areaH/2);ctx.rotate(-18*Math.PI/180);ctx.drawImage(wm,-wm.width*r/2,-wm.height*r/2,wm.width*r,wm.height*r);ctx.restore();
+    }catch(e){}
+  }
 
   if(processLogoData&&!processLogoHidden){
     try{
@@ -3236,6 +3506,25 @@ bgDensity.addEventListener('change',()=>{
   processPatternDensity=Number(bgDensity.value)||20;applyProcessStyle();persistAfterIdle();
 });
 
+gradientStart.addEventListener('input',()=>{if(!requireEdit())return;processGradientStart=gradientStart.value;applyProcessStyle();persistAfterIdle();});
+gradientEnd.addEventListener('input',()=>{if(!requireEdit())return;processGradientEnd=gradientEnd.value;applyProcessStyle();persistAfterIdle();});
+gradientAngle.addEventListener('change',()=>{if(!requireEdit())return;processGradientAngle=Number(gradientAngle.value)||0;applyProcessStyle();persistAfterIdle();});
+bgImageOpacity.addEventListener('input',()=>{if(!requireEdit())return;processBackgroundImageOpacity=Math.max(.05,Math.min(1,Number(bgImageOpacity.value)/100));applyProcessStyle();persistAfterIdle();});
+bgImageRemove.addEventListener('click',()=>{if(!requireEdit())return;processBackgroundImageData='';bgImageFile.value='';applyProcessStyle();persistAfterIdle();msg('Bakgrundsbild borttagen');});
+bgImageFile.addEventListener('change',()=>{
+  if(!requireEdit())return;
+  const file=bgImageFile.files&&bgImageFile.files[0];if(!file)return;
+  if(!/^image\/(png|jpeg|webp)$/.test(file.type)){msg('Välj PNG, JPG eller WebP');return}
+  if(file.size>1500000){msg('Bakgrundsbilden får vara max 1,5 MB');bgImageFile.value='';return}
+  const reader=new FileReader();
+  reader.onload=()=>{if(!canEdit())return;processBackgroundImageData=String(reader.result||'');processBackgroundType='image';applyProcessStyle(true);persistAfterIdle();msg('Bakgrundsbild tillagd')};
+  reader.readAsDataURL(file);
+});
+watermarkText.addEventListener('input',()=>{if(!requireEdit())return;processWatermarkText=watermarkText.value.slice(0,80);applyProcessStyle();persistAfterIdle();});
+watermarkUseLogo.addEventListener('change',()=>{if(!requireEdit())return;processWatermarkUseLogo=watermarkUseLogo.checked;applyProcessStyle();persistAfterIdle();});
+watermarkOpacity.addEventListener('input',()=>{if(!requireEdit())return;processWatermarkOpacity=Math.max(.05,Math.min(.4,Number(watermarkOpacity.value)/100));applyProcessStyle();persistAfterIdle();});
+
+
 processLogo.addEventListener('pointerdown',e=>{
   if(!canEdit()||!processLogoData||processLogoHidden||e.button!==0)return;
   e.preventDefault();e.stopPropagation();
@@ -3351,6 +3640,7 @@ documentUrlInput.addEventListener('change',()=>{
   pushUndo();
   item.data.documentUrl=raw;
   renderDocumentLink(item);
+  const valid=safeDocumentUrl(raw);if(documentOpenEditor){documentOpenEditor.hidden=!valid;if(valid)documentOpenEditor.href=valid;else documentOpenEditor.removeAttribute('href');}
   persist();
   msg(raw?'Dokumentlänk sparad':'Dokumentlänk borttagen');
 });
@@ -3385,7 +3675,13 @@ linkDash.addEventListener('change',()=>{
   msg('Linjetyp ändrad');
 });
 deleteLinkBtn.addEventListener('click',()=>{if(deleteLinkAt(selectedLinkIndex,true))msg('Koppling borttagen')});
-linkHandle.addEventListener('pointerdown',e=>{if(!canEdit()||selectedLinkIndex==null)return;e.preventDefault();e.stopPropagation();const r=canvas.getBoundingClientRect(),sx=e.clientX,sy=e.clientY;let mutated=false;const mv=ev=>{if(!mutated&&MapliniCanvasCore.hasMeaningfulDelta(ev.clientX-sx,ev.clientY-sy)){pushUndo(true);mutated=true}if(!mutated)return;MapliniConnectorCore.setVia(links,selectedLinkIndex,ev.clientX-r.left,ev.clientY-r.top);dirtyLinks.add(selectedLinkIndex);drawLinks()},done=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',done);document.removeEventListener('pointercancel',done);if(mutated)persist()};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',done);document.addEventListener('pointercancel',done)});
+linkHandle.addEventListener('pointerdown',e=>{if(selectedLinkIndex==null)return;startSelectedLinkDrag(selectedLinkIndex,e)});
+
+
+zoomOutBtn.addEventListener('click',()=>applyCanvasScale(canvasScale-0.1));
+zoomInBtn.addEventListener('click',()=>applyCanvasScale(canvasScale+0.1));
+zoomResetBtn.addEventListener('click',()=>applyCanvasScale(1));
+applyCanvasScale(1,false);
 
 
 loadCloudSession();

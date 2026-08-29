@@ -1,6 +1,8 @@
-# Maplini v0.10.34
+# Maplini v0.10.37
 
-Byggd direkt från v0.10.33.
+Byggd direkt från v0.10.36.
 
-Ny nodtyp **Dokument** kan läggas på canvasen och kopplas till en extern dokumentlänk.
-Länken lagras i processens befintliga JSON-state och kräver ingen Supabase-migrering.
+`Processyta ▾` innehåller nu ett komplett bakgrundsbibliotek:
+mönster, solid färg, gradient, uppladdad bild, vattenstämpel och materialtexturer.
+
+Inställningarna sparas i processens befintliga state och kräver ingen databasändring.

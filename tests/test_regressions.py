@@ -191,7 +191,7 @@ def test_connector_create_delete_and_move_share_core_paths():
     assert "MapliniConnectorCore.create(el.dataset.id,target.dataset.id,side)" in APP
     assert "function deleteLinkAt(index,withUndo=true)" in APP
     assert "MapliniConnectorCore.removeAt(links,index)" in APP
-    assert "MapliniConnectorCore.setVia(links,selectedLinkIndex" in APP
+    assert "MapliniConnectorCore.setVia(links,index,p.x,p.y)" in APP
     assert "links.splice(selectedLinkIndex,1)" not in APP
 
 
@@ -256,7 +256,8 @@ def test_v01016_link_only_area_selection_can_be_deleted():
 
 
 def test_v01016_gestures_are_cancel_safe_and_do_not_create_empty_undo_steps():
-    assert APP.count("addEventListener('pointercancel',done)") >= 3
+    assert APP.count("addEventListener('pointercancel',done)") >= 2
+    assert "document.addEventListener('pointercancel',finish)" in APP
     assert 'MapliniMobileCore.movedEnough' in APP
     assert 'if(mutated)persist()' in APP
 
@@ -280,7 +281,7 @@ def test_v01016_canvas_core_node_test_when_available():
 
 
 def test_v01017_ui_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.10.34"' in APP
+    assert 'APP_VERSION = "0.10.37"' in APP
     assert '_UI_CORE_PATH' in APP
     assert '__MAPLINI_UI_CORE__' in APP
     assert 'MapliniUiCore.selectionHint' in APP
@@ -322,7 +323,7 @@ def test_v01017_ui_core_contains_selection_hint_logic():
 
 
 def test_v01018_state_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.10.34"' in APP
+    assert 'APP_VERSION = "0.10.37"' in APP
     assert '_STATE_CORE_PATH' in APP
     assert '__MAPLINI_STATE_CORE__' in APP
     assert 'MapliniStateCore.normalizeProcess' in APP
@@ -352,7 +353,7 @@ def test_v01018_state_core_drops_orphan_links():
 
 
 def test_v01019_reliability_core_loaded():
-    assert 'APP_VERSION = "0.10.34"' in APP
+    assert 'APP_VERSION = "0.10.37"' in APP
     assert '_RELIABILITY_CORE_PATH' in APP
     assert '__MAPLINI_RELIABILITY_CORE__' in APP
 
@@ -382,7 +383,7 @@ def test_v01019_reliability_primitives():
 
 
 def test_v01020_export_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.10.34"' in APP
+    assert 'APP_VERSION = "0.10.37"' in APP
     assert '_EXPORT_CORE_PATH' in APP
     assert '__MAPLINI_EXPORT_CORE__' in APP
     assert 'MapliniExportCore.validateBytes' in APP
@@ -426,7 +427,7 @@ def test_v01021_connector_persistence_format_is_preserved():
     assert "nodeIds.has(l[0])&&nodeIds.has(l[1])" in STATE_CORE
 
 def test_v01021_workflow_core_loaded_and_history_centralized():
-    assert 'APP_VERSION = "0.10.34"' in APP
+    assert 'APP_VERSION = "0.10.37"' in APP
     assert '_WORKFLOW_CORE_PATH' in APP
     assert '__MAPLINI_WORKFLOW_CORE__' in APP
     assert 'MapliniWorkflowCore.emptyProcess' in APP
@@ -451,7 +452,7 @@ def test_v01021_workflow_core_when_node_available():
 
 
 def test_v01022_performance_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.10.34"' in APP
+    assert 'APP_VERSION = "0.10.37"' in APP
     assert '_PERFORMANCE_CORE_PATH' in APP
     assert '__MAPLINI_PERFORMANCE_CORE__' in APP
     assert 'MapliniPerformanceCore.signature' in APP
@@ -479,7 +480,7 @@ def test_v01022_performance_core_primitives_exist():
 
 
 def test_v01023_mobile_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.10.34"' in APP
+    assert 'APP_VERSION = "0.10.37"' in APP
     assert '_MOBILE_CORE_PATH' in APP
     assert '__MAPLINI_MOBILE_CORE__' in APP
     assert 'MapliniMobileCore.clientToLocal' in APP
@@ -507,7 +508,7 @@ def test_v01023_scrolled_canvas_coordinates_are_not_double_counted():
     assert "const p=clientToCanvas(e.clientX,e.clientY);addNode(type,p.x,p.y)" in APP
 
 def test_v01023_touch_drag_uses_larger_threshold_and_cancel_cleanup():
-    assert "MapliniMobileCore.movedEnough(dx,dy,pointerType)" in APP
+    assert "MapliniMobileCore.movedEnough(screenDx,screenDy,pointerType)" in APP
     assert "document.addEventListener('pointercancel',cancel)" in APP
     assert "releasePointerCapture" in APP
 
@@ -518,7 +519,7 @@ def test_v01023_mobile_core_primitives():
 
 
 def test_v01024_selection_core_loaded_and_used():
-    assert 'APP_VERSION = "0.10.34"' in APP
+    assert 'APP_VERSION = "0.10.37"' in APP
     assert '_SELECTION_CORE_PATH' in APP
     assert '__MAPLINI_SELECTION_CORE__' in APP
     assert 'MapliniSelectionCore.deleteAction' in APP
@@ -546,7 +547,7 @@ def test_v01024_escape_and_undo_redo_refresh_context():
 
 
 def test_v01025_desktop_guard_is_present_without_mobile_selector_regression():
-    assert 'APP_VERSION = "0.10.34"' in APP
+    assert 'APP_VERSION = "0.10.37"' in APP
     html=_template()
     assert "/* v0.10.25 desktop regression guard */" in html
     assert "grid-template-columns:220px minmax(0,1fr)!important" in html
@@ -562,7 +563,7 @@ def test_v01025_dead_outer_canvas_css_removed():
 
 
 def test_v01026_sync_core_is_loaded_and_used():
-    assert 'APP_VERSION = "0.10.34"' in APP
+    assert 'APP_VERSION = "0.10.37"' in APP
     assert '_SYNC_CORE_PATH' in APP
     assert '__MAPLINI_SYNC_CORE__' in APP
     assert 'MapliniSyncCore.contentChanged' in APP
@@ -602,7 +603,7 @@ def test_v01026_signout_removes_unmodified_cloud_copies():
 
 
 def test_v01027_session_core_loaded_and_used():
-    assert 'APP_VERSION = "0.10.34"' in APP
+    assert 'APP_VERSION = "0.10.37"' in APP
     assert '_SESSION_CORE_PATH' in APP
     assert '__MAPLINI_SESSION_CORE__' in APP
     assert 'MapliniSessionCore.chooseWorkspace' in APP
@@ -645,7 +646,7 @@ def test_v01027_session_core_primitives():
 
 
 def test_v01028_rc_core_loaded_and_used():
-    assert 'APP_VERSION = "0.10.34"' in APP
+    assert 'APP_VERSION = "0.10.37"' in APP
     assert '_RC_CORE_PATH' in APP
     assert '__MAPLINI_RC_CORE__' in APP
     assert 'MapliniRcCore.captureScopeState' in APP
@@ -682,7 +683,7 @@ def test_v01028_rc_core_primitives():
 
 
 def test_v01029_flow_core_loaded_and_used():
-    assert 'APP_VERSION = "0.10.34"' in APP
+    assert 'APP_VERSION = "0.10.37"' in APP
     assert '_FLOW_CORE_PATH' in APP
     assert '__MAPLINI_FLOW_CORE__' in APP
     assert 'MapliniFlowCore.sharedProcess' in APP
@@ -723,7 +724,7 @@ def test_v01029_flow_core_primitives():
 
 
 def test_v01030_access_core_loaded_and_used():
-    assert 'APP_VERSION = "0.10.34"' in APP
+    assert 'APP_VERSION = "0.10.37"' in APP
     assert '_ACCESS_CORE_PATH' in APP
     assert '__MAPLINI_ACCESS_CORE__' in APP
     assert "function canEdit(){return MapliniAccessCore.canEdit" in APP
@@ -738,7 +739,9 @@ def test_v01030_canvas_mutation_entry_points_are_guarded():
     assert "el.addEventListener('pointerdown',e=>{\n  if(!canEdit())return;" in APP
     assert "Object.values(resizeHandles).forEach(rh=>rh.addEventListener('pointerdown',e=>{\n  if(!canEdit())return;" in APP
     assert "Object.values(handles).forEach(h=>h.addEventListener('pointerdown',e=>{\n  if(!canEdit())return;" in APP
-    assert "linkHandle.addEventListener('pointerdown',e=>{if(!canEdit()||selectedLinkIndex==null)return;" in APP
+    assert "function startSelectedLinkDrag(index,e)" in APP
+    assert "if(!canEdit()||index==null||!links[index])return false;" in APP
+    assert "linkHandle.addEventListener('pointerdown',e=>{if(selectedLinkIndex==null)return;startSelectedLinkDrag(selectedLinkIndex,e)})" in APP
 
 def test_v01030_role_ui_disables_mutation_controls():
     chunk=APP[APP.index("function applyRoleUi()"):APP.index("async function loadWorkspaces()")]
@@ -763,7 +766,7 @@ def test_v01030_access_core_role_rules():
 
 
 def test_v01031_privacy_core_loaded_and_used():
-    assert 'APP_VERSION = "0.10.34"' in APP
+    assert 'APP_VERSION = "0.10.37"' in APP
     assert '_PRIVACY_CORE_PATH' in APP
     assert '__MAPLINI_PRIVACY_CORE__' in APP
     assert "MapliniPrivacyCore.shouldPersistLocally" in APP
@@ -805,7 +808,7 @@ def test_v01031_privacy_core_rules():
 
 
 def test_v01032_save_local_has_privacy_guard():
-    assert 'APP_VERSION = "0.10.34"' in APP
+    assert 'APP_VERSION = "0.10.37"' in APP
     chunk=APP[APP.index("function saveLocal(immediate=false)"):APP.index("function loadLocal()")]
     assert "if(!MapliniPrivacyCore.shouldPersistLocally({sharedView}))return true" in chunk
 
@@ -842,7 +845,7 @@ def test_v01032_direct_google_export_reports_runtime_error():
 
 
 def test_v01033_process_logo_is_selectable_and_draggable():
-    assert 'APP_VERSION = "0.10.34"' in APP
+    assert 'APP_VERSION = "0.10.37"' in APP
     assert ".p48-process-logo.selected" in APP
     assert "processLogo.addEventListener('pointerdown'" in APP
     chunk=APP[APP.index("processLogo.addEventListener('pointerdown'"):APP.index("logoSize.addEventListener")]
@@ -862,7 +865,7 @@ def test_v01033_process_logo_position_persists():
 
 
 def test_v01034_document_node_palette_and_state():
-    assert 'APP_VERSION = "0.10.34"' in APP
+    assert 'APP_VERSION = "0.10.37"' in APP
     assert 'data-type="document"' in APP
     assert "document:'Dokument'" in APP
     assert ".p48-node.document" in APP
@@ -872,7 +875,8 @@ def test_v01034_document_link_editor_and_safe_open():
     assert "function safeDocumentUrl(value)" in APP
     assert "u.protocol!=='http:'&&u.protocol!=='https:'" in APP
     assert "function renderDocumentLink(item)" in APP
-    assert "window.open(url,'_blank','noopener,noreferrer')" in APP
+    assert "btn=document.createElement('a')" in APP
+    assert "btn.target='_blank';btn.rel='noopener noreferrer'" in APP
     assert "documentUrlInput.addEventListener('change'" in APP
 
 def test_v01034_document_link_does_not_start_node_drag():
@@ -883,3 +887,74 @@ def test_v01034_document_link_does_not_start_node_drag():
 def test_v01034_document_url_exports_to_sheets():
     assert "'Dokumentlänk'" in APP
     assert "d.type==='document'?(d.documentUrl||''):''" in APP
+
+
+def test_v01035_document_link_is_native_anchor():
+    assert "btn=document.createElement('a')" in APP
+    assert "btn.target='_blank';btn.rel='noopener noreferrer'" in APP
+    assert "if(valid)btn.href=valid;else btn.removeAttribute('href')" in APP
+    assert "window.open(url,'_blank'" not in APP
+    assert 'id="p48-document-open-editor"' in APP
+
+def test_v01035_selection_emphasis_is_thinner():
+    assert ".p48-node.selected{outline:2px solid #2c7be5!important" in APP
+    assert ".p48-link-selection{stroke-width:5px!important;opacity:.22!important}" in APP
+
+def test_v01035_scroll_has_bottom_clearance():
+    html=_template()
+    assert 'class="p48-scroll-bottom-spacer"' in html
+    assert ".p48-scroll-bottom-spacer{width:1px;height:56px" in html
+    assert '.p48-side::after{content:"";display:block;height:56px' in html
+
+
+def test_v01036_selected_connector_can_be_dragged():
+    assert 'APP_VERSION = "0.10.37"' in APP
+    assert "function startSelectedLinkDrag(index,e)" in APP
+    assert "if(selectedLinkIndex===hit&&canEdit())" in APP
+    assert "startSelectedLinkDrag(hit,e)" in APP
+    assert "linkHandle.addEventListener('pointerdown',e=>{if(selectedLinkIndex==null)return;startSelectedLinkDrag(selectedLinkIndex,e)})" in APP
+    assert "MapliniConnectorCore.setVia(links,index,p.x,p.y)" in APP
+
+def test_v01036_canvas_scale_controls_exist():
+    html=_template()
+    assert 'id="p48-zoom-out"' in html
+    assert 'id="p48-zoom-reset"' in html
+    assert 'id="p48-zoom-in"' in html
+    assert "function applyCanvasScale(next,keepCenter=true)" in APP
+    assert "Math.max(0.5,Math.min(1.5" in APP
+    assert "transform:scale(var(--p48-canvas-scale,1))" in APP
+    assert "screenDeltaToCanvas" in APP
+
+def test_v01036_scaled_interactions_use_logical_canvas_coordinates():
+    assert "return {x:p.x/canvasScale,y:p.y/canvasScale}" in APP
+    assert "const {dx,dy}=screenDeltaToCanvas(screenDx,screenDy)" in APP
+    assert "const p=clientToCanvas(ev.clientX,ev.clientY)" in APP
+
+
+def test_v01037_background_library_controls():
+    html=_template()
+    assert 'APP_VERSION = "0.10.37"' in APP
+    for value in ('dots','grid','lines','solid','gradient','image','watermark','texture-paper','texture-parchment','texture-canvas','texture-concrete'):
+        assert f'value="{value}"' in html
+    assert 'id="p48-gradient-start"' in html
+    assert 'id="p48-gradient-end"' in html
+    assert 'id="p48-bg-image-file"' in html
+    assert 'id="p48-watermark-text"' in html
+    assert 'id="p48-watermark-use-logo"' in html
+
+def test_v01037_background_state_persists():
+    state=APP[APP.index("function state()"):APP.index("const LOCAL_KEY")]
+    restore=APP[APP.index("function restore(s)"):APP.index("function openProcess")]
+    for key in ("processGradientStart","processGradientEnd","processGradientAngle","processBackgroundImageData","processBackgroundImageOpacity","processWatermarkText","processWatermarkOpacity","processWatermarkUseLogo"):
+        assert key in state
+        assert key in restore
+
+def test_v01037_background_image_is_size_guarded():
+    assert "file.size>1500000" in APP
+    assert "Bakgrundsbilden får vara max 1,5 MB" in APP
+
+def test_v01037_export_supports_new_backgrounds():
+    assert "processBackgroundType==='image'&&processBackgroundImageData" in APP
+    assert "processBackgroundType==='watermark'&&processWatermarkUseLogo&&processLogoData" in APP
+    assert "type==='gradient'" in APP
+    assert "type.startsWith('texture-')" in APP
