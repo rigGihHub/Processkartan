@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.10.39"
+APP_VERSION = "0.10.40"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -644,6 +644,15 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 #p48-links *{pointer-events:visibleStroke}
 .p48-link{stroke:#687584;stroke-width:2.2;fill:none}.p48-temp{stroke:#df941e;stroke-width:2.4;fill:none;stroke-dasharray:6 5}
 .p48-node{position:absolute;min-width:160px;max-width:360px;width:max-content;min-height:64px;height:auto;padding:14px 26px;border:2px solid #637387;border-radius:10px;background:#fff;box-shadow:0 3px 9px rgba(31,42,55,.10);z-index:5;user-select:none;touch-action:none;display:flex;align-items:center;justify-content:center}
+/* v0.10.40: selectable node visual styles */
+.p48-node.p48-style-3d{box-shadow:0 7px 0 rgba(31,42,55,.18),0 13px 22px rgba(31,42,55,.16)}
+.p48-node.p48-style-raised{box-shadow:0 12px 28px rgba(31,42,55,.22),0 2px 6px rgba(31,42,55,.10)}
+.p48-node.p48-style-glass{backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);box-shadow:inset 0 1px 0 rgba(255,255,255,.72),0 10px 24px rgba(31,42,55,.13)}
+.p48-node.p48-style-flat{box-shadow:none}
+.p48-node.decision.p48-style-3d::before{box-shadow:6px 6px 0 rgba(31,42,55,.18),10px 12px 18px rgba(31,42,55,.12)}
+.p48-node.decision.p48-style-raised::before{box-shadow:7px 9px 20px rgba(31,42,55,.20)}
+.p48-node.decision.p48-style-glass::before{box-shadow:inset 1px 1px 0 rgba(255,255,255,.68),6px 8px 18px rgba(31,42,55,.12)}
+.p48-node.decision.p48-style-flat::before{box-shadow:none}
 .p48-label{display:block;width:100%;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;line-height:1.28;cursor:text;outline:none}
 .p48-label[contenteditable="true"]{user-select:text;-webkit-user-select:text;cursor:text;min-width:40px}
 .p48-node.start,.p48-node.end{border-radius:38px}.p48-node.start{border-color:#2b7b61}.p48-node.end{border-color:#985148}
@@ -1005,6 +1014,18 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
           </label>
         </div>
         <button type="button" class="p48-btn p48-node-only" id="p48-font-all" style="width:100%;margin-top:7px">Använd typsnitt + storlek på all text</button>
+        <div class="p48-format-grid-clean p48-node-only" style="margin-top:8px">
+          <label>Rutstil
+            <select id="p48-node-style">
+              <option value="standard" selected>Standard</option>
+              <option value="3d">3D</option>
+              <option value="raised">Upphöjd skugga</option>
+              <option value="glass">Glas</option>
+              <option value="flat">Minimal / platt</option>
+            </select>
+          </label>
+        </div>
+        <button type="button" class="p48-btn p48-node-only" id="p48-node-style-all" style="width:100%;margin-top:7px">Använd rutstil på alla rutor</button>
         
         <div class="p48-point-settings p48-node-only">
           <div class="p48-title">Kopplingspunkter</div>
@@ -1123,6 +1144,7 @@ const controls=root.querySelector('#p48-controls'),formatPanel=root.querySelecto
 const bold=root.querySelector('#p48-bold'),italic=root.querySelector('#p48-italic'),under=root.querySelector('#p48-under');
 const documentLinkEditor=root.querySelector('#p48-document-link-editor'),documentUrlInput=root.querySelector('#p48-document-url'),documentOpenEditor=root.querySelector('#p48-document-open-editor');
 const fontAllBtn=root.querySelector('#p48-font-all');
+const nodeStyleSelect=root.querySelector('#p48-node-style'),nodeStyleAllBtn=root.querySelector('#p48-node-style-all');
 const pointSize=root.querySelector('#p48-point-size'),pointColor=root.querySelector('#p48-point-color'),hidePoints=root.querySelector('#p48-hide-points');
 const canvasBg=root.querySelector('#p48-canvas-bg'),bgType=root.querySelector('#p48-bg-type'),bgPatternColor=root.querySelector('#p48-bg-pattern-color'),bgDensity=root.querySelector('#p48-bg-density'),logoFile=root.querySelector('#p48-logo-file'),logoRemove=root.querySelector('#p48-logo-remove'),logoHide=root.querySelector('#p48-logo-hide'),logoSize=root.querySelector('#p48-logo-size'),processLogo=root.querySelector('#p48-process-logo');
 const gradientControls=root.querySelector('#p48-gradient-controls'),gradientStart=root.querySelector('#p48-gradient-start'),gradientEnd=root.querySelector('#p48-gradient-end'),gradientAngle=root.querySelector('#p48-gradient-angle');
@@ -1761,8 +1783,24 @@ function uid(){return 'proc-'+Date.now().toString(36)+'-'+Math.random().toString
 function msg(t){status.textContent=t;setTimeout(()=>{if(status.textContent===t)status.textContent=''},1800)}
 function safeRun(label,fn){try{const r=fn();if(r&&typeof r.then==='function')return r.catch(e=>{reportRuntimeError(e,label);return null});return r}catch(e){reportRuntimeError(e,label);return null}}
 function defBg(type){return {start:'#edf8f3',end:'#fff3f1',decision:'#fff8df',subprocess:'#f7f3ff',note:'#fffbe8',group:'#f8fafc',document:'#f3f8fc'}[type]||'#ffffff'}
-function styleOf(d){return{fontFamily:d.fontFamily||'Inter',fontSize:Number(d.fontSize||13),textColor:d.textColor||'#17202a',bgColor:d.bgColor||defBg(d.type),fontWeight:d.fontWeight||'700',fontStyle:d.fontStyle||'normal',textDecoration:d.textDecoration||'none',textAlign:d.textAlign||'center',borderColor:d.borderColor||'#637387',borderWidth:Number(d.borderWidth||2)}}
-function applyStyle(item){const s=styleOf(item.data);Object.assign(item.data,s);item.el.style.fontFamily=s.fontFamily;item.label.style.fontFamily=s.fontFamily;item.label.style.fontSize=s.fontSize+'px';item.label.style.color=s.textColor;item.label.style.fontWeight=s.fontWeight;item.label.style.fontStyle=s.fontStyle;item.label.style.textDecoration=s.textDecoration;item.label.style.textAlign=s.textAlign;if(item.io){item.io.style.fontFamily=s.fontFamily;item.io.style.fontSize=Math.max(9,Math.round(s.fontSize*.72))+'px'}if(item.docOpen){item.docOpen.style.fontFamily=s.fontFamily;item.docOpen.style.fontSize=Math.max(9,Math.round(s.fontSize*.85))+'px'}item.el.style.background=s.bgColor;item.el.style.setProperty('--decision-bg',s.bgColor);if(item.data.type==='decision'){item.el.style.setProperty('--decision-border',s.borderColor);item.el.style.setProperty('--decision-border-width',s.borderWidth+'px')}else{item.el.style.borderColor=s.borderColor;item.el.style.borderWidth=s.borderWidth+'px'}}
+function styleOf(d){
+  const allowedNodeStyles=new Set(['standard','3d','raised','glass','flat']);
+  const nodeStyle=allowedNodeStyles.has(d.nodeStyle)?d.nodeStyle:'standard';
+  return{fontFamily:d.fontFamily||'Inter',fontSize:Number(d.fontSize||13),textColor:d.textColor||'#17202a',bgColor:d.bgColor||defBg(d.type),fontWeight:d.fontWeight||'700',fontStyle:d.fontStyle||'normal',textDecoration:d.textDecoration||'none',textAlign:d.textAlign||'center',borderColor:d.borderColor||'#637387',borderWidth:Number(d.borderWidth||2),nodeStyle}
+}
+function applyStyle(item){
+  const s=styleOf(item.data);Object.assign(item.data,s);
+  item.el.classList.remove('p48-style-3d','p48-style-raised','p48-style-glass','p48-style-flat');
+  if(s.nodeStyle!=='standard')item.el.classList.add('p48-style-'+s.nodeStyle);
+  item.el.style.fontFamily=s.fontFamily;item.label.style.fontFamily=s.fontFamily;item.label.style.fontSize=s.fontSize+'px';item.label.style.color=s.textColor;item.label.style.fontWeight=s.fontWeight;item.label.style.fontStyle=s.fontStyle;item.label.style.textDecoration=s.textDecoration;item.label.style.textAlign=s.textAlign;
+  if(item.io){item.io.style.fontFamily=s.fontFamily;item.io.style.fontSize=Math.max(9,Math.round(s.fontSize*.72))+'px'}if(item.docOpen){item.docOpen.style.fontFamily=s.fontFamily;item.docOpen.style.fontSize=Math.max(9,Math.round(s.fontSize*.85))+'px'}
+  let visualBg=s.bgColor;
+  if(s.nodeStyle==='3d')visualBg=`linear-gradient(145deg,rgba(255,255,255,.52),rgba(0,0,0,.07)),${s.bgColor}`;
+  else if(s.nodeStyle==='raised')visualBg=`linear-gradient(180deg,rgba(255,255,255,.40),rgba(255,255,255,0)),${s.bgColor}`;
+  else if(s.nodeStyle==='glass')visualBg=`linear-gradient(145deg,rgba(255,255,255,.58),rgba(255,255,255,.16)),${s.bgColor}`;
+  item.el.style.background=visualBg;item.el.style.setProperty('--decision-bg',visualBg);
+  if(item.data.type==='decision'){item.el.style.setProperty('--decision-border',s.borderColor);item.el.style.setProperty('--decision-border-width',s.borderWidth+'px')}else{item.el.style.borderColor=s.borderColor;item.el.style.borderWidth=s.borderWidth+'px'}
+}
 function safeDocumentUrl(value){
   const raw=String(value||'').trim();
   if(!raw)return '';
@@ -2203,6 +2241,7 @@ function refreshControls(){
   setFormatEnabled(true);
   const s=styleOf(item.data);
   font.value=s.fontFamily;size.value=s.fontSize;textColor.value=s.textColor;bgColor.value=s.bgColor;borderColor.value=s.borderColor;borderWidth.value=String(s.borderWidth);
+  if(nodeStyleSelect)nodeStyleSelect.value=s.nodeStyle;
   bold.classList.toggle('active',s.fontWeight==='700');italic.classList.toggle('active',s.fontStyle==='italic');under.classList.toggle('active',s.textDecoration==='underline');
   root.querySelectorAll('[data-align]').forEach(b=>b.classList.toggle('active',b.dataset.align===s.textAlign));
   if(documentLinkEditor)documentLinkEditor.hidden=item.data.type!=='document';
@@ -3098,6 +3137,10 @@ async function renderMapSnapshot(){
   for(const item of nodes.values()){
     const d=item.data,s=styleOf(d),x=ox+(d.x||0),y=oy+(d.y||0),w=item.el.offsetWidth,h=item.el.offsetHeight;
     ctx.save();
+    if(s.nodeStyle==='3d'){ctx.shadowColor='rgba(31,42,55,.25)';ctx.shadowBlur=10;ctx.shadowOffsetX=5;ctx.shadowOffsetY=8;}
+    else if(s.nodeStyle==='raised'){ctx.shadowColor='rgba(31,42,55,.22)';ctx.shadowBlur=18;ctx.shadowOffsetY=8;}
+    else if(s.nodeStyle==='glass'){ctx.globalAlpha=.88;ctx.shadowColor='rgba(31,42,55,.16)';ctx.shadowBlur=12;ctx.shadowOffsetY=5;}
+    else if(s.nodeStyle==='flat'){ctx.shadowColor='transparent';ctx.shadowBlur=0;}
     ctx.fillStyle=s.bgColor||'#ffffff';
     ctx.strokeStyle=s.borderColor||'#637387';ctx.lineWidth=Number(s.borderWidth)||2;
 
@@ -3108,6 +3151,7 @@ async function renderMapSnapshot(){
     }else{
       drawRoundedRect(ctx,x,y,w,h,10);ctx.fill();ctx.stroke();
     }
+    ctx.shadowColor='transparent';ctx.shadowBlur=0;ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;ctx.globalAlpha=1;
 
     const fontSize=Math.max(10,Math.min(36,Number(s.fontSize||13)));
     const weight=s.fontWeight==='700'?'700':'400',italicStyle=s.fontStyle==='italic'?'italic ':'';
@@ -3373,6 +3417,19 @@ root.querySelector('#p48-save').addEventListener('click',async()=>{
   const localOk=saveLocal(true);
   msg(localOk?'Sparad lokalt':'Lokal sparning misslyckades');
 });
+function closeOpenMenus(exceptTarget=null){
+  root.querySelectorAll('details.p48-canvas-menu[open],details.p48-sheets-menu[open]').forEach(menu=>{
+    if(!exceptTarget||!menu.contains(exceptTarget))menu.open=false;
+  });
+  if(shareBox&&shareBox.style.display==='block'&&(!exceptTarget||(!shareBox.contains(exceptTarget)&&exceptTarget!==shareBtn)))shareBox.style.display='none';
+}
+document.addEventListener('pointerdown',e=>closeOpenMenus(e.target),true);
+window.addEventListener('blur',()=>closeOpenMenus());
+root.querySelectorAll('details.p48-canvas-menu,details.p48-sheets-menu').forEach(menu=>menu.addEventListener('toggle',()=>{
+  if(!menu.open)return;
+  root.querySelectorAll('details.p48-canvas-menu[open],details.p48-sheets-menu[open]').forEach(other=>{if(other!==menu)other.open=false;});
+}));
+
 shareBtn.addEventListener('click',shareCurrent);copyShareBtn.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(shareUrlInput.value);msg('Länk kopierad')}catch(e){try{shareUrlInput.select();const ok=document.execCommand('copy');if(!ok)throw new Error('copy command failed');msg('Länk kopierad')}catch(copyErr){reportRuntimeError(copyErr,'share-copy');msg('Kunde inte kopiera länken')}}});
 loginBtn.addEventListener('click',signIn);signupBtn.addEventListener('click',signUp);logoutBtn.addEventListener('click',signOut);
 
@@ -3485,6 +3542,19 @@ fontAllBtn.addEventListener('click',()=>{
   persist();
   refreshControls();
   msg('Typsnitt och storlek uppdaterat på all text');
+});
+nodeStyleSelect.addEventListener('change',()=>updateStyle({nodeStyle:nodeStyleSelect.value}));
+nodeStyleAllBtn.addEventListener('click',()=>{
+  if(!requireEdit())return;
+  if(!nodes.size)return;
+  const chosen=nodeStyleSelect.value;
+  pushUndo();
+  for(const item of nodes.values()){
+    item.data.nodeStyle=chosen;
+    applyStyle(item);
+  }
+  drawLinks();persist();refreshControls();
+  msg('Rutstil uppdaterad på alla rutor');
 });
 
 pointSize.addEventListener('change',()=>{

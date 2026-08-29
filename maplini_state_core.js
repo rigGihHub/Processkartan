@@ -11,7 +11,8 @@ function normalizeNode(n,index){
   return Object.assign({},n,{id,type,text:safeString(n.text||n.label||'','',5000),
     x:finiteNumber(n.x,80,0,20000),y:finiteNumber(n.y,80,0,20000),
     w:finiteNumber(n.w||n.width,180,60,4000),h:finiteNumber(n.h||n.height,80,36,4000),
-    documentUrl:safeString(n.documentUrl||'','',4000)});
+    documentUrl:safeString(n.documentUrl||'','',4000),
+    nodeStyle:['standard','3d','raised','glass','flat'].includes(n.nodeStyle)?n.nodeStyle:'standard'});
 }
 function normalizeLink(l){
   if(Array.isArray(l)){
