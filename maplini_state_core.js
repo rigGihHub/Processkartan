@@ -5,12 +5,13 @@ function finiteNumber(v,fallback,min,max){const n=Number(v);return Number.isFini
 function safeString(v,fallback,maxLen){const s=typeof v==='string'?v:fallback;return s.slice(0,maxLen);}
 function normalizeNode(n,index){
   n=(n&&typeof n==='object')?clone(n):{};
-  const allowed=new Set(['start','process','decision','end','subprocess','group','note']);
+  const allowed=new Set(['start','process','decision','end','subprocess','group','note','document']);
   const type=allowed.has(n.type)?n.type:'process';
   const id=safeString(n.id||('node-'+(index+1)),'node-'+(index+1),120);
   return Object.assign({},n,{id,type,text:safeString(n.text||n.label||'','',5000),
     x:finiteNumber(n.x,80,0,20000),y:finiteNumber(n.y,80,0,20000),
-    w:finiteNumber(n.w||n.width,180,60,4000),h:finiteNumber(n.h||n.height,80,36,4000)});
+    w:finiteNumber(n.w||n.width,180,60,4000),h:finiteNumber(n.h||n.height,80,36,4000),
+    documentUrl:safeString(n.documentUrl||'','',4000)});
 }
 function normalizeLink(l){
   if(Array.isArray(l)){
@@ -42,7 +43,9 @@ function normalizeProcess(p,fallbackId){
     processPatternDensity:finiteNumber(p.processPatternDensity,20,4,100),
     processLogoData:typeof p.processLogoData==='string'?p.processLogoData:'',
     processLogoHidden:Boolean(p.processLogoHidden),
-    processLogoWidth:finiteNumber(p.processLogoWidth,180,40,1200)});
+    processLogoWidth:finiteNumber(p.processLogoWidth,180,40,1200),
+    processLogoX:finiteNumber(p.processLogoX,28,0,20000),
+    processLogoY:finiteNumber(p.processLogoY,28,0,20000)});
 }
 function normalizeStore(store){
   store=(store&&typeof store==='object')?store:{};

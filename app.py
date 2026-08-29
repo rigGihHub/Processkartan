@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.10.32"
+APP_VERSION = "0.10.34"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -526,8 +526,10 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-logo-controls button,.p48-logo-controls label{font:700 11px system-ui}
 .p48-logo-upload{display:block;border:1px dashed #b9c5cf;border-radius:7px;padding:7px;text-align:center;cursor:pointer}
 .p48-logo-upload input{display:none}
-.p48-process-logo{position:absolute;left:28px;top:28px;max-width:220px;max-height:90px;object-fit:contain;z-index:3;pointer-events:none;display:none}
-.p48-process-logo.on{display:block}
+.p48-process-logo{position:absolute;left:28px;top:28px;max-width:220px;max-height:90px;object-fit:contain;z-index:6;pointer-events:none;display:none;user-select:none;-webkit-user-drag:none;touch-action:none}
+.p48-process-logo.on{display:block;pointer-events:auto;cursor:grab}
+.p48-process-logo.selected{outline:2px solid #2c7be5;outline-offset:5px;cursor:grabbing}
+#p48-canvas.p48-readonly .p48-process-logo.on{pointer-events:none;cursor:default}
 
 /* v0.9.1 critical editor rules inside iframe */
 .p48-link-hit-layer{position:absolute;inset:0;z-index:4;pointer-events:none}
@@ -656,6 +658,15 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 }
 .p48-node.decision .p48-label,.p48-node.decision .p48-node-io{position:relative;z-index:2;text-align:center}
 .p48-node.subprocess{border-style:double;border-width:4px;border-color:#7556a6}.p48-node.note{border-color:#b8973e}.p48-node.group{min-width:240px;max-width:440px;min-height:120px;border-style:dashed;color:#536171}
+.p48-node.document{border-color:#3b6f9c;background:#f3f8fc;min-width:180px;padding-bottom:38px}
+.p48-node.document::before{content:"📄";position:absolute;left:12px;top:10px;font-size:18px;line-height:1}
+.p48-doc-open{position:absolute;left:12px;right:12px;bottom:8px;min-height:24px;border:0;border-top:1px solid rgba(59,111,156,.22);background:transparent;color:#245d8d;font:700 11px system-ui;cursor:pointer;padding-top:6px;text-align:center}
+.p48-doc-open:hover{text-decoration:underline}
+.p48-doc-open[hidden]{display:none!important}
+.p48-document-link-editor{margin-top:10px;padding:10px;border:1px solid #d8e3ec;border-radius:8px;background:#f8fbfd}
+.p48-document-link-editor label{display:block;font:700 10px system-ui;color:#657281;margin:5px 0 3px}
+.p48-document-link-editor input{width:100%;border:1px solid #cfd7df;border-radius:7px;padding:7px;font:12px system-ui}
+
 .p48-node.selected{outline:3px solid #2c7be5;outline-offset:3px}
 .p48-node.decision.selected{outline:none}
 .p48-node.decision.selected::before{
@@ -844,6 +855,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
       <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Slut" title="Dra eller tryck för att lägga till" data-type="end"><span class="p48-icon">■</span>Slut</div>
       <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Delprocess" title="Dra eller tryck för att lägga till" data-type="subprocess"><span class="p48-icon">▣</span>Delprocess</div>
       <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Anteckning" title="Dra eller tryck för att lägga till" data-type="note"><span class="p48-icon">N</span>Anteckning</div>
+      <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Dokument" title="Dra eller tryck för att lägga till" data-type="document"><span class="p48-icon">📄</span>Dokument</div>
       <div class="p48-step-io">
         <div class="p48-io-wrap">
           <div class="p48-io-title">Inputs</div>
@@ -935,6 +947,12 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
           <button type="button" class="p48-mini" data-align="center">Centrera</button>
           <button type="button" class="p48-mini" data-align="right">Höger</button>
         </div>
+        <div id="p48-document-link-editor" class="p48-document-link-editor p48-node-only" hidden>
+          <div class="p48-title">Dokument</div>
+          <label for="p48-document-url">Dokumentlänk</label>
+          <input id="p48-document-url" type="url" inputmode="url" autocomplete="off" placeholder="https://…">
+          <div class="p48-small">Länka till exempelvis Google Drive, SharePoint, OneDrive eller annan webbadress.</div>
+        </div>
         <button type="button" class="p48-btn p48-node-only" id="p48-delete-node" style="width:100%;margin-top:10px;color:#a43d34;border-color:#e0c4c1">Ta bort markerad ruta</button>
 
         <div id="p48-link-format" class="p48-link-format">
@@ -1005,6 +1023,7 @@ const hnav=root.querySelector('#p48-hnav'),hnavInner=root.querySelector('#p48-hn
 const nameInput=root.querySelector('#p48-name'),status=root.querySelector('#p48-status'),processBox=root.querySelector('#p48-processes');
 const controls=root.querySelector('#p48-controls'),formatPanel=root.querySelector('#p48-format-panel'),formatHint=root.querySelector('#p48-format-hint'),font=root.querySelector('#p48-font'),size=root.querySelector('#p48-size'),textColor=root.querySelector('#p48-textcolor'),bgColor=root.querySelector('#p48-bgcolor');
 const bold=root.querySelector('#p48-bold'),italic=root.querySelector('#p48-italic'),under=root.querySelector('#p48-under');
+const documentLinkEditor=root.querySelector('#p48-document-link-editor'),documentUrlInput=root.querySelector('#p48-document-url');
 const fontAllBtn=root.querySelector('#p48-font-all');
 const pointSize=root.querySelector('#p48-point-size'),pointColor=root.querySelector('#p48-point-color'),hidePoints=root.querySelector('#p48-hide-points');
 const canvasBg=root.querySelector('#p48-canvas-bg'),bgType=root.querySelector('#p48-bg-type'),bgPatternColor=root.querySelector('#p48-bg-pattern-color'),bgDensity=root.querySelector('#p48-bg-density'),logoFile=root.querySelector('#p48-logo-file'),logoRemove=root.querySelector('#p48-logo-remove'),logoHide=root.querySelector('#p48-logo-hide'),logoSize=root.querySelector('#p48-logo-size'),processLogo=root.querySelector('#p48-process-logo');
@@ -1030,7 +1049,7 @@ let selectedLinkIndex=null,selectedLinkIndices=new Set();
 const nodeGeomCache=new Map();
 let geomVersion=0;
 let connectorPointSize=8,connectorPointColor='#1f6f55',connectorPointsHidden=false;
-let processBackground='#ffffff',processBackgroundType='solid',processPatternColor='#d7e1e8',processPatternDensity=20,processLogoData='',processLogoHidden=false,processLogoWidth=180;
+let processBackground='#ffffff',processBackgroundType='solid',processPatternColor='#d7e1e8',processPatternDensity=20,processLogoData='',processLogoHidden=false,processLogoWidth=180,processLogoX=28,processLogoY=28;
 const SUPABASE_URL="__SUPABASE_URL__", SUPABASE_ANON_KEY="__SUPABASE_ANON_KEY__", PUBLIC_APP_URL="__PUBLIC_APP_URL__";
 const CLOUD_ENABLED=SUPABASE_URL.length>0&&SUPABASE_ANON_KEY.length>0;
 let cloudSession=null,sharedView=false;
@@ -1464,7 +1483,7 @@ let lastProcessStyleSignature='';
 function applyProcessStyle(force=false){
   const signature=MapliniPerformanceCore.signature([
     processBackground,processBackgroundType,processPatternColor,processPatternDensity,
-    processLogoData,processLogoHidden,processLogoWidth
+    processLogoData,processLogoHidden,processLogoWidth,processLogoX,processLogoY
   ]);
   if(!force&&signature===lastProcessStyleSignature)return false;
   lastProcessStyleSignature=signature;
@@ -1511,6 +1530,8 @@ function applyProcessStyle(force=false){
   if(processLogoData){
     processLogo.src=processLogoData;
     processLogo.style.maxWidth=processLogoWidth+'px';
+    processLogo.style.left=processLogoX+'px';
+    processLogo.style.top=processLogoY+'px';
     processLogo.classList.toggle('on',!processLogoHidden);
   }else{
     processLogo.removeAttribute('src');
@@ -1552,9 +1573,39 @@ function clone(v){return JSON.parse(JSON.stringify(v))}
 function uid(){return 'proc-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7)}
 function msg(t){status.textContent=t;setTimeout(()=>{if(status.textContent===t)status.textContent=''},1800)}
 function safeRun(label,fn){try{const r=fn();if(r&&typeof r.then==='function')return r.catch(e=>{reportRuntimeError(e,label);return null});return r}catch(e){reportRuntimeError(e,label);return null}}
-function defBg(type){return {start:'#edf8f3',end:'#fff3f1',decision:'#fff8df',subprocess:'#f7f3ff',note:'#fffbe8',group:'#f8fafc'}[type]||'#ffffff'}
+function defBg(type){return {start:'#edf8f3',end:'#fff3f1',decision:'#fff8df',subprocess:'#f7f3ff',note:'#fffbe8',group:'#f8fafc',document:'#f3f8fc'}[type]||'#ffffff'}
 function styleOf(d){return{fontFamily:d.fontFamily||'Inter',fontSize:Number(d.fontSize||13),textColor:d.textColor||'#17202a',bgColor:d.bgColor||defBg(d.type),fontWeight:d.fontWeight||'700',fontStyle:d.fontStyle||'normal',textDecoration:d.textDecoration||'none',textAlign:d.textAlign||'center',borderColor:d.borderColor||'#637387',borderWidth:Number(d.borderWidth||2)}}
 function applyStyle(item){const s=styleOf(item.data);Object.assign(item.data,s);item.label.style.fontFamily=s.fontFamily;item.label.style.fontSize=s.fontSize+'px';item.label.style.color=s.textColor;item.label.style.fontWeight=s.fontWeight;item.label.style.fontStyle=s.fontStyle;item.label.style.textDecoration=s.textDecoration;item.label.style.textAlign=s.textAlign;item.el.style.background=s.bgColor;item.el.style.setProperty('--decision-bg',s.bgColor);if(item.data.type==='decision'){item.el.style.setProperty('--decision-border',s.borderColor);item.el.style.setProperty('--decision-border-width',s.borderWidth+'px')}else{item.el.style.borderColor=s.borderColor;item.el.style.borderWidth=s.borderWidth+'px'}}
+function safeDocumentUrl(value){
+  const raw=String(value||'').trim();
+  if(!raw)return '';
+  try{
+    const u=new URL(raw,window.location.href);
+    if(u.protocol!=='http:'&&u.protocol!=='https:')return '';
+    return u.href;
+  }catch(e){return ''}
+}
+function renderDocumentLink(item){
+  if(!item||item.data.type!=='document')return;
+  let btn=item.docOpen;
+  if(!btn){
+    btn=document.createElement('button');
+    btn.type='button';btn.className='p48-doc-open';
+    btn.addEventListener('pointerdown',e=>{e.stopPropagation()});
+    btn.addEventListener('click',e=>{
+      e.preventDefault();e.stopPropagation();
+      const url=safeDocumentUrl(item.data.documentUrl);
+      if(!url){msg('Lägg först till en giltig dokumentlänk');return}
+      const win=window.open(url,'_blank','noopener,noreferrer');
+      if(!win)msg('Webbläsaren blockerade öppningen');
+    });
+    item.el.appendChild(btn);item.docOpen=btn;
+  }
+  const valid=safeDocumentUrl(item.data.documentUrl);
+  btn.textContent=valid?'↗ Öppna dokument':'+ Lägg till dokumentlänk';
+  btn.title=valid?valid:'Markera rutan och lägg till en dokumentlänk';
+}
+
 function state(){
   const meta=processes[currentId]||{};
   return MapliniStateCore.normalizeProcess({
@@ -1572,6 +1623,8 @@ function state(){
     processLogoData,
     processLogoHidden,
     processLogoWidth,
+    processLogoX,
+    processLogoY,
     localModifiedAt:Number(meta.localModifiedAt||0),
     cloudUpdatedAt:meta.cloudUpdatedAt||null
   },currentId);
@@ -1725,6 +1778,8 @@ function restore(s){
   processLogoData=d.processLogoData||'';
   processLogoHidden=Boolean(d.processLogoHidden);
   processLogoWidth=Number(d.processLogoWidth||180);
+  processLogoX=Number.isFinite(Number(d.processLogoX))?Number(d.processLogoX):28;
+  processLogoY=Number.isFinite(Number(d.processLogoY))?Number(d.processLogoY):28;
   applyConnectorPointSettings();
   applyProcessStyle(true);
   (d.nodes||[]).forEach(makeNode);
@@ -1787,7 +1842,7 @@ async function deleteProcess(id){
     msg('Process raderad lokalt – molnradering misslyckades');
   }
 }
-function nodeText(t){return{start:'Start',process:'Ny aktivitet',decision:'Beslut?',end:'Slut',subprocess:'Ny delprocess',group:'Ny grupp / område',note:'Anteckning'}[t]||'Nytt steg'}
+function nodeText(t){return{start:'Start',process:'Ny aktivitet',decision:'Beslut?',end:'Slut',subprocess:'Ny delprocess',group:'Ny grupp / område',note:'Anteckning',document:'Dokument'}[t]||'Nytt steg'}
 function place(el,x,y){const p=MapliniCanvasCore.place(x,y,el.offsetWidth,el.offsetHeight);el.style.left=p.x+'px';el.style.top=p.y+'px'}
 function sync(el){const x=nodes.get(el.dataset.id);if(x){x.data.x=parseFloat(el.style.left)||0;x.data.y=parseFloat(el.style.top)||0}}
 function center(el){return[(parseFloat(el.style.left)||0)+el.offsetWidth/2,(parseFloat(el.style.top)||0)+el.offsetHeight/2]}
@@ -1922,7 +1977,23 @@ function setFormatEnabled(enabled){
   if(stepIO){stepIO.classList.toggle('on',enabled);stepIO.style.opacity='1';}
 }
 
-function refreshControls(){const item=selectedId?nodes.get(selectedId):null;if(!item){setFormatEnabled(false);inputsBox.innerHTML='';outputsBox.innerHTML='';if(selectedLinkIndex!=null)refreshLinkControls();return}setFormatEnabled(true);const s=styleOf(item.data);font.value=s.fontFamily;size.value=s.fontSize;textColor.value=s.textColor;bgColor.value=s.bgColor;borderColor.value=s.borderColor;borderWidth.value=String(s.borderWidth);bold.classList.toggle('active',s.fontWeight==='700');italic.classList.toggle('active',s.fontStyle==='italic');under.classList.toggle('active',s.textDecoration==='underline');root.querySelectorAll('[data-align]').forEach(b=>b.classList.toggle('active',b.dataset.align===s.textAlign));renderIOEditor(item)}
+function refreshControls(){
+  const item=selectedId?nodes.get(selectedId):null;
+  if(!item){
+    setFormatEnabled(false);inputsBox.innerHTML='';outputsBox.innerHTML='';
+    if(documentLinkEditor)documentLinkEditor.hidden=true;
+    if(documentUrlInput)documentUrlInput.value='';
+    if(selectedLinkIndex!=null)refreshLinkControls();return
+  }
+  setFormatEnabled(true);
+  const s=styleOf(item.data);
+  font.value=s.fontFamily;size.value=s.fontSize;textColor.value=s.textColor;bgColor.value=s.bgColor;borderColor.value=s.borderColor;borderWidth.value=String(s.borderWidth);
+  bold.classList.toggle('active',s.fontWeight==='700');italic.classList.toggle('active',s.fontStyle==='italic');under.classList.toggle('active',s.textDecoration==='underline');
+  root.querySelectorAll('[data-align]').forEach(b=>b.classList.toggle('active',b.dataset.align===s.textAlign));
+  if(documentLinkEditor)documentLinkEditor.hidden=item.data.type!=='document';
+  if(documentUrlInput)documentUrlInput.value=item.data.type==='document'?(item.data.documentUrl||''):'';
+  renderIOEditor(item)
+}
 function updateStyle(patch){if(!requireEdit())return;const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();Object.assign(item.data,patch);applyStyle(item);drawLinks();persist()}
 function beginInlineEdit(el){
   if(!requireEdit())return;
@@ -1965,7 +2036,7 @@ const d=clone(data),el=document.createElement('div');el.className='p48-node '+d.
 const label=document.createElement('span');label.className='p48-label';label.textContent=d.text;label.contentEditable='false';label.spellcheck=true;el.appendChild(label);
 const handles={};for(const side of ['right','left','top','bottom']){const h=document.createElement('span');h.className='p48-handle '+side;h.dataset.side=side;el.appendChild(h);handles[side]=h}
 const resizeHandles={};for(const corner of ['se','sw','ne','nw']){const rh=document.createElement('span');rh.className='p48-resize '+corner;rh.dataset.corner=corner;el.appendChild(rh);resizeHandles[corner]=rh}
-canvas.appendChild(el);nodes.set(d.id,{el,data:d,label,handles,resizeHandles,io:null});applyStyle(nodes.get(d.id));renderNodeIO(nodes.get(d.id));
+canvas.appendChild(el);nodes.set(d.id,{el,data:d,label,handles,resizeHandles,io:null,docOpen:null});applyStyle(nodes.get(d.id));renderNodeIO(nodes.get(d.id));renderDocumentLink(nodes.get(d.id));
 for(const h of Object.values(handles)){
   h.style.width=connectorPointSize+'px';
   h.style.height=connectorPointSize+'px';
@@ -1986,7 +2057,7 @@ label.addEventListener('keydown',e=>{
 el.addEventListener('click',e=>{e.stopPropagation();select(el)});
 el.addEventListener('pointerdown',e=>{
   if(!canEdit())return;
-  if(e.button!==0||e.target.classList.contains('p48-handle')||e.target.classList.contains('p48-label')||e.target.classList.contains('p48-resize'))return;
+  if(e.button!==0||e.target.classList.contains('p48-handle')||e.target.classList.contains('p48-label')||e.target.classList.contains('p48-resize')||e.target.classList.contains('p48-doc-open'))return;
   select(el);
   const sx=e.clientX,sy=e.clientY,ox=parseFloat(el.style.left)||0,oy=parseFloat(el.style.top)||0,pointerType=e.pointerType||'mouse';
   let mutated=false;
@@ -2447,7 +2518,8 @@ function typeLabel(type){
     decision:'Beslut',
     end:'Slut',
     subprocess:'Delprocess',
-    note:'Anteckning'
+    note:'Anteckning',
+    document:'Dokument'
   })[type]||String(type||'');
 }
 function processRowsForSheet(){
@@ -2463,6 +2535,7 @@ function processRowsForSheet(){
       d.id||'',
       typeLabel(d.type),
       d.text||'',
+      d.type==='document'?(d.documentUrl||''):'',
       Array.isArray(d.inputs)?d.inputs.filter(Boolean).join(' | '):'',
       Array.isArray(d.outputs)?d.outputs.filter(Boolean).join(' | '):'',
       outgoing.join(' | '),
@@ -2499,7 +2572,7 @@ function buildSheetXml(headers,rows,widths){
 function buildGoogleSheetsXlsx(){
   persist();
   const s=state();
-  const stepHeaders=['Ordning','ID','Typ','Text','Inputs','Outputs','Nästa steg','Föregående steg','X','Y','Bredd','Höjd'];
+  const stepHeaders=['Ordning','ID','Typ','Text','Dokumentlänk','Inputs','Outputs','Nästa steg','Föregående steg','X','Y','Bredd','Höjd'];
   const stepRows=processRowsForSheet();
   const nodeMap=new Map((s.nodes||[]).map(n=>[n.id,n]));
   const linkHeaders=['Från ID','Från steg','Till ID','Till steg','Anslutning'];
@@ -2511,7 +2584,7 @@ function buildGoogleSheetsXlsx(){
     l[2]||'right'
   ]);
 
-  const sheet1=buildSheetXml(stepHeaders,stepRows,[9,12,14,36,28,28,30,30,10,10,10,10]);
+  const sheet1=buildSheetXml(stepHeaders,stepRows,[9,12,14,36,42,28,28,30,30,10,10,10,10]);
   const sheet2=buildSheetXml(linkHeaders,linkRows,[14,34,14,34,14]);
 
   const contentTypes=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
@@ -3073,7 +3146,7 @@ function directGoogleSheetPayload(){
   const ordered=[...nodes.values()].map(x=>x.data).sort((a,b)=>((a.y||0)-(b.y||0))||((a.x||0)-(b.x||0)));
   const byId=new Map(ordered.map(n=>[n.id,n]));
   const step_rows=ordered.map((d,i)=>[
-    i+1,d.id||'',typeLabel(d.type),d.text||'',
+    i+1,d.id||'',typeLabel(d.type),d.text||'',d.type==='document'?(d.documentUrl||''):'',
     Array.isArray(d.inputs)?d.inputs.filter(Boolean).join(' | '):'',
     Array.isArray(d.outputs)?d.outputs.filter(Boolean).join(' | '):'',
     links.filter(l=>l[0]===d.id).map(l=>byId.get(l[1])?.text||l[1]).join(' | '),
@@ -3162,6 +3235,53 @@ bgDensity.addEventListener('change',()=>{
   if(!requireEdit())return;
   processPatternDensity=Number(bgDensity.value)||20;applyProcessStyle();persistAfterIdle();
 });
+
+processLogo.addEventListener('pointerdown',e=>{
+  if(!canEdit()||!processLogoData||processLogoHidden||e.button!==0)return;
+  e.preventDefault();e.stopPropagation();
+  clearSelection();
+  processLogo.classList.add('selected');
+  const pointerId=e.pointerId;
+  try{processLogo.setPointerCapture(pointerId)}catch(ignore){}
+  const start=clientToCanvas(e.clientX,e.clientY);
+  const startX=processLogoX,startY=processLogoY;
+  let mutated=false;
+  const move=ev=>{
+    if(ev.pointerId!==pointerId)return;
+    if(!canEdit()){finish(ev,true);return}
+    const p=clientToCanvas(ev.clientX,ev.clientY);
+    const dx=p.x-start.x,dy=p.y-start.y;
+    if(!mutated&&MapliniCanvasCore.hasMeaningfulDelta(dx,dy)){pushUndo(true);mutated=true}
+    if(!mutated)return;
+    processLogoX=Math.max(0,Math.min(canvas.scrollWidth-processLogo.offsetWidth,startX+dx));
+    processLogoY=Math.max(0,Math.min(canvas.scrollHeight-processLogo.offsetHeight,startY+dy));
+    processLogo.style.left=processLogoX+'px';
+    processLogo.style.top=processLogoY+'px';
+  };
+  const finish=(ev,cancelled=false)=>{
+    document.removeEventListener('pointermove',move);
+    document.removeEventListener('pointerup',up);
+    document.removeEventListener('pointercancel',cancel);
+    try{processLogo.releasePointerCapture(pointerId)}catch(ignore){}
+    if(cancelled&&!canEdit()){
+      processLogoX=startX;processLogoY=startY;
+      processLogo.style.left=processLogoX+'px';processLogo.style.top=processLogoY+'px';
+    }else if(mutated){
+      lastProcessStyleSignature='';
+      persist();
+      msg('Logotyp flyttad');
+    }
+  };
+  const up=ev=>{if(ev.pointerId===pointerId)finish(ev,false)};
+  const cancel=ev=>{if(ev.pointerId===pointerId)finish(ev,true)};
+  document.addEventListener('pointermove',move);
+  document.addEventListener('pointerup',up);
+  document.addEventListener('pointercancel',cancel);
+});
+canvas.addEventListener('pointerdown',e=>{
+  if(e.target!==processLogo)processLogo.classList.remove('selected');
+});
+
 logoSize.addEventListener('change',()=>{
   if(!requireEdit())return;
   processLogoWidth=Number(logoSize.value)||180;
@@ -3176,6 +3296,8 @@ logoRemove.addEventListener('click',()=>{
   if(!requireEdit())return;
   processLogoData='';
   processLogoHidden=false;
+  processLogoX=28;processLogoY=28;
+  processLogo.classList.remove('selected');
   logoFile.value='';
   applyProcessStyle();persistAfterIdle();
   msg('Logotype borttagen');
@@ -3219,6 +3341,19 @@ borderWidth.addEventListener('change',()=>{
 bold.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({fontWeight:styleOf(x.data).fontWeight==='700'?'400':'700'})});italic.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({fontStyle:styleOf(x.data).fontStyle==='italic'?'normal':'italic'})});under.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({textDecoration:styleOf(x.data).textDecoration==='underline'?'none':'underline'})});root.querySelectorAll('[data-align]').forEach(b=>b.addEventListener('click',()=>updateStyle({textAlign:b.dataset.align})));
 
 
+
+documentUrlInput.addEventListener('change',()=>{
+  if(!requireEdit())return;
+  const item=selectedId?nodes.get(selectedId):null;
+  if(!item||item.data.type!=='document')return;
+  const raw=documentUrlInput.value.trim();
+  if(raw&&!safeDocumentUrl(raw)){msg('Dokumentlänken måste börja med http:// eller https://');documentUrlInput.value=item.data.documentUrl||'';return}
+  pushUndo();
+  item.data.documentUrl=raw;
+  renderDocumentLink(item);
+  persist();
+  msg(raw?'Dokumentlänk sparad':'Dokumentlänk borttagen');
+});
 addInputBtn.addEventListener('click',()=>{if(!requireEdit())return;const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();ensureIO(item);item.data.inputs.push('Ny input');renderNodeIO(item);persist();refreshControls();});
 addOutputBtn.addEventListener('click',()=>{if(!requireEdit())return;const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();ensureIO(item);item.data.outputs.push('Ny output');renderNodeIO(item);persist();refreshControls();});
 

@@ -229,7 +229,7 @@ def test_v01015_mobile_palette_supports_tap_and_keyboard_add():
     html = _template()
     soup = BeautifulSoup(html, "html.parser")
     items = soup.select('.p48-item[role="button"][tabindex="0"]')
-    assert len(items) == 6
+    assert len(items) == 7
     assert "function addFromPalette(item,{closeMobile=false}={})" in APP
     assert "if(isMobileLayout()){e.preventDefault();addFromPalette(i,{closeMobile:true})}" in APP
     assert "if(e.key==='Enter'||e.key===' ')" in APP
@@ -280,7 +280,7 @@ def test_v01016_canvas_core_node_test_when_available():
 
 
 def test_v01017_ui_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.10.32"' in APP
+    assert 'APP_VERSION = "0.10.34"' in APP
     assert '_UI_CORE_PATH' in APP
     assert '__MAPLINI_UI_CORE__' in APP
     assert 'MapliniUiCore.selectionHint' in APP
@@ -322,7 +322,7 @@ def test_v01017_ui_core_contains_selection_hint_logic():
 
 
 def test_v01018_state_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.10.32"' in APP
+    assert 'APP_VERSION = "0.10.34"' in APP
     assert '_STATE_CORE_PATH' in APP
     assert '__MAPLINI_STATE_CORE__' in APP
     assert 'MapliniStateCore.normalizeProcess' in APP
@@ -352,7 +352,7 @@ def test_v01018_state_core_drops_orphan_links():
 
 
 def test_v01019_reliability_core_loaded():
-    assert 'APP_VERSION = "0.10.32"' in APP
+    assert 'APP_VERSION = "0.10.34"' in APP
     assert '_RELIABILITY_CORE_PATH' in APP
     assert '__MAPLINI_RELIABILITY_CORE__' in APP
 
@@ -382,7 +382,7 @@ def test_v01019_reliability_primitives():
 
 
 def test_v01020_export_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.10.32"' in APP
+    assert 'APP_VERSION = "0.10.34"' in APP
     assert '_EXPORT_CORE_PATH' in APP
     assert '__MAPLINI_EXPORT_CORE__' in APP
     assert 'MapliniExportCore.validateBytes' in APP
@@ -426,7 +426,7 @@ def test_v01021_connector_persistence_format_is_preserved():
     assert "nodeIds.has(l[0])&&nodeIds.has(l[1])" in STATE_CORE
 
 def test_v01021_workflow_core_loaded_and_history_centralized():
-    assert 'APP_VERSION = "0.10.32"' in APP
+    assert 'APP_VERSION = "0.10.34"' in APP
     assert '_WORKFLOW_CORE_PATH' in APP
     assert '__MAPLINI_WORKFLOW_CORE__' in APP
     assert 'MapliniWorkflowCore.emptyProcess' in APP
@@ -451,7 +451,7 @@ def test_v01021_workflow_core_when_node_available():
 
 
 def test_v01022_performance_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.10.32"' in APP
+    assert 'APP_VERSION = "0.10.34"' in APP
     assert '_PERFORMANCE_CORE_PATH' in APP
     assert '__MAPLINI_PERFORMANCE_CORE__' in APP
     assert 'MapliniPerformanceCore.signature' in APP
@@ -479,7 +479,7 @@ def test_v01022_performance_core_primitives_exist():
 
 
 def test_v01023_mobile_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.10.32"' in APP
+    assert 'APP_VERSION = "0.10.34"' in APP
     assert '_MOBILE_CORE_PATH' in APP
     assert '__MAPLINI_MOBILE_CORE__' in APP
     assert 'MapliniMobileCore.clientToLocal' in APP
@@ -518,7 +518,7 @@ def test_v01023_mobile_core_primitives():
 
 
 def test_v01024_selection_core_loaded_and_used():
-    assert 'APP_VERSION = "0.10.32"' in APP
+    assert 'APP_VERSION = "0.10.34"' in APP
     assert '_SELECTION_CORE_PATH' in APP
     assert '__MAPLINI_SELECTION_CORE__' in APP
     assert 'MapliniSelectionCore.deleteAction' in APP
@@ -546,7 +546,7 @@ def test_v01024_escape_and_undo_redo_refresh_context():
 
 
 def test_v01025_desktop_guard_is_present_without_mobile_selector_regression():
-    assert 'APP_VERSION = "0.10.32"' in APP
+    assert 'APP_VERSION = "0.10.34"' in APP
     html=_template()
     assert "/* v0.10.25 desktop regression guard */" in html
     assert "grid-template-columns:220px minmax(0,1fr)!important" in html
@@ -562,7 +562,7 @@ def test_v01025_dead_outer_canvas_css_removed():
 
 
 def test_v01026_sync_core_is_loaded_and_used():
-    assert 'APP_VERSION = "0.10.32"' in APP
+    assert 'APP_VERSION = "0.10.34"' in APP
     assert '_SYNC_CORE_PATH' in APP
     assert '__MAPLINI_SYNC_CORE__' in APP
     assert 'MapliniSyncCore.contentChanged' in APP
@@ -602,7 +602,7 @@ def test_v01026_signout_removes_unmodified_cloud_copies():
 
 
 def test_v01027_session_core_loaded_and_used():
-    assert 'APP_VERSION = "0.10.32"' in APP
+    assert 'APP_VERSION = "0.10.34"' in APP
     assert '_SESSION_CORE_PATH' in APP
     assert '__MAPLINI_SESSION_CORE__' in APP
     assert 'MapliniSessionCore.chooseWorkspace' in APP
@@ -645,7 +645,7 @@ def test_v01027_session_core_primitives():
 
 
 def test_v01028_rc_core_loaded_and_used():
-    assert 'APP_VERSION = "0.10.32"' in APP
+    assert 'APP_VERSION = "0.10.34"' in APP
     assert '_RC_CORE_PATH' in APP
     assert '__MAPLINI_RC_CORE__' in APP
     assert 'MapliniRcCore.captureScopeState' in APP
@@ -682,7 +682,7 @@ def test_v01028_rc_core_primitives():
 
 
 def test_v01029_flow_core_loaded_and_used():
-    assert 'APP_VERSION = "0.10.32"' in APP
+    assert 'APP_VERSION = "0.10.34"' in APP
     assert '_FLOW_CORE_PATH' in APP
     assert '__MAPLINI_FLOW_CORE__' in APP
     assert 'MapliniFlowCore.sharedProcess' in APP
@@ -723,7 +723,7 @@ def test_v01029_flow_core_primitives():
 
 
 def test_v01030_access_core_loaded_and_used():
-    assert 'APP_VERSION = "0.10.32"' in APP
+    assert 'APP_VERSION = "0.10.34"' in APP
     assert '_ACCESS_CORE_PATH' in APP
     assert '__MAPLINI_ACCESS_CORE__' in APP
     assert "function canEdit(){return MapliniAccessCore.canEdit" in APP
@@ -763,7 +763,7 @@ def test_v01030_access_core_role_rules():
 
 
 def test_v01031_privacy_core_loaded_and_used():
-    assert 'APP_VERSION = "0.10.32"' in APP
+    assert 'APP_VERSION = "0.10.34"' in APP
     assert '_PRIVACY_CORE_PATH' in APP
     assert '__MAPLINI_PRIVACY_CORE__' in APP
     assert "MapliniPrivacyCore.shouldPersistLocally" in APP
@@ -805,7 +805,7 @@ def test_v01031_privacy_core_rules():
 
 
 def test_v01032_save_local_has_privacy_guard():
-    assert 'APP_VERSION = "0.10.32"' in APP
+    assert 'APP_VERSION = "0.10.34"' in APP
     chunk=APP[APP.index("function saveLocal(immediate=false)"):APP.index("function loadLocal()")]
     assert "if(!MapliniPrivacyCore.shouldPersistLocally({sharedView}))return true" in chunk
 
@@ -839,3 +839,47 @@ def test_v01032_export_preflight_is_centralized_and_privacy_safe():
 def test_v01032_direct_google_export_reports_runtime_error():
     chunk=APP[APP.index("function createGoogleSheetDirect()"):APP.index("root.querySelector('#p48-pdf')")]
     assert "reportRuntimeError(e,'google-sheets-direct')" in chunk
+
+
+def test_v01033_process_logo_is_selectable_and_draggable():
+    assert 'APP_VERSION = "0.10.34"' in APP
+    assert ".p48-process-logo.selected" in APP
+    assert "processLogo.addEventListener('pointerdown'" in APP
+    chunk=APP[APP.index("processLogo.addEventListener('pointerdown'"):APP.index("logoSize.addEventListener")]
+    assert "if(!canEdit()" in chunk
+    assert "clientToCanvas" in chunk
+    assert "pushUndo(true)" in chunk
+    assert "processLogoX=" in chunk and "processLogoY=" in chunk
+    assert "persist()" in chunk
+    assert "pointercancel" in chunk
+
+def test_v01033_process_logo_position_persists():
+    state=APP[APP.index("function state()"):APP.index("const LOCAL_KEY")]
+    restore=APP[APP.index("function restore(s)"):APP.index("function openProcess")]
+    assert "processLogoX" in state and "processLogoY" in state
+    assert "processLogoX=Number.isFinite" in restore
+    assert "processLogoY=Number.isFinite" in restore
+
+
+def test_v01034_document_node_palette_and_state():
+    assert 'APP_VERSION = "0.10.34"' in APP
+    assert 'data-type="document"' in APP
+    assert "document:'Dokument'" in APP
+    assert ".p48-node.document" in APP
+
+def test_v01034_document_link_editor_and_safe_open():
+    assert 'id="p48-document-url"' in APP
+    assert "function safeDocumentUrl(value)" in APP
+    assert "u.protocol!=='http:'&&u.protocol!=='https:'" in APP
+    assert "function renderDocumentLink(item)" in APP
+    assert "window.open(url,'_blank','noopener,noreferrer')" in APP
+    assert "documentUrlInput.addEventListener('change'" in APP
+
+def test_v01034_document_link_does_not_start_node_drag():
+    make=APP[APP.index("function makeNode(data)"):APP.index("function addNode(type")]
+    assert "p48-doc-open" in make
+    assert "e.target.classList.contains('p48-doc-open')" in make
+
+def test_v01034_document_url_exports_to_sheets():
+    assert "'Dokumentlänk'" in APP
+    assert "d.type==='document'?(d.documentUrl||''):''" in APP

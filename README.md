@@ -1,8 +1,6 @@
-# Maplini v0.10.32
+# Maplini v0.10.34
 
-Final Pre-Push Audit & Cleanup, built directly on v0.10.31.
+Byggd direkt från v0.10.33.
 
-This candidate closes the remaining shared-browser privacy path, aligns shared-view with the centralized
-read-only UI, fixes inline-edit commit semantics and centralizes export preflight persistence.
-
-No Supabase migration, OAuth/secrets change, deployment action or new dependency is required.
+Ny nodtyp **Dokument** kan läggas på canvasen och kopplas till en extern dokumentlänk.
+Länken lagras i processens befintliga JSON-state och kräver ingen Supabase-migrering.
