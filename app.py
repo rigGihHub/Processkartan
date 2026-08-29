@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.10.37"
+APP_VERSION = "0.10.39"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -1004,7 +1004,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
             <input id="p48-size" type="number" min="10" max="36" value="13">
           </label>
         </div>
-        <button type="button" class="p48-btn p48-node-only" id="p48-font-all" style="width:100%;margin-top:7px">Använd typsnitt på all text</button>
+        <button type="button" class="p48-btn p48-node-only" id="p48-font-all" style="width:100%;margin-top:7px">Använd typsnitt + storlek på all text</button>
         
         <div class="p48-point-settings p48-node-only">
           <div class="p48-title">Kopplingspunkter</div>
@@ -1762,7 +1762,7 @@ function msg(t){status.textContent=t;setTimeout(()=>{if(status.textContent===t)s
 function safeRun(label,fn){try{const r=fn();if(r&&typeof r.then==='function')return r.catch(e=>{reportRuntimeError(e,label);return null});return r}catch(e){reportRuntimeError(e,label);return null}}
 function defBg(type){return {start:'#edf8f3',end:'#fff3f1',decision:'#fff8df',subprocess:'#f7f3ff',note:'#fffbe8',group:'#f8fafc',document:'#f3f8fc'}[type]||'#ffffff'}
 function styleOf(d){return{fontFamily:d.fontFamily||'Inter',fontSize:Number(d.fontSize||13),textColor:d.textColor||'#17202a',bgColor:d.bgColor||defBg(d.type),fontWeight:d.fontWeight||'700',fontStyle:d.fontStyle||'normal',textDecoration:d.textDecoration||'none',textAlign:d.textAlign||'center',borderColor:d.borderColor||'#637387',borderWidth:Number(d.borderWidth||2)}}
-function applyStyle(item){const s=styleOf(item.data);Object.assign(item.data,s);item.label.style.fontFamily=s.fontFamily;item.label.style.fontSize=s.fontSize+'px';item.label.style.color=s.textColor;item.label.style.fontWeight=s.fontWeight;item.label.style.fontStyle=s.fontStyle;item.label.style.textDecoration=s.textDecoration;item.label.style.textAlign=s.textAlign;item.el.style.background=s.bgColor;item.el.style.setProperty('--decision-bg',s.bgColor);if(item.data.type==='decision'){item.el.style.setProperty('--decision-border',s.borderColor);item.el.style.setProperty('--decision-border-width',s.borderWidth+'px')}else{item.el.style.borderColor=s.borderColor;item.el.style.borderWidth=s.borderWidth+'px'}}
+function applyStyle(item){const s=styleOf(item.data);Object.assign(item.data,s);item.el.style.fontFamily=s.fontFamily;item.label.style.fontFamily=s.fontFamily;item.label.style.fontSize=s.fontSize+'px';item.label.style.color=s.textColor;item.label.style.fontWeight=s.fontWeight;item.label.style.fontStyle=s.fontStyle;item.label.style.textDecoration=s.textDecoration;item.label.style.textAlign=s.textAlign;if(item.io){item.io.style.fontFamily=s.fontFamily;item.io.style.fontSize=Math.max(9,Math.round(s.fontSize*.72))+'px'}if(item.docOpen){item.docOpen.style.fontFamily=s.fontFamily;item.docOpen.style.fontSize=Math.max(9,Math.round(s.fontSize*.85))+'px'}item.el.style.background=s.bgColor;item.el.style.setProperty('--decision-bg',s.bgColor);if(item.data.type==='decision'){item.el.style.setProperty('--decision-border',s.borderColor);item.el.style.setProperty('--decision-border-width',s.borderWidth+'px')}else{item.el.style.borderColor=s.borderColor;item.el.style.borderWidth=s.borderWidth+'px'}}
 function safeDocumentUrl(value){
   const raw=String(value||'').trim();
   if(!raw)return '';
@@ -1783,7 +1783,16 @@ function renderDocumentLink(item){
     btn.addEventListener('click',e=>{
       e.stopPropagation();
       const url=safeDocumentUrl(item.data.documentUrl);
-      if(!url){e.preventDefault();select(item.el);msg('Lägg först till en giltig dokumentlänk');}
+      if(!url){
+        e.preventDefault();
+        select(item.el);
+        if(documentLinkEditor)documentLinkEditor.hidden=false;
+        if(documentUrlInput){
+          documentUrlInput.focus({preventScroll:true});
+          documentUrlInput.scrollIntoView({block:'nearest',behavior:'smooth'});
+        }
+        msg('Klistra in dokumentlänken i fältet Dokumentlänk');
+      }
     });
     item.el.appendChild(btn);item.docOpen=btn;
   }
@@ -1791,6 +1800,7 @@ function renderDocumentLink(item){
   if(valid)btn.href=valid;else btn.removeAttribute('href');
   btn.textContent=valid?'↗ Öppna dokument':'+ Lägg till dokumentlänk';
   btn.title=valid?valid:'Markera rutan och lägg till en dokumentlänk';
+  const ts=styleOf(item.data);btn.style.fontFamily=ts.fontFamily;btn.style.fontSize=Math.max(9,Math.round(ts.fontSize*.85))+'px';
 }
 
 function state(){
@@ -2142,6 +2152,7 @@ function renderNodeIO(item){
   if(item.data.inputs.length){const s=document.createElement('span');s.textContent='In: '+item.data.inputs.join(', ');item.io.appendChild(s);}
   if(item.data.outputs.length){const s=document.createElement('span');s.textContent='Out: '+item.data.outputs.join(', ');item.io.appendChild(s);}
   item.io.style.display=(item.data.inputs.length||item.data.outputs.length)?'grid':'none';
+  const ts=styleOf(item.data);item.io.style.fontFamily=ts.fontFamily;item.io.style.fontSize=Math.max(9,Math.round(ts.fontSize*.72))+'px';
 }
 function renderIOEditor(item){
   inputsBox.innerHTML='';outputsBox.innerHTML='';ensureIO(item);
@@ -3461,13 +3472,19 @@ font.addEventListener('change',()=>updateStyle({fontFamily:font.value}));
 fontAllBtn.addEventListener('click',()=>{
   if(!requireEdit())return;
   if(!nodes.size)return;
+  const globalFont=font.value;
+  const globalSize=Math.max(10,Math.min(36,Number(size.value)||13));
   pushUndo();
   for(const item of nodes.values()){
-    item.data.fontFamily=font.value;
+    item.data.fontFamily=globalFont;
+    item.data.fontSize=globalSize;
     applyStyle(item);
+    renderNodeIO(item);
+    renderDocumentLink(item);
   }
   persist();
-  msg('Typsnitt uppdaterat på all text');
+  refreshControls();
+  msg('Typsnitt och storlek uppdaterat på all text');
 });
 
 pointSize.addEventListener('change',()=>{

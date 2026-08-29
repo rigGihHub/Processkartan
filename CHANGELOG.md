@@ -1,5 +1,10 @@
 # v0.10.37 — BACKGROUND LIBRARY
 
+## 0.10.39 - Global text typography
+- Global formatting action now applies both selected font family and text size to all process nodes at once.
+- Inputs/Outputs and document-link text inherit the node typography consistently.
+- Global typography change is one Undo operation and persists with the process.
+
 Integrerad bakgrundsväljare i **Processyta ▾**.
 
 ## Mönstrade
@@ -25,3 +30,11 @@ Integrerad bakgrundsväljare i **Processyta ▾**.
 - Bakgrundsbilder begränsas till 1,5 MB för att skydda lokal lagring och backup
 
 Ingen Supabase-migrering, OAuth-, secret- eller dependency-ändring.
+
+# v0.10.38 — DOCUMENT LINK ADD FIX
+
+- Fixar **+ Lägg till dokumentlänk** direkt i en Dokument-ruta.
+- Klick markerar dokumentrutan, visar Dokument-panelen och fokuserar fältet **Dokumentlänk**.
+- Dokumentfältet scrollas fram vid behov så att länken kan klistras in direkt.
+- Befintliga giltiga dokumentlänkar fortsätter öppnas i ny flik.
+- Ingen databas-, dependency- eller konfigurationsändring.
