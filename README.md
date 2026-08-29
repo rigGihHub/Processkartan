@@ -1,8 +1,8 @@
-# Maplini v0.10.12
+# Maplini v0.10.32
 
-Mobilfix:
-- normal scroll upp/ned på Android och iPhone,
-- fortsatt horisontell panorering av canvas,
-- Verktyg öppnar vänsterpanelen,
-- toppraden ligger kvar som en rad,
-- loggan kapas inte längre på samma sätt.
+Final Pre-Push Audit & Cleanup, built directly on v0.10.31.
+
+This candidate closes the remaining shared-browser privacy path, aligns shared-view with the centralized
+read-only UI, fixes inline-edit commit semantics and centralizes export preflight persistence.
+
+No Supabase migration, OAuth/secrets change, deployment action or new dependency is required.

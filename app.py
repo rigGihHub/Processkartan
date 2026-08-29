@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.10.12"
+APP_VERSION = "0.10.32"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -16,6 +16,36 @@ _PUBLIC_APP_URL = st.secrets.get("app", {}).get("public_url", "https://processka
 _CLOUD_ENABLED = bool(_SUPABASE_URL and _SUPABASE_ANON_KEY)
 _CONNECTOR_CORE_PATH = Path(__file__).resolve().parent / "maplini_connector_core.js"
 _CONNECTOR_CORE_JS = _CONNECTOR_CORE_PATH.read_text(encoding="utf-8") if _CONNECTOR_CORE_PATH.exists() else ""
+_CANVAS_CORE_PATH = Path(__file__).resolve().parent / "maplini_canvas_core.js"
+_CANVAS_CORE_JS = _CANVAS_CORE_PATH.read_text(encoding="utf-8") if _CANVAS_CORE_PATH.exists() else ""
+_UI_CORE_PATH = Path(__file__).resolve().parent / "maplini_ui_core.js"
+_UI_CORE_JS = _UI_CORE_PATH.read_text(encoding="utf-8") if _UI_CORE_PATH.exists() else ""
+_STATE_CORE_PATH = Path(__file__).resolve().parent / "maplini_state_core.js"
+_STATE_CORE_JS = _STATE_CORE_PATH.read_text(encoding="utf-8") if _STATE_CORE_PATH.exists() else ""
+_RELIABILITY_CORE_PATH = Path(__file__).resolve().parent / "maplini_reliability_core.js"
+_RELIABILITY_CORE_JS = _RELIABILITY_CORE_PATH.read_text(encoding="utf-8") if _RELIABILITY_CORE_PATH.exists() else ""
+_EXPORT_CORE_PATH = Path(__file__).resolve().parent / "maplini_export_core.js"
+_EXPORT_CORE_JS = _EXPORT_CORE_PATH.read_text(encoding="utf-8") if _EXPORT_CORE_PATH.exists() else ""
+_WORKFLOW_CORE_PATH = Path(__file__).resolve().parent / "maplini_workflow_core.js"
+_WORKFLOW_CORE_JS = _WORKFLOW_CORE_PATH.read_text(encoding="utf-8") if _WORKFLOW_CORE_PATH.exists() else ""
+_PERFORMANCE_CORE_PATH = Path(__file__).resolve().parent / "maplini_performance_core.js"
+_PERFORMANCE_CORE_JS = _PERFORMANCE_CORE_PATH.read_text(encoding="utf-8") if _PERFORMANCE_CORE_PATH.exists() else ""
+_MOBILE_CORE_PATH = Path(__file__).resolve().parent / "maplini_mobile_core.js"
+_MOBILE_CORE_JS = _MOBILE_CORE_PATH.read_text(encoding="utf-8") if _MOBILE_CORE_PATH.exists() else ""
+_SELECTION_CORE_PATH = Path(__file__).resolve().parent / "maplini_selection_core.js"
+_SELECTION_CORE_JS = _SELECTION_CORE_PATH.read_text(encoding="utf-8") if _SELECTION_CORE_PATH.exists() else ""
+_SYNC_CORE_PATH = Path(__file__).resolve().parent / "maplini_sync_core.js"
+_SYNC_CORE_JS = _SYNC_CORE_PATH.read_text(encoding="utf-8") if _SYNC_CORE_PATH.exists() else ""
+_SESSION_CORE_PATH = Path(__file__).resolve().parent / "maplini_session_core.js"
+_SESSION_CORE_JS = _SESSION_CORE_PATH.read_text(encoding="utf-8") if _SESSION_CORE_PATH.exists() else ""
+_RC_CORE_PATH = Path(__file__).resolve().parent / "maplini_rc_core.js"
+_RC_CORE_JS = _RC_CORE_PATH.read_text(encoding="utf-8") if _RC_CORE_PATH.exists() else ""
+_FLOW_CORE_PATH = Path(__file__).resolve().parent / "maplini_flow_core.js"
+_FLOW_CORE_JS = _FLOW_CORE_PATH.read_text(encoding="utf-8") if _FLOW_CORE_PATH.exists() else ""
+_ACCESS_CORE_PATH = Path(__file__).resolve().parent / "maplini_access_core.js"
+_ACCESS_CORE_JS = _ACCESS_CORE_PATH.read_text(encoding="utf-8") if _ACCESS_CORE_PATH.exists() else ""
+_PRIVACY_CORE_PATH = Path(__file__).resolve().parent / "maplini_privacy_core.js"
+_PRIVACY_CORE_JS = _PRIVACY_CORE_PATH.read_text(encoding="utf-8") if _PRIVACY_CORE_PATH.exists() else ""
 
 
 st.markdown("""
@@ -25,21 +55,6 @@ st.markdown("""
 .block-container{padding:0.35rem 0.45rem 0.8rem;max-width:none}
 header[data-testid="stHeader"]{height:2rem}
 #MainMenu,footer{visibility:hidden}
-
-/* v0.8.5: permanent horizontal navigation for wide process maps */
-.p48-main,.p48-stage,.p48-canvas-wrap{min-width:0}
-.p48-canvas-wrap{
-  overflow-x:scroll !important;
-  overflow-y:auto !important;
-  scrollbar-gutter:stable both-edges;
-  max-width:100%;
-  padding-bottom:10px;
-}
-.p48-canvas-wrap::-webkit-scrollbar{height:14px;width:14px}
-.p48-canvas-wrap::-webkit-scrollbar-track{background:#eef2f5;border-radius:8px}
-.p48-canvas-wrap::-webkit-scrollbar-thumb{background:#9aa8b4;border-radius:8px;border:3px solid #eef2f5}
-.p48-canvas-wrap::-webkit-scrollbar-thumb:hover{background:#748491}
-#p48-canvas{min-width:2400px}
 
 
 .p48-account-unified{background:#fff}
@@ -93,6 +108,15 @@ header[data-testid="stHeader"]{height:2rem}
 .p48-link-handle.on{display:block}
 .p48-link-format{display:none;margin-top:12px;padding-top:10px;border-top:1px solid #e1e7ed}
 .p48-link-format.on{display:block}
+/* v0.10.15 contextual formatting: show only controls relevant to current selection */
+.p48-format[data-context="none"] #p48-controls{display:none}
+.p48-format[data-context="node"] .p48-link-format{display:none!important}
+.p48-format[data-context="link"] .p48-node-only{display:none!important}
+.p48-format[data-context="link"] .p48-link-format{display:block!important;margin-top:0;padding-top:0;border-top:0}
+.p48-step-io{display:none}
+.p48-step-io.on{display:block}
+.p48-palette-hint{display:none;font:600 10px system-ui;color:#71808f;margin:-2px 0 8px}
+@media(max-width:900px), (pointer:coarse) and (max-width:1100px){.p48-palette-hint{display:block}}
 .p48-link-format-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .p48-link-format label{font:700 10px system-ui;color:#657281}
 .p48-link-format input,.p48-link-format select{width:100%;margin-top:4px;border:1px solid #cfd7df;border-radius:7px;padding:6px;font:12px system-ui;background:#fff}
@@ -223,9 +247,18 @@ html = r"""
 <style>
 /* v0.10.12 mobile shell — real DOM + vertical scrolling */
 .p48-mobile-tools-btn,.p48-mobile-backdrop{display:none}
-.p48-node,.p48-handle,.p48-resize-handle,.p48-link-hit-segment{touch-action:none}
+.p48-node,.p48-handle,.p48-resize,.p48-link-hit-segment{touch-action:none}
 .p48-scroll{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 button,summary,select,input{-webkit-tap-highlight-color:transparent}
+
+/* v0.10.15 contextual sidebar */
+.p48-format[data-context="none"] #p48-controls{display:none}
+.p48-format[data-context="node"] .p48-link-format{display:none!important}
+.p48-format[data-context="link"] .p48-node-only{display:none!important}
+.p48-format[data-context="link"] .p48-link-format{display:block!important;margin-top:0;padding-top:0;border-top:0}
+.p48-step-io{display:none}
+.p48-step-io.on{display:block}
+.p48-palette-hint{display:none;font:600 10px system-ui;color:#71808f;margin:-2px 0 8px}
 
 @media (max-width:900px), (pointer:coarse) and (max-width:1100px){
   html,body{
@@ -296,6 +329,8 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
     z-index:1!important;
   }
   .p48-canvas-wrap,#p48-canvas{width:2400px!important;min-width:2400px!important;height:1400px!important;min-height:1400px!important}
+  #p48-canvas{touch-action:pan-x pan-y!important}
+  #p48-canvas.p48-selection-mode{touch-action:none!important}
   .p48-canvas-wrap{padding-bottom:24px!important}
 
   .p48-side{
@@ -315,8 +350,11 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   .p48-side button,.p48-side select,.p48-side input{min-height:44px;font-size:16px!important}
   .p48-side input[type="color"]{min-height:44px}
   .p48-item{min-height:48px}
+  .p48-palette-hint{display:block}
   .p48-node.selected .p48-handle{min-width:12px!important;min-height:12px!important}
-  .p48-resize-handle{min-width:16px!important;min-height:16px!important}
+  .p48-node.selected .p48-handle::after{content:"";position:absolute;inset:-8px;border-radius:50%}
+  .p48-resize{min-width:16px!important;min-height:16px!important}
+  .p48-resize::after{content:"";position:absolute;inset:-7px}
 
   .p48-canvas-popover,.p48-sheets-popover{
     position:fixed!important;left:10px!important;right:10px!important;top:auto!important;
@@ -376,6 +414,58 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   height:1400px;
   margin:0;
   padding:0;
+}
+
+/* v0.10.25 desktop regression guard */
+@media (min-width:1101px), (min-width:901px) and (pointer:fine){
+  .p48-mobile-tools-btn,.p48-mobile-backdrop{display:none!important}
+  .p48-top{
+    position:relative!important;
+    display:flex!important;
+    align-items:center!important;
+    flex-wrap:wrap!important;
+    overflow:visible!important;
+    width:auto!important;
+    max-width:none!important;
+    min-height:0!important;
+  }
+  .p48-body{
+    display:grid!important;
+    grid-template-columns:220px minmax(0,1fr)!important;
+    position:relative!important;
+    width:auto!important;
+    height:900px!important;
+    min-height:900px!important;
+    overflow:hidden!important;
+  }
+  .p48-side{
+    grid-column:1!important;
+    position:relative!important;
+    inset:auto!important;
+    width:auto!important;
+    height:900px!important;
+    max-height:900px!important;
+    transform:none!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    z-index:auto!important;
+    box-shadow:none!important;
+  }
+  .p48-scroll{
+    grid-column:2!important;
+    position:relative!important;
+    inset:auto!important;
+    width:auto!important;
+    height:900px!important;
+    min-height:900px!important;
+    max-height:900px!important;
+    overflow:auto!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    z-index:auto!important;
+  }
 }
 
 /* visible version */
@@ -448,6 +538,8 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-node.selected .p48-handle{opacity:1!important;pointer-events:auto!important}
 .p48-node.multi-selected:not(.selected) .p48-handle{opacity:0!important;pointer-events:none!important}
 #p48-canvas.p48-hide-points .p48-handle{display:none!important}
+#p48-canvas.p48-readonly .p48-handle,#p48-canvas.p48-readonly .p48-resize{display:none!important}
+#p48-canvas.p48-readonly .p48-node{cursor:default!important}
 .p48-point-settings{margin-top:10px;padding-top:10px;border-top:1px solid #e1e7ed}
 .p48-point-settings .p48-point-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .p48-point-settings label{font:700 10px system-ui;color:#657281}
@@ -582,6 +674,16 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-node.decision .p48-resize.ne{right:5px;top:5px}
 .p48-node.decision .p48-resize.nw{left:5px;top:5px}
 @media(max-width:850px){.p48-body{grid-template-columns:1fr}.p48-side{border-right:0;border-bottom:1px solid #dce2e8}}
+.p48-btn:focus-visible,.p48-mini:focus-visible,.p48-addio:focus-visible,.p48-item:focus-visible,
+.p48-side input:focus-visible,.p48-side select:focus-visible,.p48-name:focus-visible{
+  outline:3px solid rgba(37,99,235,.38);
+  outline-offset:2px;
+}
+.p48-item:focus-visible{cursor:pointer}
+.p48-node.selected{box-shadow:0 0 0 3px rgba(37,99,235,.16)}
+.p48-node.multi-selected{box-shadow:0 0 0 3px rgba(14,165,233,.14)}
+.p48-runtime-error{display:inline-flex;align-items:center;max-width:520px;padding:6px 9px;border:1px solid #fecaca;border-radius:8px;background:#fff7f7;color:#991b1b;font-size:12px;font-weight:600;white-space:normal}
+.p48-runtime-error[hidden]{display:none!important}
 </style>
 
 <div class="p48-brand">
@@ -594,14 +696,14 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 <div class="p48-top">
   <strong>Process</strong>
   <input id="p48-name" class="p48-name" value="Exempel – upphandlingsprocess" aria-label="Processnamn">
-  <button type="button" class="p48-btn primary" id="p48-new">+ Ny process</button>
+  <button type="button" class="p48-btn primary" id="p48-new" title="Skapa ny process">+ Ny process</button>
   <button type="button" class="p48-btn p48-mobile-tools-btn" id="p48-mobile-tools" aria-expanded="false" aria-controls="p48-side">☰ Verktyg</button>
-  <button type="button" class="p48-btn" id="p48-save">Spara</button>
+  <button type="button" class="p48-btn" id="p48-save" title="Spara process">Spara</button>
   
-  <button type="button" class="p48-btn" id="p48-share">Dela</button>
+  <button type="button" class="p48-btn" id="p48-share" title="Dela aktuell process">Dela</button>
   <div class="p48-sharebox" id="p48-sharebox"><input id="p48-share-url" readonly><button type="button" class="p48-mini" id="p48-copy-share">Kopiera länk</button></div>
-  <button type="button" class="p48-btn" id="p48-undo">↶ Ångra</button>
-  <button type="button" class="p48-btn" id="p48-redo">↷ Gör om</button>
+  <button type="button" class="p48-btn" id="p48-undo" title="Ångra (Ctrl/Cmd+Z)">↶ Ångra</button>
+  <button type="button" class="p48-btn" id="p48-redo" title="Gör om (Ctrl/Cmd+Shift+Z eller Ctrl/Cmd+Y)">↷ Gör om</button>
   <details class="p48-canvas-menu">
   <summary class="p48-btn">Processyta ▾</summary>
   <div class="p48-canvas-popover">
@@ -669,8 +771,8 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
     <option value="3">3 sidor</option>
     <option value="4">4 sidor</option>
   </select>
-  <button type="button" class="p48-btn" id="p48-select-tool">Markera område</button>
-  <button type="button" class="p48-btn" id="p48-delete-selection" disabled>Ta bort markerat</button>
+  <button type="button" class="p48-btn" id="p48-select-tool" aria-pressed="false" title="Markera flera objekt eller kopplingar">Markera område</button>
+  <button type="button" class="p48-btn" id="p48-delete-selection" disabled title="Ta bort markerat (Delete/Backspace)">Ta bort markerat</button>
   <span class="p48-spacer"></span>
   <button type="button" class="p48-btn primary" id="p48-pdf">Exportera PDF</button>
   <button type="button" class="p48-btn" id="p48-doc">Exportera DOCX</button>
@@ -683,7 +785,8 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   </details>
   
   
-  <span id="p48-status" class="p48-status"></span>
+  <span id="p48-status" class="p48-status" role="status" aria-live="polite"></span>
+<span id="p48-runtime-error" class="p48-runtime-error" role="alert" aria-live="assertive" hidden></span>
 </div>
 
 <div class="p48-body">
@@ -733,13 +836,14 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
     </div>
 
     <div class="p48-section">
-      <div class="p48-title">Dra till arbetsytan</div>
-      <div class="p48-item" draggable="true" data-type="start"><span class="p48-icon">▶</span>Start</div>
-      <div class="p48-item" draggable="true" data-type="process"><span class="p48-icon">□</span>Aktivitet</div>
-      <div class="p48-item" draggable="true" data-type="decision"><span class="p48-icon">◇</span>Beslut</div>
-      <div class="p48-item" draggable="true" data-type="end"><span class="p48-icon">■</span>Slut</div>
-      <div class="p48-item" draggable="true" data-type="subprocess"><span class="p48-icon">▣</span>Delprocess</div>
-      <div class="p48-item" draggable="true" data-type="note"><span class="p48-icon">N</span>Anteckning</div>
+      <div class="p48-title">Lägg till på arbetsytan</div>
+      <div class="p48-palette-hint">Tryck på en form för att lägga till den. På dator kan du även dra.</div>
+      <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Start" title="Dra eller tryck för att lägga till" data-type="start"><span class="p48-icon">▶</span>Start</div>
+      <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Aktivitet" title="Dra eller tryck för att lägga till" data-type="process"><span class="p48-icon">□</span>Aktivitet</div>
+      <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Beslut" title="Dra eller tryck för att lägga till" data-type="decision"><span class="p48-icon">◇</span>Beslut</div>
+      <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Slut" title="Dra eller tryck för att lägga till" data-type="end"><span class="p48-icon">■</span>Slut</div>
+      <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Delprocess" title="Dra eller tryck för att lägga till" data-type="subprocess"><span class="p48-icon">▣</span>Delprocess</div>
+      <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Anteckning" title="Dra eller tryck för att lägga till" data-type="note"><span class="p48-icon">N</span>Anteckning</div>
       <div class="p48-step-io">
         <div class="p48-io-wrap">
           <div class="p48-io-title">Inputs</div>
@@ -752,11 +856,11 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
       </div>
     </div>
 
-    <div class="p48-format">
+    <div class="p48-format" id="p48-format-panel" data-context="none">
       <div class="p48-title">Formatering</div>
-      <div class="p48-sub">Markera en ruta för att ändra dess text, färger och formatering.</div>
+      <div class="p48-sub" id="p48-format-hint">Markera en ruta eller koppling för att visa relevanta inställningar.</div>
       <div id="p48-controls">
-        <div class="p48-format-grid-clean">
+        <div class="p48-format-grid-clean p48-node-only">
           <label>Typsnitt
             <select id="p48-font">
 <option value="Inter">Inter</option>
@@ -792,9 +896,9 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
             <input id="p48-size" type="number" min="10" max="36" value="13">
           </label>
         </div>
-        <button type="button" class="p48-btn" id="p48-font-all" style="width:100%;margin-top:7px">Använd typsnitt på all text</button>
+        <button type="button" class="p48-btn p48-node-only" id="p48-font-all" style="width:100%;margin-top:7px">Använd typsnitt på all text</button>
         
-        <div class="p48-point-settings">
+        <div class="p48-point-settings p48-node-only">
           <div class="p48-title">Kopplingspunkter</div>
           <div class="p48-point-grid">
             <label>Storlek
@@ -816,22 +920,22 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
           </label>
         </div>
           
-          <div><label>Textfärg</label><input id="p48-textcolor" type="color" value="#17202a"></div>
-          <div><label>Bakgrund</label><input id="p48-bgcolor" type="color" value="#ffffff"></div>
+          <div class="p48-node-only"><label>Textfärg</label><input id="p48-textcolor" type="color" value="#17202a"></div>
+          <div class="p48-node-only"><label>Bakgrund</label><input id="p48-bgcolor" type="color" value="#ffffff"></div>
           <div><label>Kantfärg</label><input id="p48-bordercolor" type="color" value="#637387"></div>
           <div><label>Kanttjocklek</label><select id="p48-borderwidth"><option value="1">1 px</option><option value="2" selected>2 px</option><option value="3">3 px</option><option value="4">4 px</option><option value="6">6 px</option></select></div>
         </div>
-        <div class="p48-actions">
+        <div class="p48-actions p48-node-only">
           <button type="button" class="p48-mini" id="p48-bold"><b>B</b></button>
           <button type="button" class="p48-mini" id="p48-italic"><i>I</i></button>
           <button type="button" class="p48-mini" id="p48-under"><u>U</u></button>
         </div>
-        <div class="p48-actions">
+        <div class="p48-actions p48-node-only">
           <button type="button" class="p48-mini" data-align="left">Vänster</button>
           <button type="button" class="p48-mini" data-align="center">Centrera</button>
           <button type="button" class="p48-mini" data-align="right">Höger</button>
         </div>
-        <button type="button" class="p48-btn" id="p48-delete-node" style="width:100%;margin-top:10px;color:#a43d34;border-color:#e0c4c1">Ta bort markerad ruta</button>
+        <button type="button" class="p48-btn p48-node-only" id="p48-delete-node" style="width:100%;margin-top:10px;color:#a43d34;border-color:#e0c4c1">Ta bort markerad ruta</button>
 
         <div id="p48-link-format" class="p48-link-format">
           <div class="p48-title">Formatera koppling</div>
@@ -865,15 +969,41 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 </div>
 
 <script>__MAPLINI_CONNECTOR_CORE__</script>
+<script>__MAPLINI_CANVAS_CORE__</script>
+<script>__MAPLINI_UI_CORE__</script>
+<script>__MAPLINI_STATE_CORE__</script>
+<script>__MAPLINI_RELIABILITY_CORE__</script>
+<script>__MAPLINI_EXPORT_CORE__</script>
+<script>__MAPLINI_WORKFLOW_CORE__</script>
+<script>__MAPLINI_PERFORMANCE_CORE__</script>
+<script>__MAPLINI_MOBILE_CORE__</script>
+<script>__MAPLINI_SELECTION_CORE__</script>
+<script>__MAPLINI_SYNC_CORE__</script>
+<script>__MAPLINI_SESSION_CORE__</script>
+<script>__MAPLINI_RC_CORE__</script>
+<script>__MAPLINI_FLOW_CORE__</script>
+<script>__MAPLINI_ACCESS_CORE__</script>
+<script>__MAPLINI_PRIVACY_CORE__</script>
 <script>
 (()=>{
 const root=document.getElementById('pk48'); if(!root||root.dataset.ready==='1')return; root.dataset.ready='1';
+const runtimeErrorEl=root.querySelector('#p48-runtime-error');
+function reportRuntimeError(error,context='runtime'){
+  const info=MapliniReliabilityCore.errorInfo(error,context);
+  console.error('[Maplini]',info.context,info.message,error);
+  if(runtimeErrorEl){runtimeErrorEl.textContent='Ett fel inträffade. Ditt senaste lokala läge har inte raderats.';runtimeErrorEl.hidden=false;}
+  try{localStorage.setItem('maplini_last_runtime_error',JSON.stringify(info))}catch(ignore){}
+  return info;
+}
+function clearRuntimeError(){if(runtimeErrorEl){runtimeErrorEl.hidden=true;runtimeErrorEl.textContent='';}}
+window.addEventListener('error',e=>reportRuntimeError(e.error||e.message,'window.error'));
+window.addEventListener('unhandledrejection',e=>reportRuntimeError(e.reason,'unhandledrejection'));
 const canvas=root.querySelector('#p48-canvas'),scroll=root.querySelector('#p48-scroll'),linkLayer=root.querySelector('#p48-links'),temp=root.querySelector('#p48-temp');
 const mobileToolsBtn=root.querySelector('#p48-mobile-tools'),mobileBackdrop=root.querySelector('#p48-mobile-backdrop'),sidePanel=root.querySelector('#p48-side');
 const linkHitLayer=root.querySelector('#p48-link-hit-layer');
 const hnav=root.querySelector('#p48-hnav'),hnavInner=root.querySelector('#p48-hnav-inner');
 const nameInput=root.querySelector('#p48-name'),status=root.querySelector('#p48-status'),processBox=root.querySelector('#p48-processes');
-const controls=root.querySelector('#p48-controls'),font=root.querySelector('#p48-font'),size=root.querySelector('#p48-size'),textColor=root.querySelector('#p48-textcolor'),bgColor=root.querySelector('#p48-bgcolor');
+const controls=root.querySelector('#p48-controls'),formatPanel=root.querySelector('#p48-format-panel'),formatHint=root.querySelector('#p48-format-hint'),font=root.querySelector('#p48-font'),size=root.querySelector('#p48-size'),textColor=root.querySelector('#p48-textcolor'),bgColor=root.querySelector('#p48-bgcolor');
 const bold=root.querySelector('#p48-bold'),italic=root.querySelector('#p48-italic'),under=root.querySelector('#p48-under');
 const fontAllBtn=root.querySelector('#p48-font-all');
 const pointSize=root.querySelector('#p48-point-size'),pointColor=root.querySelector('#p48-point-color'),hidePoints=root.querySelector('#p48-hide-points');
@@ -904,6 +1034,8 @@ let processBackground='#ffffff',processBackgroundType='solid',processPatternColo
 const SUPABASE_URL="__SUPABASE_URL__", SUPABASE_ANON_KEY="__SUPABASE_ANON_KEY__", PUBLIC_APP_URL="__PUBLIC_APP_URL__";
 const CLOUD_ENABLED=SUPABASE_URL.length>0&&SUPABASE_ANON_KEY.length>0;
 let cloudSession=null,sharedView=false;
+let cloudLoadedProcessIds=new Set();
+let cloudLoadedProcessScopes=new Map();
 let currentWorkspaceId=null,currentRole='owner',printPreview=false;
 let pdfView='A3L',pageCountMode='auto';
 
@@ -954,11 +1086,30 @@ const starter={id:'proc-1',name:'Exempel – upphandlingsprocess',nodes:[
 
 
 function cloudKey(){return'maplini_supabase_session'}
+function workspacePrefKey(){return MapliniSessionCore.workspacePrefKey(ownerId())}
+function loadWorkspacePreference(){
+  if(!ownerId())return null;
+  try{return localStorage.getItem(workspacePrefKey())||null}catch(e){return null}
+}
+function saveWorkspacePreference(id){
+  if(!ownerId())return;
+  try{
+    const key=workspacePrefKey();
+    if(id)localStorage.setItem(key,id);else localStorage.removeItem(key);
+  }catch(e){}
+}
+function resetWorkspaceState(){
+  currentWorkspaceId=null;currentRole='owner';
+  if(workspaceSelect){workspaceSelect.innerHTML='<option value="">Personligt</option>';workspaceSelect.value=''}
+  if(roleBadge)roleBadge.textContent='Owner';
+  applyRoleUi();
+}
+
 function updateAccountUi(){
  const logged=!!(cloudSession?.access_token&&cloudSession?.user);
  signedOut.hidden=logged;signedIn.hidden=!logged;
  if(logged)userEmail.textContent=cloudSession.user.email||'Inloggad';
- shareBtn.disabled=!logged||!CLOUD_ENABLED||sharedView;
+ shareBtn.disabled=!logged||!CLOUD_ENABLED||sharedView||!MapliniAccessCore.canEdit({sharedView,currentRole});
  if(CLOUD_ENABLED&&logged){cloudBadge.className='p48-cloud-badge';cloudBadge.textContent='Moln anslutet';cloudHelp.textContent='Spara och dela mellan enheter.'}
  else if(CLOUD_ENABLED){cloudBadge.className='p48-cloud-badge off';cloudBadge.textContent='Ej inloggad';cloudHelp.textContent='Logga in för molnlagring.'}
  else{cloudBadge.className='p48-cloud-badge off';cloudBadge.textContent='Lokal lagring';cloudHelp.textContent='Lägg in Supabase i Streamlit Secrets.'}
@@ -1021,7 +1172,10 @@ async function testSupabaseConnection(){
   }
 }
 async function validateSession(){
-  if(!cloudSession?.access_token)return false;
+  if(!cloudSession?.access_token){
+    resetWorkspaceState();
+    return false;
+  }
   try{
     const u=await sb('/auth/v1/user',{method:'GET'},true);
     if(u&&u.id){
@@ -1031,8 +1185,9 @@ async function validateSession(){
     }
   }catch(e){
     console.warn('Session invalid',e);
-    saveCloudSession(null);
   }
+  cloudLoadedProcessIds.clear();cloudLoadedProcessScopes.clear();
+  saveCloudSession(null);resetWorkspaceState();
   return false;
 }
 async function signIn(){
@@ -1046,7 +1201,10 @@ async function signIn(){
     },false);
     if(!d?.access_token)throw new Error('Supabase returnerade ingen access token.');
     saveCloudSession(d);
-    await validateSession();
+    const valid=await validateSession();
+    if(!valid)throw new Error('Sessionen kunde inte verifieras.');
+    await loadWorkspaces();
+    applyRoleUi();
     msg('Inloggad');
     await loadCloudProcesses();
   }catch(e){
@@ -1067,7 +1225,10 @@ async function signUp(){
     },false);
     if(d?.access_token){
       saveCloudSession(d);
-      await validateSession();
+      const valid=await validateSession();
+      if(!valid)throw new Error('Sessionen kunde inte verifieras.');
+      await loadWorkspaces();
+      applyRoleUi();
       msg('Konto skapat och inloggat');
       await loadCloudProcesses();
     }else if(d?.user){
@@ -1083,37 +1244,170 @@ async function signUp(){
     msg(text);
   }
 }
-function signOut(){clearAuthError();saveCloudSession(null);msg('Utloggad')}
+function signOut(){
+  clearAuthError();
+  persist(false,false);saveLocal(true);
+  const plan=MapliniSyncCore.signOutPlan(processes,[...cloudLoadedProcessIds],currentId);
+  processes=plan.processes;currentId=plan.currentId||currentId;
+  cloudLoadedProcessIds.clear();cloudLoadedProcessScopes.clear();
+  saveCloudSession(null);resetWorkspaceState();
+  if(plan.removedIds.length){
+    if(processes[currentId])restore(processes[currentId]);
+    else{
+      currentId=uid();
+      processes[currentId]=MapliniWorkflowCore.emptyProcess(currentId,'Ny process');
+      processes[currentId].localModifiedAt=Date.now();
+      restore(processes[currentId]);
+    }
+    saveLocal(true);renderProcesses(true);
+  }
+  msg(plan.preservedModifiedIds.length?'Utloggad · lokalt ändrade processer behölls':'Utloggad');
+}
 function ownerId(){return cloudSession?.user?.id||null}
-async function saveCurrentToCloud(){if(!ownerId())throw new Error('Logga in först');persist();await sb('/rest/v1/processes?on_conflict=id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({id:currentId,owner_id:ownerId(),workspace_id:currentWorkspaceId,name:state().name,data:state(),updated_at:new Date().toISOString()})});msg('Sparad i molnet')}
-async function loadCloudProcesses(){if(!ownerId())return;try{const q=currentWorkspaceId
-      ?('/rest/v1/processes?select=id,name,data&workspace_id=eq.'+encodeURIComponent(currentWorkspaceId)+'&order=updated_at.desc')
-      :('/rest/v1/processes?select=id,name,data&workspace_id=is.null&order=updated_at.desc');
-    const rows=await sb(q);for(const row of(rows||[]))if(row.data&&row.id)processes[row.id]=Object.assign({},row.data,{id:row.id,name:row.name||row.data.name});saveLocal();renderProcesses()}catch(e){console.error(e);msg('Kunde inte läsa molnet')}}
+async function saveCurrentToCloud(){
+  if(!requireEdit())throw new Error('Endast visning');
+  if(!ownerId())throw new Error('Logga in först');
+  persist(false,false);
+  const localOk=saveLocal(true);
+  const st=clone(processes[currentId]||state());
+  const updatedAt=new Date().toISOString();
+  await sb('/rest/v1/processes?on_conflict=id',{
+    method:'POST',
+    headers:{Prefer:'resolution=merge-duplicates,return=minimal'},
+    body:JSON.stringify({id:currentId,owner_id:ownerId(),workspace_id:currentWorkspaceId,name:st.name,data:st,updated_at:updatedAt})
+  });
+  processes[currentId]=Object.assign({},st,{cloudUpdatedAt:updatedAt});
+  cloudLoadedProcessIds.add(currentId);
+  cloudLoadedProcessScopes.set(currentId,MapliniSessionCore.scopeKey(currentWorkspaceId));
+  saveLocal(true);
+  return {localOk,cloudOk:true,updatedAt};
+}
+async function loadCloudProcesses(){
+  if(!ownerId())return false;
+  persist(false,false);saveLocal(true);
+  const before=MapliniRcCore.captureScopeState(processes,currentId,cloudLoadedProcessIds,cloudLoadedProcessScopes);
+  try{
+    const scope=MapliniSessionCore.scopeKey(currentWorkspaceId);
+    const staleIds=[...cloudLoadedProcessScopes.entries()].filter(([,s])=>s!==scope).map(([id])=>id);
+    if(staleIds.length){
+      const plan=MapliniSyncCore.signOutPlan(processes,staleIds,currentId);
+      processes=plan.processes;currentId=plan.currentId||currentId;
+      for(const id of staleIds){cloudLoadedProcessIds.delete(id);cloudLoadedProcessScopes.delete(id)}
+      if(!processes[currentId]){
+        currentId=uid();processes[currentId]=MapliniWorkflowCore.emptyProcess(currentId,'Ny process');
+        processes[currentId].localModifiedAt=Date.now();
+      }
+      restore(processes[currentId]);
+    }
+    const q=currentWorkspaceId
+      ?('/rest/v1/processes?select=id,name,data,updated_at&workspace_id=eq.'+encodeURIComponent(currentWorkspaceId)+'&order=updated_at.desc')
+      :('/rest/v1/processes?select=id,name,data,updated_at&workspace_id=is.null&order=updated_at.desc');
+    const rows=await sb(q);
+    const merged=MapliniSyncCore.mergeCloudRows(processes,rows||[]);
+    processes=merged.processes;
+    for(const id of merged.cloudLoadedIds){cloudLoadedProcessIds.add(id);cloudLoadedProcessScopes.set(id,scope)}
+    currentId=MapliniRcCore.ensureCurrentId(processes,currentId,merged.cloudLoadedIds);
+    if(processes[currentId])restore(processes[currentId]);
+    saveLocal(true);renderProcesses(true);refreshControls();refreshLinkControls();updateSelectionUi();
+    if(merged.preservedLocalIds.length)msg('Molnet läst · nyare lokala ändringar behölls');
+    return true;
+  }catch(e){
+    const restored=MapliniRcCore.restoreScopeState(before);
+    processes=restored.processes;currentId=restored.currentId;
+    cloudLoadedProcessIds=new Set(restored.cloudLoadedIds);
+    cloudLoadedProcessScopes=new Map(restored.cloudLoadedScopes);
+    if(processes[currentId])restore(processes[currentId]);
+    saveLocal(true);renderProcesses(true);refreshControls();refreshLinkControls();updateSelectionUi();
+    console.error(e);reportRuntimeError(e,'cloud-load');msg('Kunde inte läsa molnet · tidigare läge återställt');
+    return false;
+  }
+}
 function shareToken(){return crypto?.randomUUID?crypto.randomUUID().replace(/-/g,''):Math.random().toString(36).slice(2)+Date.now().toString(36)}
-async function shareCurrent(){try{await saveCurrentToCloud();const rows=await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(currentId)+'&select=share_token');const token=rows?.[0]?.share_token||shareToken();await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(currentId),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({share_token:token,share_mode:'view'})});shareUrlInput.value=PUBLIC_APP_URL.replace(/\/$/,'')+'?share='+token;shareBox.style.display='block';msg('Delningslänk skapad')}catch(e){console.error(e);msg('Delning misslyckades')}}
-async function loadShared(token){if(!CLOUD_ENABLED||!token)return false;try{const rows=await sb('/rest/v1/processes?share_token=eq.'+encodeURIComponent(token)+'&share_mode=eq.view&select=id,name,data',{},false);if(rows?.length){const row=rows[0];sharedView=true;currentId=row.id;processes={[row.id]:Object.assign({},row.data,{id:row.id,name:row.name||row.data.name})};restore(processes[row.id]);renderProcesses();root.querySelectorAll('.p48-item,.p48-format input,.p48-format select,.p48-format button,.p48-step-io input,.p48-step-io button').forEach(el=>{el.style.pointerEvents='none';el.style.opacity='.5'});root.querySelector('#p48-new').disabled=true;root.querySelector('#p48-save').disabled=true;updateAccountUi();msg('Delad process – endast visning');return true}}catch(e){console.error(e)}return false}
-async function deleteCloud(id){if(ownerId())try{await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:{Prefer:'return=minimal'}})}catch(e){console.error(e)}}
+async function shareCurrent(){try{await saveCurrentToCloud();const rows=await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(currentId)+'&select=share_token');const token=rows?.[0]?.share_token||shareToken();await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(currentId),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({share_token:token,share_mode:'view'})});shareUrlInput.value=PUBLIC_APP_URL.replace(/\/$/,'')+'?share='+token;shareBox.style.display='block';msg('Delningslänk skapad')}catch(e){console.error(e);reportRuntimeError(e,'share-current');msg('Delning misslyckades')}}
+async function loadShared(token){
+  if(!CLOUD_ENABLED||!token)return false;
+  try{
+    const rows=await sb('/rest/v1/processes?share_token=eq.'+encodeURIComponent(token)+'&share_mode=eq.view&select=id,name,data',{},false);
+    if(!rows?.length){msg('Delningslänken är ogiltig eller inte längre aktiv');return false}
+    const row=rows[0];
+    const candidate=MapliniFlowCore.sharedProcess(row);
+    if(!candidate||!MapliniReliabilityCore.isUsableProcess(candidate)){
+      reportRuntimeError(new Error('Invalid shared process payload'),'shared-load');
+      msg('Den delade processen kunde inte läsas');
+      return false;
+    }
+    sharedView=true;currentId=candidate.id;processes={[candidate.id]:candidate};
+    if(!restore(candidate)){
+      sharedView=false;processes={};
+      msg('Den delade processen kunde inte öppnas');
+      return false;
+    }
+    renderProcesses();
+    updateAccountUi();applyRoleUi();refreshControls();refreshLinkControls();updateSelectionUi();
+    msg('Delad process – endast visning');return true;
+  }catch(e){
+    console.error(e);reportRuntimeError(e,'shared-load');msg('Kunde inte läsa delningslänken');return false;
+  }
+}
+async function deleteCloud(id){
+  if(!ownerId())return true;
+  try{
+    await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(id),{method:'DELETE',headers:{Prefer:'return=minimal'}});
+    return true;
+  }catch(e){
+    reportRuntimeError(e,'cloud-delete');
+    return false;
+  }
+}
 
 
-function canEdit(){return !sharedView&&(currentRole==='owner'||currentRole==='editor')}
+function canEdit(){return MapliniAccessCore.canEdit({sharedView,currentRole})}
+function requireEdit(show=true){
+  if(canEdit())return true;
+  if(show)msg('Endast visning');
+  return false;
+}
 function applyRoleUi(){
   if(roleBadge)roleBadge.textContent=currentRole.charAt(0).toUpperCase()+currentRole.slice(1);
   const editable=canEdit();
   root.querySelectorAll('.p48-item,.p48-format input,.p48-format select,.p48-format button,.p48-step-io input,.p48-step-io button').forEach(el=>{
     el.style.pointerEvents=editable?'':'none';el.style.opacity=editable?'':'0.5';
   });
-  root.querySelector('#p48-new').disabled=!editable;
-  root.querySelector('#p48-save').disabled=!editable;
+  const mutationSelectors=[
+    '#p48-name','#p48-new','#p48-save','#p48-undo','#p48-redo','#p48-delete-selection',
+    '#p48-canvas-bg','#p48-bg-type','#p48-bg-pattern-color','#p48-bg-density',
+    '#p48-logo-file','#p48-logo-remove','#p48-logo-hide','#p48-logo-size'
+  ];
+  mutationSelectors.forEach(sel=>{const el=root.querySelector(sel);if(el)el.disabled=!editable});
+  if(shareBtn)shareBtn.disabled=!editable||!ownerId()||!CLOUD_ENABLED||sharedView;
+  canvas.classList.toggle('p48-readonly',!editable);
+  if(!editable){
+    selectionMode=false;
+    canvas.classList.remove('p48-selection-mode');
+    marquee.style.display='none';
+    finishTempArrow();
+  }
 }
 async function loadWorkspaces(){
-  if(!ownerId())return;
+  if(!ownerId()){resetWorkspaceState();return false}
   try{
     const rows=await sb('/rest/v1/workspace_members?select=role,workspace_id,workspaces(id,name)&user_id=eq.'+encodeURIComponent(ownerId()));
+    const entries=(rows||[]).filter(row=>row&&row.workspaces&&row.workspace_id);
+    const preferred=currentWorkspaceId||loadWorkspacePreference();
+    const chosen=MapliniSessionCore.chooseWorkspace(preferred,entries);
     workspaceSelect.innerHTML='<option value="">Personligt</option>';
-    for(const row of(rows||[])){if(!row.workspaces)continue;const o=document.createElement('option');o.value=row.workspace_id;o.textContent=row.workspaces.name;o.dataset.role=row.role;workspaceSelect.appendChild(o)}
-    if(currentWorkspaceId)workspaceSelect.value=currentWorkspaceId;
-  }catch(e){console.error(e)}
+    for(const row of entries){
+      const o=document.createElement('option');o.value=row.workspace_id;o.textContent=row.workspaces.name;o.dataset.role=row.role;workspaceSelect.appendChild(o);
+    }
+    currentWorkspaceId=chosen.id;
+    currentRole=chosen.role;
+    workspaceSelect.value=currentWorkspaceId||'';
+    saveWorkspacePreference(currentWorkspaceId);
+    applyRoleUi();
+    return true;
+  }catch(e){
+    console.error(e);reportRuntimeError(e,'workspace-load');resetWorkspaceState();return false;
+  }
 }
 async function createWorkspace(){
   if(!ownerId())return msg('Logga in först');
@@ -1122,14 +1416,26 @@ async function createWorkspace(){
     const id=crypto?.randomUUID?crypto.randomUUID():('ws-'+Date.now());
     await sb('/rest/v1/workspaces',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({id,name,owner_id:ownerId()})});
     await sb('/rest/v1/workspace_members',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({workspace_id:id,user_id:ownerId(),role:'owner'})});
-    currentWorkspaceId=id;currentRole='owner';workspaceName.value='';await loadWorkspaces();workspaceSelect.value=id;applyRoleUi();msg('Workspace skapat');
+    currentWorkspaceId=id;currentRole='owner';saveWorkspacePreference(id);workspaceName.value='';await loadWorkspaces();workspaceSelect.value=id;applyRoleUi();
+    const loaded=await loadCloudProcesses();
+    msg(loaded?'Workspace skapat':'Workspace skapat · molndata kunde inte läsas');
   }catch(e){console.error(e);msg('Kunde inte skapa workspace')}
 }
-workspaceSelect.addEventListener('change',()=>{
-  currentWorkspaceId=workspaceSelect.value||null;
+workspaceSelect.addEventListener('change',async()=>{
+  const previousId=currentWorkspaceId,previousRole=currentRole;
+  const nextId=workspaceSelect.value||null;
   const opt=workspaceSelect.selectedOptions[0];
+  currentWorkspaceId=nextId;
   currentRole=currentWorkspaceId?(opt?.dataset.role||'viewer'):'owner';
-  applyRoleUi();loadCloudProcesses();
+  saveWorkspacePreference(currentWorkspaceId);applyRoleUi();
+  const ok=await loadCloudProcesses();
+  if(ok){
+    msg(currentWorkspaceId?'Workspace öppnat':'Personligt workspace öppnat');
+    return;
+  }
+  currentWorkspaceId=previousId;currentRole=previousRole;workspaceSelect.value=previousId||'';
+  saveWorkspacePreference(currentWorkspaceId);applyRoleUi();
+  msg('Workspacebyte misslyckades · tidigare workspace återställt');
 });
 createWorkspaceBtn.addEventListener('click',createWorkspace);
 
@@ -1154,7 +1460,14 @@ function applyConnectorPointSettings(){
 }
 
 
-function applyProcessStyle(){
+let lastProcessStyleSignature='';
+function applyProcessStyle(force=false){
+  const signature=MapliniPerformanceCore.signature([
+    processBackground,processBackgroundType,processPatternColor,processPatternDensity,
+    processLogoData,processLogoHidden,processLogoWidth
+  ]);
+  if(!force&&signature===lastProcessStyleSignature)return false;
+  lastProcessStyleSignature=signature;
   const d=Math.max(8,Number(processPatternDensity)||20);
   const c=processPatternColor||'#d7e1e8';
   const bg=processBackground||'#ffffff';
@@ -1203,6 +1516,7 @@ function applyProcessStyle(){
     processLogo.removeAttribute('src');
     processLogo.classList.remove('on');
   }
+  return true;
 }
 
 
@@ -1237,59 +1551,105 @@ function anchorCached(id,side){
 function clone(v){return JSON.parse(JSON.stringify(v))}
 function uid(){return 'proc-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7)}
 function msg(t){status.textContent=t;setTimeout(()=>{if(status.textContent===t)status.textContent=''},1800)}
+function safeRun(label,fn){try{const r=fn();if(r&&typeof r.then==='function')return r.catch(e=>{reportRuntimeError(e,label);return null});return r}catch(e){reportRuntimeError(e,label);return null}}
 function defBg(type){return {start:'#edf8f3',end:'#fff3f1',decision:'#fff8df',subprocess:'#f7f3ff',note:'#fffbe8',group:'#f8fafc'}[type]||'#ffffff'}
 function styleOf(d){return{fontFamily:d.fontFamily||'Inter',fontSize:Number(d.fontSize||13),textColor:d.textColor||'#17202a',bgColor:d.bgColor||defBg(d.type),fontWeight:d.fontWeight||'700',fontStyle:d.fontStyle||'normal',textDecoration:d.textDecoration||'none',textAlign:d.textAlign||'center',borderColor:d.borderColor||'#637387',borderWidth:Number(d.borderWidth||2)}}
 function applyStyle(item){const s=styleOf(item.data);Object.assign(item.data,s);item.label.style.fontFamily=s.fontFamily;item.label.style.fontSize=s.fontSize+'px';item.label.style.color=s.textColor;item.label.style.fontWeight=s.fontWeight;item.label.style.fontStyle=s.fontStyle;item.label.style.textDecoration=s.textDecoration;item.label.style.textAlign=s.textAlign;item.el.style.background=s.bgColor;item.el.style.setProperty('--decision-bg',s.bgColor);if(item.data.type==='decision'){item.el.style.setProperty('--decision-border',s.borderColor);item.el.style.setProperty('--decision-border-width',s.borderWidth+'px')}else{item.el.style.borderColor=s.borderColor;item.el.style.borderWidth=s.borderWidth+'px'}}
-function state(){return{
-  id:currentId,
-  name:nameInput.value.trim()||'Namnlös process',
-  nodes:[...nodes.values()].map(x=>x.data),
-  links,
-  connectorPointSize,
-  connectorPointColor,
-  connectorPointsHidden,
-  processBackground,
-  processBackgroundType,
-  processPatternColor,
-  processPatternDensity,
-  processLogoData,
-  processLogoHidden,
-  processLogoWidth
-}}
+function state(){
+  const meta=processes[currentId]||{};
+  return MapliniStateCore.normalizeProcess({
+    id:currentId,
+    name:nameInput.value.trim()||'Namnlös process',
+    nodes:[...nodes.values()].map(x=>clone(x.data)),
+    links:clone(links),
+    connectorPointSize,
+    connectorPointColor,
+    connectorPointsHidden,
+    processBackground,
+    processBackgroundType,
+    processPatternColor,
+    processPatternDensity,
+    processLogoData,
+    processLogoHidden,
+    processLogoWidth,
+    localModifiedAt:Number(meta.localModifiedAt||0),
+    cloudUpdatedAt:meta.cloudUpdatedAt||null
+  },currentId);
+}
+const LOCAL_KEY='maplini_v050',LOCAL_BACKUP_KEY='maplini_v050_backup',LOCAL_CORRUPT_KEY='maplini_v050_corrupt';
 let localSaveTimer=null,localSaveDirty=false,lastLocalPayload='';
 function saveLocal(immediate=false){
+  if(!MapliniPrivacyCore.shouldPersistLocally({sharedView}))return true;
   localSaveDirty=true;
   const flush=()=>{
-    if(!localSaveDirty)return;
+    if(!localSaveDirty)return true;
     localSaveDirty=false;
     if(localSaveTimer){clearTimeout(localSaveTimer);localSaveTimer=null;}
     try{
-      const payload=JSON.stringify({currentId,processes});
+      const normalized=MapliniStateCore.normalizeStore({schemaVersion:1,currentId,processes});
+      const payload=JSON.stringify(normalized);
       if(payload!==lastLocalPayload){
-        localStorage.setItem('maplini_v050',payload);
-        lastLocalPayload=payload;
+        const previous=localStorage.getItem(LOCAL_KEY);
+        if(previous&&previous!==payload)localStorage.setItem(LOCAL_BACKUP_KEY,previous);
+        localStorage.setItem(LOCAL_KEY,payload);
+        const verify=localStorage.getItem(LOCAL_KEY);
+        if(verify!==payload)throw new Error('localStorage verification failed');
+        lastLocalPayload=payload;clearRuntimeError();
       }
-    }catch(e){}
+      return true;
+    }catch(e){
+      localSaveDirty=true;
+      reportRuntimeError(e,'local-save');
+      try{sessionStorage.setItem('maplini_emergency_snapshot',JSON.stringify(MapliniReliabilityCore.makeEmergencySnapshot({schemaVersion:1,currentId,processes})))}catch(ignore){}
+      return false;
+    }
   };
-  if(immediate){flush();return}
+  if(immediate)return flush();
   if(localSaveTimer)clearTimeout(localSaveTimer);
   localSaveTimer=setTimeout(flush,180);
+  return true;
 }
 function loadLocal(){
-  try{
-    const raw=localStorage.getItem('maplini_v050')||localStorage.getItem('processkartan_v048');
-    if(!raw)return false;
-    const d=JSON.parse(raw);
-    if(!d.processes||!Object.keys(d.processes).length)return false;
-    processes=d.processes;
-    currentId=d.currentId&&processes[d.currentId]?d.currentId:Object.keys(processes)[0];
-    saveLocal();
-    return true;
-  }catch(e){return false}
+  const candidates=[
+    {key:LOCAL_KEY,raw:localStorage.getItem(LOCAL_KEY)},
+    {key:LOCAL_BACKUP_KEY,raw:localStorage.getItem(LOCAL_BACKUP_KEY)},
+    {key:'maplini_emergency_snapshot',raw:sessionStorage.getItem('maplini_emergency_snapshot')},
+    {key:'processkartan_v048',raw:localStorage.getItem('processkartan_v048')},
+    {key:'maplini_pre_delete_snapshot',raw:sessionStorage.getItem('maplini_pre_delete_snapshot')}
+  ];
+  for(const candidate of candidates){
+    if(!candidate.raw)continue;
+    try{
+      const normalized=MapliniStateCore.normalizeStore(JSON.parse(candidate.raw));
+      if(!Object.keys(normalized.processes).length)continue;
+      processes=normalized.processes;
+      currentId=normalized.currentId;
+      resetHistory();
+      if(candidate.key===LOCAL_KEY){
+        lastLocalPayload=JSON.stringify(normalized);
+      }else{
+        lastLocalPayload='';
+        const promoted=saveLocal(true);
+        if(!promoted)console.warn('Recovered data loaded but could not be promoted to primary storage');
+      }
+      return true;
+    }catch(e){
+      if(candidate.key===LOCAL_KEY){
+        try{localStorage.setItem(LOCAL_CORRUPT_KEY,candidate.raw)}catch(ignore){}
+        console.error('Maplini local data invalid; trying backup',e);
+      }
+    }
+  }
+  return false;
 }
-function renderProcesses(){
+let lastProcessListSignature='';
+function renderProcesses(force=false){
+  const sorted=Object.values(processes).sort((a,b)=>(a.name||'').localeCompare(b.name||'','sv'));
+  const signature=MapliniPerformanceCore.signature([currentId,...sorted.map(p=>p.id+'\u0000'+(p.name||''))]);
+  if(!force&&signature===lastProcessListSignature)return false;
+  lastProcessListSignature=signature;
   processBox.innerHTML='';
-  Object.values(processes).sort((a,b)=>(a.name||'').localeCompare(b.name||'','sv')).forEach(p=>{
+  sorted.forEach(p=>{
     const row=document.createElement('div');row.className='p48-proc-row';
     const b=document.createElement('button');b.type='button';b.className='p48-proc'+(p.id===currentId?' active':'');
     b.textContent=p.name||'Namnlös process';b.title=p.name||'Namnlös process';
@@ -1298,6 +1658,7 @@ function renderProcesses(){
     del.addEventListener('click',e=>{e.stopPropagation();deleteProcess(p.id)});
     row.append(b,del);processBox.appendChild(row);
   });
+  return true;
 }
 let lastProcessListName='';
 
@@ -1308,7 +1669,15 @@ function persistAfterIdle(){
 }
 
 function persist(show=false,refreshList=false){
+  const previous=processes[currentId]||null;
   const st=state();
+  if(sharedView){
+    // Public shared links are ephemeral: never copy their process payload into localStorage.
+    processes[currentId]=st;
+    scheduleHorizontalNavSync();
+    return st;
+  }
+  if(MapliniSyncCore.contentChanged(previous,st))st.localModifiedAt=Date.now();
   processes[currentId]=st;
   saveLocal(false);
   const currentName=st.name||'';
@@ -1318,8 +1687,10 @@ function persist(show=false,refreshList=false){
   }
   if(show)msg('Sparad');
   scheduleHorizontalNavSync();
+  return st;
 }
 let lastUndoAt=0,lastUndoSnapshot='';
+function resetHistory(){undo=[];redo=[];lastUndoSnapshot='';lastUndoAt=0}
 function pushUndo(force=false){
   const now=performance.now();
   const snapshot=JSON.stringify(state());
@@ -1334,9 +1705,13 @@ function pushUndo(force=false){
   if(undo.length>50)undo.shift();
   redo=[];
 }
-function clearCanvas(){for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();linkLayer.innerHTML='';clearLinkHitLayer();linkDomByIndex.clear();finishTempArrow();refreshControls();updateSelectionUi()}
+function clearCanvas(){for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();selectedLinkIndex=null;selectedLinkIndices.clear();linkLayer.innerHTML='';clearLinkHitLayer();linkDomByIndex.clear();finishTempArrow();refreshControls();refreshLinkControls();updateSelectionUi()}
 function restore(s){
-  const d=typeof s==='string'?JSON.parse(s):clone(s);
+  let raw;
+  try{raw=typeof s==='string'?JSON.parse(s):clone(s)}
+  catch(e){reportRuntimeError(e,'restore-parse');return false}
+  const d=MapliniStateCore.normalizeProcess(raw,raw?.id||currentId);
+  if(!MapliniReliabilityCore.isUsableProcess(d)){reportRuntimeError(new Error('Invalid process payload'),'restore-validate');return false}
   clearCanvas();
   currentId=d.id||currentId;
   nameInput.value=d.name||'Namnlös process';
@@ -1351,34 +1726,69 @@ function restore(s){
   processLogoHidden=Boolean(d.processLogoHidden);
   processLogoWidth=Number(d.processLogoWidth||180);
   applyConnectorPointSettings();
-  applyProcessStyle();
+  applyProcessStyle(true);
   (d.nodes||[]).forEach(makeNode);
-  links=d.links||[];
+  links=MapliniConnectorCore.normalizeLinks(d.links||[]);
   seq=Math.max(0,...[...nodes.keys()].map(id=>parseInt(String(id).replace(/\D/g,''),10)||0));
   requestFullLinkRender(true);
+  return true;
 }
-function openProcess(id){if(!processes[id])return;currentId=id;undo=[];redo=[];restore(processes[id]);saveLocal(false);renderProcesses();msg('Process öppnad');scroll.scrollTop=0;scroll.scrollLeft=0;requestAnimationFrame(alignEditorTop)}
-function newProcess(){persist();const n=prompt('Namn på den nya processen:','Ny process');if(n===null)return;currentId=uid();processes[currentId]={id:currentId,name:n.trim()||'Ny process',nodes:[],links:[]};undo=[];redo=[];restore(processes[currentId]);saveLocal(true);renderProcesses();scroll.scrollLeft=0;scroll.scrollTop=0;msg('Ny process skapad')}
-function deleteProcess(id){
-  const proc=processes[id]; if(!proc)return;
+function openProcess(id){
+  if(!processes[id])return;
+  const previousId=currentId,previous=processes[previousId]?clone(processes[previousId]):null;
+  currentId=id;resetHistory();
+  processes[id]=MapliniStateCore.normalizeProcess(processes[id],id);
+  if(!restore(processes[id])){
+    if(previousId&&previous){currentId=previousId;processes[previousId]=previous;restore(previous)}
+    msg('Processen kunde inte öppnas');return;
+  }
+  saveLocal(false);renderProcesses();refreshControls();refreshLinkControls();updateSelectionUi();msg('Process öppnad');scroll.scrollTop=0;scroll.scrollLeft=0;requestAnimationFrame(alignEditorTop)
+}
+function newProcess(){if(!requireEdit())return;persist();const n=prompt('Namn på den nya processen:','Ny process');if(n===null)return;currentId=uid();processes[currentId]=MapliniWorkflowCore.emptyProcess(currentId,n.trim()||'Ny process');processes[currentId].localModifiedAt=Date.now();resetHistory();restore(processes[currentId]);saveLocal(true);renderProcesses();scroll.scrollLeft=0;scroll.scrollTop=0;msg('Ny process skapad')}
+async function deleteProcess(id){
+  if(!requireEdit())return;
+  const proc=processes[id];if(!proc)return;
   const label=proc.name||'Namnlös process';
   if(!confirm('Radera processen "'+label+'"? Detta går inte att ångra.'))return;
-  delete processes[id];deleteCloud(id);
-  if(id===currentId){
-    const remaining=Object.keys(processes);
-    if(remaining.length){
-      currentId=remaining[0];
-      restore(processes[currentId]);
-    }else{
-      currentId=uid();
-      processes[currentId]={id:currentId,name:'Ny process',nodes:[],links:[]};
-      restore(processes[currentId]);
-    }
+
+  persist(false,false);
+  const beforeOk=saveLocal(true);
+  if(!beforeOk){msg('Radering avbruten · lokal säkerhetskopia kunde inte sparas');return}
+
+  const snapshot=MapliniReliabilityCore.makeEmergencySnapshot({schemaVersion:1,currentId,processes});
+  try{sessionStorage.setItem('maplini_pre_delete_snapshot',JSON.stringify(snapshot))}
+  catch(e){reportRuntimeError(e,'pre-delete-snapshot');msg('Radering avbruten · säkerhetskopia kunde inte skapas');return}
+
+  const next=MapliniFlowCore.afterProcessDelete(processes,currentId,id);
+  processes=next.processes;currentId=next.currentId;
+  cloudLoadedProcessIds.delete(id);cloudLoadedProcessScopes.delete(id);
+
+  if(!processes[currentId]){
+    currentId=uid();
+    processes[currentId]=MapliniWorkflowCore.emptyProcess(currentId,'Ny process');
+    processes[currentId].localModifiedAt=Date.now();
   }
-  saveLocal();renderProcesses();refreshControls();msg('Process raderad');
+  resetHistory();restore(processes[currentId]);
+
+  const localOk=saveLocal(true);
+  if(!localOk){
+    const restored=MapliniStateCore.normalizeStore(snapshot);
+    processes=restored.processes;currentId=restored.currentId;
+    restore(processes[currentId]);saveLocal(true);renderProcesses(true);
+    msg('Radering misslyckades · tidigare läge återställt');return;
+  }
+
+  renderProcesses(true);refreshControls();refreshLinkControls();updateSelectionUi();
+  const cloudOk=await deleteCloud(id);
+  if(cloudOk){
+    try{sessionStorage.removeItem('maplini_pre_delete_snapshot')}catch(ignore){}
+    msg('Process raderad');
+  }else{
+    msg('Process raderad lokalt – molnradering misslyckades');
+  }
 }
 function nodeText(t){return{start:'Start',process:'Ny aktivitet',decision:'Beslut?',end:'Slut',subprocess:'Ny delprocess',group:'Ny grupp / område',note:'Anteckning'}[t]||'Nytt steg'}
-function place(el,x,y){const snap=20,nx=Math.round(x/snap)*snap,ny=Math.round(y/snap)*snap;el.style.left=Math.max(10,Math.min(2400-el.offsetWidth-10,nx))+'px';el.style.top=Math.max(10,Math.min(1400-el.offsetHeight-10,ny))+'px'}
+function place(el,x,y){const p=MapliniCanvasCore.place(x,y,el.offsetWidth,el.offsetHeight);el.style.left=p.x+'px';el.style.top=p.y+'px'}
 function sync(el){const x=nodes.get(el.dataset.id);if(x){x.data.x=parseFloat(el.style.left)||0;x.data.y=parseFloat(el.style.top)||0}}
 function center(el){return[(parseFloat(el.style.left)||0)+el.offsetWidth/2,(parseFloat(el.style.top)||0)+el.offsetHeight/2]}
 function anchor(el,side){
@@ -1396,14 +1806,24 @@ function updateSelectionUi(){
     if(selectedId===item.data.id)item.el.classList.add('selected');
     else item.el.classList.remove('selected');
   }
-  deleteSelectionBtn.disabled=selectedIds.size===0;
+  deleteSelectionBtn.disabled=selectedIds.size===0&&selectedLinkIndices.size===0;
   selectToolBtn.classList.toggle('primary',selectionMode);
+  selectToolBtn.setAttribute('aria-pressed',selectionMode?'true':'false');
   selectToolBtn.textContent=selectionMode?'Avsluta markering':'Markera område';
-
+  if(formatHint&&!selectedId&&selectedLinkIndex==null){
+    formatHint.textContent=MapliniUiCore.selectionHint({
+      selectedLinkIndex,
+      selectedNodeCount:selectedIds.size,
+      selectedLinkCount:selectedLinkIndices.size,
+      nodeEnabled:false
+    });
+  }
 }
 function clearSelection(){
   const hadLinks=(selectedLinkIndex!=null||selectedLinkIndices.size>0);
-  selectedIds.clear();selectedLinkIndices.clear();selectedLinkIndex=null;selectedId=null;
+  const next=MapliniSelectionCore.clear();
+  selectedId=next.selectedId;selectedIds=new Set(next.selectedIds);
+  selectedLinkIndex=next.selectedLinkIndex;selectedLinkIndices=new Set(next.selectedLinkIndices);
   refreshControls();refreshLinkControls();updateSelectionUi();
   if(hadLinks)requestFullLinkRender(true);
 }
@@ -1413,6 +1833,7 @@ function selectMany(ids){
   refreshControls();updateSelectionUi();
 }
 function deleteSelectedMany(){
+  if(!requireEdit())return;
   if(!selectedIds.size&&!selectedLinkIndices.size)return;
   pushUndo();
   const doomed=new Set(selectedIds);
@@ -1421,10 +1842,12 @@ function deleteSelectedMany(){
     if(item){item.el.remove();nodes.delete(id);}
   }
   links=MapliniConnectorCore.removeSelected(links,doomed,selectedLinkIndices);
-  selectedIds.clear();selectedLinkIndices.clear();selectedId=null;selectedLinkIndex=null;
-  requestFullLinkRender();persist();refreshControls();refreshLinkControls();updateSelectionUi();msg('Markerat område borttaget');
+  const cleared=MapliniSelectionCore.clear();
+  selectedId=cleared.selectedId;selectedIds=new Set(cleared.selectedIds);
+  selectedLinkIndex=cleared.selectedLinkIndex;selectedLinkIndices=new Set(cleared.selectedLinkIndices);
+  requestFullLinkRender(true);persist();refreshControls();refreshLinkControls();updateSelectionUi();msg('Markerat område borttaget');
 }
-function rectsIntersect(a,b){return MapliniConnectorCore.rectsIntersect(a,b);}
+function rectsIntersect(a,b){return MapliniCanvasCore.rectsIntersect(a,b);}
 function linksInSelectionRect(selRect){
   const hits=[];
   for(const [index,entry] of linkDomByIndex.entries()){
@@ -1467,9 +1890,9 @@ function renderIOEditor(item){
   const row=(value,index,kind)=>{
     const r=document.createElement('div');r.className='p48-io-row';
     const inp=document.createElement('input');inp.value=value;inp.placeholder=kind==='inputs'?'Input':'Output';
-    inp.addEventListener('change',()=>{pushUndo();item.data[kind][index]=inp.value.trim();item.data[kind]=item.data[kind].filter(Boolean);renderNodeIO(item);drawLinks();persist();refreshControls();});
+    inp.addEventListener('change',()=>{if(!requireEdit())return;pushUndo();item.data[kind][index]=inp.value.trim();item.data[kind]=item.data[kind].filter(Boolean);renderNodeIO(item);drawLinks();persist();refreshControls();});
     const del=document.createElement('button');del.type='button';del.textContent='×';
-    del.addEventListener('click',()=>{pushUndo();item.data[kind].splice(index,1);renderNodeIO(item);drawLinks();persist();refreshControls();});
+    del.addEventListener('click',()=>{if(!requireEdit())return;pushUndo();item.data[kind].splice(index,1);renderNodeIO(item);drawLinks();persist();refreshControls();});
     r.append(inp,del);return r;
   };
   item.data.inputs.forEach((v,i)=>inputsBox.appendChild(row(v,i,'inputs')));
@@ -1478,21 +1901,31 @@ function renderIOEditor(item){
 
 function setFormatEnabled(enabled){
   const linkMode=selectedLinkIndex!=null;
+  const editable=canEdit();
+  const context=linkMode?'link':(enabled?'node':'none');
+  if(formatPanel)formatPanel.dataset.context=context;
+  if(formatHint)formatHint.textContent=MapliniUiCore.selectionHint({
+    selectedLinkIndex,
+    selectedNodeCount:selectedIds.size,
+    selectedLinkCount:selectedLinkIndices.size,
+    nodeEnabled:enabled
+  });
   controls.querySelectorAll('select,input,button').forEach(el=>{
     const commonForLink=(el===borderColor||el===borderWidth||el===linkColor||el===linkEnd||el===linkDash||el===deleteLinkBtn);
-    if(linkMode)el.disabled=!commonForLink;
-    else el.disabled=!enabled;
+    if(linkMode)el.disabled=!editable||!commonForLink;
+    else el.disabled=!editable||!enabled;
   });
-  root.querySelectorAll('.p48-step-io input,.p48-step-io button').forEach(el=>{el.disabled=!enabled;});
-  controls.style.opacity=(enabled||linkMode)?'1':'0.45';
+  root.querySelectorAll('.p48-step-io input,.p48-step-io button').forEach(el=>{el.disabled=!editable||!enabled;});
+  controls.style.opacity='1';
   linkFormat.style.opacity=linkMode?'1':'';
   const stepIO=root.querySelector('.p48-step-io');
-  if(stepIO)stepIO.style.opacity=enabled?'1':'0.45';
+  if(stepIO){stepIO.classList.toggle('on',enabled);stepIO.style.opacity='1';}
 }
 
 function refreshControls(){const item=selectedId?nodes.get(selectedId):null;if(!item){setFormatEnabled(false);inputsBox.innerHTML='';outputsBox.innerHTML='';if(selectedLinkIndex!=null)refreshLinkControls();return}setFormatEnabled(true);const s=styleOf(item.data);font.value=s.fontFamily;size.value=s.fontSize;textColor.value=s.textColor;bgColor.value=s.bgColor;borderColor.value=s.borderColor;borderWidth.value=String(s.borderWidth);bold.classList.toggle('active',s.fontWeight==='700');italic.classList.toggle('active',s.fontStyle==='italic');under.classList.toggle('active',s.textDecoration==='underline');root.querySelectorAll('[data-align]').forEach(b=>b.classList.toggle('active',b.dataset.align===s.textAlign));renderIOEditor(item)}
-function updateStyle(patch){const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();Object.assign(item.data,patch);applyStyle(item);drawLinks();persist()}
+function updateStyle(patch){if(!requireEdit())return;const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();Object.assign(item.data,patch);applyStyle(item);drawLinks();persist()}
 function beginInlineEdit(el){
+  if(!requireEdit())return;
   const item=nodes.get(el.dataset.id);
   if(!item)return;
   select(el);
@@ -1511,6 +1944,12 @@ function finishInlineEdit(el){
   const item=nodes.get(el.dataset.id);
   if(!item)return;
   if(item.label.contentEditable!=='true')return;
+  if(!canEdit()){
+    item.label.textContent=item.data.text||'Nytt steg';
+    item.label.contentEditable='false';
+    refreshControls();
+    return;
+  }
   const clean=(item.label.innerText||'').replace(/\n{3,}/g,'\n\n').trim();
   item.data.text=clean||item.data.text||'Nytt steg';
   item.label.textContent=item.data.text;
@@ -1538,41 +1977,71 @@ for(const h of Object.values(handles)){
 el.addEventListener('dblclick',e=>{e.stopPropagation();beginInlineEdit(el)});
 label.addEventListener('click',e=>{e.stopPropagation();select(el)});
 label.addEventListener('dblclick',e=>{e.stopPropagation();beginInlineEdit(el)});
-label.addEventListener('input',()=>{const item=nodes.get(el.dataset.id);if(item){item.data.text=label.innerText;drawLinks();}});
+label.addEventListener('input',()=>{const item=nodes.get(el.dataset.id);if(item&&canEdit())drawLinks();});
 label.addEventListener('blur',()=>finishInlineEdit(el));
 label.addEventListener('keydown',e=>{
   if(e.key==='Escape'){e.preventDefault();finishInlineEdit(el);el.focus();}
   if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();finishInlineEdit(el);el.focus();}
 });
 el.addEventListener('click',e=>{e.stopPropagation();select(el)});
-el.addEventListener('pointerdown',e=>{if(e.button!==0||e.target.classList.contains('p48-handle')||e.target.classList.contains('p48-label')||e.target.classList.contains('p48-resize'))return;select(el);pushUndo(true);const sx=e.clientX,sy=e.clientY,ox=parseFloat(el.style.left)||0,oy=parseFloat(el.style.top)||0;el.setPointerCapture(e.pointerId);const mv=ev=>{place(el,ox+ev.clientX-sx,oy+ev.clientY-sy);sync(el);drawLinks()};const up=()=>{el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',up);persist()};el.addEventListener('pointermove',mv);el.addEventListener('pointerup',up)});
-
-Object.values(resizeHandles).forEach(rh=>rh.addEventListener('pointerdown',e=>{
-  e.stopPropagation();e.preventDefault();select(el);pushUndo();
-  const corner=rh.dataset.corner,sx=e.clientX,sy=e.clientY;
-  const ox=parseFloat(el.style.left)||0,oy=parseFloat(el.style.top)||0,ow=el.offsetWidth,oh=el.offsetHeight;
+el.addEventListener('pointerdown',e=>{
+  if(!canEdit())return;
+  if(e.button!==0||e.target.classList.contains('p48-handle')||e.target.classList.contains('p48-label')||e.target.classList.contains('p48-resize'))return;
+  select(el);
+  const sx=e.clientX,sy=e.clientY,ox=parseFloat(el.style.left)||0,oy=parseFloat(el.style.top)||0,pointerType=e.pointerType||'mouse';
+  let mutated=false;
+  try{el.setPointerCapture(e.pointerId)}catch(ignore){}
   const mv=ev=>{
     const dx=ev.clientX-sx,dy=ev.clientY-sy;
-    let w=ow+(corner.includes('e')?dx:-dx),h=oh+(corner.includes('s')?dy:-dy);
-    if(el.classList.contains('decision')){
-      const size=Math.max(130,Math.min(420,Math.max(w,h)));
-      w=size;h=size;
-    }else{
-      w=Math.max(120,Math.min(700,w));h=Math.max(54,Math.min(500,h));
-    }
-    if(corner.includes('w'))el.style.left=(ox+ow-w)+'px';
-    if(corner.includes('n'))el.style.top=(oy+oh-h)+'px';
-    el.style.width=w+'px';el.style.height=h+'px';el.style.minHeight=h+'px';
-    sync(el);const item=nodes.get(el.dataset.id);item.data.width=w;item.data.height=h;drawLinks();
+    if(!mutated&&MapliniMobileCore.movedEnough(dx,dy,pointerType)){pushUndo(true);mutated=true}
+    if(!mutated)return;
+    place(el,ox+dx,oy+dy);sync(el);drawLinks();
   };
-  const up=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);persist()};
-  document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up);
+  const done=()=>{
+    el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',done);el.removeEventListener('pointercancel',done);
+    try{if(el.hasPointerCapture&&el.hasPointerCapture(e.pointerId))el.releasePointerCapture(e.pointerId)}catch(ignore){}
+    if(mutated)persist();
+  };
+  el.addEventListener('pointermove',mv);el.addEventListener('pointerup',done);el.addEventListener('pointercancel',done);
+});
+
+Object.values(resizeHandles).forEach(rh=>rh.addEventListener('pointerdown',e=>{
+  if(!canEdit())return;
+  e.stopPropagation();e.preventDefault();select(el);
+  const corner=rh.dataset.corner,sx=e.clientX,sy=e.clientY;
+  const ox=parseFloat(el.style.left)||0,oy=parseFloat(el.style.top)||0,ow=el.offsetWidth,oh=el.offsetHeight;
+  let mutated=false;
+  const mv=ev=>{
+    const dx=ev.clientX-sx,dy=ev.clientY-sy;
+    if(!mutated&&MapliniMobileCore.movedEnough(dx,dy,e.pointerType||'mouse')){pushUndo(true);mutated=true}
+    if(!mutated)return;
+    const box=MapliniCanvasCore.resize({x:ox,y:oy,width:ow,height:oh},corner,dx,dy,el.classList.contains('decision')?'decision':'process');
+    el.style.left=box.x+'px';el.style.top=box.y+'px';el.style.width=box.width+'px';el.style.height=box.height+'px';el.style.minHeight=box.height+'px';
+    sync(el);const item=nodes.get(el.dataset.id);item.data.width=box.width;item.data.height=box.height;drawLinks();
+  };
+  const done=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',done);document.removeEventListener('pointercancel',done);if(mutated)persist()};
+  document.addEventListener('pointermove',mv);document.addEventListener('pointerup',done);document.addEventListener('pointercancel',done);
 }));
 
-Object.values(handles).forEach(h=>h.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault();const side=h.dataset.side,[x1,y1]=anchor(el,side);temp.hidden=false;temp.setAttribute('d',`M${x1},${y1} L${x1},${y1}`);const mv=ev=>{const r=canvas.getBoundingClientRect(),x2=ev.clientX-r.left+scroll.scrollLeft,y2=ev.clientY-r.top+scroll.scrollTop;temp.setAttribute('d',`M${x1},${y1} L${x2},${y2}`)};const up=ev=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);finishTempArrow();const target=document.elementFromPoint(ev.clientX,ev.clientY)?.closest('.p48-node');if(target&&target!==el){pushUndo();links.push([el.dataset.id,target.dataset.id,side,{color:'#687584',width:2,end:'arrow',dash:'solid',viaX:null,viaY:null}]);requestFullLinkRender();persist()}};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)}));
+Object.values(handles).forEach(h=>h.addEventListener('pointerdown',e=>{
+  if(!canEdit())return;
+  e.stopPropagation();e.preventDefault();
+  const side=h.dataset.side,[x1,y1]=anchor(el,side);
+  temp.hidden=false;temp.setAttribute('d',`M${x1},${y1} L${x1},${y1}`);
+  const mv=ev=>{const p=clientToCanvas(ev.clientX,ev.clientY);temp.setAttribute('d',`M${x1},${y1} L${p.x},${p.y}`)};
+  const finish=ev=>{
+    document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',finish);document.removeEventListener('pointercancel',cancel);
+    finishTempArrow();
+    if(!ev)return;
+    const target=document.elementFromPoint(ev.clientX,ev.clientY)?.closest('.p48-node');
+    if(target&&target!==el){pushUndo();links.push(MapliniConnectorCore.create(el.dataset.id,target.dataset.id,side));requestFullLinkRender();persist()}
+  };
+  const cancel=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',finish);document.removeEventListener('pointercancel',cancel);finishTempArrow()};
+  document.addEventListener('pointermove',mv);document.addEventListener('pointerup',finish);document.addEventListener('pointercancel',cancel);
+}));
 return el}
 
-function addNode(type,x,y){pushUndo();seq++;const el=makeNode({id:'n'+seq,type,text:nodeText(type),x:x-90,y:y-38});place(el,x-90,y-38);sync(el);select(el);drawLinks();persist()}
+function addNode(type,x,y){if(!requireEdit())return;pushUndo();seq++;const el=makeNode({id:'n'+seq,type,text:nodeText(type),x:x-90,y:y-38});place(el,x-90,y-38);sync(el);select(el);drawLinks();persist()}
 
 
 function distancePointToSegment(px,py,x1,y1,x2,y2){
@@ -1641,6 +2110,20 @@ function selectLink(i){
   updateSelectionUi();
   refreshLinkControls();
   requestFullLinkRender(true);
+}
+function deleteLinkAt(index,withUndo=true){
+  if(!requireEdit())return false;
+  if(index==null||!links[index])return false;
+  if(withUndo)pushUndo();
+  links=MapliniConnectorCore.removeAt(links,index);
+  const next=MapliniSelectionCore.afterLinkDelete({
+    selectedId,selectedIds:[...selectedIds],selectedLinkIndex,selectedLinkIndices:[...selectedLinkIndices]
+  },index);
+  selectedId=next.selectedId;selectedIds=new Set(next.selectedIds);
+  selectedLinkIndex=next.selectedLinkIndex;selectedLinkIndices=new Set(next.selectedLinkIndices);
+  requestFullLinkRender(true);persist();
+  refreshControls();refreshLinkControls();updateSelectionUi();
+  return true;
 }
 function clearLinkSelection(){
   const had=(selectedLinkIndex!=null||selectedLinkIndices.size>0);
@@ -1893,6 +2376,9 @@ document.addEventListener('pointerdown',e=>{
 function isMobileLayout(){
   return window.matchMedia('(max-width:900px), (pointer:coarse) and (max-width:1100px)').matches;
 }
+function clientToCanvas(clientX,clientY){
+  return MapliniMobileCore.clientToLocal(clientX,clientY,canvas.getBoundingClientRect());
+}
 function setMobileTools(open){
   if(!sidePanel||!mobileToolsBtn||!mobileBackdrop)return;
   const on=Boolean(open)&&isMobileLayout();
@@ -2084,17 +2570,25 @@ function buildGoogleSheetsXlsx(){
     {name:'xl/worksheets/sheet2.xml',data:sheet2}
   ]);
 }
+function prepareExport(){
+  persist(false,false);
+  const localOk=saveLocal(true);
+  if(!localOk)reportRuntimeError(new Error('Local pre-export save failed'),'export-preflight');
+  return localOk;
+}
 function exportGoogleSheets(){
   try{
+    prepareExport();
     const bytes=buildGoogleSheetsXlsx();
     downloadBytes(
       bytes,
       cleanFileName(state().name)+'_Google_Sheets.xlsx',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'zip'
     );
     msg('Google Sheets-fil skapad');
   }catch(err){
-    console.error(err);msg('Google Sheets-export misslyckades');
+    reportRuntimeError(err,'export-xlsx');msg('Google Sheets-export misslyckades');
   }
 }
 
@@ -2398,33 +2892,39 @@ function buildDocxWithJpeg(jpeg,imgW,imgH,title){
     {name:'word/media/process-map.jpg',data:jpeg}
   ]);
 }
-function downloadBytes(bytes,name,type){
+function downloadBytes(bytes,name,type,kind='binary'){
+  const check=MapliniExportCore.validateBytes(bytes,kind);
+  if(!check.ok)throw new Error('Export validation failed: '+check.reason);
   const blob=new Blob([bytes],{type}),a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);a.download=name;a.click();
+  a.href=URL.createObjectURL(blob);a.download=MapliniExportCore.safeFileName(name);a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1500);
 }
 async function exportPdf(){
   try{
+    prepareExport();
     const shot=await renderMapSnapshot();
     const spec=pageSpec();
     const count=desiredPageCount();
     const jpeg=canvasJpegBytes(shot,.94);
     const pdf=buildMultiPagePdfFromCanvas(shot,jpeg,shot.width,shot.height,spec,count);
-    downloadBytes(pdf,cleanFileName(state().name)+`_${spec.code}_${count}sidor.pdf`,'application/pdf');
+    downloadBytes(pdf,cleanFileName(state().name)+`_${spec.code}_${count}sidor.pdf`,'application/pdf','pdf');
     msg(`PDF skapad · ${spec.name} · ${count} sida${count>1?'or':''}`);
-  }catch(err){console.error(err);msg('PDF-export misslyckades')}
+  }catch(err){reportRuntimeError(err,'export-pdf');msg('PDF-export misslyckades')}
 }
 async function exportDoc(){
   try{
+    prepareExport();
     const shot=await renderMapSnapshot(),jpeg=canvasJpegBytes(shot,.94);
     const docx=buildDocxWithJpeg(jpeg,shot.width,shot.height,state().name);
-    downloadBytes(docx,cleanFileName(state().name)+'.docx','application/vnd.openxmlformats-officedocument.wordprocessingml.document');msg('DOCX skapad');
-  }catch(err){console.error(err);msg('DOCX-export misslyckades')}
+    downloadBytes(docx,cleanFileName(state().name)+'.docx','application/vnd.openxmlformats-officedocument.wordprocessingml.document','zip');
+    msg('DOCX skapad');
+  }catch(err){reportRuntimeError(err,'export-docx');msg('DOCX-export misslyckades')}
 }
 
 
 selectToolBtn.addEventListener('click',()=>{
   selectionMode=!selectionMode;
+  canvas.classList.toggle('p48-selection-mode',selectionMode);
   clearSelection();
   updateSelectionUi();
 });
@@ -2433,20 +2933,19 @@ deleteSelectionBtn.addEventListener('click',deleteSelectedMany);
 canvas.addEventListener('pointerdown',e=>{
   if(!selectionMode||e.button!==0||e.target.closest('.p48-node'))return;
   e.preventDefault();finishTempArrow();
-  const rect=canvas.getBoundingClientRect();
-  const sx=e.clientX-rect.left+scroll.scrollLeft;
-  const sy=e.clientY-rect.top+scroll.scrollTop;
+  const startPoint=clientToCanvas(e.clientX,e.clientY);
+  const sx=startPoint.x,sy=startPoint.y;
   marquee.style.left=sx+'px';marquee.style.top=sy+'px';marquee.style.width='0px';marquee.style.height='0px';marquee.style.display='block';
 
   const move=ev=>{
-    const x=ev.clientX-rect.left+scroll.scrollLeft,y=ev.clientY-rect.top+scroll.scrollTop;
+    const p=clientToCanvas(ev.clientX,ev.clientY),x=p.x,y=p.y;
     const left=Math.min(sx,x),top=Math.min(sy,y),w=Math.abs(x-sx),h=Math.abs(y-sy);
     marquee.style.left=left+'px';marquee.style.top=top+'px';marquee.style.width=w+'px';marquee.style.height=h+'px';
   };
   const up=ev=>{
-    document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);
-    const x=ev.clientX-rect.left+scroll.scrollLeft,y=ev.clientY-rect.top+scroll.scrollTop;
-    const selRect={left:Math.min(sx,x),top:Math.min(sy,y),right:Math.max(sx,x),bottom:Math.max(sy,y)};
+    document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);document.removeEventListener('pointercancel',cancel);
+    const p=clientToCanvas(ev.clientX,ev.clientY),x=p.x,y=p.y;
+    const selRect=MapliniCanvasCore.normalizeRect({x:sx,y:sy},{x,y});
     const ids=[];
     for(const item of nodes.values()){
       const nr={left:item.data.x||0,top:item.data.y||0,right:(item.data.x||0)+item.el.offsetWidth,bottom:(item.data.y||0)+item.el.offsetHeight};
@@ -2460,34 +2959,67 @@ canvas.addEventListener('pointerdown',e=>{
     requestFullLinkRender(true);
     updateSelectionUi();
   };
-  document.addEventListener('pointermove',move);document.addEventListener('pointerup',up);
+  const cancel=()=>{
+    document.removeEventListener('pointermove',move);document.removeEventListener('pointerup',up);document.removeEventListener('pointercancel',cancel);
+    marquee.style.display='none';
+  };
+  document.addEventListener('pointermove',move);document.addEventListener('pointerup',up);document.addEventListener('pointercancel',cancel);
 });
 
 document.addEventListener('pointerup',e=>{
   if(!e.target.closest || !e.target.closest('.p48-handle')) finishTempArrow();
 });
 document.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){selectionMode=false;marquee.style.display='none';finishTempArrow();updateSelectionUi();}
+  if(e.key==='Escape'){
+    if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)||e.target.isContentEditable)return;
+    selectionMode=false;canvas.classList.remove('p48-selection-mode');marquee.style.display='none';finishTempArrow();
+    if(selectedId||selectedIds.size||selectedLinkIndex!=null||selectedLinkIndices.size)clearSelection();
+    else updateSelectionUi();
+  }
 });
 
-root.querySelectorAll('.p48-item').forEach(i=>i.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',i.dataset.type);e.dataTransfer.effectAllowed='copy'}));
+function paletteInsertPoint(){
+  const x=Math.max(140,scroll.scrollLeft+Math.min(Math.max(scroll.clientWidth*.5,180),720));
+  const row=nodes.size%6;
+  const y=150+(row*105);
+  return [x,y];
+}
+function addFromPalette(item,{closeMobile=false}={}){
+  if(!item||sharedView)return;
+  const [x,y]=paletteInsertPoint();
+  addNode(item.dataset.type,x,y);
+  if(closeMobile)setMobileTools(false);
+  msg('Form tillagd');
+}
+root.querySelectorAll('.p48-item').forEach(i=>{
+  i.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',i.dataset.type);e.dataTransfer.effectAllowed='copy'});
+  i.addEventListener('click',e=>{if(isMobileLayout()){e.preventDefault();addFromPalette(i,{closeMobile:true})}});
+  i.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();addFromPalette(i,{closeMobile:isMobileLayout()})}});
+});
 canvas.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='copy'});
-canvas.addEventListener('drop',e=>{e.preventDefault();const type=e.dataTransfer.getData('text/plain');if(!type)return;const r=canvas.getBoundingClientRect();addNode(type,e.clientX-r.left+scroll.scrollLeft,e.clientY-r.top+scroll.scrollTop)});
+canvas.addEventListener('drop',e=>{e.preventDefault();const type=e.dataTransfer.getData('text/plain');if(!type)return;const p=clientToCanvas(e.clientX,e.clientY);addNode(type,p.x,p.y)});
 canvas.addEventListener('click',e=>{
   if((e.target===canvas||e.target===linkLayer)&&!selectionMode){clearSelection();clearLinkSelection();finishTempArrow();}
 });
-nameInput.addEventListener('change',()=>{persist(false,true);msg('Namn sparat')});
+nameInput.addEventListener('change',()=>{if(!requireEdit())return;persist(false,true);msg('Namn sparat')});
 root.querySelector('#p48-new').addEventListener('click',newProcess);
 root.querySelector('#p48-save').addEventListener('click',async()=>{
-  persist(false);
   if(ownerId()){
-    try{await saveCurrentToCloud();msg('Sparad lokalt och i molnet')}
-    catch(e){console.error(e);msg('Sparad lokalt · molnsynk misslyckades')}
-  }else{
-    saveLocal(true);msg('Sparad lokalt');
+    try{
+      const result=await saveCurrentToCloud();
+      msg(result.localOk!==false?'Sparad lokalt och i molnet':'Sparad i molnet · lokal lagring misslyckades');
+    }catch(e){
+      console.error(e);reportRuntimeError(e,'cloud-save');
+      const localOk=saveLocal(true);
+      msg(localOk?'Sparad lokalt · molnsynk misslyckades':'Sparning misslyckades lokalt och i molnet');
+    }
+    return;
   }
+  persist(false);
+  const localOk=saveLocal(true);
+  msg(localOk?'Sparad lokalt':'Lokal sparning misslyckades');
 });
-shareBtn.addEventListener('click',shareCurrent);copyShareBtn.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(shareUrlInput.value);msg('Länk kopierad')}catch(e){shareUrlInput.select();document.execCommand('copy')}});
+shareBtn.addEventListener('click',shareCurrent);copyShareBtn.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(shareUrlInput.value);msg('Länk kopierad')}catch(e){try{shareUrlInput.select();const ok=document.execCommand('copy');if(!ok)throw new Error('copy command failed');msg('Länk kopierad')}catch(copyErr){reportRuntimeError(copyErr,'share-copy');msg('Kunde inte kopiera länken')}}});
 loginBtn.addEventListener('click',signIn);signupBtn.addEventListener('click',signUp);logoutBtn.addEventListener('click',signOut);
 
 
@@ -2556,18 +3088,35 @@ function createGoogleSheetDirect(){
     const url=new URL(window.parent.location.href);
     url.searchParams.set('gs_payload',JSON.stringify(directGoogleSheetPayload()));
     window.parent.location.href=url.toString();
-  }catch(e){console.error(e);msg('Kunde inte starta Google Sheets-export')}
+  }catch(e){console.error(e);reportRuntimeError(e,'google-sheets-direct');msg('Kunde inte starta Google Sheets-export')}
 }
 
 root.querySelector('#p48-pdf').addEventListener('click',exportPdf);root.querySelector('#p48-doc').addEventListener('click',exportDoc);root.querySelector('#p48-sheets').addEventListener('click',exportGoogleSheets);root.querySelector('#p48-sheets-direct').addEventListener('click',createGoogleSheetDirect);
 const sheetsMenu=root.querySelector('.p48-sheets-menu');
 root.querySelector('#p48-sheets').addEventListener('click',()=>{if(sheetsMenu)sheetsMenu.open=false;});
 root.querySelector('#p48-sheets-direct').addEventListener('click',()=>{if(sheetsMenu)sheetsMenu.open=false;});
-root.querySelector('#p48-undo').addEventListener('click',()=>{if(!undo.length)return;redo.push(JSON.stringify(state()));restore(undo.pop());persist()});
-root.querySelector('#p48-redo').addEventListener('click',()=>{if(!redo.length)return;undo.push(JSON.stringify(state()));restore(redo.pop());persist()});
-root.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;if(e.key==='Delete'){if(selectedLinkIndex!=null){links.splice(selectedLinkIndex,1);selectedLinkIndex=null;drawLinks();persist();refreshLinkControls()}else if(selectedIds.size>1)deleteSelectedMany();else deleteSelected()}});
+root.querySelector('#p48-undo').addEventListener('click',()=>{if(!requireEdit())return;if(!undo.length)return;redo.push(JSON.stringify(state()));restore(undo.pop());refreshControls();refreshLinkControls();updateSelectionUi();persist()});
+root.querySelector('#p48-redo').addEventListener('click',()=>{if(!requireEdit())return;if(!redo.length)return;undo.push(JSON.stringify(state()));restore(redo.pop());refreshControls();refreshLinkControls();updateSelectionUi();persist()});
+root.addEventListener('keydown',e=>{
+  if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)||e.target.isContentEditable)return;
+  const mod=e.ctrlKey||e.metaKey,key=e.key.toLowerCase();
+  if(e.key==='Escape'){
+    const had=MapliniSelectionCore.hasAny({selectedId,selectedIds:[...selectedIds],selectedLinkIndex,selectedLinkIndices:[...selectedLinkIndices]});
+    selectionMode=false;canvas.classList.remove('p48-selection-mode');marquee.style.display='none';finishTempArrow();
+    if(had){e.preventDefault();clearSelection()}
+    return;
+  }
+  if(mod&&key==='z'){if(!canEdit())return;e.preventDefault();if(e.shiftKey){if(redo.length){undo.push(JSON.stringify(state()));restore(redo.pop());refreshControls();refreshLinkControls();updateSelectionUi();persist()}}else if(undo.length){redo.push(JSON.stringify(state()));restore(undo.pop());refreshControls();refreshLinkControls();updateSelectionUi();persist()}return}
+  if(mod&&key==='y'){if(!canEdit())return;e.preventDefault();if(redo.length){undo.push(JSON.stringify(state()));restore(redo.pop());refreshControls();refreshLinkControls();updateSelectionUi();persist()}return}
+  if(e.key==='Delete'||e.key==='Backspace'){if(!canEdit())return;
+    const action=MapliniSelectionCore.deleteAction({selectedId,selectedIds:[...selectedIds],selectedLinkIndex,selectedLinkIndices:[...selectedLinkIndices]});
+    if(action==='many'||action==='node'){e.preventDefault();deleteSelectedMany()}
+    else if(action==='link'){e.preventDefault();deleteLinkAt(selectedLinkIndex!=null?selectedLinkIndex:[...selectedLinkIndices][0],true)}
+  }
+});
 font.addEventListener('change',()=>updateStyle({fontFamily:font.value}));
 fontAllBtn.addEventListener('click',()=>{
+  if(!requireEdit())return;
   if(!nodes.size)return;
   pushUndo();
   for(const item of nodes.values()){
@@ -2579,42 +3128,52 @@ fontAllBtn.addEventListener('click',()=>{
 });
 
 pointSize.addEventListener('change',()=>{
+  if(!requireEdit())return;
   connectorPointSize=Number(pointSize.value)||8;
   applyConnectorPointSettings();
   persist();
 });
 pointColor.addEventListener('input',()=>{
+  if(!requireEdit())return;
   connectorPointColor=pointColor.value;
   applyConnectorPointSettings();
   persist();
 });
 hidePoints.addEventListener('change',()=>{
+  if(!requireEdit())return;
   connectorPointsHidden=hidePoints.checked;
   applyConnectorPointSettings();
   persist();
 });
 
 canvasBg.addEventListener('input',()=>{
+  if(!requireEdit())return;
   processBackground=canvasBg.value;applyProcessStyle();persistAfterIdle();
 });
 bgType.addEventListener('change',()=>{
+  if(!requireEdit())return;
   processBackgroundType=bgType.value;applyProcessStyle();persistAfterIdle();
 });
 bgPatternColor.addEventListener('input',()=>{
+  if(!requireEdit())return;
   processPatternColor=bgPatternColor.value;applyProcessStyle();persistAfterIdle();
 });
 bgDensity.addEventListener('change',()=>{
+  if(!requireEdit())return;
   processPatternDensity=Number(bgDensity.value)||20;applyProcessStyle();persistAfterIdle();
 });
 logoSize.addEventListener('change',()=>{
+  if(!requireEdit())return;
   processLogoWidth=Number(logoSize.value)||180;
   applyProcessStyle();persistAfterIdle();
 });
 logoHide.addEventListener('change',()=>{
+  if(!requireEdit())return;
   processLogoHidden=logoHide.checked;
   applyProcessStyle();persistAfterIdle();
 });
 logoRemove.addEventListener('click',()=>{
+  if(!requireEdit())return;
   processLogoData='';
   processLogoHidden=false;
   logoFile.value='';
@@ -2622,11 +3181,13 @@ logoRemove.addEventListener('click',()=>{
   msg('Logotype borttagen');
 });
 logoFile.addEventListener('change',()=>{
+  if(!requireEdit())return;
   const file=logoFile.files&&logoFile.files[0];
   if(!file)return;
   if(!/^image\/(png|jpeg|webp)$/.test(file.type)){msg('Välj PNG, JPG eller WebP');return}
   const reader=new FileReader();
   reader.onload=()=>{
+    if(!canEdit()){logoFile.value='';msg('Endast visning');return}
     processLogoData=String(reader.result||'');
     processLogoHidden=false;
     applyProcessStyle();persistAfterIdle();
@@ -2636,6 +3197,7 @@ logoFile.addEventListener('change',()=>{
 });
 
 size.addEventListener('change',()=>updateStyle({fontSize:Math.max(10,Math.min(36,Number(size.value)||13))}));textColor.addEventListener('input',()=>updateStyle({textColor:textColor.value}));bgColor.addEventListener('input',()=>updateStyle({bgColor:bgColor.value}));borderColor.addEventListener('input',()=>{
+  if(!requireEdit())return;
   if(selectedLinkIndex!=null){
     pushUndo();
     setLinkStyle(selectedLinkIndex,{color:borderColor.value});
@@ -2645,6 +3207,7 @@ size.addEventListener('change',()=>updateStyle({fontSize:Math.max(10,Math.min(36
   updateStyle({borderColor:borderColor.value});
 });
 borderWidth.addEventListener('change',()=>{
+  if(!requireEdit())return;
   if(selectedLinkIndex!=null){
     pushUndo();
     setLinkStyle(selectedLinkIndex,{width:Number(borderWidth.value)});
@@ -2656,11 +3219,12 @@ borderWidth.addEventListener('change',()=>{
 bold.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({fontWeight:styleOf(x.data).fontWeight==='700'?'400':'700'})});italic.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({fontStyle:styleOf(x.data).fontStyle==='italic'?'normal':'italic'})});under.addEventListener('click',()=>{const x=selectedId?nodes.get(selectedId):null;if(x)updateStyle({textDecoration:styleOf(x.data).textDecoration==='underline'?'none':'underline'})});root.querySelectorAll('[data-align]').forEach(b=>b.addEventListener('click',()=>updateStyle({textAlign:b.dataset.align})));
 
 
-addInputBtn.addEventListener('click',()=>{const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();ensureIO(item);item.data.inputs.push('Ny input');renderNodeIO(item);persist();refreshControls();});
-addOutputBtn.addEventListener('click',()=>{const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();ensureIO(item);item.data.outputs.push('Ny output');renderNodeIO(item);persist();refreshControls();});
+addInputBtn.addEventListener('click',()=>{if(!requireEdit())return;const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();ensureIO(item);item.data.inputs.push('Ny input');renderNodeIO(item);persist();refreshControls();});
+addOutputBtn.addEventListener('click',()=>{if(!requireEdit())return;const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();ensureIO(item);item.data.outputs.push('Ny output');renderNodeIO(item);persist();refreshControls();});
 
 deleteNodeBtn.addEventListener('click',()=>deleteSelected());
 linkColor.addEventListener('input',()=>{
+  if(!requireEdit())return;
   if(selectedLinkIndex==null){msg('Markera först en pil');return}
   pushUndo();
   setLinkStyle(selectedLinkIndex,{color:linkColor.value});
@@ -2670,6 +3234,7 @@ linkColor.addEventListener('input',()=>{
   msg('Pilfärg ändrad');
 });
 linkEnd.addEventListener('change',()=>{
+  if(!requireEdit())return;
   if(selectedLinkIndex==null){msg('Markera först en koppling');return}
   pushUndo();
   setLinkStyle(selectedLinkIndex,{end:String(linkEnd.value)});
@@ -2677,14 +3242,15 @@ linkEnd.addEventListener('change',()=>{
   msg('Slutmarkör ändrad');
 });
 linkDash.addEventListener('change',()=>{
+  if(!requireEdit())return;
   if(selectedLinkIndex==null){msg('Markera först en koppling');return}
   pushUndo();
   setLinkStyle(selectedLinkIndex,{dash:String(linkDash.value)});
   dirtyLinks.add(selectedLinkIndex);drawLinks();persist();refreshLinkControls();
   msg('Linjetyp ändrad');
 });
-deleteLinkBtn.addEventListener('click',()=>{if(selectedLinkIndex==null)return;pushUndo();links.splice(selectedLinkIndex,1);selectedLinkIndex=null;requestFullLinkRender();persist();refreshLinkControls();msg('Koppling borttagen')});
-linkHandle.addEventListener('pointerdown',e=>{if(selectedLinkIndex==null)return;e.preventDefault();e.stopPropagation();pushUndo(true);const r=canvas.getBoundingClientRect(),mv=ev=>{setLinkStyle(selectedLinkIndex,{viaX:ev.clientX-r.left,viaY:ev.clientY-r.top});dirtyLinks.add(selectedLinkIndex);drawLinks()},up=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',up);persist()};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',up)});
+deleteLinkBtn.addEventListener('click',()=>{if(deleteLinkAt(selectedLinkIndex,true))msg('Koppling borttagen')});
+linkHandle.addEventListener('pointerdown',e=>{if(!canEdit()||selectedLinkIndex==null)return;e.preventDefault();e.stopPropagation();const r=canvas.getBoundingClientRect(),sx=e.clientX,sy=e.clientY;let mutated=false;const mv=ev=>{if(!mutated&&MapliniCanvasCore.hasMeaningfulDelta(ev.clientX-sx,ev.clientY-sy)){pushUndo(true);mutated=true}if(!mutated)return;MapliniConnectorCore.setVia(links,selectedLinkIndex,ev.clientX-r.left,ev.clientY-r.top);dirtyLinks.add(selectedLinkIndex);drawLinks()},done=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',done);document.removeEventListener('pointercancel',done);if(mutated)persist()};document.addEventListener('pointermove',mv);document.addEventListener('pointerup',done);document.addEventListener('pointercancel',done)});
 
 
 loadCloudSession();
@@ -2697,7 +3263,7 @@ const SHARE_TOKEN="__SHARE_TOKEN__";
 }catch(err){
   console.error('Maplini restore failed',err);
   clearCanvas();
-  const fallback={id:currentId,name:'Ny process',nodes:[],links:[]};
+  const fallback=MapliniWorkflowCore.emptyProcess(currentId,'Ny process');
   processes[currentId]=fallback;
   nameInput.value=fallback.name;
 }
@@ -2706,32 +3272,60 @@ renderProcesses();refreshControls();updateSelectionUi();updateAccountUi();msg('K
  renderPrintPages();
  if(ownerId()){
    const valid=await validateSession();
-   if(valid){await loadWorkspaces();await loadCloudProcesses();applyRoleUi();}
+   if(valid){
+     await loadWorkspaces();
+     const cloudOk=await loadCloudProcesses();
+     applyRoleUi();
+     if(!cloudOk)msg('Klar · lokal data återställd, molnet kunde inte läsas');
+   }else{
+     resetWorkspaceState();
+     msg('Klar · lokal lagring');
+   }
  }
 })();
 })();
 
 
 function syncResponsiveLayout(){
-  if(!isMobileLayout())setMobileTools(false);
+  const mobile=isMobileLayout();
+  if(!mobile){
+    setMobileTools(false);
+    canvas.classList.toggle('p48-selection-mode',selectionMode);
+  }
   if(scroll){scroll.style.visibility='visible';scroll.style.pointerEvents='auto';}
   invalidateNodeGeom();
   requestFullLinkRender();
   scheduleHorizontalNavSync();
 }
-window.addEventListener('orientationchange',()=>setTimeout(syncResponsiveLayout,120));
-window.addEventListener('resize',()=>requestAnimationFrame(syncResponsiveLayout));
-requestAnimationFrame(syncResponsiveLayout);
+function scheduleResponsiveLayout(){
+  MapliniPerformanceCore.rafOnce('responsive-layout',syncResponsiveLayout);
+}
+window.addEventListener('orientationchange',()=>setTimeout(scheduleResponsiveLayout,120));
+window.addEventListener('resize',scheduleResponsiveLayout,{passive:true});
+scheduleResponsiveLayout();
 
-window.addEventListener('beforeunload',()=>{try{saveLocal(true)}catch(e){}});
+function flushLifecycleSave(context){
+  if(!MapliniPrivacyCore.shouldPersistLocally({sharedView}))return true;
+  try{
+    persist(false,false);
+    const ok=saveLocal(true);
+    if(!ok)reportRuntimeError(new Error('Local lifecycle save failed'),context);
+    return ok;
+  }catch(e){
+    reportRuntimeError(e,context);
+    return false;
+  }
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')flushLifecycleSave('visibility-save')});
+window.addEventListener('beforeunload',()=>{flushLifecycleSave('beforeunload-save')});
 
 function alignEditorTop(){
   invalidateNodeGeom();
   requestFullLinkRender();
   scheduleHorizontalNavSync();
 }
-requestAnimationFrame(alignEditorTop);
-setTimeout(alignEditorTop,100);
+MapliniPerformanceCore.rafOnce('align-editor-top',alignEditorTop);
+setTimeout(()=>MapliniPerformanceCore.rafOnce('align-editor-top',alignEditorTop),100);
 
 </script>
 </div>
@@ -2743,6 +3337,21 @@ maplini_google_ui.render_google_export_ui(st, google_docs)
 html = html.replace("__MAPLINI_LOGO__", f"data:image/png;base64,{_LOGO_B64}")
 html = html.replace("__MAPLINI_VERSION__", APP_VERSION)
 html = html.replace("__MAPLINI_CONNECTOR_CORE__", _CONNECTOR_CORE_JS)
+html = html.replace("__MAPLINI_CANVAS_CORE__", _CANVAS_CORE_JS)
+html = html.replace("__MAPLINI_UI_CORE__", _UI_CORE_JS)
+html = html.replace("__MAPLINI_STATE_CORE__", _STATE_CORE_JS)
+html = html.replace("__MAPLINI_RELIABILITY_CORE__", _RELIABILITY_CORE_JS)
+html = html.replace("__MAPLINI_EXPORT_CORE__", _EXPORT_CORE_JS)
+html = html.replace("__MAPLINI_WORKFLOW_CORE__", _WORKFLOW_CORE_JS)
+html = html.replace("__MAPLINI_PERFORMANCE_CORE__", _PERFORMANCE_CORE_JS)
+html = html.replace("__MAPLINI_MOBILE_CORE__", _MOBILE_CORE_JS)
+html = html.replace("__MAPLINI_SELECTION_CORE__", _SELECTION_CORE_JS)
+html = html.replace("__MAPLINI_SYNC_CORE__", _SYNC_CORE_JS)
+html = html.replace("__MAPLINI_SESSION_CORE__", _SESSION_CORE_JS)
+html = html.replace("__MAPLINI_RC_CORE__", _RC_CORE_JS)
+html = html.replace("__MAPLINI_FLOW_CORE__", _FLOW_CORE_JS)
+html = html.replace("__MAPLINI_ACCESS_CORE__", _ACCESS_CORE_JS)
+html = html.replace("__MAPLINI_PRIVACY_CORE__", _PRIVACY_CORE_JS)
 html = html.replace("__SUPABASE_URL__", _SUPABASE_URL)
 html = html.replace("__SUPABASE_ANON_KEY__", _SUPABASE_ANON_KEY)
 html = html.replace("__PUBLIC_APP_URL__", _PUBLIC_APP_URL)

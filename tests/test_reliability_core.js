@@ -1,0 +1,3 @@
+const fs=require('fs'),vm=require('vm');vm.runInThisContext(fs.readFileSync('maplini_reliability_core.js','utf8'));const r=globalThis.MapliniReliabilityCore;
+function ok(v,m){if(!v)throw new Error(m)}
+ok(r.parseJsonSafe('{"a":1}').a===1,'parse');ok(r.parseJsonSafe('{bad')===null,'bad json');ok(r.isUsableProcess({id:'p',nodes:[],links:[]}), 'usable');ok(!r.isUsableProcess({id:'',nodes:[],links:[]}), 'bad');const i=r.errorInfo(new Error('boom'),'ctx');ok(i.context==='ctx'&&i.message.includes('boom'),'error');const e=r.makeEmergencySnapshot({currentId:'p',processes:{p:{id:'p'}}});ok(e.emergency&&e.currentId==='p','emergency');ok(r.validateStoreShape({processes:{}}).ok,'shape');ok(!r.validateStoreShape(null).ok,'bad shape');console.log('reliability core OK');
