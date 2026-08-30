@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.10.40"
+APP_VERSION = "0.10.41"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -421,6 +421,11 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   overflow:auto;
   background:#e9eef3;
 }
+/* v0.10.41: one visible vertical editor scrollbar. The sidebar still scrolls with wheel/touch,
+   but its duplicate scrollbar is hidden; scroll chaining to the iframe is prevented. */
+.p48-side{scrollbar-width:none;overscroll-behavior:contain}
+.p48-side::-webkit-scrollbar{width:0;height:0;display:none}
+.p48-scroll{overscroll-behavior:contain;scrollbar-gutter:auto}
 .p48-canvas-wrap{
   position:relative;
   width:2400px;
@@ -692,6 +697,12 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-doc-open{position:absolute;left:12px;right:12px;bottom:8px;min-height:24px;border:0;border-top:1px solid rgba(59,111,156,.22);background:transparent;color:#245d8d;font:700 11px system-ui;cursor:pointer;padding-top:6px;text-align:center}
 .p48-doc-open:hover{text-decoration:underline}
 .p48-doc-open[hidden]{display:none!important}
+/* v0.10.41: document URLs are entered directly inside the document node. */
+.p48-node.document.p48-doc-editing{min-height:104px;padding-bottom:58px}
+.p48-doc-inline-editor{position:absolute;left:10px;right:10px;bottom:8px;z-index:12;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:center;padding-top:7px;border-top:1px solid rgba(59,111,156,.22);background:inherit}
+.p48-doc-inline-editor[hidden]{display:none!important}
+.p48-doc-inline-input{min-width:0;width:100%;height:32px;border:1px solid #9bb7cf;border-radius:7px;padding:5px 7px;background:#fff;color:#17202a;font:11px system-ui;user-select:text;-webkit-user-select:text;touch-action:manipulation}
+.p48-doc-inline-save{height:32px;border:1px solid #3b6f9c;border-radius:7px;background:#eef6fc;color:#245d8d;padding:0 9px;font:800 10px system-ui;cursor:pointer}
 .p48-document-link-editor{margin-top:10px;padding:10px;border:1px solid #d8e3ec;border-radius:8px;background:#f8fbfd}
 .p48-document-link-editor label{display:block;font:700 10px system-ui;color:#657281;margin:5px 0 3px}
 .p48-document-link-editor input{width:100%;border:1px solid #cfd7df;border-radius:7px;padding:7px;font:12px system-ui}
@@ -1810,6 +1821,56 @@ function safeDocumentUrl(value){
     return u.href;
   }catch(e){return ''}
 }
+function closeDocumentInlineEditor(item){
+  if(!item)return;
+  item.el.classList.remove('p48-doc-editing');
+  if(item.docInlineEditor)item.docInlineEditor.hidden=true;
+  if(item.docOpen)item.docOpen.hidden=false;
+}
+function commitDocumentInlineUrl(item){
+  if(!item||!item.docInlineInput)return false;
+  const raw=String(item.docInlineInput.value||'').trim();
+  const normalized=safeDocumentUrl(raw);
+  if(raw&&!normalized){
+    msg('Ange en giltig http- eller https-länk');
+    item.docInlineInput.focus({preventScroll:true});
+    return false;
+  }
+  const previous=String(item.data.documentUrl||'');
+  if(previous!==raw){
+    pushUndo();
+    item.data.documentUrl=raw;
+    persist();
+  }
+  closeDocumentInlineEditor(item);
+  renderDocumentLink(item);
+  selectedId=item.data.id;selectedIds=new Set([item.data.id]);
+  refreshControls();updateSelectionUi();
+  if(raw)msg('Dokumentlänk sparad');
+  return true;
+}
+function openDocumentInlineEditor(item){
+  if(!item||item.data.type!=='document'||!requireEdit())return;
+  select(item.el);
+  if(!item.docInlineEditor){
+    const editor=document.createElement('div');editor.className='p48-doc-inline-editor';editor.hidden=true;
+    const input=document.createElement('input');input.type='url';input.inputMode='url';input.autocomplete='off';input.className='p48-doc-inline-input';input.placeholder='https://…';input.setAttribute('aria-label','Dokumentlänk');
+    const save=document.createElement('button');save.type='button';save.className='p48-doc-inline-save';save.textContent='Spara';
+    editor.append(input,save);item.el.appendChild(editor);item.docInlineEditor=editor;item.docInlineInput=input;
+    editor.addEventListener('pointerdown',e=>e.stopPropagation());editor.addEventListener('click',e=>e.stopPropagation());
+    save.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();commitDocumentInlineUrl(item)});
+    input.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){e.preventDefault();commitDocumentInlineUrl(item)}
+      else if(e.key==='Escape'){e.preventDefault();closeDocumentInlineEditor(item);renderDocumentLink(item);item.el.focus();}
+    });
+  }
+  item.docInlineInput.value=item.data.documentUrl||'';
+  item.el.classList.add('p48-doc-editing');
+  item.docInlineEditor.hidden=false;
+  if(item.docOpen)item.docOpen.hidden=true;
+  requestAnimationFrame(()=>{item.docInlineInput.focus({preventScroll:true});item.docInlineInput.select();});
+  msg('Klistra in dokumentlänken direkt i dokumentrutan');
+}
 function renderDocumentLink(item){
   if(!item||item.data.type!=='document')return;
   let btn=item.docOpen;
@@ -1823,13 +1884,7 @@ function renderDocumentLink(item){
       const url=safeDocumentUrl(item.data.documentUrl);
       if(!url){
         e.preventDefault();
-        select(item.el);
-        if(documentLinkEditor)documentLinkEditor.hidden=false;
-        if(documentUrlInput){
-          documentUrlInput.focus({preventScroll:true});
-          documentUrlInput.scrollIntoView({block:'nearest',behavior:'smooth'});
-        }
-        msg('Klistra in dokumentlänken i fältet Dokumentlänk');
+        openDocumentInlineEditor(item);
       }
     });
     item.el.appendChild(btn);item.docOpen=btn;
@@ -1837,7 +1892,8 @@ function renderDocumentLink(item){
   const valid=safeDocumentUrl(item.data.documentUrl);
   if(valid)btn.href=valid;else btn.removeAttribute('href');
   btn.textContent=valid?'↗ Öppna dokument':'+ Lägg till dokumentlänk';
-  btn.title=valid?valid:'Markera rutan och lägg till en dokumentlänk';
+  btn.title=valid?valid:'Lägg till dokumentlänk direkt i rutan';
+  btn.hidden=Boolean(item.docInlineEditor&&!item.docInlineEditor.hidden);
   const ts=styleOf(item.data);btn.style.fontFamily=ts.fontFamily;btn.style.fontSize=Math.max(9,Math.round(ts.fontSize*.85))+'px';
 }
 
@@ -2249,7 +2305,7 @@ function refreshControls(){
   if(documentOpenEditor){const u=item.data.type==='document'?safeDocumentUrl(item.data.documentUrl):'';documentOpenEditor.hidden=!u;if(u)documentOpenEditor.href=u;else documentOpenEditor.removeAttribute('href');}
   renderIOEditor(item)
 }
-function updateStyle(patch){if(!requireEdit())return;const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();Object.assign(item.data,patch);applyStyle(item);drawLinks();persist()}
+function updateStyle(patch){if(!requireEdit())return;const item=selectedId?nodes.get(selectedId):null;if(!item)return;const keepId=item.data.id;pushUndo();Object.assign(item.data,patch);applyStyle(item);drawLinks();persist();selectedId=keepId;selectedIds=new Set([keepId]);refreshControls();updateSelectionUi()}
 function beginInlineEdit(el){
   if(!requireEdit())return;
   const item=nodes.get(el.dataset.id);
@@ -2291,7 +2347,7 @@ const d=clone(data),el=document.createElement('div');el.className='p48-node '+d.
 const label=document.createElement('span');label.className='p48-label';label.textContent=d.text;label.contentEditable='false';label.spellcheck=true;el.appendChild(label);
 const handles={};for(const side of ['right','left','top','bottom']){const h=document.createElement('span');h.className='p48-handle '+side;h.dataset.side=side;el.appendChild(h);handles[side]=h}
 const resizeHandles={};for(const corner of ['se','sw','ne','nw']){const rh=document.createElement('span');rh.className='p48-resize '+corner;rh.dataset.corner=corner;el.appendChild(rh);resizeHandles[corner]=rh}
-canvas.appendChild(el);nodes.set(d.id,{el,data:d,label,handles,resizeHandles,io:null,docOpen:null});applyStyle(nodes.get(d.id));renderNodeIO(nodes.get(d.id));renderDocumentLink(nodes.get(d.id));
+canvas.appendChild(el);nodes.set(d.id,{el,data:d,label,handles,resizeHandles,io:null,docOpen:null,docInlineEditor:null,docInlineInput:null});applyStyle(nodes.get(d.id));renderNodeIO(nodes.get(d.id));renderDocumentLink(nodes.get(d.id));
 for(const h of Object.values(handles)){
   h.style.width=connectorPointSize+'px';
   h.style.height=connectorPointSize+'px';
@@ -2312,7 +2368,7 @@ label.addEventListener('keydown',e=>{
 el.addEventListener('click',e=>{e.stopPropagation();select(el)});
 el.addEventListener('pointerdown',e=>{
   if(!canEdit())return;
-  if(e.button!==0||e.target.classList.contains('p48-handle')||e.target.classList.contains('p48-label')||e.target.classList.contains('p48-resize')||e.target.classList.contains('p48-doc-open'))return;
+  if(e.button!==0||e.target.classList.contains('p48-handle')||e.target.classList.contains('p48-label')||e.target.classList.contains('p48-resize')||e.target.classList.contains('p48-doc-open')||(e.target.closest&&e.target.closest('.p48-doc-inline-editor')))return;
   select(el);
   const sx=e.clientX,sy=e.clientY,ox=parseFloat(el.style.left)||0,oy=parseFloat(el.style.top)||0,pointerType=e.pointerType||'mouse';
   let mutated=false;
@@ -3876,4 +3932,4 @@ html = html.replace("__PUBLIC_APP_URL__", _PUBLIC_APP_URL)
 html = html.replace("__SHARE_TOKEN__", st.query_params.get("share", ""))
 if not _CLOUD_ENABLED:
     st.caption("Molnlagring är inte aktiverad ännu. Lägg Supabase-inställningarna i Streamlit Secrets enligt README.")
-components.html(html, height=1650, scrolling=True)
+components.html(html, height=1120, scrolling=False)

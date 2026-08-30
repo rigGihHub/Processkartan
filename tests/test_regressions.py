@@ -180,7 +180,7 @@ def test_mobile_logo_uses_contain_and_is_not_crop_locked():
     assert "overflow:visible!important" in mobile
 
 def test_streamlit_component_is_tall_enough_for_mobile_page_scroll():
-    assert "components.html(html, height=1650" in APP
+    assert "components.html(html, height=1120, scrolling=False)" in APP
 
 
 def test_connector_restore_is_normalized():
@@ -281,7 +281,7 @@ def test_v01016_canvas_core_node_test_when_available():
 
 
 def test_v01017_ui_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     assert '_UI_CORE_PATH' in APP
     assert '__MAPLINI_UI_CORE__' in APP
     assert 'MapliniUiCore.selectionHint' in APP
@@ -323,7 +323,7 @@ def test_v01017_ui_core_contains_selection_hint_logic():
 
 
 def test_v01018_state_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     assert '_STATE_CORE_PATH' in APP
     assert '__MAPLINI_STATE_CORE__' in APP
     assert 'MapliniStateCore.normalizeProcess' in APP
@@ -353,7 +353,7 @@ def test_v01018_state_core_drops_orphan_links():
 
 
 def test_v01019_reliability_core_loaded():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     assert '_RELIABILITY_CORE_PATH' in APP
     assert '__MAPLINI_RELIABILITY_CORE__' in APP
 
@@ -383,7 +383,7 @@ def test_v01019_reliability_primitives():
 
 
 def test_v01020_export_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     assert '_EXPORT_CORE_PATH' in APP
     assert '__MAPLINI_EXPORT_CORE__' in APP
     assert 'MapliniExportCore.validateBytes' in APP
@@ -427,7 +427,7 @@ def test_v01021_connector_persistence_format_is_preserved():
     assert "nodeIds.has(l[0])&&nodeIds.has(l[1])" in STATE_CORE
 
 def test_v01021_workflow_core_loaded_and_history_centralized():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     assert '_WORKFLOW_CORE_PATH' in APP
     assert '__MAPLINI_WORKFLOW_CORE__' in APP
     assert 'MapliniWorkflowCore.emptyProcess' in APP
@@ -452,7 +452,7 @@ def test_v01021_workflow_core_when_node_available():
 
 
 def test_v01022_performance_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     assert '_PERFORMANCE_CORE_PATH' in APP
     assert '__MAPLINI_PERFORMANCE_CORE__' in APP
     assert 'MapliniPerformanceCore.signature' in APP
@@ -480,7 +480,7 @@ def test_v01022_performance_core_primitives_exist():
 
 
 def test_v01023_mobile_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     assert '_MOBILE_CORE_PATH' in APP
     assert '__MAPLINI_MOBILE_CORE__' in APP
     assert 'MapliniMobileCore.clientToLocal' in APP
@@ -519,7 +519,7 @@ def test_v01023_mobile_core_primitives():
 
 
 def test_v01024_selection_core_loaded_and_used():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     assert '_SELECTION_CORE_PATH' in APP
     assert '__MAPLINI_SELECTION_CORE__' in APP
     assert 'MapliniSelectionCore.deleteAction' in APP
@@ -547,7 +547,7 @@ def test_v01024_escape_and_undo_redo_refresh_context():
 
 
 def test_v01025_desktop_guard_is_present_without_mobile_selector_regression():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     html=_template()
     assert "/* v0.10.25 desktop regression guard */" in html
     assert "grid-template-columns:220px minmax(0,1fr)!important" in html
@@ -563,7 +563,7 @@ def test_v01025_dead_outer_canvas_css_removed():
 
 
 def test_v01026_sync_core_is_loaded_and_used():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     assert '_SYNC_CORE_PATH' in APP
     assert '__MAPLINI_SYNC_CORE__' in APP
     assert 'MapliniSyncCore.contentChanged' in APP
@@ -603,7 +603,7 @@ def test_v01026_signout_removes_unmodified_cloud_copies():
 
 
 def test_v01027_session_core_loaded_and_used():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     assert '_SESSION_CORE_PATH' in APP
     assert '__MAPLINI_SESSION_CORE__' in APP
     assert 'MapliniSessionCore.chooseWorkspace' in APP
@@ -646,7 +646,7 @@ def test_v01027_session_core_primitives():
 
 
 def test_v01028_rc_core_loaded_and_used():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     assert '_RC_CORE_PATH' in APP
     assert '__MAPLINI_RC_CORE__' in APP
     assert 'MapliniRcCore.captureScopeState' in APP
@@ -683,7 +683,7 @@ def test_v01028_rc_core_primitives():
 
 
 def test_v01029_flow_core_loaded_and_used():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     assert '_FLOW_CORE_PATH' in APP
     assert '__MAPLINI_FLOW_CORE__' in APP
     assert 'MapliniFlowCore.sharedProcess' in APP
@@ -724,7 +724,7 @@ def test_v01029_flow_core_primitives():
 
 
 def test_v01030_access_core_loaded_and_used():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     assert '_ACCESS_CORE_PATH' in APP
     assert '__MAPLINI_ACCESS_CORE__' in APP
     assert "function canEdit(){return MapliniAccessCore.canEdit" in APP
@@ -766,7 +766,7 @@ def test_v01030_access_core_role_rules():
 
 
 def test_v01031_privacy_core_loaded_and_used():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     assert '_PRIVACY_CORE_PATH' in APP
     assert '__MAPLINI_PRIVACY_CORE__' in APP
     assert "MapliniPrivacyCore.shouldPersistLocally" in APP
@@ -808,7 +808,7 @@ def test_v01031_privacy_core_rules():
 
 
 def test_v01032_save_local_has_privacy_guard():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     chunk=APP[APP.index("function saveLocal(immediate=false)"):APP.index("function loadLocal()")]
     assert "if(!MapliniPrivacyCore.shouldPersistLocally({sharedView}))return true" in chunk
 
@@ -845,7 +845,7 @@ def test_v01032_direct_google_export_reports_runtime_error():
 
 
 def test_v01033_process_logo_is_selectable_and_draggable():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     assert ".p48-process-logo.selected" in APP
     assert "processLogo.addEventListener('pointerdown'" in APP
     chunk=APP[APP.index("processLogo.addEventListener('pointerdown'"):APP.index("logoSize.addEventListener")]
@@ -865,7 +865,7 @@ def test_v01033_process_logo_position_persists():
 
 
 def test_v01034_document_node_palette_and_state():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     assert 'data-type="document"' in APP
     assert "document:'Dokument'" in APP
     assert ".p48-node.document" in APP
@@ -908,7 +908,7 @@ def test_v01035_scroll_has_bottom_clearance():
 
 
 def test_v01036_selected_connector_can_be_dragged():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     assert "function startSelectedLinkDrag(index,e)" in APP
     assert "if(selectedLinkIndex===hit&&canEdit())" in APP
     assert "startSelectedLinkDrag(hit,e)" in APP
@@ -933,7 +933,7 @@ def test_v01036_scaled_interactions_use_logical_canvas_coordinates():
 
 def test_v01037_background_library_controls():
     html=_template()
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     for value in ('dots','grid','lines','solid','gradient','image','watermark','texture-paper','texture-parchment','texture-canvas','texture-concrete'):
         assert f'value="{value}"' in html
     assert 'id="p48-gradient-start"' in html
@@ -960,10 +960,12 @@ def test_v01037_export_supports_new_backgrounds():
     assert "type.startsWith('texture-')" in APP
 
 
-def test_document_node_add_link_focuses_editor():
-    assert "msg('Klistra in dokumentlänken i fältet Dokumentlänk')" in APP
-    assert "documentUrlInput.focus({preventScroll:true})" in APP
-    assert "documentUrlInput.scrollIntoView({block:'nearest',behavior:'smooth'})" in APP
+def test_document_node_add_link_opens_inline_editor():
+    assert "function openDocumentInlineEditor(item)" in APP
+    assert "msg('Klistra in dokumentlänken direkt i dokumentrutan')" in APP
+    assert "item.docInlineInput.focus({preventScroll:true})" in APP
+    render = APP[APP.index("function renderDocumentLink(item){"):APP.index("function state(){")]
+    assert "openDocumentInlineEditor(item)" in render
 
 def test_global_font_and_size_control_applies_both_to_all_nodes():
     text = Path('app.py').read_text(encoding='utf-8')
@@ -981,7 +983,7 @@ def test_node_secondary_text_inherits_typography():
     assert "item.docOpen.style.fontFamily=s.fontFamily" in text
 
 def test_v01040_dropdown_menus_close_on_outside_click():
-    assert 'APP_VERSION = "0.10.40"' in APP
+    assert 'APP_VERSION = "0.10.41"' in APP
     assert 'function closeOpenMenus(exceptTarget=null)' in APP
     assert "details.p48-canvas-menu[open]" in APP
     assert "details.p48-sheets-menu[open]" in APP
@@ -1012,3 +1014,25 @@ def test_v01040_export_knows_visual_styles():
     assert "s.nodeStyle==='raised'" in APP
     assert "s.nodeStyle==='glass'" in APP
     assert "s.nodeStyle==='flat'" in APP
+
+
+def test_v01041_document_link_is_edited_inline_on_canvas():
+    assert 'APP_VERSION = "0.10.41"' in APP
+    assert "function openDocumentInlineEditor(item)" in APP
+    assert "p48-doc-inline-editor" in APP
+    render = APP[APP.index("function renderDocumentLink(item){"):APP.index("function state(){")]
+    assert "openDocumentInlineEditor(item)" in render
+    assert "documentUrlInput.focus" not in render
+    assert "Klistra in dokumentlänken direkt i dokumentrutan" in APP
+
+def test_v01041_node_formatting_preserves_active_selection():
+    chunk = APP[APP.index("function updateStyle(patch)"):APP.index("function beginInlineEdit(el)")]
+    assert "const keepId=item.data.id" in chunk
+    assert "selectedId=keepId;selectedIds=new Set([keepId])" in chunk
+    assert "refreshControls();updateSelectionUi()" in chunk
+
+def test_v01041_simplified_vertical_scroll_contract():
+    assert "components.html(html, height=1120, scrolling=False)" in APP
+    assert ".p48-side{scrollbar-width:none;overscroll-behavior:contain}" in APP
+    assert ".p48-side::-webkit-scrollbar{width:0;height:0;display:none}" in APP
+    assert ".p48-scroll{overscroll-behavior:contain;scrollbar-gutter:auto}" in APP

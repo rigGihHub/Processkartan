@@ -1,5 +1,12 @@
 # Maplini Changelog
 
+## 0.10.41 - Inline document link, persistent selection & simpler scrolling
+- Dokumentnodens `+ Lägg till dokumentlänk` öppnar ett URL-fält direkt i noden på canvasen i stället för att flytta fokus till vänsterpanelen.
+- Inline-länken validerar http/https, sparas med Spara eller Enter och håller dokumentnoden markerad efter sparning.
+- Nodmarkering bevaras explicit efter formateringsändringar, inklusive 3D/raised/glass/flat, så användaren kan fortsätta redigera utan att markera om noden.
+- Tog bort iframe-baserad vertikal scroll, döljer den redundanta sidebar-scrollbaren men behåller wheel/touch-scroll och stoppar scroll chaining mellan panelerna.
+- Ingen databas-, OAuth- eller dependency-ändring.
+
 ## 0.10.40 - Menu auto-close & node visual styles
 - Öppna dropdown-menyer stängs när användaren klickar utanför dem, och en ny dropdown stänger den tidigare.
 - Delningspanelen stängs också vid klick utanför.
