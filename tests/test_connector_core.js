@@ -6,7 +6,7 @@ assert(C,'connector core missing');
 let links=[];
 links.push(C.create('n1','n2','right'));
 assert.deepStrictEqual(links[0].slice(0,3),['n1','n2','right']);
-assert.strictEqual(C.style(links[0]).color,'#687584');
+assert.strictEqual(C.style(links[0]).color,'#5b6775');
 C.setStyle(links,0,{color:'#ff0000',width:4,dash:'dashed'});
 assert.strictEqual(C.style(links[0]).color,'#ff0000');
 assert.strictEqual(C.style(links[0]).width,4);
@@ -30,3 +30,39 @@ assert.deepStrictEqual(bulk[0].slice(0,2),['c','d']);
 let area=C.rectsIntersect({left:0,right:10,top:0,bottom:10},{left:5,right:15,top:5,bottom:15});
 assert.strictEqual(area,true);
 console.log('connector lifecycle OK');
+let modern=C.create('x','y','right');
+assert.strictEqual(C.style(modern).routing,'orthogonal');
+assert.strictEqual(C.style(modern).anchorMode,'auto');
+assert.deepStrictEqual(C.autoSides(100,20),['right','left']);
+assert.deepStrictEqual(C.autoSides(-100,20),['left','right']);
+assert.deepStrictEqual(C.autoSides(10,100),['bottom','top']);
+let pts=C.routePoints(0,10,100,50,'right','left',{routing:'orthogonal'});
+assert.deepStrictEqual(pts,[[0,10],[50,10],[50,50],[100,50]]);
+assert.strictEqual(C.pathData(pts),'M0,10 L50,10 L50,50 L100,50');
+let mp=C.midpoint([[0,0],[100,0],[100,100]]);
+assert.deepStrictEqual(mp,{x:100,y:0});
+
+assert.strictEqual(C.style(C.create('d','a','right')).label,'');
+assert.strictEqual(C.decisionLabel(0),'Ja');
+assert.strictEqual(C.decisionLabel(1),'Nej');
+assert.strictEqual(C.decisionLabel(2),'');
+let labeled=C.create('d','x','right',{label:'Godkänd'});
+assert.strictEqual(C.style(labeled).label,'Godkänd');
+assert.strictEqual(C.style(C.normalizeLink(JSON.parse(JSON.stringify(labeled)))).label,'Godkänd');
+
+// v0.10.45: splitting a link inserts a node without losing visual flow style.
+{
+  const links=[C.create('a','b','right',{color:'#123456',width:3,dash:'dashed',routing:'straight',anchorMode:'manual',label:'Ja',viaX:88,viaY:44})];
+  const out=C.splitLink(links,0,'n9');
+  assert.strictEqual(out.length,2);
+  assert.deepStrictEqual(out[0].slice(0,2),['a','n9']);
+  assert.deepStrictEqual(out[1].slice(0,2),['n9','b']);
+  assert.strictEqual(C.style(out[0]).label,'Ja');
+  assert.strictEqual(C.style(out[1]).label,'');
+  assert.strictEqual(C.style(out[0]).color,'#123456');
+  assert.strictEqual(C.style(out[1]).dash,'dashed');
+  assert.strictEqual(C.style(out[0]).routing,'straight');
+  assert.strictEqual(C.style(out[0]).anchorMode,'auto');
+  assert.strictEqual(C.style(out[0]).viaX,null);
+  assert.strictEqual(C.style(out[1]).viaY,null);
+}
