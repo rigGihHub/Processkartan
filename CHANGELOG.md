@@ -1,3 +1,23 @@
+## v0.16.3 – Canvas Pan & Scale Slider
+- Added desktop mouse navigation: press and drag on blank canvas to pan horizontally and vertically.
+- Panning ignores nodes, connectors, controls and other interactive elements so normal editing gestures remain intact.
+- Replaced the whole-process `+10 % / −10 %` controls with a 50–150% slider and live percentage readout.
+- Slider interaction keeps the scale menu open and scales continuously while dragging.
+- Fixed whole-process scaling so node CSS minimum/maximum dimensions no longer block visible shrinking or growing.
+- Scaled nodes now use border-box dimensions and explicit min/max overrides, so the visible rectangle follows the scale together with text and spacing.
+- Stored scaled width/height are restored with the same sizing rules when a process is reopened.
+- Fit-to-page remains available as a separate one-shot action.
+- No database, Supabase or migration changes.
+
+## v0.16.2 – Process Scale Quick Access
+- Moved `Skala process` out of the `Mer` menu and into the main top toolbar, directly beside the primary process tools.
+- The scale control is now visible without first opening a secondary menu.
+- `−10 %` and `+10 %` keep the scale menu open after each press, allowing repeated scaling in one continuous interaction.
+- Added event isolation so scale-button clicks do not collapse the surrounding details menu.
+- `Passa till vald sida` still closes the menu after completing its one-shot action.
+- Existing process scaling behavior remains proportional across nodes, text, spacing and connector geometry.
+- No data-schema, Supabase or migration changes.
+
 ## v0.16.1 – Dependency Coach
 - Added a process-method warning for direct Activity → Activity links.
 - When a user manually connects two activities directly, Maplini selects the new connector, opens `Infoga steg`, and asks what result from the first activity enables the next.

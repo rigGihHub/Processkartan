@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.16.1"
+APP_VERSION = "0.16.3"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -388,6 +388,18 @@ html = r"""
 .p48-node,.p48-handle,.p48-resize,.p48-link-hit-segment{touch-action:none}
 .p48-scroll{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 button,summary,select,input{-webkit-tap-highlight-color:transparent}
+
+/* v0.16.2 process scale quick access */
+.p48-scale-menu-top>summary{font-weight:750}
+.p48-scale-menu-top[open]>summary{border-color:#9bb9ae;background:#f3f8f6}
+.p48-scale-slider-label{display:flex;align-items:center;justify-content:space-between;margin:3px 0 7px;color:#405363;font:700 11px Inter,system-ui}
+.p48-scale-slider-label strong{color:#176c52;font-size:12px}
+.p48-process-scale-slider{width:100%;accent-color:#1f6f55;cursor:pointer}
+.p48-scale-slider-marks{display:flex;justify-content:space-between;margin-top:3px;color:#83909a;font:600 9px Inter,system-ui}
+.p48-scale-popover{min-width:245px}
+.p48-scroll.p48-desktop-pan-ready{cursor:grab}
+.p48-scroll.p48-desktop-panning{cursor:grabbing!important;user-select:none}
+.p48-scroll.p48-desktop-panning *{cursor:grabbing!important}
 
 /* v0.16.0 method-first palette */
 .p48-method-flow{display:flex;align-items:center;justify-content:center;gap:5px;margin:8px 0 10px;padding:7px 5px;border-radius:8px;background:#f1f7f5;color:#315d51;font:700 9px/1.2 Inter,system-ui}
@@ -1108,6 +1120,18 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
     </div>
   </details>
 
+  <details class="p48-scale-menu p48-scale-menu-top" id="p48-scale-menu">
+    <summary class="p48-btn" title="Ändra storlek på hela processen">↔ Skala process ▾</summary>
+    <div class="p48-scale-popover">
+      <div class="p48-pop-title">Skala hela processen</div>
+      <label class="p48-scale-slider-label" for="p48-process-scale">Storlek <strong id="p48-process-scale-value">100 %</strong></label>
+      <input id="p48-process-scale" class="p48-process-scale-slider" type="range" min="50" max="150" step="5" value="100" aria-label="Skala hela processen">
+      <div class="p48-scale-slider-marks" aria-hidden="true"><span>50 %</span><span>100 %</span><span>150 %</span></div>
+      <button type="button" class="p48-mini p48-scale-fit" id="p48-scale-fit-page">Passa till vald sida</button>
+      <div class="p48-muted">Reglaget ändrar rutor, text, avstånd och hela processens innehåll proportionellt.</div>
+    </div>
+  </details>
+
   <details class="p48-export-menu" id="p48-export-menu">
     <summary class="p48-btn primary" title="Exportera processen">Exportera ▾</summary>
     <div class="p48-export-popover">
@@ -1231,18 +1255,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
       <label class="p48-hide-row"><input id="p48-logo-hide" type="checkbox">Dölj logotype</label>
     </div>
   </details>
-      <details class="p48-scale-menu" id="p48-scale-menu">
-    <summary class="p48-btn" title="Ändra storlek på hela processen">↔ Skala process ▾</summary>
-    <div class="p48-scale-popover">
-      <div class="p48-pop-title">Hela processens innehåll</div>
-      <div class="p48-scale-actions">
-        <button type="button" class="p48-mini" id="p48-scale-down">−10 %</button>
-        <button type="button" class="p48-mini" id="p48-scale-up">+10 %</button>
-      </div>
-      <button type="button" class="p48-mini p48-scale-fit" id="p48-scale-fit-page">Passa till vald sida</button>
-      <div class="p48-muted">Använder valt A4/A3-format nedan. Ändrar rutor, text och avstånd proportionellt.</div>
-    </div>
-  </details>
+
     </div>
   </details>
 
@@ -1604,7 +1617,7 @@ const selectToolBtn=root.querySelector('#p48-select-tool');
 const deleteSelectionBtn=root.querySelector('#p48-delete-selection'),duplicateSelectionBtn=root.querySelector('#p48-duplicate-selection');
 const zoomOutBtn=root.querySelector('#p48-zoom-out'),zoomResetBtn=root.querySelector('#p48-zoom-reset'),zoomInBtn=root.querySelector('#p48-zoom-in');
 const fitScreenBtn=root.querySelector('#p48-fit-screen'),arrangeMenu=root.querySelector('#p48-arrange-menu'),arrangeHint=root.querySelector('#p48-arrange-hint'),alignChoices=[...root.querySelectorAll('.p48-align-choice')],distributeChoices=[...root.querySelectorAll('.p48-distribute-choice')];
-const scaleMenu=root.querySelector('#p48-scale-menu'),scaleDownBtn=root.querySelector('#p48-scale-down'),scaleUpBtn=root.querySelector('#p48-scale-up'),scaleFitPageBtn=root.querySelector('#p48-scale-fit-page');
+const scaleMenu=root.querySelector('#p48-scale-menu'),processScaleSlider=root.querySelector('#p48-process-scale'),processScaleValue=root.querySelector('#p48-process-scale-value'),scaleFitPageBtn=root.querySelector('#p48-scale-fit-page');
 const accountPanel=root.querySelector('#p48-account-panel'),accountSummaryState=root.querySelector('#p48-account-summary-state');
 const smartLayoutMenu=root.querySelector('#p48-smart-layout-menu'),smartLayoutHint=root.querySelector('#p48-smart-layout-hint'),smartLayoutChoices=[...root.querySelectorAll('.p48-smart-layout-choice')];
 const inputsBox=root.querySelector('#p48-inputs'),outputsBox=root.querySelector('#p48-outputs');
@@ -1626,7 +1639,7 @@ let cloudSession=null,sharedView=false;
 let cloudLoadedProcessIds=new Set();
 let cloudLoadedProcessScopes=new Map();
 let currentWorkspaceId=null,currentWorkspaceOwnerId=null,currentRole='owner',printPreview=false;
-let pdfView='A4P',pageCountMode='auto',canvasScale=1,canvasLogicalWidth=2400,canvasLogicalHeight=1400;
+let pdfView='A4P',pageCountMode='auto',canvasScale=1,canvasLogicalWidth=2400,canvasLogicalHeight=1400,processScalePercent=100,processScaleGesture=false;
 
 
 function clampCanvasScale(value){return Math.max(0.25,Math.min(1.5,Math.round(Number(value)*100)/100))}
@@ -2562,6 +2575,9 @@ function restore(s){
   const d=MapliniStateCore.normalizeProcess(raw,raw?.id||currentId);
   if(!MapliniReliabilityCore.isUsableProcess(d)){reportRuntimeError(new Error('Invalid process payload'),'restore-validate');return false}
   clearCanvas();
+  processScalePercent=100;
+  if(processScaleSlider)processScaleSlider.value='100';
+  if(processScaleValue)processScaleValue.textContent='100 %';
   currentId=d.id||currentId;
   nameInput.value=d.name||'Namnlös process';
   connectorPointSize=Number(d.connectorPointSize||8);
@@ -3019,7 +3035,11 @@ function finishInlineEdit(el){
 }
 
 function makeNode(data){
-const d=clone(data),el=document.createElement('div');el.className='p48-node '+d.type;el.dataset.id=d.id;el.style.left=d.x+'px';el.style.top=d.y+'px';el.tabIndex=0;if(d.width)el.style.width=d.width+'px';if(d.height){el.style.height=d.height+'px';el.style.minHeight=d.height+'px';}
+const d=clone(data),el=document.createElement('div');el.className='p48-node '+d.type;el.dataset.id=d.id;el.style.left=d.x+'px';el.style.top=d.y+'px';el.tabIndex=0;
+if(d.width){
+  el.style.boxSizing='border-box';el.style.minWidth='0px';el.style.maxWidth='none';el.style.width=d.width+'px';
+}
+if(d.height){el.style.boxSizing='border-box';el.style.minHeight='0px';el.style.height=d.height+'px';}
 const label=document.createElement('span');label.className='p48-label';label.textContent=d.text;label.contentEditable='false';label.spellcheck=true;el.appendChild(label);
 const handles={};for(const side of ['right','left','top','bottom']){const h=document.createElement('span');h.className='p48-handle '+side;h.dataset.side=side;el.appendChild(h);handles[side]=h}
 const resizeHandles={};for(const corner of ['se','sw','ne','nw']){const rh=document.createElement('span');rh.className='p48-resize '+corner;rh.dataset.corner=corner;el.appendChild(rh);resizeHandles[corner]=rh}
@@ -3711,6 +3731,40 @@ root.addEventListener('click',e=>{
   if(addBtn)setTimeout(()=>setMobileTools(false),0);
 });
 
+// v0.16.3 desktop canvas navigation: drag blank canvas with the primary mouse button.
+let desktopPan=null,desktopPanMoved=false;
+function desktopPanBlankTarget(target){
+  if(!target)return false;
+  return target===scroll||target===canvas||target===canvas.parentElement||
+    target.id==='p48-svg'||target.id==='p48-links'||target.classList?.contains('p48-print-page');
+}
+if(scroll){
+  scroll.classList.add('p48-desktop-pan-ready');
+  scroll.addEventListener('pointerdown',e=>{
+    if(isMobileLayout()||selectionMode||e.pointerType==='touch'||e.button!==0||!desktopPanBlankTarget(e.target))return;
+    desktopPan={id:e.pointerId,x:e.clientX,y:e.clientY,left:scroll.scrollLeft,top:scroll.scrollTop};
+    desktopPanMoved=false;scroll.classList.add('p48-desktop-panning');
+    try{scroll.setPointerCapture(e.pointerId)}catch(_){}
+    e.preventDefault();
+  },{passive:false});
+  scroll.addEventListener('pointermove',e=>{
+    if(!desktopPan||desktopPan.id!==e.pointerId)return;
+    const dx=e.clientX-desktopPan.x,dy=e.clientY-desktopPan.y;
+    if(Math.abs(dx)>3||Math.abs(dy)>3)desktopPanMoved=true;
+    scroll.scrollLeft=Math.max(0,desktopPan.left-dx);
+    scroll.scrollTop=Math.max(0,desktopPan.top-dy);
+    scheduleHorizontalNavSync();
+    e.preventDefault();
+  },{passive:false});
+  const endDesktopPan=e=>{
+    if(!desktopPan||desktopPan.id!==e.pointerId)return;
+    desktopPan=null;scroll.classList.remove('p48-desktop-panning');
+    try{scroll.releasePointerCapture(e.pointerId)}catch(_){}
+  };
+  scroll.addEventListener('pointerup',endDesktopPan);
+  scroll.addEventListener('pointercancel',endDesktopPan);
+}
+
 // v0.13 mobile canvas gestures: one finger pans blank canvas, two fingers pinch-zoom.
 const mobilePointers=new Map();let mobileGesture=null;
 function mobileGestureBlocked(target){return Boolean(target&&target.closest&&target.closest('.p48-node,.p48-node-quick,.p48-link-quick,.p48-link-hit-segment,.p48-link-visible,.p48-link-selection,.p48-link-handle,.p48-handle,.p48-resize,button,input,select,summary,a'));}
@@ -4387,7 +4441,8 @@ root.querySelectorAll('.p48-item').forEach(i=>{
 canvas.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='copy'});
 canvas.addEventListener('drop',e=>{e.preventDefault();const type=e.dataTransfer.getData('text/plain');if(!type)return;const p=clientToCanvas(e.clientX,e.clientY);addNode(type,p.x,p.y)});
 canvas.addEventListener('click',e=>{
-  if((e.target===canvas||e.target===linkLayer)&&!selectionMode){clearSelection();clearLinkSelection();finishTempArrow();}
+  if(desktopPanMoved){desktopPanMoved=false;e.preventDefault();e.stopPropagation();return}
+  if((e.target===canvas||e.target===linkLayer||e.target.id==='p48-svg'||e.target.id==='p48-links')&&!selectionMode){clearSelection();clearLinkSelection();finishTempArrow();}
 });
 nameInput.addEventListener('change',()=>{if(!requireEdit())return;persist(false,true);msg('Namn sparat')});
 root.querySelector('#p48-new').addEventListener('click',newProcess);
@@ -4927,7 +4982,7 @@ function selectedNodeRects(ids){
   return out;
 }
 
-function scaleWholeProcess(factor,fitToPage=false){
+function scaleWholeProcess(factor,fitToPage=false,recordHistory=true){
   if(!requireEdit())return false;
   const items=[...nodes.values()];
   if(!items.length){msg('Processen har inga rutor att skala');return false}
@@ -4944,7 +4999,7 @@ function scaleWholeProcess(factor,fitToPage=false){
     actualFactor=Math.max(.35,Math.min(1.75,actualFactor));
   }
   if(Math.abs(actualFactor-1)<.005){msg('Processen har redan rätt storlek');return false}
-  pushUndo(true);
+  if(recordHistory)pushUndo(true);
   const anchorX=fitToPage?54:minX,anchorY=fitToPage?54:minY;
   for(const item of items){
     const d=item.data||{},el=item.el;
@@ -4953,8 +5008,15 @@ function scaleWholeProcess(factor,fitToPage=false){
     const sx=anchorX+(x-minX)*actualFactor,sy=anchorY+(y-minY)*actualFactor;
     const sw=Math.max(56,w*actualFactor),sh=Math.max(34,h*actualFactor);
     d.x=sx;d.y=sy;d.width=sw;d.height=sh;
-    el.style.left=sx+'px';el.style.top=sy+'px';el.style.width=sw+'px';el.style.height=sh+'px';
-    d.fontSize=Math.max(9,Math.min(36,(Number(styleOf(d).fontSize)||13)*actualFactor));
+    el.style.left=sx+'px';el.style.top=sy+'px';
+    /* CSS min/max sizes used to stop the visible node from shrinking/growing with process scale.
+       Inline geometry owns the dimensions after scaling. */
+    el.style.boxSizing='border-box';el.style.minWidth='0px';el.style.maxWidth='none';el.style.minHeight='0px';
+    el.style.width=sw+'px';el.style.height=sh+'px';
+    if(d.type==='decision')el.style.padding=Math.max(12,38*actualFactor)+'px';
+    else if(d.type==='object')el.style.padding=`${Math.max(5,10*actualFactor)}px ${Math.max(8,14*actualFactor)}px`;
+    else el.style.padding=`${Math.max(7,14*actualFactor)}px ${Math.max(10,26*actualFactor)}px`;
+    d.fontSize=Math.max(8,Math.min(40,(Number(styleOf(d).fontSize)||13)*actualFactor));
     sync(el);applyStyle(item);invalidateNodeGeom(item.data.id);markNodeLinksDirty(item.data.id);
   }
   // Scale manual connector breakpoints around the same origin.
@@ -4970,7 +5032,12 @@ function scaleWholeProcess(factor,fitToPage=false){
     if(Object.keys(patch).length)setLinkStyle(i,patch);
   }
   updateCanvasExtentForPages();requestFullLinkRender(true);drawLinks();persist();refreshControls();updateSelectionUi();
-  msg(fitToPage?`Processen anpassades till ${pageSpec().name}`:`Hela processen skalades ${Math.round(actualFactor*100)}%`);
+  if(fitToPage){
+    processScalePercent=100;
+    if(processScaleSlider)processScaleSlider.value='100';
+    if(processScaleValue)processScaleValue.textContent='100 %';
+  }
+  msg(fitToPage?`Processen anpassades till ${pageSpec().name}`:`Processens storlek ändrad`);
   return true;
 }
 function fitProcessToScreen(){
@@ -5039,8 +5106,27 @@ if(scroll)scroll.addEventListener('pointerdown',e=>{
   if(e.target===scroll||e.target===canvas||e.target.classList?.contains('p48-print-page'))closeTransientMenus();
 },{capture:true});
 if(fitScreenBtn)fitScreenBtn.addEventListener('click',fitProcessToScreen);
-if(scaleDownBtn)scaleDownBtn.addEventListener('click',()=>{if(scaleWholeProcess(.9)&&scaleMenu)scaleMenu.open=false});
-if(scaleUpBtn)scaleUpBtn.addEventListener('click',()=>{if(scaleWholeProcess(1.1)&&scaleMenu)scaleMenu.open=false});
+function applyProcessScaleSlider(next){
+  const target=Math.max(50,Math.min(150,Number(next)||100));
+  if(processScaleValue)processScaleValue.textContent=Math.round(target)+' %';
+  if(Math.abs(target-processScalePercent)<.01)return false;
+  const ratio=target/processScalePercent;
+  const ok=scaleWholeProcess(ratio,false,false);
+  if(ok)processScalePercent=target;
+  return ok;
+}
+if(processScaleSlider){
+  processScaleSlider.addEventListener('pointerdown',e=>{e.stopPropagation();if(!processScaleGesture){pushUndo(true);processScaleGesture=true}});
+  processScaleSlider.addEventListener('input',e=>{e.stopPropagation();applyProcessScaleSlider(processScaleSlider.value);if(scaleMenu)scaleMenu.open=true});
+  const finishScaleGesture=()=>{processScaleGesture=false;if(scaleMenu)scaleMenu.open=true};
+  processScaleSlider.addEventListener('pointerup',finishScaleGesture);
+  processScaleSlider.addEventListener('pointercancel',finishScaleGesture);
+  processScaleSlider.addEventListener('keydown',e=>{
+    if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','PageUp','PageDown'].includes(e.key))return;
+    if(!processScaleGesture){pushUndo(true);processScaleGesture=true}
+  });
+  processScaleSlider.addEventListener('change',()=>{processScaleGesture=false;if(scaleMenu)scaleMenu.open=true});
+}
 if(scaleFitPageBtn)scaleFitPageBtn.addEventListener('click',()=>{if(scaleWholeProcess(1,true)&&scaleMenu)scaleMenu.open=false});
 smartLayoutChoices.forEach(btn=>btn.addEventListener('click',()=>{if(smartLayout(btn.dataset.layoutScope,btn.dataset.layoutOrientation)&&smartLayoutMenu)smartLayoutMenu.open=false}));
 
