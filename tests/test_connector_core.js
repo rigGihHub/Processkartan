@@ -72,3 +72,6 @@ assert.strictEqual(C.style(C.normalizeLink(JSON.parse(JSON.stringify(labeled))))
   assert.strictEqual(C.style(out[0]).viaX,null);
   assert.strictEqual(C.style(out[1]).viaY,null);
 }
+
+const mixedDragged=C.routePoints(0,0,100,100,'right','top',{routing:'orthogonal',viaX:40,viaY:60});
+assert(mixedDragged.some(p=>p[0]===40&&p[1]===60));

@@ -28,7 +28,7 @@ def test_desktop_guard_protects_sidebar_and_canvas_geometry():
     end = html.index("/* visible version */", start)
     guard = html[start:end]
     assert "grid-template-columns:220px minmax(0,1fr)!important" in guard
-    assert "height:900px!important" in guard
+    assert "height:var(--p48-desktop-body-h,640px)!important" in guard
     assert "transform:none!important" in guard
     assert "visibility:visible!important" in guard
     assert "overflow:auto!important" in guard

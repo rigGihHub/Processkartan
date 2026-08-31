@@ -12,3 +12,8 @@ let r=C.resize({x:10,y:10,width:180,height:76},'nw',-500,-500,'process');assert(
 r=C.resize({x:10,y:10,width:180,height:180},'se',100,20,'decision');assert.strictEqual(r.width,r.height);assert(r.width>=130&&r.width<=420);
 assert(!C.hasMeaningfulDelta(1,0));assert(C.hasMeaningfulDelta(2,0));
 console.log('canvas core OK');
+
+assert.strictEqual(C.zoomStep(1,'out'),0.9);
+assert.strictEqual(C.zoomStep(1,'in'),1.1);
+assert.strictEqual(C.zoomStep(0.25,'out'),0.25);
+assert.strictEqual(C.zoomStep(1.5,'in'),1.5);

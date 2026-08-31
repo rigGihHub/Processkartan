@@ -41,7 +41,17 @@ function routePoints(x1,y1,x2,y2,sourceSide,targetSide,styleValue){
     const my=st.viaY==null?(y1+y2)/2:Number(st.viaY);
     return [[x1,y1],[x1,my],[x2,my],[x2,y2]];
   }
-  if(srcHorizontal)return [[x1,y1],[x2,y1],[x2,y2]];
+  if(srcHorizontal){
+    if(st.viaX!=null||st.viaY!=null){
+      const vx=st.viaX==null?(x1+x2)/2:Number(st.viaX),vy=st.viaY==null?(y1+y2)/2:Number(st.viaY);
+      return [[x1,y1],[vx,y1],[vx,vy],[x2,vy],[x2,y2]];
+    }
+    return [[x1,y1],[x2,y1],[x2,y2]];
+  }
+  if(st.viaX!=null||st.viaY!=null){
+    const vx=st.viaX==null?(x1+x2)/2:Number(st.viaX),vy=st.viaY==null?(y1+y2)/2:Number(st.viaY);
+    return [[x1,y1],[x1,vy],[vx,vy],[vx,y2],[x2,y2]];
+  }
   return [[x1,y1],[x1,y2],[x2,y2]];
 }
 function pathData(points){return points.map((p,i)=>(i?'L':'M')+p[0]+','+p[1]).join(' ');}

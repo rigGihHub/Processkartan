@@ -1,4 +1,4 @@
-## UI Regression Fix v0.13.3
+## UI Regression Fix v0.13.4
 
 - Fixar regressionen där canvasens kontextverktyg (`Rak/Vinkelrät` och nodens snabbmeny) renderades som vanliga HTML-kontroller uppe till vänster trots att inget var markerat.
 - Grundorsak: toolbar-CSS låg i Streamlit-förälderns stylesheet medan editorn körs i ett separat `components.html`-iframe. CSS kan inte korsa iframe-gränsen.
@@ -6,7 +6,16 @@
 - Båda toolbarerna är nu `display:none` som standard och visas endast när JavaScript sätter `.on` efter korrekt nod-/pilmarkering.
 - Ingen databas-, Supabase- eller dependencyändring.
 
-# Maplini v0.13.0
+# Maplini v0.14.3
+
+## Process Intelligence v0.14.3
+
+- **🔍 Analysera** öppnar Processkontroll med en deterministisk strukturanalys av aktuell process.
+- Visar processhälsa, fel, kontrollpunkter och insikter.
+- Kontrollerar Start/Slut, isolerade rutor, inkommande/utgående flöden, beslut, loopar, långa sekvenser samt flödeskoncentrationer.
+- Klick på ett fynd markerar och centrerar berörda rutor på canvasen.
+- V0.14.1 ändrar inte processdata, Supabase-schema eller dependencies.
+
 
 ## Mobile Context & Fullscreen v0.13.2
 
@@ -131,3 +140,19 @@ Markera två eller fler rutor för att använda samma Formatering-panel på hela
 
 ### Autosave och återställning (v0.13.1)
 Maplini visar löpande sparstatus och använder en kortlivad recovery-snapshot mellan redigering och verifierad lokal sparning. Om en session avbryts mitt i detta fönster visas vid nästa start ett val att återställa eller ignorera de avbrutna ändringarna. Mobilens appväxling och sidstängning triggar dessutom omedelbar lifecycle-save.
+
+
+### v0.13.4
+- Desktop sidebar scroll fix: persistent vertical scrolling, stable scrollbar gutter and bottom clearance so the final connector controls remain reachable.
+
+
+### v0.14.3
+Connector drag, multi-page horizontal scrolling and verified zoom direction.
+
+
+### v0.14.3
+Förfinar Smart Layout-pilarnas centrering, desktop-sidebarens åtkomlighet, rutstilar och den samlade textformateringen.
+
+
+### v0.14.3
+UI simplified: Ordna removed, compact account panel, dedicated Logotyp menu, and whole-process scaling including fit to selected A4/A3 page.

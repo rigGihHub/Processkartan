@@ -41,5 +41,10 @@
     return{x,y,width:w,height:h};
   }
   function hasMeaningfulDelta(dx,dy,threshold=2){return Math.abs(num(dx))+Math.abs(num(dy))>=Math.max(0,num(threshold,2))}
-  global.MapliniCanvasCore={DEFAULT_BOUNDS,snap,clamp,normalizeRect,rectsIntersect,place,resize,hasMeaningfulDelta};
+  function zoomStep(scale,direction,step=.1,min=.25,max=1.5){
+    const current=num(scale,1),delta=Math.abs(num(step,.1));
+    const next=String(direction)==='out'?current-delta:current+delta;
+    return Math.round(clamp(next,min,max)*100)/100;
+  }
+  global.MapliniCanvasCore={DEFAULT_BOUNDS,snap,clamp,normalizeRect,rectsIntersect,place,resize,hasMeaningfulDelta,zoomStep};
 })(typeof window!=='undefined'?window:globalThis);

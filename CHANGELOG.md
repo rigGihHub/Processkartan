@@ -1,3 +1,36 @@
+## v0.14.3 – UI Simplification & Process Scaling
+- Removed the Align/Distribute "Ordna" UI from the top toolbar and contextual toolbar.
+- Added "Skala process" with −10 %, +10 % and "Passa till vald sida".
+- Scaling changes node position, dimensions, text size and manual connector bend coordinates proportionally; one Undo checkpoint.
+- Account/login UI is collapsed behind a compact Konto control.
+- Process logo controls moved to a dedicated top-toolbar "Logotyp" menu.
+- Existing process data remains compatible; removed UI helpers remain internal only.
+
+## v0.14.2 – Layout & Formatting Polish
+- Vertikal Smart Layout återställer interna kopplingar till Auto-fästpunkter och rensar gamla brytpunkter så pilar centreras botten→topp.
+- Desktop-editorns höjd anpassas efter skärmens tillgängliga höjd så hela vänsterpanelens scrollbar kan nås.
+- Rutstilarna 3D, Upphöjd skugga, Glas och Minimal/platt har fått tydligare visuella skillnader.
+- Typsnitt, textstorlek, fet/kursiv/understruken och textjustering ligger nu i ett sammanhållet textformateringsblock.
+
+## v0.14.1 – Editing Stability
+- Restores drag-to-adjust for selected connectors by starting drag directly from the connector hit target.
+- Dragging a strict straight connector switches it to manually routed orthogonal mode so its path can actually be moved; endpoints remain attached to nodes.
+- Canvas width now expands dynamically for multi-page print layouts and nodes beyond the default 2400 px workspace, restoring horizontal scrolling to later pages.
+- Zoom −/+ now share a tested zoomStep contract: minus always zooms out, plus always zooms in.
+
+## v0.14.0 – Process Intelligence: Processkontroll
+- Ny **🔍 Analysera**-funktion i toppmenyn med strukturell processkontroll.
+- Processhälsa visas som 1,5–10,0/10 tillsammans med antal fel, kontrollpunkter och insikter.
+- Identifierar saknad Start/Slut, isolerade rutor, saknade inkommande flöden, döda ändar och beslut med färre än två utgående grenar.
+- Identifierar dessutom loopar/återkopplingar, långa sekvenser och noder där många flöden samlas eller förgrenas.
+- Fynd kopplade till rutor är klickbara: Maplini markerar berörda rutor och centrerar dem på canvasen.
+- Anteckningar/gruppytor behandlas som annotationer och ger inte falska strukturfel.
+- Analysen är deterministisk och regelbaserad; inga AI-gissningar, databasändringar eller nya dependencies.
+
+## v0.13.4 – Sidebar Scroll Reachability
+- Fixes desktop left sidebar so the bottom-most controls can always be reached.
+- Adds stable vertical scrollbar, contained overscroll and bottom clearance without changing canvas/body DOM structure.
+
 ## v0.13.3 – UI Regression Fix
 - Rättar kontextverktyg som syntes ostylade uppe till vänster i canvasen utan markering.
 - Flyttar kritisk CSS för `.p48-link-quick` och `.p48-node-quick` till editor-iframens eget stylesheet.
