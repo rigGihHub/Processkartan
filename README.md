@@ -1,3 +1,11 @@
+## UI Regression Fix v0.13.3
+
+- Fixar regressionen där canvasens kontextverktyg (`Rak/Vinkelrät` och nodens snabbmeny) renderades som vanliga HTML-kontroller uppe till vänster trots att inget var markerat.
+- Grundorsak: toolbar-CSS låg i Streamlit-förälderns stylesheet medan editorn körs i ett separat `components.html`-iframe. CSS kan inte korsa iframe-gränsen.
+- Flyttar/duplicerar därför toolbarernas visibility-, layout-, hover-, active- och touch-regler till editorns eget iframe-stylesheet.
+- Båda toolbarerna är nu `display:none` som standard och visas endast när JavaScript sätter `.on` efter korrekt nod-/pilmarkering.
+- Ingen databas-, Supabase- eller dependencyändring.
+
 # Maplini v0.13.0
 
 ## Mobile Context & Fullscreen v0.13.2

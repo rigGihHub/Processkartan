@@ -1,3 +1,10 @@
+## v0.13.3 – UI Regression Fix
+- Rättar kontextverktyg som syntes ostylade uppe till vänster i canvasen utan markering.
+- Flyttar kritisk CSS för `.p48-link-quick` och `.p48-node-quick` till editor-iframens eget stylesheet.
+- Återställer `display:none` som default och `.on { display:flex }` endast vid giltig markering.
+- Återställer korrekt styling, hover/active-lägen, multi-select-visning och touchstorlekar.
+- Ny regressionstestning verifierar uttryckligen att toolbar-CSS finns inne i raw editor HTML/iframe.
+
 ## v0.13.2 – Mobile Context & Fullscreen
 - Mobilens **＋ Lägg till** öppnar nu en egen bottom-sheet med Start, Aktivitet, Beslut, Dokument, Delprocess, Anteckning och Slut utan att vänsterpanelen behöver öppnas.
 - Markerade rutor får **••• Mer** med Kopiera, Formatering, Smart Layout horisontellt/vertikalt, fler egenskaper och borttagning.

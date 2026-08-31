@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.13.2"
+APP_VERSION = "0.13.3"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -331,6 +331,28 @@ html = r"""
 .p48-node,.p48-handle,.p48-resize,.p48-link-hit-segment{touch-action:none}
 .p48-scroll{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 button,summary,select,input{-webkit-tap-highlight-color:transparent}
+
+/* v0.13.3 contextual toolbar regression fix — these controls live inside the editor iframe.
+   Keep their visibility and presentation rules in this iframe stylesheet, not only in Streamlit's parent document. */
+.p48-link-quick{position:absolute;z-index:82;display:none;align-items:center;gap:4px;transform:translate(-50%,calc(-100% - 14px));padding:4px;border:1px solid #c8d5e1;border-radius:9px;background:rgba(255,255,255,.98);box-shadow:0 5px 16px rgba(31,52,70,.16);pointer-events:auto;white-space:nowrap}
+.p48-link-quick.on{display:flex}
+.p48-link-quick button{border:1px solid transparent;border-radius:6px;background:transparent;color:#40556a;padding:5px 8px;font:700 10px system-ui;cursor:pointer}
+.p48-link-quick button:hover{background:#eef5fb;border-color:#c7dced}
+.p48-link-quick button.active{background:#e7f2fc;border-color:#86b3d8;color:#17639d}
+.p48-link-quick button:disabled{opacity:.45;cursor:default}
+.p48-node-quick{position:absolute;z-index:84;display:none;align-items:center;gap:4px;transform:translate(-50%,calc(-100% - 12px)) scale(var(--p48-toolbar-inverse-scale,1));transform-origin:50% 100%;padding:4px;border:1px solid #c8d5e1;border-radius:10px;background:rgba(255,255,255,.98);box-shadow:0 6px 18px rgba(31,52,70,.16);pointer-events:auto;white-space:nowrap}
+.p48-node-quick.on{display:flex}
+.p48-node-quick button,.p48-node-quick summary,.p48-node-quick .p48-quick-color-label{border:1px solid transparent;border-radius:7px;background:transparent;color:#40556a;padding:6px 8px;font:700 10px system-ui;cursor:pointer;list-style:none;display:inline-flex;align-items:center;gap:5px;min-height:30px;box-sizing:border-box}
+.p48-node-quick button:hover,.p48-node-quick summary:hover,.p48-node-quick .p48-quick-color-label:hover{background:#eef5fb;border-color:#c7dced}
+.p48-node-quick button.danger:hover{background:#fff1f2;border-color:#fecdd3;color:#b42318}
+.p48-node-quick details{position:relative}
+.p48-node-quick summary::-webkit-details-marker{display:none}
+.p48-node-quick-arrange-pop{position:absolute;left:50%;top:calc(100% + 7px);transform:translateX(-50%);width:220px;padding:8px;border:1px solid #cbd7e3;border-radius:10px;background:#fff;box-shadow:0 10px 24px rgba(34,52,70,.18);display:grid;grid-template-columns:repeat(3,1fr);gap:5px;z-index:86}
+.p48-node-quick-arrange-pop button{white-space:normal;justify-content:center;padding:6px 5px}
+.p48-node-quick-arrange-pop .wide{grid-column:span 3}
+.p48-quick-color-label input{width:18px;height:18px;border:0;padding:0;background:none;cursor:pointer}
+.p48-node-quick[data-mode="single"] [data-multi-only],.p48-node-quick[data-mode="multi"] [data-single-only]{display:none!important}
+@media(max-width:700px),(pointer:coarse){.p48-node-quick{gap:5px;padding:5px;transform:translate(-50%,calc(-100% - 16px)) scale(var(--p48-toolbar-inverse-scale,1));max-width:calc(100vw - 24px)}.p48-node-quick button,.p48-node-quick summary,.p48-node-quick .p48-quick-color-label{min-height:38px;padding:8px 10px;font-size:11px}.p48-node-quick-arrange-pop{width:236px}.p48-link-quick{gap:5px;padding:5px;transform:translate(-50%,calc(-100% - 18px))}.p48-link-quick button{min-height:36px;padding:7px 10px;font-size:11px}}
 
 /* v0.10.15 contextual sidebar */
 .p48-format[data-context="none"] #p48-controls{display:none}
