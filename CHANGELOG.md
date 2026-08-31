@@ -1,3 +1,13 @@
+## v0.15.11 – First View & A4 Portrait Default
+- Fixed the empty-process onboarding so its card styling is present inside the embedded editor iframe instead of only in Streamlit's parent document.
+- New/empty processes now show a centered, clearly designed start card rather than raw text at the top-left of the canvas.
+- A4 portrait is now the default PDF/page format throughout the editor.
+- Updated the page-spec fallback from A3 landscape to A4 portrait.
+- Hardened runtime warnings: incidental browser/iframe errors are still logged for diagnostics but no longer trigger the red data-safety banner.
+- Explicit Maplini operation failures still display the red banner.
+- A successful process restore clears a stale runtime banner.
+- No database, Supabase or migration changes.
+
 ## v0.15.10 – Full Canvas Zoom & Ctrl Multi-Select
 - Fixed top-bar zoom so the scaling rule now lives inside the embedded editor iframe. `+` / `−` therefore scale the complete canvas contents: nodes, node text, connectors, connector labels, process logo and canvas guides together.
 - Kept logical canvas coordinates unchanged, so zoom remains visual and does not rewrite process data.

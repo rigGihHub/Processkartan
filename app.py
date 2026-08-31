@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.15.10"
+APP_VERSION = "0.15.11"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -388,6 +388,48 @@ html = r"""
 .p48-node,.p48-handle,.p48-resize,.p48-link-hit-segment{touch-action:none}
 .p48-scroll{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 button,summary,select,input{-webkit-tap-highlight-color:transparent}
+
+/* v0.15.11 empty-process first view — must live inside the editor iframe. */
+.p48-empty-state{
+  position:absolute;
+  inset:0;
+  z-index:18;
+  display:grid;
+  place-items:start center;
+  pointer-events:none;
+  padding:72px 32px 32px;
+  box-sizing:border-box;
+}
+.p48-empty-state[hidden]{display:none!important}
+.p48-empty-card{
+  width:min(460px,calc(100% - 48px));
+  box-sizing:border-box;
+  padding:24px;
+  border:1px solid #cddbe5;
+  border-radius:16px;
+  background:rgba(255,255,255,.97);
+  box-shadow:0 16px 38px rgba(36,58,78,.14);
+  text-align:center;
+  pointer-events:auto;
+}
+.p48-empty-kicker{font:800 10px/1 Inter,system-ui;letter-spacing:.12em;color:#28715c;margin-bottom:8px}
+.p48-empty-title{font:800 22px/1.2 Inter,system-ui;color:#20364f;margin:0}
+.p48-empty-copy{font:500 13px/1.5 Inter,system-ui;color:#60717f;margin:9px auto 17px;max-width:380px}
+.p48-empty-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.p48-empty-actions button{
+  border:1px solid #b9c8d5;border-radius:9px;background:#fff;color:#294052;
+  padding:10px 12px;min-height:44px;font:750 12px Inter,system-ui;cursor:pointer;
+}
+.p48-empty-actions button.primary{background:#1f6f55;border-color:#1f6f55;color:#fff}
+.p48-empty-actions button:hover{filter:brightness(.98)}
+.p48-empty-tip{margin-top:13px;padding-top:11px;border-top:1px solid #e5ebef;font:500 11px/1.45 Inter,system-ui;color:#74828e}
+@media(max-width:700px),(pointer:coarse){
+  .p48-empty-state{padding:54px 14px 18px}
+  .p48-empty-card{width:min(100%,390px);padding:19px}
+  .p48-empty-title{font-size:19px}
+  .p48-empty-actions{grid-template-columns:1fr}
+  .p48-empty-actions button{min-height:46px}
+}
 
 /* v0.15.10 real canvas zoom — this MUST live inside the editor iframe.
    Scaling the canvas itself makes nodes, text, connectors, labels, logos and print guides
@@ -1065,10 +1107,10 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
       <div class="p48-pop-title p48-export-page-title">Sidformat</div>
       <select id="p48-pdf-view" class="p48-btn" title="PDF-yta">
         <option value="off">Ingen PDF-yta</option>
-        <option value="A4P">A4 stående</option>
+        <option value="A4P" selected>A4 stående</option>
         <option value="A4L">A4 liggande</option>
         <option value="A3P">A3 stående</option>
-        <option value="A3L" selected>A3 liggande</option>
+        <option value="A3L">A3 liggande</option>
       </select>
       <select id="p48-page-count" class="p48-btn" title="Antal PDF-sidor">
         <option value="auto" selected>Automatiskt antal sidor</option>
@@ -1489,16 +1531,21 @@ function syncDesktopViewportHeight(){
 }
 syncDesktopViewportHeight();window.addEventListener('resize',syncDesktopViewportHeight);
 const runtimeErrorEl=root.querySelector('#p48-runtime-error');
-function reportRuntimeError(error,context='runtime'){
+function reportRuntimeError(error,context='runtime',showBanner=true){
   const info=MapliniReliabilityCore.errorInfo(error,context);
   console.error('[Maplini]',info.context,info.message,error);
-  if(runtimeErrorEl){runtimeErrorEl.textContent='Ett fel inträffade. Ditt senaste lokala läge har inte raderats.';runtimeErrorEl.hidden=false;}
+  if(showBanner&&runtimeErrorEl){
+    runtimeErrorEl.textContent='Ett fel inträffade. Ditt senaste lokala läge har inte raderats.';
+    runtimeErrorEl.hidden=false;
+  }
   try{localStorage.setItem('maplini_last_runtime_error',JSON.stringify(info))}catch(ignore){}
   return info;
 }
 function clearRuntimeError(){if(runtimeErrorEl){runtimeErrorEl.hidden=true;runtimeErrorEl.textContent='';}}
-window.addEventListener('error',e=>reportRuntimeError(e.error||e.message,'window.error'));
-window.addEventListener('unhandledrejection',e=>reportRuntimeError(e.reason,'unhandledrejection'));
+/* Browser/iframe noise is logged for diagnostics but must not present a data-safety warning.
+   Explicit Maplini operations still call reportRuntimeError() with the banner enabled. */
+window.addEventListener('error',e=>reportRuntimeError(e.error||e.message,'window.error',false));
+window.addEventListener('unhandledrejection',e=>reportRuntimeError(e.reason,'unhandledrejection',false));
 const canvas=root.querySelector('#p48-canvas'),scroll=root.querySelector('#p48-scroll'),emptyState=root.querySelector('#p48-empty-state'),emptyStart=root.querySelector('#p48-empty-start'),emptyActivity=root.querySelector('#p48-empty-activity'),linkLayer=root.querySelector('#p48-links'),temp=root.querySelector('#p48-temp');
 const mobileToolsBtn=root.querySelector('#p48-mobile-tools'),mobileBackdrop=root.querySelector('#p48-mobile-backdrop'),sidePanel=root.querySelector('#p48-side');
 const mobileBar=root.querySelector('#p48-mobile-bar'),mobileAdd=root.querySelector('#p48-mobile-add'),mobileUndo=root.querySelector('#p48-mobile-undo'),mobileRedo=root.querySelector('#p48-mobile-redo'),mobileFit=root.querySelector('#p48-mobile-fit'),mobileFullscreen=root.querySelector('#p48-mobile-fullscreen'),mobileMore=root.querySelector('#p48-mobile-more'),mobileNext=root.querySelector('#p48-mobile-next'),mobileFormat=root.querySelector('#p48-mobile-format'),mobileDuplicate=root.querySelector('#p48-mobile-duplicate'),mobileContext=root.querySelector('#p48-mobile-context'),mobileDelete=root.querySelector('#p48-mobile-delete');
@@ -1555,7 +1602,7 @@ let cloudSession=null,sharedView=false;
 let cloudLoadedProcessIds=new Set();
 let cloudLoadedProcessScopes=new Map();
 let currentWorkspaceId=null,currentWorkspaceOwnerId=null,currentRole='owner',printPreview=false;
-let pdfView='A3L',pageCountMode='auto',canvasScale=1,canvasLogicalWidth=2400,canvasLogicalHeight=1400;
+let pdfView='A4P',pageCountMode='auto',canvasScale=1,canvasLogicalWidth=2400,canvasLogicalHeight=1400;
 
 
 function clampCanvasScale(value){return Math.max(0.25,Math.min(1.5,Math.round(Number(value)*100)/100))}
@@ -2518,7 +2565,7 @@ function restore(s){
   (d.nodes||[]).forEach(makeNode);
   links=MapliniConnectorCore.normalizeLinks(d.links||[]);
   seq=Math.max(0,...[...nodes.keys()].map(id=>parseInt(String(id).replace(/\D/g,''),10)||0));
-  requestFullLinkRender(true);refreshEmptyState();
+  requestFullLinkRender(true);refreshEmptyState();clearRuntimeError();
   return true;
 }
 function openProcess(id){
@@ -4358,7 +4405,7 @@ function pageSpec(){
     A3P:{name:'A3 stående',code:'A3P',w:794,h:1123,pdfW:841.89,pdfH:1190.55},
     A3L:{name:'A3 liggande',code:'A3L',w:1123,h:794,pdfW:1190.55,pdfH:841.89}
   };
-  return specs[pdfView]||specs.A3L;
+  return specs[pdfView]||specs.A4P;
 }
 function contentExtent(){
   const b=exportBounds();
