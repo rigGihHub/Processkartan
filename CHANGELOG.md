@@ -1,3 +1,87 @@
+## v0.13.2 – Mobile Context & Fullscreen
+- Mobilens **＋ Lägg till** öppnar nu en egen bottom-sheet med Start, Aktivitet, Beslut, Dokument, Delprocess, Anteckning och Slut utan att vänsterpanelen behöver öppnas.
+- Markerade rutor får **••• Mer** med Kopiera, Formatering, Smart Layout horisontellt/vertikalt, fler egenskaper och borttagning.
+- Ny **⛶ Helskärm** i mobilens nederkant. Header och toppverktygsfält döljs och canvasen använder hela mobilens viewport.
+- Helskärmsläget försöker använda webbläsarens Fullscreen API när det stöds och har CSS-fallback när det inte gör det. Escape/system-exit synkroniserar tillbaka Maplinis UI.
+- Mobilens Add/context-menyer använder 44–48 px touchmål, safe-area och backdrop för stabil användning med en hand.
+- Vanliga mobilåtgärder kan nu utföras utan att sidopanelen är framme; avancerad formatering och alla verktyg finns fortfarande ett tryck bort.
+- Desktop-layout, databas/Supabase och dependencies är oförändrade.
+
+## v0.13.1 – Autosave & Recovery
+- Tydlig autosave-status i verktygsraden: Sparar…, Autosparad med klockslag eller Sparfel.
+- Tvåstegssparning: en recovery-snapshot skrivs direkt när innehåll ändras och rensas först när ordinarie lokal lagring verifierats.
+- Vid avbruten session kan Maplini erbjuda Återställ eller Ignorera utan att skriva över den ordinarie processen automatiskt.
+- Lifecycle-save förstärkt med visibilitychange, pagehide, freeze och beforeunload för mobil/appväxling.
+- Delade read-only-vyer fortsätter att vara helt utan lokal persistens.
+
+# v0.13.0 – Mobile UX
+
+- Ny fast mobil snabbmeny i nederkant som växlar efter kontext. Normalläge: **＋ Lägg till**, **↶ Ångra**, **↷ Gör om**, **⊡ Anpassa**, **☰ Verktyg**. Markerad ruta: **＋ Nästa**, **Egenskaper**, **Duplicera**, **Ta bort**.
+- Mobil canvas använder nu egen touch-gesthantering: dra på tom processyta för att panorera både horisontellt och vertikalt.
+- Två fingrar ger pinch-zoom mellan befintliga 25–150 %, centrerad kring fingrarnas mittpunkt.
+- Mobilens canvasviewport är begränsad till en användbar skärmhöjd så panorering sker i editorn i stället för genom hela sidan.
+- Kopplingarnas touchmål är 44 px och pilens draghandtag har större osynlig träffyta.
+- Noddragning, resize, connectorinteraktion och områdesmarkering undantas från canvasens pan-gest för att undvika konkurrerande touchbeteenden.
+- Nederkanten tar hänsyn till safe-area på telefoner med gestfält/notch.
+- Desktop-DOM och desktop-layout lämnas oförändrade. Ingen databas-, Supabase-, OAuth-, secret- eller dependency-ändring.
+
+# v0.12.1 – Smart Layout refinement
+
+- **Ja/Nej-aware decision layout:** connector labels are used as semantic ordering signals. In horizontal layout Ja is placed above Nej; in vertical layout Ja is placed left of Nej.
+- **Fewer connector crossings:** three deterministic barycentric down/up sweeps reorder siblings based on connected neighbors rather than only original coordinates.
+- **Better loop handling:** DFS detects feedback edges before rank calculation so a loop such as `X → Y → Z → X` no longer pushes ranks forward repeatedly. The main path remains compact and the feedback connector returns visually.
+- Merge behavior, selected-only layout, node dimensions, selection state, Fit-to-screen and one-Undo-per-layout remain unchanged.
+- Added Smart Layout regression coverage for reversed Ja/Nej source order, vertical branch semantics, feedback loops and crossing reduction.
+- No database, Supabase, OAuth, secret or dependency changes.
+
+# v0.12.0 – Smart Layout
+
+- Ny **✨ Snygga till ▾**-meny i toppverktygsfältet.
+- Hela processen kan ordnas automatiskt **horisontellt** eller **vertikalt**.
+- Minst två markerade rutor kan snyggas till separat utan att övriga rutor flyttas.
+- Layoutmotorn använder interna kopplingar för att skapa flödesnivåer: grenar sprids, syskon delar nivå och sammanslagningar placeras längre fram.
+- Befintlig visuell ordning används som tie-breaker för stabilare resultat och cykler/disconnected delar hanteras defensivt.
+- Layouten anpassar mellanrum till canvasens 2400×1400-gränser och försöker hålla alla rutor inom arbetsytan.
+- Varje Smart Layout-körning är en enda Undo-operation. Markering och nodstorlekar bevaras och pilar ritas om efter flytten.
+- Efter hel/processlayout används befintlig Fit-to-screen för att visa resultatet utan extra Undo-steg.
+- Ny fristående `maplini_layout_core.js` med egna JS-regressionstester.
+- Ingen databas-, Supabase-, OAuth-, secret- eller dependency-ändring.
+
+# v0.11.7 – Contextual node toolbar
+
+- Markerade rutor får nu en kontextuell snabbmeny direkt på canvasen.
+- Enkel ruta: **＋ Nästa**, **Formatera**, **Duplicera**, **Ta bort**.
+- Flera rutor: **Formatera**, **Färg**, **Duplicera**, **Ordna**, **Ta bort**.
+- Multi-select-menyn innehåller befintliga Align/Distribute-kommandon och använder samma Undo-logik som toppmenyn.
+- Snabbmenyn följer urvalets bounding box vid flytt/storleksändring och kompenserar för canvaszoom så knapparna förblir läsbara.
+- Formatera återanvänder den befintliga sidopanelen och öppnar mobilens verktygspanel vid behov.
+- Toolbar-interaktion undantas från connector hit-testing och dess Ordna-meny stängs vid klick utanför.
+- Ingen databas-, Supabase-, OAuth-, secret- eller dependency-ändring.
+
+# v0.11.6 – Multi-select formatting
+
+- Formateringspanelen fungerar nu även när flera rutor är markerade.
+- Typsnitt, textstorlek, textfärg, bakgrund, kantfärg, kanttjocklek, rutstil, fet/kursiv/understruken text och textjustering kan appliceras på hela markeringen samtidigt.
+- Multi-select ligger kvar efter formatering och kopplade pilar ritas om när nodernas geometri påverkas.
+- Varje formateringsändring skapar en enda Undo-checkpoint för hela markeringen.
+- Enkelrute-funktioner som dokumentlänk och Inputs/Outputs döljs/inaktiveras vid multi-select för att undvika otydlig massredigering.
+- Blandade formatvärden ändras inte förrän användaren aktivt väljer ett nytt värde.
+
+# v0.11.5 – Connector quick routing
+
+- Markerad pil visar nu ett kompakt snabbval direkt vid pilen: **Rak** eller **Vinkelrät**.
+- Aktiv routing markeras visuellt så det syns direkt hur pilen är inställd.
+- Snabbvalet återanvänder samma routinglogik som sidopanelen: byte till Rak rensar gamla brytpunkter (`viaX`/`viaY`).
+- Routingbyte är en enda Undo-operation och respekterar read-only-läge.
+- Snabbvalet följer den markerade pilens mittpunkt när pilens geometri ändras och har större touchytor på mobil.
+
+# v0.11.4 – Straight connectors + sidebar scroll fix
+
+- **Rak routing är nu verkligen rak:** byte från vinkelrät till Rak tar bort gamla brytpunkter (`viaX`/`viaY`) och renderar en direkt linje mellan fästpunkterna.
+- Connector-kärnan ignorerar även gamla sparade brytpunkter när routing är `straight`, så äldre processer kan rätas ut korrekt.
+- **Vänsterflanken kan scrollas hela vägen ned:** sidopanelen använder nu `box-sizing:border-box`, så dess padding räknas in i den fasta editorhöjden i stället för att klippas av.
+- En smal scrollbar visas på desktop för tydligare återkoppling; mobil behåller dold scrollbar men full touch-scroll.
+
 # v0.11.3 – Fit-to-screen + Align/Distribute
 
 - Ny **⊡ Anpassa**-knapp zoomar och centrerar hela processen utan att ändra nodernas koordinater.

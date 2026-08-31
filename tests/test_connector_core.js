@@ -29,6 +29,12 @@ assert.strictEqual(bulk.length,1);
 assert.deepStrictEqual(bulk[0].slice(0,2),['c','d']);
 let area=C.rectsIntersect({left:0,right:10,top:0,bottom:10},{left:5,right:15,top:5,bottom:15});
 assert.strictEqual(area,true);
+
+// v0.11.4: straight routing must ignore stale/manual via points and remain a single segment.
+{
+  const pts = C.routePoints(10,20,210,80,'right','left',{routing:'straight',viaX:90,viaY:140});
+  assert.deepStrictEqual(pts, [[10,20],[210,80]]);
+}
 console.log('connector lifecycle OK');
 let modern=C.create('x','y','right');
 assert.strictEqual(C.style(modern).routing,'orthogonal');

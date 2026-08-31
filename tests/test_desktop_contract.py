@@ -46,3 +46,12 @@ def test_desktop_resize_cleanup_keeps_canvas_interaction_state():
     assert "if(!mobile){" in APP
     assert "setMobileTools(false)" in APP
     assert "canvas.classList.toggle('p48-selection-mode',selectionMode)" in APP
+
+
+def test_v0114_sidebar_scroll_box_model_and_straight_routing_contract():
+    app = APP
+    assert "box-sizing:border-box;" in app
+    assert "box-sizing:border-box!important;" in app
+    assert "scrollbar-width:thin" in app
+    assert "routing==='straight'?{routing,viaX:null,viaY:null}:{routing}" in app
+    assert "Pilen är nu rak" in app

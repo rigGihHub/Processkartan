@@ -28,10 +28,7 @@ function autoSides(dx,dy){
 function routePoints(x1,y1,x2,y2,sourceSide,targetSide,styleValue){
   const st=cloneStyle(styleValue);
   if(st.routing!=='orthogonal'){
-    if(st.viaX!=null||st.viaY!=null){
-      const mx=st.viaX==null?(x1+x2)/2:Number(st.viaX),my=st.viaY==null?(y1+y2)/2:Number(st.viaY);
-      return [[x1,y1],[mx,my],[x2,y2]];
-    }
+    // "straight" is a strict direct segment. Legacy/manual via coordinates must not bend it.
     return [[x1,y1],[x2,y2]];
   }
   const srcHorizontal=sourceSide==='left'||sourceSide==='right';
