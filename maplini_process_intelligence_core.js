@@ -17,8 +17,22 @@ function normLinks(links,ids){
   return out;
 }
 function severityRank(s){return s==='error'?0:s==='warning'?1:2}
+const ACTIONS={
+  missing_start:'Lägg till en Start-ruta och koppla den till processens första verkliga steg.',
+  multiple_starts:'Kontrollera om processen verkligen har flera startvägar. Slå annars ihop dem till en tydlig Start.',
+  missing_end:'Lägg till en Slut-ruta och koppla processens sista väg till den.',
+  isolated:'Koppla rutan till rätt steg före och efter. Ta bort den om den inte hör till processen.',
+  no_incoming:'Koppla ett föregående steg till rutan, eller gör den till en Start om den faktiskt börjar processen.',
+  dead_end:'Koppla steget vidare till nästa steg eller ändra det till Slut om processen ska avslutas här.',
+  decision_branches:'Lägg till minst två tydliga utgående vägar från beslutet, till exempel Ja och Nej.',
+  merge_bottleneck:'Kontrollera om alla inkommande vägar behöver mötas här och om ansvar eller väntetid behöver tydliggöras.',
+  fanout:'Kontrollera att varje utgående gren behövs och märk gärna alternativen så att vägvalet blir tydligt.',
+  loop:'Kontrollera att återkopplingen är avsiktlig och ange vad som gör att processen lämnar loopen.',
+  long_chain:'Se om flera steg kan slås ihop, grupperas eller beskrivas enklare utan att tappa viktig information.'
+};
+function priorityLabel(severity){return severity==='error'?'Åtgärda först':severity==='warning'?'Kontrollera':'Förbättring';}
 function finding(code,severity,title,detail,nodeIds=[],meta={}){
-  return {code,severity,title,detail,nodeIds:[...new Set(nodeIds.map(String))],meta};
+  return {code,severity,title,detail,action:ACTIONS[code]||'Kontrollera om flödet kan göras tydligare.',priority:priorityLabel(severity),nodeIds:[...new Set(nodeIds.map(String))],meta};
 }
 function stronglyConnected(ids,outEdges){
   let index=0;const stack=[],onStack=new Set(),idx=new Map(),low=new Map(),components=[];

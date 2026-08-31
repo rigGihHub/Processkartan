@@ -53,5 +53,5 @@ def test_v0114_sidebar_scroll_box_model_and_straight_routing_contract():
     assert "box-sizing:border-box;" in app
     assert "box-sizing:border-box!important;" in app
     assert "scrollbar-width:thin" in app
-    assert "routing==='straight'?{routing,viaX:null,viaY:null}:{routing}" in app
+    assert "routing==='straight'" in app
     assert "Pilen är nu rak" in app

@@ -30,3 +30,15 @@ assert(r.findings.some(f=>f.code==='loop'&&f.nodeIds.includes('a')&&f.nodeIds.in
 r=P.analyze([{id:'n',type:'note',text:'Notering'}],[]);
 assert(!r.findings.some(f=>f.code==='isolated'),'notes are annotations, not structural errors');
 console.log('process intelligence core ok');
+
+// v0.15.2 actionable guidance contract
+r=P.analyze([
+ {id:'s',type:'start',text:'Start'},
+ {id:'a',type:'process',text:'A'}
+],[['s','a']]);
+const dead=r.findings.find(f=>f.code==='dead_end');
+assert(dead && typeof dead.action==='string' && dead.action.length>10);
+assert(dead.priority==='Åtgärda först');
+const missEnd=r.findings.find(f=>f.code==='missing_end');
+assert(missEnd && missEnd.action.includes('Slut'));
+console.log('actionable guidance contract ok');

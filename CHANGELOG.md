@@ -1,3 +1,79 @@
+## v0.15.2 – New Process UX
+- Replaced the browser-native `prompt()` used by New Process with a Maplini-styled modal dialog.
+- New Process now keeps the current process safe until the user explicitly creates the new one.
+- Process name field is focused and selected automatically for fast keyboard use.
+- Enter creates the process; Escape, backdrop click or Avbryt closes the dialog without creating anything.
+- Empty names are blocked with inline validation rather than silently creating a fallback.
+- Successful creation lands directly in the v0.15.1 empty-canvas first-step experience.
+- Mobile uses a bottom-positioned dialog with large touch targets.
+- No database, Supabase, dependency or process-data changes.
+
+## v0.15.1 – First-Time User UX
+- Added a focused empty-canvas start state for genuinely empty editable processes.
+- New users can create the first Start or Activity directly from the canvas without hunting through the sidebar.
+- The first created node is selected and opened for inline text editing immediately.
+- Added a concise hint that `＋ Nästa` is the fastest way to continue building the flow.
+- The empty-state guide disappears as soon as the first node exists and stays hidden in shared read-only views.
+- Mobile uses the same first-step model with larger, stacked actions.
+- Existing palette, drag/drop, mobile add sheet and process data format remain unchanged.
+- No database, Supabase or dependency changes.
+
+## v0.15.0 – Actionable Process Check
+- Reworked Processkontroll around the user's next action instead of technical findings.
+- Every deterministic structural finding now includes a concrete Swedish "Gör så här" recommendation.
+- Added clear priority labels: Åtgärda först, Kontrollera and Förbättring.
+- Added a "Börja här" card that surfaces the highest-priority finding and can jump directly to affected nodes.
+- Replaced disabled finding buttons with readable finding cards plus explicit "Visa berörd ruta" actions.
+- Improved the empty state so a clean structural check is easier to understand.
+- Renamed summary categories from Fel/Insikter to the more actionable Åtgärda/Kontrollera/Förbättra.
+- Kept the analysis deterministic and local; no AI, external API or new data collection was added.
+- No database, Supabase or data-format changes.
+
+## v0.14.9 – Simplified UI Stability & Browser Polish
+- Fixed a real v0.14.8 nested-menu regression: opening Excel/Google Sheets inside Export no longer closes Export, and opening Processyta/Logotyp/Skala inside More no longer closes More.
+- Preserved the four-button mobile bottom bar while restoring mobile access to Redo and Fullscreen as secondary actions in the Add sheet.
+- Fullscreen state now updates the secondary mobile button label as well.
+- Export actions close the Export menu after the action is started, reducing stale overlay states.
+- Expanded Chromium interaction smoke coverage to verify nested Export/More menus, four-button mobile navigation, secondary Redo/Fullscreen access, and the existing free-connector drag/node-follow/Undo flow.
+- No database, Supabase or data-format changes.
+
+## v0.14.8 – 30% Simpler
+- Reduced the permanent desktop command surface to the core actions: New, Save, Share, Undo/Redo, Zoom/Fit, Smart Layout, Export and More.
+- Grouped PDF, DOCX, Excel/Google Sheets and page-format controls under one Export menu.
+- Moved Process Analysis, area selection, duplicate/delete, canvas appearance, logo and process scaling under one More menu.
+- Simplified Undo/Redo labels to compact icon actions while preserving tooltips and keyboard shortcuts.
+- Reduced the normal mobile bottom bar to four actions: Add, Undo, Fit and Tools.
+- Secondary mobile actions remain accessible through contextual tools rather than competing permanently for space.
+- Existing feature IDs and data formats are preserved; this is an information-architecture simplification, not a feature removal.
+- No database or Supabase migration changes.
+
+## v0.14.7 – Integrity & Core Interaction
+- Fixed a verified workspace ownership bug: workspace process saves now use the workspace owner's canonical user id instead of the current editor's id.
+- Added `supabase_schema_v0147.sql` to harden RLS so editors may edit workspace process content but cannot claim ownership.
+- Rebuilt free connector dragging around pointer delta from pointerdown, eliminating jumps when grabbing near an endpoint.
+- Fixed the actual one-gesture connector blocker: the document capture listener now arms drag instead of consuming the first pointerdown as selection-only.
+- Removed a stale call to nonexistent `refreshLinkQuickToolbar()` and made early resize refreshes safe while the editor is initializing.
+- Fixed Google Sheets Processsteg columns by adding the missing `Dokumentlänk` header and adjusting formatting/filter range to 13 columns.
+- Added a real Chromium browser interaction smoke test for connector drag, node-follow behavior and Undo.
+- No new product features.
+
+## v0.14.6 – Free Connector Routing & Visual UX Polish
+- Added true free connector routing. Dragging a connector moves its middle body independently while both endpoints remain attached to their nodes.
+- Free routing stores offsets relative to the attached endpoints; moving nodes therefore keeps the manual connector shape following the process.
+- Added explicit "Fri" routing in both connector controls and contextual connector toolbar.
+- Smart Layout intentionally resets internal connectors to centered automatic orthogonal routing.
+- Whole-process scaling also scales free-route offsets.
+- Small visual polish pass: clearer sidebar section hierarchy, focus states and drag cursors.
+- No database, Supabase or dependency changes.
+
+## v0.14.5 – Editing Stability & UX Cleanup
+- Removed remaining live event wiring for the retired Align/Distribute UI.
+- Smart Layout now uses the actual logical canvas size instead of fixed 2400×1400 bounds.
+- Contextual node toolbar positioning now respects multi-page canvas width.
+- Resizing the browser recalculates page extents, horizontal navigation and contextual toolbars.
+- Added centralized transient-menu cleanup so popovers do not stack; Escape or blank-canvas interaction closes them.
+- No database, Supabase or dependency changes.
+
 ## v0.14.4 – Connector Drag Fix
 - Connector click-drag now works in one gesture; pre-selection is no longer required.
 - Both SVG and HTML connector hit targets start the same drag path.

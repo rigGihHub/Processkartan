@@ -54,7 +54,7 @@ def create_sheet(st,title,step_rows,link_rows):
     sheets=build("sheets","v4",credentials=cr,cache_discovery=False)
     res=sheets.spreadsheets().create(body={"properties":{"title":title},"sheets":[{"properties":{"title":"Processsteg"}},{"properties":{"title":"Kopplingar"}}]},fields="spreadsheetId,spreadsheetUrl").execute()
     sid=res["spreadsheetId"]
-    steps=["Ordning","ID","Typ","Text","Inputs","Outputs","Nästa steg","Föregående steg","X","Y","Bredd","Höjd"]
+    steps=["Ordning","ID","Typ","Text","Dokumentlänk","Inputs","Outputs","Nästa steg","Föregående steg","X","Y","Bredd","Höjd"]
     links=["Från ID","Från steg","Till ID","Till steg","Anslutning"]
     sheets.spreadsheets().values().batchUpdate(spreadsheetId=sid,body={"valueInputOption":"RAW","data":[
         {"range":"Processsteg!A1","majorDimension":"ROWS","values":[steps]+step_rows},
@@ -63,7 +63,7 @@ def create_sheet(st,title,step_rows,link_rows):
     meta=sheets.spreadsheets().get(spreadsheetId=sid,fields="sheets(properties(sheetId,title))").execute()
     ids={x["properties"]["title"]:x["properties"]["sheetId"] for x in meta["sheets"]}
     req=[]
-    for nm,endcol in [("Processsteg",12),("Kopplingar",5)]:
+    for nm,endcol in [("Processsteg",13),("Kopplingar",5)]:
         sh=ids[nm]
         req.append({
             "repeatCell":{

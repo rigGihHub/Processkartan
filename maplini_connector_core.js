@@ -1,6 +1,6 @@
 (function(global){
 'use strict';
-const DEFAULT_STYLE={color:'#5b6775',width:2,end:'arrow',dash:'solid',viaX:null,viaY:null,routing:'straight',anchorMode:'manual',label:''};
+const DEFAULT_STYLE={color:'#5b6775',width:2,end:'arrow',dash:'solid',viaX:null,viaY:null,freeDx:0,freeDy:0,routing:'straight',anchorMode:'manual',label:''};
 
 function cloneStyle(value){return Object.assign({},DEFAULT_STYLE,value&&typeof value==='object'?value:{});}
 function normalizeLink(link){
@@ -27,6 +27,15 @@ function autoSides(dx,dy){
 }
 function routePoints(x1,y1,x2,y2,sourceSide,targetSide,styleValue){
   const st=cloneStyle(styleValue);
+  if(st.routing==='free'){
+    // Free routing keeps both endpoints attached to their nodes while translating the
+    // connector's middle body independently. Offsets are relative to the direct line,
+    // so moving either node makes the free route follow automatically.
+    const ox=Number(st.freeDx)||0,oy=Number(st.freeDy)||0;
+    const p1=[x1+(x2-x1)*0.25+ox,y1+(y2-y1)*0.25+oy];
+    const p2=[x1+(x2-x1)*0.75+ox,y1+(y2-y1)*0.75+oy];
+    return [[x1,y1],p1,p2,[x2,y2]];
+  }
   if(st.routing!=='orthogonal'){
     // "straight" is a strict direct segment. Legacy/manual via coordinates must not bend it.
     return [[x1,y1],[x2,y2]];
@@ -64,6 +73,7 @@ function midpoint(points){
   return{x:points[0][0],y:points[0][1]};
 }
 function setVia(links,index,x,y){return setStyle(links,index,{viaX:Number(x),viaY:Number(y)});}
+function setFreeOffset(links,index,dx,dy){return setStyle(links,index,{routing:'free',freeDx:Number(dx)||0,freeDy:Number(dy)||0,viaX:null,viaY:null});}
 function rectsIntersect(a,b){return !(a.right<b.left||a.left>b.right||a.bottom<b.top||a.top>b.bottom);}
 function removeSelected(links,doomedIds,selectedIndices){
   const doomed=doomedIds instanceof Set?doomedIds:new Set(doomedIds||[]);
@@ -93,5 +103,5 @@ function splitLink(links,index,newNodeId){
   return source;
 }
 
-global.MapliniConnectorCore={DEFAULT_STYLE,cloneStyle,normalizeLink,normalizeLinks,style,setStyle,create,setVia,autoSides,routePoints,pathData,midpoint,rectsIntersect,removeSelected,removeAt,selectionAfterDelete,decisionLabel,splitLink};
+global.MapliniConnectorCore={DEFAULT_STYLE,cloneStyle,normalizeLink,normalizeLinks,style,setStyle,create,setVia,setFreeOffset,autoSides,routePoints,pathData,midpoint,rectsIntersect,removeSelected,removeAt,selectionAfterDelete,decisionLabel,splitLink};
 })(typeof window!=='undefined'?window:globalThis);

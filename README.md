@@ -6,9 +6,9 @@
 - Båda toolbarerna är nu `display:none` som standard och visas endast när JavaScript sätter `.on` efter korrekt nod-/pilmarkering.
 - Ingen databas-, Supabase- eller dependencyändring.
 
-# Maplini v0.14.4
+# Maplini v0.15.2
 
-## Process Intelligence v0.14.4
+## Process Intelligence v0.15.2
 
 - **🔍 Analysera** öppnar Processkontroll med en deterministisk strukturanalys av aktuell process.
 - Visar processhälsa, fel, kontrollpunkter och insikter.
@@ -146,17 +146,53 @@ Maplini visar löpande sparstatus och använder en kortlivad recovery-snapshot m
 - Desktop sidebar scroll fix: persistent vertical scrolling, stable scrollbar gutter and bottom clearance so the final connector controls remain reachable.
 
 
-### v0.14.4
+### v0.15.2
 Connector drag, multi-page horizontal scrolling and verified zoom direction.
 
 
-### v0.14.4
+### v0.15.2
 Förfinar Smart Layout-pilarnas centrering, desktop-sidebarens åtkomlighet, rutstilar och den samlade textformateringen.
 
 
-### v0.14.4
+### v0.15.2
 UI simplified: Ordna removed, compact account panel, dedicated Logotyp menu, and whole-process scaling including fit to selected A4/A3 page.
 
 
-### v0.14.4
+### v0.15.2
 Connector dragging fixed: click-drag works directly on the connector hit area without a separate pre-selection click.
+
+
+### v0.15.2
+Stability/UX cleanup: dynamic multi-page layout bounds, resilient toolbar positioning, resize recalculation and centralized popover cleanup.
+
+
+### v0.15.2
+Free connector routing: drag the arrow body independently while endpoints remain attached and continue following moved nodes. Includes a small visual/UX polish pass.
+
+
+### v0.15.2 – Integrity & Core Interaction
+This release fixes workspace ownership integrity, connector one-gesture/free-drag behavior and Google Sheets column alignment.
+
+**Supabase:** deployments using workspaces must run `supabase_schema_v0147.sql` after updating the app. The migration preserves editor access but enforces the workspace owner as canonical `processes.owner_id`.
+
+**Browser smoke QA:** `python tests/browser_interaction_smoke.py` runs the embedded editor in Chromium and verifies one-gesture connector drag, attached endpoint behavior after moving a node, and Undo.
+
+
+### v0.15.2
+30% Simpler: the main toolbar now exposes only core commands. Export/page settings are grouped under Export, secondary tools under More, and the normal mobile bar is reduced to four actions.
+
+
+### v0.15.2
+Stability/polish pass for the simplified command surface. Nested menus now remain open correctly, mobile keeps four primary actions while Redo/Fullscreen remain available secondarily, and browser smoke coverage validates these flows together with free connector dragging.
+
+
+### v0.15.2
+Actionable Process Check: structural findings now explain what to do next, are prioritized, and can focus affected nodes directly on the canvas. The analysis remains deterministic/local and does not add an AI dependency.
+
+
+### v0.15.2
+First-Time User UX: empty editable processes now present a clear first-step card on the canvas with direct Start/Activity actions and guidance to continue with `＋ Nästa`.
+
+
+### v0.15.2
+New Process UX: browser `prompt()` has been replaced by a Maplini-native naming dialog with Enter/Escape support, inline validation, cancel/backdrop behavior and direct continuation into the empty-canvas first-step flow.

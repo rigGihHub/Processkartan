@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.14.4"
+APP_VERSION = "0.15.2"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -135,6 +135,35 @@ header[data-testid="stHeader"]{height:2rem}
 .p48-node-quick[data-mode="single"] [data-multi-only],.p48-node-quick[data-mode="multi"] [data-single-only]{display:none!important}
 @media(max-width:700px),(pointer:coarse){.p48-node-quick{gap:5px;padding:5px;transform:translate(-50%,calc(-100% - 16px)) scale(var(--p48-toolbar-inverse-scale,1));max-width:calc(100vw - 24px)}.p48-node-quick button,.p48-node-quick summary,.p48-node-quick .p48-quick-color-label{min-height:38px;padding:8px 10px;font-size:11px}.p48-node-quick-arrange-pop{width:236px}}
 @media(max-width:700px),(pointer:coarse){.p48-link-quick{gap:5px;padding:5px;transform:translate(-50%,calc(-100% - 18px))}.p48-link-quick button{min-height:36px;padding:7px 10px;font-size:11px}}
+
+.p48-section{padding-top:12px;padding-bottom:12px}
+.p48-section+.p48-section{border-top:1px solid #e9eef2}
+.p48-title{letter-spacing:.01em}
+.p48-toolbar .p48-btn,.p48-top .p48-btn{transition:background .12s ease,border-color .12s ease,box-shadow .12s ease}
+.p48-btn:focus-visible,.p48-mini:focus-visible{outline:2px solid #2c7be5;outline-offset:2px}
+.p48-link-hit-segment.p48-selected-link-hit{cursor:move}
+.p48-link-hit{cursor:move}
+
+
+/* v0.14.8 – simplified command surface */
+.p48-top-simplified{gap:7px}
+.p48-top-simplified .p48-icon-action{width:36px;padding-left:0;padding-right:0;font-size:17px}
+.p48-export-menu,.p48-more-menu{position:relative}
+.p48-export-menu>summary,.p48-more-menu>summary{list-style:none}
+.p48-export-menu>summary::-webkit-details-marker,.p48-more-menu>summary::-webkit-details-marker{display:none}
+.p48-export-popover,.p48-more-popover{position:absolute;top:calc(100% + 7px);right:0;z-index:190;background:#fff;border:1px solid #cbd7e3;border-radius:12px;box-shadow:0 12px 30px rgba(31,52,70,.18);padding:10px}
+.p48-export-popover{width:270px;display:grid;gap:8px}
+.p48-export-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.p48-export-popover select{width:100%;text-align:left}
+.p48-export-page-title{margin-top:4px;padding-top:8px;border-top:1px solid #e5ebf0}
+.p48-more-popover{width:300px;display:grid;gap:7px;max-height:min(70vh,620px);overflow:auto}
+.p48-more-wide{width:100%;text-align:left}
+.p48-more-selection-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.p48-more-popover>.p48-canvas-menu,.p48-more-popover>.p48-logo-menu,.p48-more-popover>.p48-scale-menu{position:relative;width:100%}
+.p48-more-popover>.p48-canvas-menu>summary,.p48-more-popover>.p48-logo-menu>summary,.p48-more-popover>.p48-scale-menu>summary{width:100%;box-sizing:border-box;text-align:left}
+.p48-more-popover .p48-canvas-popover,.p48-more-popover .p48-logo-popover,.p48-more-popover .p48-scale-popover{position:relative;top:auto;left:auto;right:auto;margin-top:6px;width:auto;min-width:0;box-shadow:none;border-color:#dbe3ea}
+@media(max-width:900px){.p48-top-simplified .p48-spacer{display:none}.p48-export-popover,.p48-more-popover{right:auto;left:0}}
+
 .p48-link-format{display:none;margin-top:12px;padding-top:10px;border-top:1px solid #e1e7ed}
 .p48-link-format.on{display:block}
 /* v0.10.15 contextual formatting: show only controls relevant to current selection */
@@ -218,6 +247,20 @@ header[data-testid="stHeader"]{height:2rem}
 }
 
 /* Smaller configurable connection points */
+/* v0.15.1 first-time empty canvas */
+.p48-empty-state{position:absolute;inset:0;z-index:18;display:grid;place-items:center;pointer-events:none;padding:28px}
+.p48-empty-state[hidden]{display:none!important}
+.p48-empty-card{width:min(430px,calc(100% - 40px));padding:22px;border:1px solid #cddbe5;border-radius:16px;background:rgba(255,255,255,.96);box-shadow:0 16px 38px rgba(36,58,78,.14);text-align:center;pointer-events:auto}
+.p48-empty-kicker{font:800 9px/1 Inter,system-ui;letter-spacing:.12em;color:#28715c;margin-bottom:7px}
+.p48-empty-title{font:800 21px/1.2 Inter,system-ui;color:#20364f}
+.p48-empty-copy{font:500 12px/1.5 Inter,system-ui;color:#60717f;margin:8px auto 15px;max-width:360px}
+.p48-empty-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.p48-empty-actions button{border:1px solid #b9c8d5;border-radius:9px;background:#fff;color:#294052;padding:10px 11px;min-height:42px;font:750 12px Inter,system-ui;cursor:pointer}
+.p48-empty-actions button.primary{background:#1f6f55;border-color:#1f6f55;color:#fff}
+.p48-empty-actions button:hover{filter:brightness(.98)}
+.p48-empty-tip{margin-top:12px;padding-top:10px;border-top:1px solid #e5ebef;font:500 10px/1.45 Inter,system-ui;color:#74828e}
+@media(max-width:700px),(pointer:coarse){.p48-empty-state{padding:14px;align-items:start;padding-top:72px}.p48-empty-card{width:min(100%,380px);padding:18px}.p48-empty-title{font-size:18px}.p48-empty-actions{grid-template-columns:1fr}.p48-empty-actions button{min-height:46px}}
+
 #p48-canvas{
   --p48-point-size:8px;
   --p48-point-color:#1f6f55;
@@ -719,7 +762,9 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-analysis-summary{display:grid;grid-template-columns:92px 1fr;gap:12px;padding:12px 14px;background:#f7fafc;border-bottom:1px solid #e2e8ee}
 .p48-analysis-score{display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #d4e1dc;border-radius:12px;background:#fff;padding:9px}.p48-analysis-score strong{font:800 24px/1 Inter,system-ui;color:#176c52}.p48-analysis-score span{font:700 9px/1.2 Inter,system-ui;color:#6c7a87;margin-top:4px}
 .p48-analysis-counts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;align-content:center}.p48-analysis-count{border-radius:9px;padding:7px 5px;text-align:center;font:700 10px Inter,system-ui;background:#fff;border:1px solid #e0e6eb}.p48-analysis-count strong{display:block;font-size:15px;margin-bottom:2px}.p48-analysis-count.error strong{color:#b42318}.p48-analysis-count.warning strong{color:#b25e09}.p48-analysis-count.info strong{color:#2c67a0}
-.p48-analysis-list{overflow:auto;padding:10px 10px 18px;display:grid;gap:8px}.p48-analysis-empty{padding:22px 16px;text-align:center;color:#536574;font:600 12px/1.5 Inter,system-ui}.p48-analysis-item{width:100%;text-align:left;border:1px solid #dde4ea;border-left-width:4px;border-radius:10px;background:#fff;padding:9px 10px;cursor:pointer;color:#273846}.p48-analysis-item:hover{background:#f7fafc}.p48-analysis-item.error{border-left-color:#d92d20}.p48-analysis-item.warning{border-left-color:#e68a17}.p48-analysis-item.info{border-left-color:#3978b7}.p48-analysis-item:disabled{cursor:default;opacity:.88}.p48-analysis-item-title{font:750 11px/1.25 Inter,system-ui}.p48-analysis-item-detail{font:500 10px/1.35 Inter,system-ui;color:#687887;margin-top:4px}.p48-analysis-item-action{font:700 9px/1.2 Inter,system-ui;color:#28715c;margin-top:6px}
+.p48-analysis-next{margin:10px 10px 0;padding:11px 12px;border:1px solid #b9d8cc;border-radius:11px;background:#f2faf6;display:grid;gap:4px}
+.p48-analysis-next[hidden]{display:none!important}.p48-analysis-next-label{font:800 9px/1 Inter,system-ui;color:#28715c;letter-spacing:.08em}.p48-analysis-next strong{font:800 12px/1.3 Inter,system-ui;color:#20364f}.p48-analysis-next>span:not(.p48-analysis-next-label){font:500 10px/1.4 Inter,system-ui;color:#536574}.p48-analysis-next button{justify-self:start;margin-top:4px}
+.p48-analysis-list{overflow:auto;padding:10px 10px 18px;display:grid;gap:8px}.p48-analysis-empty{padding:22px 16px;text-align:center;color:#536574;font:600 12px/1.5 Inter,system-ui;display:grid;gap:5px}.p48-analysis-empty strong{color:#28715c;font-size:13px}.p48-analysis-empty span{font-weight:500;font-size:10px}.p48-analysis-item{width:100%;text-align:left;border:1px solid #dde4ea;border-left-width:4px;border-radius:10px;background:#fff;padding:10px;color:#273846}.p48-analysis-item:hover{background:#f7fafc}.p48-analysis-item.error{border-left-color:#d92d20}.p48-analysis-item.warning{border-left-color:#e68a17}.p48-analysis-item.info{border-left-color:#3978b7}.p48-analysis-item-head{display:flex;align-items:flex-start;gap:7px}.p48-analysis-priority{flex:0 0 auto;border-radius:999px;padding:3px 6px;font:800 8px/1.2 Inter,system-ui}.p48-analysis-priority.error{background:#fff0ee;color:#b42318}.p48-analysis-priority.warning{background:#fff6e8;color:#9a550d}.p48-analysis-priority.info{background:#eef6fd;color:#2c67a0}.p48-analysis-item-title{font:750 11px/1.3 Inter,system-ui;flex:1}.p48-analysis-item-detail{font:500 10px/1.35 Inter,system-ui;color:#687887;margin-top:4px}.p48-analysis-item-fix{margin-top:7px;padding:7px 8px;border-radius:8px;background:#f7f9fb;display:grid;gap:2px;font:500 10px/1.4 Inter,system-ui;color:#506271}.p48-analysis-item-fix strong{font-size:9px;color:#2d4558}.p48-analysis-item-action{border:0;background:transparent;padding:5px 0 0;font:700 9px/1.2 Inter,system-ui;color:#28715c;margin-top:3px;cursor:pointer}.p48-analysis-item-action:hover{text-decoration:underline}
 @media(max-width:700px),(pointer:coarse){.p48-analysis-panel{top:72px;right:8px;left:8px;bottom:82px;width:auto;border-radius:14px}.p48-analysis-close{min-width:44px;min-height:44px}.p48-analysis-item{min-height:54px;padding:11px 12px}.p48-analysis-summary{grid-template-columns:82px 1fr}}
 #pk48 *{box-sizing:border-box}
 .p48-brand{height:94px;background:#fff;border-bottom:1px solid #e1e7ed;display:flex;align-items:center;padding:8px 18px}
@@ -749,6 +794,22 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-save-state{font:700 11px system-ui;color:#4b6b5c;white-space:nowrap;padding:4px 7px;border-radius:999px;background:#edf7f1;border:1px solid #d5eadc}
 .p48-save-state[data-state="saving"]{color:#6a5b2d;background:#fff8df;border-color:#eee0a6}
 .p48-save-state[data-state="error"]{color:#9c3029;background:#fff1ef;border-color:#efc6c1}
+/* v0.15.2 new-process dialog */
+.p48-new-process-backdrop{position:fixed;inset:0;z-index:9900;background:rgba(28,43,56,.28);backdrop-filter:blur(1px)}
+.p48-new-process-backdrop[hidden],.p48-new-process-dialog[hidden]{display:none!important}
+.p48-new-process-dialog{position:fixed;z-index:9901;left:50%;top:50%;transform:translate(-50%,-50%);width:min(430px,calc(100vw - 28px));padding:22px;border:1px solid #cbd8e2;border-radius:16px;background:#fff;box-shadow:0 22px 60px rgba(27,45,61,.25);color:#22384b}
+.p48-new-process-kicker{font:800 9px/1 Inter,system-ui;letter-spacing:.12em;color:#28715c;margin-bottom:7px}
+.p48-new-process-title{font:800 20px/1.25 Inter,system-ui;color:#20364f}
+.p48-new-process-sub{font:500 11px/1.45 Inter,system-ui;color:#6b7a87;margin:5px 0 16px}
+.p48-new-process-label{display:block;font:750 10px/1.2 Inter,system-ui;color:#516575;margin-bottom:5px}
+.p48-new-process-dialog input{width:100%;border:2px solid #9eb2c3;border-radius:9px;padding:10px 11px;font:700 14px Inter,system-ui;color:#24394c;background:#fbfdff}
+.p48-new-process-dialog input:focus{outline:2px solid rgba(44,123,229,.22);outline-offset:1px;border-color:#2c7be5}
+.p48-new-process-error{margin-top:7px;border-radius:7px;padding:7px 8px;background:#fff1ef;color:#a23a31;font:650 10px/1.35 Inter,system-ui}
+.p48-new-process-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+.p48-new-process-actions button{min-height:40px;border:1px solid #c7d2dc;border-radius:9px;background:#fff;color:#304659;padding:8px 13px;font:750 12px Inter,system-ui;cursor:pointer}
+.p48-new-process-actions button.primary{background:#1f6f55;border-color:#1f6f55;color:#fff}
+@media(max-width:700px),(pointer:coarse){.p48-new-process-dialog{top:auto;bottom:18px;transform:translateX(-50%);padding:19px}.p48-new-process-actions{display:grid;grid-template-columns:1fr 1fr}.p48-new-process-actions button{min-height:46px}}
+
 .p48-recovery-banner{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9999;max-width:min(620px,calc(100vw - 24px));display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #a9c8df;border-radius:11px;background:#f7fbff;box-shadow:0 8px 26px rgba(32,54,72,.18);font:600 12px system-ui;color:#30465a}
 .p48-recovery-banner[hidden]{display:none}.p48-recovery-banner .p48-recovery-actions{display:flex;gap:6px;margin-left:auto}.p48-recovery-banner button{border:1px solid #adc5d8;border-radius:7px;background:#fff;padding:6px 9px;font:700 11px system-ui;cursor:pointer}.p48-recovery-banner button.primary{background:#e7f3fc;border-color:#77a9ce;color:#175f95}
 @media(max-width:700px){.p48-save-state{font-size:10px;padding:3px 6px}.p48-recovery-banner{top:8px;align-items:flex-start;flex-wrap:wrap}.p48-recovery-banner .p48-recovery-actions{width:100%;margin-left:0}.p48-recovery-banner button{min-height:38px;flex:1}}
@@ -931,21 +992,20 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
     <div class="p48-version">v. __MAPLINI_VERSION__</div>
   </div>
 </div>
-<div class="p48-top">
+<div class="p48-top p48-top-simplified">
   <strong>Process</strong>
   <input id="p48-name" class="p48-name" value="Exempel – upphandlingsprocess" aria-label="Processnamn">
   <button type="button" class="p48-btn primary" id="p48-new" title="Skapa ny process">+ Ny process</button>
   <button type="button" class="p48-btn p48-mobile-tools-btn" id="p48-mobile-tools" aria-expanded="false" aria-controls="p48-side">☰ Verktyg</button>
   <button type="button" class="p48-btn" id="p48-save" title="Spara process">Spara</button>
-  
   <button type="button" class="p48-btn" id="p48-share" title="Dela aktuell process">Dela</button>
   <div class="p48-sharebox" id="p48-sharebox"><input id="p48-share-url" readonly><button type="button" class="p48-mini" id="p48-copy-share">Kopiera länk</button></div>
-  <button type="button" class="p48-btn" id="p48-undo" title="Ångra (Ctrl/Cmd+Z)">↶ Ångra</button>
-  <button type="button" class="p48-btn" id="p48-redo" title="Gör om (Ctrl/Cmd+Shift+Z eller Ctrl/Cmd+Y)">↷ Gör om</button>
+  <button type="button" class="p48-btn p48-icon-action" id="p48-undo" title="Ångra (Ctrl/Cmd+Z)" aria-label="Ångra">↶</button>
+  <button type="button" class="p48-btn p48-icon-action" id="p48-redo" title="Gör om (Ctrl/Cmd+Shift+Z eller Ctrl/Cmd+Y)" aria-label="Gör om">↷</button>
   <div class="p48-zoom-controls" role="group" aria-label="Storlek på canvasinnehåll">
-    <button type="button" class="p48-btn" id="p48-zoom-out" aria-label="Zooma ut" title="Zooma ut – gör innehållet mindre">−</button>
+    <button type="button" class="p48-btn" id="p48-zoom-out" aria-label="Zooma ut" title="Zooma ut">−</button>
     <button type="button" class="p48-btn p48-zoom-value" id="p48-zoom-reset" title="Återställ till 100%">100%</button>
-    <button type="button" class="p48-btn" id="p48-zoom-in" aria-label="Zooma in" title="Zooma in – gör innehållet större">+</button>
+    <button type="button" class="p48-btn" id="p48-zoom-in" aria-label="Zooma in" title="Zooma in">+</button>
     <button type="button" class="p48-btn" id="p48-fit-screen" title="Anpassa hela processen till fönstret">⊡ Anpassa</button>
   </div>
   <details class="p48-smart-layout-menu" id="p48-smart-layout-menu">
@@ -960,8 +1020,47 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
       <div class="p48-muted" id="p48-smart-layout-hint">Pilarna används för att förstå flödet.</div>
     </div>
   </details>
-  <button type="button" class="p48-btn" id="p48-analyze" title="Kontrollera processens struktur">🔍 Analysera</button>
-  <details class="p48-canvas-menu">
+
+  <details class="p48-export-menu" id="p48-export-menu">
+    <summary class="p48-btn primary" title="Exportera processen">Exportera ▾</summary>
+    <div class="p48-export-popover">
+      <div class="p48-pop-title">Exportera</div>
+      <div class="p48-export-actions">
+        <button type="button" class="p48-btn primary" id="p48-pdf">PDF</button>
+        <button type="button" class="p48-btn" id="p48-doc">DOCX</button>
+      </div>
+      <details class="p48-sheets-menu">
+        <summary class="p48-btn">Excel / Google Sheets ▾</summary>
+        <div class="p48-sheets-popover">
+          <button type="button" class="p48-btn primary" id="p48-sheets-direct">Skapa i Google Drive</button>
+          <button type="button" class="p48-btn" id="p48-sheets">Ladda ner .xlsx</button>
+        </div>
+      </details>
+      <div class="p48-pop-title p48-export-page-title">Sidformat</div>
+      <select id="p48-pdf-view" class="p48-btn" title="PDF-yta">
+        <option value="off">Ingen PDF-yta</option>
+        <option value="A4P">A4 stående</option>
+        <option value="A4L">A4 liggande</option>
+        <option value="A3P">A3 stående</option>
+        <option value="A3L" selected>A3 liggande</option>
+      </select>
+      <select id="p48-page-count" class="p48-btn" title="Antal PDF-sidor">
+        <option value="auto" selected>Automatiskt antal sidor</option>
+        <option value="1">1 sida</option><option value="2">2 sidor</option><option value="3">3 sidor</option><option value="4">4 sidor</option>
+      </select>
+    </div>
+  </details>
+
+  <details class="p48-more-menu" id="p48-more-menu">
+    <summary class="p48-btn" title="Fler verktyg">••• Mer</summary>
+    <div class="p48-more-popover">
+      <button type="button" class="p48-btn p48-more-wide" id="p48-analyze" title="Kontrollera processens struktur">🔍 Analysera process</button>
+      <button type="button" class="p48-btn p48-more-wide" id="p48-select-tool" aria-pressed="false" title="Markera flera objekt eller kopplingar">Markera område</button>
+      <div class="p48-more-selection-actions">
+        <button type="button" class="p48-btn" id="p48-duplicate-selection" disabled title="Duplicera markerade rutor (Ctrl/Cmd+D)">Duplicera</button>
+        <button type="button" class="p48-btn danger" id="p48-delete-selection" disabled title="Ta bort markerat (Delete/Backspace)">Ta bort</button>
+      </div>
+      <details class="p48-canvas-menu">
   <summary class="p48-btn">Processyta ▾</summary>
   <div class="p48-canvas-popover">
     <div class="p48-pop-title">Processyta</div>
@@ -1041,7 +1140,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
           </div>
   </div>
 </details>
-  <details class="p48-logo-menu" id="p48-logo-menu">
+      <details class="p48-logo-menu" id="p48-logo-menu">
     <summary class="p48-btn" title="Lägg till eller ändra processlogga">🖼 Logotyp ▾</summary>
     <div class="p48-logo-popover">
       <div class="p48-pop-title">Processlogga</div>
@@ -1063,7 +1162,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
       <label class="p48-hide-row"><input id="p48-logo-hide" type="checkbox">Dölj logotype</label>
     </div>
   </details>
-  <details class="p48-scale-menu" id="p48-scale-menu">
+      <details class="p48-scale-menu" id="p48-scale-menu">
     <summary class="p48-btn" title="Ändra storlek på hela processen">↔ Skala process ▾</summary>
     <div class="p48-scale-popover">
       <div class="p48-pop-title">Hela processens innehåll</div>
@@ -1075,38 +1174,13 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
       <div class="p48-muted">Använder valt A4/A3-format nedan. Ändrar rutor, text och avstånd proportionellt.</div>
     </div>
   </details>
-  <select id="p48-pdf-view" class="p48-btn" title="PDF-yta">
-    <option value="off">PDF-yta: Av</option>
-    <option value="A4P">A4 stående</option>
-    <option value="A4L">A4 liggande</option>
-    <option value="A3P">A3 stående</option>
-    <option value="A3L" selected>A3 liggande</option>
-  </select>
-  <select id="p48-page-count" class="p48-btn" title="Antal PDF-sidor">
-    <option value="auto" selected>Auto sidor</option>
-    <option value="1">1 sida</option>
-    <option value="2">2 sidor</option>
-    <option value="3">3 sidor</option>
-    <option value="4">4 sidor</option>
-  </select>
-  <button type="button" class="p48-btn" id="p48-select-tool" aria-pressed="false" title="Markera flera objekt eller kopplingar">Markera område</button>
-  <button type="button" class="p48-btn" id="p48-duplicate-selection" disabled title="Duplicera markerade rutor (Ctrl/Cmd+D)">Duplicera</button>
-  <button type="button" class="p48-btn" id="p48-delete-selection" disabled title="Ta bort markerat (Delete/Backspace)">Ta bort markerat</button>
-  <span class="p48-spacer"></span>
-  <button type="button" class="p48-btn primary" id="p48-pdf">Exportera PDF</button>
-  <button type="button" class="p48-btn" id="p48-doc">Exportera DOCX</button>
-  <details class="p48-sheets-menu">
-    <summary class="p48-btn">Google Sheets ▾</summary>
-    <div class="p48-sheets-popover">
-      <button type="button" class="p48-btn primary" id="p48-sheets-direct">Skapa i Google Drive</button>
-      <button type="button" class="p48-btn" id="p48-sheets">Ladda ner .xlsx</button>
     </div>
   </details>
-  
-  
+
+  <span class="p48-spacer"></span>
   <span id="p48-save-state" class="p48-save-state" data-state="saved" aria-live="polite">Autosparad</span>
   <span id="p48-status" class="p48-status" role="status" aria-live="polite"></span>
-<span id="p48-runtime-error" class="p48-runtime-error" role="alert" aria-live="assertive" hidden></span>
+  <span id="p48-runtime-error" class="p48-runtime-error" role="alert" aria-live="assertive" hidden></span>
 </div>
 
 <div id="p48-recovery-banner" class="p48-recovery-banner" role="status" aria-live="polite" hidden>
@@ -1114,9 +1188,29 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   <div class="p48-recovery-actions"><button type="button" class="primary" id="p48-recovery-restore">Återställ</button><button type="button" id="p48-recovery-ignore">Ignorera</button></div>
 </div>
 
+<div id="p48-new-process-backdrop" class="p48-new-process-backdrop" hidden></div>
+<section id="p48-new-process-dialog" class="p48-new-process-dialog" role="dialog" aria-modal="true" aria-labelledby="p48-new-process-title" hidden>
+  <div class="p48-new-process-kicker">NY PROCESS</div>
+  <div id="p48-new-process-title" class="p48-new-process-title">Vad ska processen heta?</div>
+  <div class="p48-new-process-sub">Namnet kan ändras när som helst senare.</div>
+  <label class="p48-new-process-label" for="p48-new-process-name">Processnamn</label>
+  <input id="p48-new-process-name" type="text" maxlength="120" value="Ny process" autocomplete="off" spellcheck="true">
+  <div id="p48-new-process-error" class="p48-new-process-error" role="alert" hidden></div>
+  <div class="p48-new-process-actions">
+    <button type="button" id="p48-new-process-cancel">Avbryt</button>
+    <button type="button" class="primary" id="p48-new-process-create">Skapa process</button>
+  </div>
+</section>
+
 <section id="p48-analysis-panel" class="p48-analysis-panel" aria-label="Processkontroll" hidden>
-  <div class="p48-analysis-head"><div><div class="p48-analysis-title">Processkontroll</div><div class="p48-analysis-sub">Strukturell kontroll av noder och flöden</div></div><button type="button" id="p48-analysis-close" class="p48-analysis-close" aria-label="Stäng analys">×</button></div>
-  <div class="p48-analysis-summary"><div class="p48-analysis-score"><strong id="p48-analysis-score">–</strong><span>PROCESSHÄLSA</span></div><div class="p48-analysis-counts"><div class="p48-analysis-count error"><strong id="p48-analysis-errors">0</strong>Fel</div><div class="p48-analysis-count warning"><strong id="p48-analysis-warnings">0</strong>Kontrollera</div><div class="p48-analysis-count info"><strong id="p48-analysis-info">0</strong>Insikter</div></div></div>
+  <div class="p48-analysis-head"><div><div class="p48-analysis-title">Processkontroll</div><div class="p48-analysis-sub">Vad behöver förbättras – och vad gör du åt det?</div></div><button type="button" id="p48-analysis-close" class="p48-analysis-close" aria-label="Stäng analys">×</button></div>
+  <div class="p48-analysis-summary"><div class="p48-analysis-score"><strong id="p48-analysis-score">–</strong><span>PROCESSHÄLSA</span></div><div class="p48-analysis-counts"><div class="p48-analysis-count error"><strong id="p48-analysis-errors">0</strong>Åtgärda</div><div class="p48-analysis-count warning"><strong id="p48-analysis-warnings">0</strong>Kontrollera</div><div class="p48-analysis-count info"><strong id="p48-analysis-info">0</strong>Förbättra</div></div></div>
+  <div id="p48-analysis-next" class="p48-analysis-next" hidden>
+    <span class="p48-analysis-next-label">BÖRJA HÄR</span>
+    <strong id="p48-analysis-next-title"></strong>
+    <span id="p48-analysis-next-action"></span>
+    <button type="button" id="p48-analysis-next-show" class="p48-mini">Visa på canvasen →</button>
+  </div>
   <div id="p48-analysis-list" class="p48-analysis-list"></div>
 </section>
 
@@ -1299,7 +1393,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
             <label>Pilfärg<input id="p48-link-color" type="color" value="#687584"></label>
             <label>Slutmarkör<select id="p48-link-end"><option value="arrow" selected>Pil</option><option value="none">Ingen</option><option value="circle">Cirkel</option><option value="diamond">Diamant</option></select></label>
             <label>Linjetyp<select id="p48-link-dash"><option value="solid" selected>Heldragen</option><option value="dashed">Streckad</option><option value="dotted">Prickad</option></select></label>
-            <label>Routing<select id="p48-link-routing"><option value="orthogonal">Vinkelrät</option><option value="straight">Rak</option></select></label>
+            <label>Routing<select id="p48-link-routing"><option value="orthogonal">Vinkelrät</option><option value="straight">Rak</option><option value="free">Fri</option></select></label>
             <label>Fästpunkter<select id="p48-link-anchor-mode"><option value="auto">Auto</option><option value="manual">Behåll startpunkt</option></select></label>
             <label class="p48-link-label-field">Text på pil<input id="p48-link-label" type="text" maxlength="60" autocomplete="off" placeholder="t.ex. Ja, Nej, Godkänd"></label>
           </div>
@@ -1320,7 +1414,18 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 
   <button type="button" class="p48-mobile-backdrop" id="p48-mobile-backdrop" aria-label="Stäng verktyg"></button>
   <main class="p48-scroll" id="p48-scroll">
-    <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><div id="p48-canvas-watermark" class="p48-canvas-watermark" aria-hidden="true"></div><img id="p48-process-logo" class="p48-process-logo" alt="Processlogotype"><div id="p48-link-hit-layer" class="p48-link-hit-layer"></div><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-link-quick" class="p48-link-quick" role="toolbar" aria-label="Snabbval för pil"><button type="button" data-link-routing="straight" title="Gör pilen rak">— Rak</button><button type="button" data-link-routing="orthogonal" title="Gör pilen vinkelrät">⌜ Vinkelrät</button></div><div id="p48-node-quick" class="p48-node-quick" role="toolbar" aria-label="Snabbval för markerade rutor" data-mode="single"><button type="button" id="p48-node-quick-next" data-single-only title="Lägg till nästa steg">＋ Nästa</button><button type="button" id="p48-node-quick-format" title="Visa formatering">Formatera</button><label class="p48-quick-color-label" data-multi-only title="Ändra bakgrundsfärg för markerade"><input type="color" id="p48-node-quick-color" value="#ffffff"> Färg</label><button type="button" id="p48-node-quick-duplicate" title="Duplicera markerade">Duplicera</button><button type="button" id="p48-node-quick-delete" class="danger" title="Ta bort markerade">Ta bort</button></div><div id="p48-print-frame" class="p48-print-frame"></div>
+    <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><div id="p48-empty-state" class="p48-empty-state" hidden>
+      <div class="p48-empty-card">
+        <div class="p48-empty-kicker">NY PROCESS</div>
+        <div class="p48-empty-title">Börja med första steget</div>
+        <div class="p48-empty-copy">Lägg till en startpunkt eller börja direkt med en aktivitet. Du kan ändra allt efteråt.</div>
+        <div class="p48-empty-actions">
+          <button type="button" class="primary" id="p48-empty-start">▶ Lägg till Start</button>
+          <button type="button" id="p48-empty-activity">□ Lägg till Aktivitet</button>
+        </div>
+        <div class="p48-empty-tip">Tips: markera sedan en ruta och välj <strong>＋ Nästa</strong> för att bygga vidare snabbt.</div>
+      </div>
+    </div><div id="p48-canvas-watermark" class="p48-canvas-watermark" aria-hidden="true"></div><img id="p48-process-logo" class="p48-process-logo" alt="Processlogotype"><div id="p48-link-hit-layer" class="p48-link-hit-layer"></div><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-link-quick" class="p48-link-quick" role="toolbar" aria-label="Snabbval för pil"><button type="button" data-link-routing="straight" title="Gör pilen rak">— Rak</button><button type="button" data-link-routing="orthogonal" title="Gör pilen vinkelrät">⌜ Vinkelrät</button><button type="button" data-link-routing="free" title="Flytta pilens bana fritt">↝ Fri</button></div><div id="p48-node-quick" class="p48-node-quick" role="toolbar" aria-label="Snabbval för markerade rutor" data-mode="single"><button type="button" id="p48-node-quick-next" data-single-only title="Lägg till nästa steg">＋ Nästa</button><button type="button" id="p48-node-quick-format" title="Visa formatering">Formatera</button><label class="p48-quick-color-label" data-multi-only title="Ändra bakgrundsfärg för markerade"><input type="color" id="p48-node-quick-color" value="#ffffff"> Färg</label><button type="button" id="p48-node-quick-duplicate" title="Duplicera markerade">Duplicera</button><button type="button" id="p48-node-quick-delete" class="danger" title="Ta bort markerade">Ta bort</button></div><div id="p48-print-frame" class="p48-print-frame"></div>
       <div id="p48-marquee" class="p48-marquee"></div>
       <svg id="p48-svg" viewBox="0 0 2400 1400">
         <defs><marker id="p48-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0,0 10,4 0,8" fill="#687584"></polygon></marker></defs>
@@ -1337,9 +1442,8 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   <nav id="p48-mobile-bar" class="p48-mobile-bar" data-mode="normal" aria-label="Mobil snabbmeny">
     <button type="button" class="primary" data-mobile-group="normal" id="p48-mobile-add">＋ Lägg till</button>
     <button type="button" data-mobile-group="normal" id="p48-mobile-undo">↶ Ångra</button>
-    <button type="button" data-mobile-group="normal" id="p48-mobile-redo">↷ Gör om</button>
     <button type="button" data-mobile-group="normal" id="p48-mobile-fit">⊡ Anpassa</button>
-    <button type="button" data-mobile-group="normal" id="p48-mobile-fullscreen">⛶ Helskärm</button>
+    <button type="button" data-mobile-group="normal" id="p48-mobile-more">☰ Verktyg</button>
     <button type="button" class="primary" data-mobile-group="selected" id="p48-mobile-next">＋ Nästa</button>
     <button type="button" data-mobile-group="selected" id="p48-mobile-format">Egenskaper</button>
     <button type="button" data-mobile-group="selected" id="p48-mobile-duplicate">Duplicera</button>
@@ -1354,6 +1458,8 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
       <button type="button" data-mobile-add="decision">◇ Beslut</button><button type="button" data-mobile-add="document">📄 Dokument</button>
       <button type="button" data-mobile-add="subprocess">▣ Delprocess</button><button type="button" data-mobile-add="note">N Anteckning</button>
       <button type="button" class="wide" data-mobile-add="end">■ Slut</button>
+      <button type="button" id="p48-mobile-sheet-redo">↷ Gör om</button>
+      <button type="button" id="p48-mobile-sheet-fullscreen">⛶ Helskärm</button>
       <button type="button" class="wide" id="p48-mobile-open-tools">☰ Alla verktyg och inställningar</button>
     </div>
     <div class="p48-mobile-sheet-grid" id="p48-mobile-context-sheet" hidden>
@@ -1407,15 +1513,16 @@ function reportRuntimeError(error,context='runtime'){
 function clearRuntimeError(){if(runtimeErrorEl){runtimeErrorEl.hidden=true;runtimeErrorEl.textContent='';}}
 window.addEventListener('error',e=>reportRuntimeError(e.error||e.message,'window.error'));
 window.addEventListener('unhandledrejection',e=>reportRuntimeError(e.reason,'unhandledrejection'));
-const canvas=root.querySelector('#p48-canvas'),scroll=root.querySelector('#p48-scroll'),linkLayer=root.querySelector('#p48-links'),temp=root.querySelector('#p48-temp');
+const canvas=root.querySelector('#p48-canvas'),scroll=root.querySelector('#p48-scroll'),emptyState=root.querySelector('#p48-empty-state'),emptyStart=root.querySelector('#p48-empty-start'),emptyActivity=root.querySelector('#p48-empty-activity'),linkLayer=root.querySelector('#p48-links'),temp=root.querySelector('#p48-temp');
 const mobileToolsBtn=root.querySelector('#p48-mobile-tools'),mobileBackdrop=root.querySelector('#p48-mobile-backdrop'),sidePanel=root.querySelector('#p48-side');
-const mobileBar=root.querySelector('#p48-mobile-bar'),mobileAdd=root.querySelector('#p48-mobile-add'),mobileUndo=root.querySelector('#p48-mobile-undo'),mobileRedo=root.querySelector('#p48-mobile-redo'),mobileFit=root.querySelector('#p48-mobile-fit'),mobileFullscreen=root.querySelector('#p48-mobile-fullscreen'),mobileNext=root.querySelector('#p48-mobile-next'),mobileFormat=root.querySelector('#p48-mobile-format'),mobileDuplicate=root.querySelector('#p48-mobile-duplicate'),mobileContext=root.querySelector('#p48-mobile-context'),mobileDelete=root.querySelector('#p48-mobile-delete');
-const mobileSheet=root.querySelector('#p48-mobile-sheet'),mobileSheetBackdrop=root.querySelector('#p48-mobile-sheet-backdrop'),mobileSheetClose=root.querySelector('#p48-mobile-sheet-close'),mobileSheetTitle=root.querySelector('#p48-mobile-sheet-title'),mobileAddSheet=root.querySelector('#p48-mobile-add-sheet'),mobileContextSheet=root.querySelector('#p48-mobile-context-sheet'),mobileOpenTools=root.querySelector('#p48-mobile-open-tools'),mobileSheetTools=root.querySelector('#p48-mobile-sheet-tools'),mobileSheetCopy=root.querySelector('#p48-mobile-sheet-copy'),mobileSheetFormat=root.querySelector('#p48-mobile-sheet-format'),mobileSheetLayoutH=root.querySelector('#p48-mobile-sheet-layout-h'),mobileSheetLayoutV=root.querySelector('#p48-mobile-sheet-layout-v'),mobileSheetDelete=root.querySelector('#p48-mobile-sheet-delete');
+const mobileBar=root.querySelector('#p48-mobile-bar'),mobileAdd=root.querySelector('#p48-mobile-add'),mobileUndo=root.querySelector('#p48-mobile-undo'),mobileRedo=root.querySelector('#p48-mobile-redo'),mobileFit=root.querySelector('#p48-mobile-fit'),mobileFullscreen=root.querySelector('#p48-mobile-fullscreen'),mobileMore=root.querySelector('#p48-mobile-more'),mobileNext=root.querySelector('#p48-mobile-next'),mobileFormat=root.querySelector('#p48-mobile-format'),mobileDuplicate=root.querySelector('#p48-mobile-duplicate'),mobileContext=root.querySelector('#p48-mobile-context'),mobileDelete=root.querySelector('#p48-mobile-delete');
+const mobileSheet=root.querySelector('#p48-mobile-sheet'),mobileSheetBackdrop=root.querySelector('#p48-mobile-sheet-backdrop'),mobileSheetClose=root.querySelector('#p48-mobile-sheet-close'),mobileSheetTitle=root.querySelector('#p48-mobile-sheet-title'),mobileAddSheet=root.querySelector('#p48-mobile-add-sheet'),mobileSheetRedo=root.querySelector('#p48-mobile-sheet-redo'),mobileSheetFullscreen=root.querySelector('#p48-mobile-sheet-fullscreen'),mobileContextSheet=root.querySelector('#p48-mobile-context-sheet'),mobileOpenTools=root.querySelector('#p48-mobile-open-tools'),mobileSheetTools=root.querySelector('#p48-mobile-sheet-tools'),mobileSheetCopy=root.querySelector('#p48-mobile-sheet-copy'),mobileSheetFormat=root.querySelector('#p48-mobile-sheet-format'),mobileSheetLayoutH=root.querySelector('#p48-mobile-sheet-layout-h'),mobileSheetLayoutV=root.querySelector('#p48-mobile-sheet-layout-v'),mobileSheetDelete=root.querySelector('#p48-mobile-sheet-delete');
 const linkHitLayer=root.querySelector('#p48-link-hit-layer');
 const hnav=root.querySelector('#p48-hnav'),hnavInner=root.querySelector('#p48-hnav-inner');
 const nameInput=root.querySelector('#p48-name'),status=root.querySelector('#p48-status'),processBox=root.querySelector('#p48-processes');
+const newProcessDialog=root.querySelector('#p48-new-process-dialog'),newProcessBackdrop=root.querySelector('#p48-new-process-backdrop'),newProcessName=root.querySelector('#p48-new-process-name'),newProcessCreate=root.querySelector('#p48-new-process-create'),newProcessCancel=root.querySelector('#p48-new-process-cancel'),newProcessError=root.querySelector('#p48-new-process-error');
 const saveState=root.querySelector('#p48-save-state'),recoveryBanner=root.querySelector('#p48-recovery-banner'),recoveryRestore=root.querySelector('#p48-recovery-restore'),recoveryIgnore=root.querySelector('#p48-recovery-ignore');
-const analyzeBtn=root.querySelector('#p48-analyze'),analysisPanel=root.querySelector('#p48-analysis-panel'),analysisClose=root.querySelector('#p48-analysis-close'),analysisScore=root.querySelector('#p48-analysis-score'),analysisErrors=root.querySelector('#p48-analysis-errors'),analysisWarnings=root.querySelector('#p48-analysis-warnings'),analysisInfo=root.querySelector('#p48-analysis-info'),analysisList=root.querySelector('#p48-analysis-list');
+const analyzeBtn=root.querySelector('#p48-analyze'),analysisPanel=root.querySelector('#p48-analysis-panel'),analysisClose=root.querySelector('#p48-analysis-close'),analysisScore=root.querySelector('#p48-analysis-score'),analysisErrors=root.querySelector('#p48-analysis-errors'),analysisWarnings=root.querySelector('#p48-analysis-warnings'),analysisInfo=root.querySelector('#p48-analysis-info'),analysisNext=root.querySelector('#p48-analysis-next'),analysisNextTitle=root.querySelector('#p48-analysis-next-title'),analysisNextAction=root.querySelector('#p48-analysis-next-action'),analysisNextShow=root.querySelector('#p48-analysis-next-show'),analysisList=root.querySelector('#p48-analysis-list');
 const controls=root.querySelector('#p48-controls'),formatPanel=root.querySelector('#p48-format-panel'),formatHint=root.querySelector('#p48-format-hint'),font=root.querySelector('#p48-font'),size=root.querySelector('#p48-size'),textColor=root.querySelector('#p48-textcolor'),bgColor=root.querySelector('#p48-bgcolor');
 const bold=root.querySelector('#p48-bold'),italic=root.querySelector('#p48-italic'),under=root.querySelector('#p48-under');
 const documentLinkEditor=root.querySelector('#p48-document-link-editor'),documentUrlInput=root.querySelector('#p48-document-url'),documentOpenEditor=root.querySelector('#p48-document-open-editor');
@@ -1461,7 +1568,7 @@ const CLOUD_ENABLED=SUPABASE_URL.length>0&&SUPABASE_ANON_KEY.length>0;
 let cloudSession=null,sharedView=false;
 let cloudLoadedProcessIds=new Set();
 let cloudLoadedProcessScopes=new Map();
-let currentWorkspaceId=null,currentRole='owner',printPreview=false;
+let currentWorkspaceId=null,currentWorkspaceOwnerId=null,currentRole='owner',printPreview=false;
 let pdfView='A3L',pageCountMode='auto',canvasScale=1,canvasLogicalWidth=2400,canvasLogicalHeight=1400;
 
 
@@ -1534,7 +1641,12 @@ scroll.addEventListener('wheel',(e)=>{
     if(hnav)hnav.scrollLeft=scroll.scrollLeft;
   }
 },{passive:false});
-window.addEventListener('resize',scheduleHorizontalNavSync);
+window.addEventListener('resize',()=>{
+  if(typeof updateCanvasExtentForPages==='function')updateCanvasExtentForPages();
+  if(typeof scheduleHorizontalNavSync==='function')scheduleHorizontalNavSync();
+  if(typeof refreshNodeQuickToolbar==='function')refreshNodeQuickToolbar();
+  if(typeof refreshLinkControls==='function')refreshLinkControls();
+});
 setTimeout(scheduleHorizontalNavSync,0);
 
 
@@ -1559,7 +1671,7 @@ function saveWorkspacePreference(id){
   }catch(e){}
 }
 function resetWorkspaceState(){
-  currentWorkspaceId=null;currentRole='owner';
+  currentWorkspaceId=null;currentWorkspaceOwnerId=null;currentRole='owner';
   if(workspaceSelect){workspaceSelect.innerHTML='<option value="">Personligt</option>';workspaceSelect.value=''}
   if(roleBadge)roleBadge.textContent='Owner';
   applyRoleUi();
@@ -1731,10 +1843,12 @@ async function saveCurrentToCloud(){
   const localOk=saveLocal(true);
   const st=clone(processes[currentId]||state());
   const updatedAt=new Date().toISOString();
+  const canonicalOwnerId=currentWorkspaceId?currentWorkspaceOwnerId:ownerId();
+  if(currentWorkspaceId&&!canonicalOwnerId)throw new Error('Workspace-ägaren kunde inte verifieras. Ladda om workspace och försök igen.');
   await sb('/rest/v1/processes?on_conflict=id',{
     method:'POST',
     headers:{Prefer:'resolution=merge-duplicates,return=minimal'},
-    body:JSON.stringify({id:currentId,owner_id:ownerId(),workspace_id:currentWorkspaceId,name:st.name,data:st,updated_at:updatedAt})
+    body:JSON.stringify({id:currentId,owner_id:canonicalOwnerId,workspace_id:currentWorkspaceId,name:st.name,data:st,updated_at:updatedAt})
   });
   processes[currentId]=Object.assign({},st,{cloudUpdatedAt:updatedAt});
   cloudLoadedProcessIds.add(currentId);
@@ -1852,17 +1966,18 @@ function applyRoleUi(){
 async function loadWorkspaces(){
   if(!ownerId()){resetWorkspaceState();return false}
   try{
-    const rows=await sb('/rest/v1/workspace_members?select=role,workspace_id,workspaces(id,name)&user_id=eq.'+encodeURIComponent(ownerId()));
+    const rows=await sb('/rest/v1/workspace_members?select=role,workspace_id,workspaces(id,name,owner_id)&user_id=eq.'+encodeURIComponent(ownerId()));
     const entries=(rows||[]).filter(row=>row&&row.workspaces&&row.workspace_id);
     const preferred=currentWorkspaceId||loadWorkspacePreference();
     const chosen=MapliniSessionCore.chooseWorkspace(preferred,entries);
     workspaceSelect.innerHTML='<option value="">Personligt</option>';
     for(const row of entries){
-      const o=document.createElement('option');o.value=row.workspace_id;o.textContent=row.workspaces.name;o.dataset.role=row.role;workspaceSelect.appendChild(o);
+      const o=document.createElement('option');o.value=row.workspace_id;o.textContent=row.workspaces.name;o.dataset.role=row.role;o.dataset.ownerId=row.workspaces.owner_id||'';workspaceSelect.appendChild(o);
     }
     currentWorkspaceId=chosen.id;
     currentRole=chosen.role;
     workspaceSelect.value=currentWorkspaceId||'';
+    currentWorkspaceOwnerId=currentWorkspaceId?(workspaceSelect.selectedOptions[0]?.dataset.ownerId||null):ownerId();
     saveWorkspacePreference(currentWorkspaceId);
     applyRoleUi();
     return true;
@@ -1877,16 +1992,17 @@ async function createWorkspace(){
     const id=crypto?.randomUUID?crypto.randomUUID():('ws-'+Date.now());
     await sb('/rest/v1/workspaces',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({id,name,owner_id:ownerId()})});
     await sb('/rest/v1/workspace_members',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({workspace_id:id,user_id:ownerId(),role:'owner'})});
-    currentWorkspaceId=id;currentRole='owner';saveWorkspacePreference(id);workspaceName.value='';await loadWorkspaces();workspaceSelect.value=id;applyRoleUi();
+    currentWorkspaceId=id;currentWorkspaceOwnerId=ownerId();currentRole='owner';saveWorkspacePreference(id);workspaceName.value='';await loadWorkspaces();workspaceSelect.value=id;applyRoleUi();
     const loaded=await loadCloudProcesses();
     msg(loaded?'Workspace skapat':'Workspace skapat · molndata kunde inte läsas');
   }catch(e){console.error(e);msg('Kunde inte skapa workspace')}
 }
 workspaceSelect.addEventListener('change',async()=>{
-  const previousId=currentWorkspaceId,previousRole=currentRole;
+  const previousId=currentWorkspaceId,previousOwnerId=currentWorkspaceOwnerId,previousRole=currentRole;
   const nextId=workspaceSelect.value||null;
   const opt=workspaceSelect.selectedOptions[0];
   currentWorkspaceId=nextId;
+  currentWorkspaceOwnerId=currentWorkspaceId?(opt?.dataset.ownerId||null):ownerId();
   currentRole=currentWorkspaceId?(opt?.dataset.role||'viewer'):'owner';
   saveWorkspacePreference(currentWorkspaceId);applyRoleUi();
   const ok=await loadCloudProcesses();
@@ -1894,7 +2010,7 @@ workspaceSelect.addEventListener('change',async()=>{
     msg(currentWorkspaceId?'Workspace öppnat':'Personligt workspace öppnat');
     return;
   }
-  currentWorkspaceId=previousId;currentRole=previousRole;workspaceSelect.value=previousId||'';
+  currentWorkspaceId=previousId;currentWorkspaceOwnerId=previousOwnerId;currentRole=previousRole;workspaceSelect.value=previousId||'';
   saveWorkspacePreference(currentWorkspaceId);applyRoleUi();
   msg('Workspacebyte misslyckades · tidigare workspace återställt');
 });
@@ -2349,7 +2465,20 @@ function pushUndo(force=false){
   if(undo.length>50)undo.shift();
   redo=[];
 }
-function clearCanvas(){for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();selectedLinkIndex=null;selectedLinkIndices.clear();linkLayer.innerHTML='';clearLinkHitLayer();linkDomByIndex.clear();finishTempArrow();refreshControls();refreshLinkControls();updateSelectionUi()}
+function refreshEmptyState(){
+  if(!emptyState)return;
+  emptyState.hidden=sharedView||nodes.size>0;
+}
+function addFirstStep(type){
+  if(!requireEdit())return false;
+  const x=Math.max(240,Math.min(canvasLogicalWidth*.32,620));
+  const y=Math.max(180,Math.min(canvasLogicalHeight*.28,360));
+  addNode(type,x,y);
+  const item=selectedId?nodes.get(selectedId):null;
+  if(item)requestAnimationFrame(()=>beginInlineEdit(item.el));
+  return true;
+}
+function clearCanvas(){for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();selectedLinkIndex=null;selectedLinkIndices.clear();linkLayer.innerHTML='';clearLinkHitLayer();linkDomByIndex.clear();finishTempArrow();refreshControls();refreshLinkControls();updateSelectionUi();refreshEmptyState()}
 function restore(s){
   let raw;
   try{raw=typeof s==='string'?JSON.parse(s):clone(s)}
@@ -2384,7 +2513,7 @@ function restore(s){
   (d.nodes||[]).forEach(makeNode);
   links=MapliniConnectorCore.normalizeLinks(d.links||[]);
   seq=Math.max(0,...[...nodes.keys()].map(id=>parseInt(String(id).replace(/\D/g,''),10)||0));
-  requestFullLinkRender(true);
+  requestFullLinkRender(true);refreshEmptyState();
   return true;
 }
 function openProcess(id){
@@ -2398,7 +2527,32 @@ function openProcess(id){
   }
   saveLocal(false);renderProcesses();refreshControls();refreshLinkControls();updateSelectionUi();msg('Process öppnad');scroll.scrollTop=0;scroll.scrollLeft=0;requestAnimationFrame(alignEditorTop)
 }
-function newProcess(){if(!requireEdit())return;persist();const n=prompt('Namn på den nya processen:','Ny process');if(n===null)return;currentId=uid();processes[currentId]=MapliniWorkflowCore.emptyProcess(currentId,n.trim()||'Ny process');processes[currentId].localModifiedAt=Date.now();resetHistory();restore(processes[currentId]);saveLocal(true);renderProcesses();scroll.scrollLeft=0;scroll.scrollTop=0;msg('Ny process skapad')}
+function setNewProcessDialog(open){
+  if(!newProcessDialog||!newProcessBackdrop)return false;
+  const show=Boolean(open);
+  newProcessDialog.hidden=!show;newProcessBackdrop.hidden=!show;
+  if(show){
+    persist();
+    if(newProcessError){newProcessError.hidden=true;newProcessError.textContent=''}
+    if(newProcessName){newProcessName.value='Ny process';requestAnimationFrame(()=>{newProcessName.focus();newProcessName.select()})}
+  }else if(newProcessName){newProcessName.blur()}
+  return true;
+}
+function createNewProcessFromDialog(){
+  if(!requireEdit())return false;
+  const n=String(newProcessName?.value||'').trim();
+  if(!n){
+    if(newProcessError){newProcessError.textContent='Skriv ett namn på processen.';newProcessError.hidden=false}
+    if(newProcessName)newProcessName.focus();
+    return false;
+  }
+  currentId=uid();processes[currentId]=MapliniWorkflowCore.emptyProcess(currentId,n);
+  processes[currentId].localModifiedAt=Date.now();resetHistory();restore(processes[currentId]);
+  saveLocal(true);renderProcesses();scroll.scrollLeft=0;scroll.scrollTop=0;refreshEmptyState();
+  setNewProcessDialog(false);msg('Ny process skapad · lägg till första steget på canvasen');
+  return true;
+}
+function newProcess(){if(!requireEdit())return;setNewProcessDialog(true)}
 async function deleteProcess(id){
   if(!requireEdit())return;
   const proc=processes[id];if(!proc)return;
@@ -2468,7 +2622,8 @@ function refreshNodeQuickToolbar(){
   const multi=items.length>1;nodeQuick.dataset.mode=multi?'multi':'single';
   let left=Infinity,top=Infinity,right=-Infinity;
   for(const item of items){const x=parseFloat(item.el.style.left)||0,y=parseFloat(item.el.style.top)||0,w=item.el.offsetWidth||180;left=Math.min(left,x);top=Math.min(top,y);right=Math.max(right,x+w)}
-  const x=Math.max(80,Math.min(2320,(left+right)/2));
+  const maxToolbarX=Math.max(120,canvasLogicalWidth-80);
+  const x=Math.max(80,Math.min(maxToolbarX,(left+right)/2));
   const y=Math.max(56,top);nodeQuick.style.left=x+'px';nodeQuick.style.top=y+'px';
   if(nodeQuickColor){const shared=sharedStyleValue(items,'bgColor');nodeQuickColor.value=shared||styleOf(items[0].data).bgColor||'#ffffff'}
   if(nodeQuickNext){const source=!multi&&isNextStepSource(items[0]);nodeQuickNext.disabled=!source;nodeQuickNext.hidden=!source}
@@ -2497,7 +2652,7 @@ function updateSelectionUi(){
   }
   deleteSelectionBtn.disabled=selectedIds.size===0&&selectedLinkIndices.size===0;
   if(duplicateSelectionBtn)duplicateSelectionBtn.disabled=!canEdit()||selectedIds.size===0;
-  const arrangeEnabled=canEdit()&&selectedIds.size>=2; alignChoices.forEach(btn=>btn.disabled=!arrangeEnabled); distributeChoices.forEach(btn=>btn.disabled=!canEdit()||selectedIds.size<3); if(arrangeHint)arrangeHint.textContent=selectedIds.size<2?'Markera minst två rutor.':(selectedIds.size<3?'Justering är tillgänglig. Fördelning kräver minst tre rutor.':`${selectedIds.size} rutor markerade.`);
+
   smartLayoutChoices.forEach(btn=>{btn.disabled=!canEdit()||(btn.dataset.layoutScope==='selected'&&selectedIds.size<2)});if(smartLayoutHint)smartLayoutHint.textContent=selectedIds.size>=2?`${selectedIds.size} markerade · välj hela processen eller markeringen.`:'Markera minst två rutor för att snygga till bara en del.';
   selectToolBtn.classList.toggle('primary',selectionMode);
   selectToolBtn.setAttribute('aria-pressed',selectionMode?'true':'false');
@@ -2750,7 +2905,7 @@ const nextBtn=document.createElement('button');nextBtn.type='button';nextBtn.cla
 const nextMenu=document.createElement('div');nextMenu.className='p48-next-step-menu';nextMenu.hidden=true;
 for(const [type,caption] of [['process','□ Aktivitet'],['decision','◇ Beslut'],['document','📄 Dokument'],['end','■ Slut']]){const b=document.createElement('button');b.type='button';b.className='p48-next-step-choice';b.dataset.nextType=type;b.textContent=caption;nextMenu.appendChild(b)}
 nextWrap.append(nextBtn,nextMenu);el.appendChild(nextWrap);
-canvas.appendChild(el);nodes.set(d.id,{el,data:d,label,handles,resizeHandles,io:null,docOpen:null,docInlineEditor:null,docInlineInput:null,nextWrap,nextBtn,nextMenu});applyStyle(nodes.get(d.id));renderNodeIO(nodes.get(d.id));renderDocumentLink(nodes.get(d.id));
+canvas.appendChild(el);nodes.set(d.id,{el,data:d,label,handles,resizeHandles,io:null,docOpen:null,docInlineEditor:null,docInlineInput:null,nextWrap,nextBtn,nextMenu});refreshEmptyState();applyStyle(nodes.get(d.id));renderNodeIO(nodes.get(d.id));renderDocumentLink(nodes.get(d.id));
 nextBtn.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault()});
 nextBtn.addEventListener('click',e=>{e.stopPropagation();e.preventDefault();if(!canEdit())return;closeNodeNextMenus(nextWrap);nextMenu.hidden=!nextMenu.hidden;nextBtn.setAttribute('aria-expanded',nextMenu.hidden?'false':'true')});
 nextMenu.querySelectorAll('.p48-next-step-choice').forEach(b=>{b.addEventListener('pointerdown',e=>{e.stopPropagation()});b.addEventListener('click',e=>{e.stopPropagation();e.preventDefault();addNextStepFromNode(d.id,b.dataset.nextType)})});
@@ -2928,7 +3083,7 @@ function refreshLinkControls(){
   linkAnchorMode.value=st.anchorMode||'manual';
   linkLabel.value=st.label||'';
 }
-function selectLink(i){
+function selectLink(i,deferRender=false){
   if(i==null||!links[i])return;
   selectedLinkIndices.clear();
   selectedLinkIndex=i;
@@ -2937,7 +3092,7 @@ function selectLink(i){
   refreshControls();
   updateSelectionUi();
   refreshLinkControls();
-  requestFullLinkRender(true);
+  if(!deferRender)requestFullLinkRender(true);
 }
 function setInsertStepMenu(open){
   if(!insertLinkStepMenu||!insertLinkStepBtn)return;
@@ -3042,20 +3197,27 @@ function clearLinkHitLayer(){
 function startSelectedLinkDrag(index,e){
   if(!canEdit()||index==null||!links[index])return false;
   e.preventDefault();e.stopPropagation();
-  if(selectedLinkIndex!==index)selectLink(index);
-  try{if(e.currentTarget&&e.currentTarget.setPointerCapture&&e.pointerId!=null)e.currentTarget.setPointerCapture(e.pointerId)}catch(_err){}
+  const pointerTarget=e.currentTarget||null;
+  try{if(pointerTarget&&pointerTarget.setPointerCapture&&e.pointerId!=null)pointerTarget.setPointerCapture(e.pointerId)}catch(_err){}
+  if(selectedLinkIndex!==index)selectLink(index,true);
   const sx=e.clientX,sy=e.clientY,pointerType=e.pointerType||'mouse';
+  const startLink=links[index],startA=nodes.get(startLink[0])?.el,startB=nodes.get(startLink[1])?.el;
+  if(!startA||!startB)return false;
+  const startStyle=Object.assign({},linkStyle(startLink));
+  const startSides=linkSides(startLink,startA,startB),startAnchorA=anchor(startA,startSides.source),startAnchorB=anchor(startB,startSides.target);
+  const directMidX=(startAnchorA[0]+startAnchorB[0])/2,directMidY=(startAnchorA[1]+startAnchorB[1])/2;
+  const routeMid=MapliniConnectorCore.midpoint(linkGeometry(startLink,startA,startB).points)||{x:directMidX,y:directMidY};
+  const baseFreeDx=startStyle.routing==='free'?(Number(startStyle.freeDx)||0):(routeMid.x-directMidX);
+  const baseFreeDy=startStyle.routing==='free'?(Number(startStyle.freeDy)||0):(routeMid.y-directMidY);
   let mutated=false;
   const move=ev=>{
     const screenDx=ev.clientX-sx,screenDy=ev.clientY-sy;
     if(!mutated&&MapliniMobileCore.movedEnough(screenDx,screenDy,pointerType)){pushUndo(true);mutated=true}
     if(!mutated)return;
-    const p=clientToCanvas(ev.clientX,ev.clientY);
-    const st=linkStyle(links[index]);
-    // A strict straight connector has no movable middle segment. Dragging it is an explicit
-    // request to route it manually, so switch to orthogonal at the first real movement.
-    if(st.routing==='straight')setLinkStyle(index,{routing:'orthogonal',anchorMode:'manual'});
-    MapliniConnectorCore.setVia(links,index,p.x,p.y);
+    // Use pointer delta from pointerdown, not absolute pointer position. This guarantees
+    // that the connector never jumps when the user grabs it near either endpoint.
+    const dx=screenDx/canvasScale,dy=screenDy/canvasScale;
+    MapliniConnectorCore.setFreeOffset(links,index,baseFreeDx+dx,baseFreeDy+dy);
     dirtyLinks.add(index);
     drawLinks();
     refreshLinkControls();
@@ -3065,6 +3227,7 @@ function startSelectedLinkDrag(index,e){
     document.removeEventListener('pointerup',finish);
     document.removeEventListener('pointercancel',finish);
     if(mutated)persist();
+    else requestFullLinkRender(true);
   };
   document.addEventListener('pointermove',move);
   document.addEventListener('pointerup',finish);
@@ -3294,7 +3457,9 @@ document.addEventListener('pointerdown',e=>{
   const segment=e.target.closest&&e.target.closest('.p48-link-hit-segment');
   const hit=segment?Number(segment.dataset.linkIndex):hitTestLink(e.clientX,e.clientY);
   if(hit!=null&&Number.isInteger(hit)&&links[hit]){
-    if(selectedLinkIndex===hit&&canEdit()){
+    // This capture listener runs before the connector segment's own pointerdown handler.
+    // Arm dragging here as well, otherwise the first gesture only selects the connector.
+    if(canEdit()){
       startSelectedLinkDrag(hit,e);
       return;
     }
@@ -3333,6 +3498,7 @@ function setMobileSheet(mode=null){
 function setMobileFullscreen(on,{fromBrowser=false}={}){
   const enabled=Boolean(on)&&isMobileLayout();root.classList.toggle('p48-mobile-canvas-fullscreen',enabled);document.documentElement.style.overflow=enabled?'hidden':'';document.body.style.overflow=enabled?'hidden':'';
   if(mobileFullscreen){mobileFullscreen.textContent=enabled?'⤢ Avsluta':'⛶ Helskärm';mobileFullscreen.setAttribute('aria-pressed',enabled?'true':'false')}
+  if(mobileSheetFullscreen){mobileSheetFullscreen.textContent=enabled?'⤢ Avsluta helskärm':'⛶ Helskärm';mobileSheetFullscreen.setAttribute('aria-pressed',enabled?'true':'false')}
   if(enabled){
     setMobileTools(false);setMobileSheet(null);document.documentElement.style.overflow='hidden';document.body.style.overflow='hidden';
     if(!fromBrowser&&!document.fullscreenElement&&root.requestFullscreen){try{const req=root.requestFullscreen();if(req&&req.catch)req.catch(()=>{})}catch(_){}}
@@ -3346,6 +3512,7 @@ if(mobileAdd)mobileAdd.addEventListener('click',()=>setMobileSheet('add'));
 if(mobileUndo)mobileUndo.addEventListener('click',()=>root.querySelector('#p48-undo').click());
 if(mobileRedo)mobileRedo.addEventListener('click',()=>root.querySelector('#p48-redo').click());
 if(mobileFit)mobileFit.addEventListener('click',()=>fitProcessToScreen());
+if(mobileMore)mobileMore.addEventListener('click',()=>setMobileTools(true));
 if(mobileFullscreen)mobileFullscreen.addEventListener('click',()=>setMobileFullscreen(!root.classList.contains('p48-mobile-canvas-fullscreen')));
 if(mobileNext)mobileNext.addEventListener('click',()=>{if(nodeQuickNext&&!nodeQuickNext.hidden)nodeQuickNext.click()});
 if(mobileFormat)mobileFormat.addEventListener('click',()=>setMobileSheet('context'));
@@ -3353,6 +3520,8 @@ if(mobileDuplicate)mobileDuplicate.addEventListener('click',()=>duplicateSelecte
 if(mobileContext)mobileContext.addEventListener('click',()=>setMobileSheet('context'));
 if(mobileDelete)mobileDelete.addEventListener('click',()=>deleteSelectedMany());
 if(mobileSheetBackdrop)mobileSheetBackdrop.addEventListener('click',()=>setMobileSheet(null));if(mobileSheetClose)mobileSheetClose.addEventListener('click',()=>setMobileSheet(null));
+if(mobileSheetRedo)mobileSheetRedo.addEventListener('click',()=>{setMobileSheet(null);root.querySelector('#p48-redo').click()});
+if(mobileSheetFullscreen)mobileSheetFullscreen.addEventListener('click',()=>{setMobileSheet(null);setMobileFullscreen(!root.classList.contains('p48-mobile-canvas-fullscreen'))});
 if(mobileOpenTools)mobileOpenTools.addEventListener('click',()=>{setMobileSheet(null);setMobileTools(true)});if(mobileSheetTools)mobileSheetTools.addEventListener('click',()=>{setMobileSheet(null);focusFormattingPanel()});
 if(mobileSheetFormat)mobileSheetFormat.addEventListener('click',()=>{setMobileSheet(null);focusFormattingPanel()});
 if(mobileSheetCopy)mobileSheetCopy.addEventListener('click',()=>{copySelectedNodes({announce:false});setMobileSheet(null);msg('Markerade kopierade')});
@@ -4011,6 +4180,7 @@ document.addEventListener('pointerup',e=>{
 });
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
+    if(newProcessDialog&&!newProcessDialog.hidden){e.preventDefault();setNewProcessDialog(false);return}
     if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)||e.target.isContentEditable)return;
     selectionMode=false;canvas.classList.remove('p48-selection-mode');marquee.style.display='none';finishTempArrow();
     if(selectedId||selectedIds.size||selectedLinkIndex!=null||selectedLinkIndices.size)clearSelection();
@@ -4031,6 +4201,8 @@ function addFromPalette(item,{closeMobile=false}={}){
   if(closeMobile)setMobileTools(false);
   msg('Form tillagd');
 }
+if(emptyStart)emptyStart.addEventListener('click',()=>addFirstStep('start'));
+if(emptyActivity)emptyActivity.addEventListener('click',()=>addFirstStep('process'));
 root.querySelectorAll('.p48-item').forEach(i=>{
   i.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',i.dataset.type);e.dataTransfer.effectAllowed='copy'});
   i.addEventListener('click',e=>{if(isMobileLayout()){e.preventDefault();addFromPalette(i,{closeMobile:true})}});
@@ -4043,6 +4215,14 @@ canvas.addEventListener('click',e=>{
 });
 nameInput.addEventListener('change',()=>{if(!requireEdit())return;persist(false,true);msg('Namn sparat')});
 root.querySelector('#p48-new').addEventListener('click',newProcess);
+if(newProcessCreate)newProcessCreate.addEventListener('click',createNewProcessFromDialog);
+if(newProcessCancel)newProcessCancel.addEventListener('click',()=>setNewProcessDialog(false));
+if(newProcessBackdrop)newProcessBackdrop.addEventListener('click',()=>setNewProcessDialog(false));
+if(newProcessName)newProcessName.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){e.preventDefault();createNewProcessFromDialog()}
+  else if(e.key==='Escape'){e.preventDefault();setNewProcessDialog(false)}
+});
+
 root.querySelector('#p48-save').addEventListener('click',async()=>{
   if(ownerId()){
     try{
@@ -4446,10 +4626,16 @@ linkDash.addEventListener('change',()=>{
 });
 function applySelectedLinkRouting(routing){
   if(!requireEdit())return false;if(selectedLinkIndex==null){msg('Markera först en koppling');return false}
-  routing=String(routing)==='orthogonal'?'orthogonal':'straight';
+  routing=['orthogonal','straight','free'].includes(String(routing))?String(routing):'straight';
   const current=linkStyle(links[selectedLinkIndex]).routing||'straight';
   if(current===routing){refreshLinkControls();return true}
-  pushUndo();setLinkStyle(selectedLinkIndex,routing==='straight'?{routing,viaX:null,viaY:null}:{routing});dirtyLinks.add(selectedLinkIndex);drawLinks();persist();refreshLinkControls();msg(routing==='straight'?'Pilen är nu rak':'Pilen är nu vinkelrät');return true;
+  pushUndo();
+  const patch=routing==='straight'
+    ?{routing,viaX:null,viaY:null,freeDx:0,freeDy:0}
+    :(routing==='orthogonal'?{routing,freeDx:0,freeDy:0}:{routing,viaX:null,viaY:null});
+  setLinkStyle(selectedLinkIndex,patch);dirtyLinks.add(selectedLinkIndex);drawLinks();persist();refreshLinkControls();
+  msg(routing==='straight'?'Pilen är nu rak':(routing==='orthogonal'?'Pilen är nu vinkelrät':'Pilen kan nu flyttas fritt'));
+  return true;
 }
 linkRouting.addEventListener('change',()=>applySelectedLinkRouting(linkRouting.value));
 linkQuickRouting.forEach(btn=>{
@@ -4481,13 +4667,54 @@ function focusAnalysisNodes(ids){
 }
 function renderProcessAnalysis(result){
   if(!analysisPanel||!analysisList)return;analysisPanel.hidden=false;
-  if(analysisScore)analysisScore.textContent=(Number(result.score)||0).toFixed(1)+'/10';if(analysisErrors)analysisErrors.textContent=String(result.counts.error||0);if(analysisWarnings)analysisWarnings.textContent=String(result.counts.warning||0);if(analysisInfo)analysisInfo.textContent=String(result.counts.info||0);
+  if(analysisScore)analysisScore.textContent=(Number(result.score)||0).toFixed(1)+'/10';
+  if(analysisErrors)analysisErrors.textContent=String(result.counts.error||0);
+  if(analysisWarnings)analysisWarnings.textContent=String(result.counts.warning||0);
+  if(analysisInfo)analysisInfo.textContent=String(result.counts.info||0);
   analysisList.innerHTML='';
-  if(!result.findings.length){const empty=document.createElement('div');empty.className='p48-analysis-empty';empty.textContent='Inga strukturella problem hittades. Processen har tydliga start- och slutpunkter och sammanhängande flöden.';analysisList.appendChild(empty);return}
-  for(const f of result.findings){const btn=document.createElement('button');btn.type='button';btn.className='p48-analysis-item '+f.severity;btn.disabled=!f.nodeIds.length;const title=document.createElement('div');title.className='p48-analysis-item-title';title.textContent=f.title;const detail=document.createElement('div');detail.className='p48-analysis-item-detail';detail.textContent=f.detail;btn.append(title,detail);if(f.nodeIds.length){const action=document.createElement('div');action.className='p48-analysis-item-action';action.textContent=f.nodeIds.length===1?'Visa på canvasen →':`Visa ${f.nodeIds.length} rutor på canvasen →`;btn.appendChild(action);btn.addEventListener('click',()=>focusAnalysisNodes(f.nodeIds))}analysisList.appendChild(btn)}
+
+  const first=result.findings&&result.findings.length?result.findings[0]:null;
+  if(analysisNext){
+    analysisNext.hidden=!first;
+    if(first){
+      if(analysisNextTitle)analysisNextTitle.textContent=first.title;
+      if(analysisNextAction)analysisNextAction.textContent=first.action||first.detail||'Kontrollera flödet.';
+      if(analysisNextShow){
+        const canShow=Array.isArray(first.nodeIds)&&first.nodeIds.length>0;
+        analysisNextShow.hidden=!canShow;
+        analysisNextShow.onclick=canShow?()=>focusAnalysisNodes(first.nodeIds):null;
+      }
+    }
+  }
+
+  if(!result.findings.length){
+    const empty=document.createElement('div');empty.className='p48-analysis-empty';
+    empty.innerHTML='<strong>Processen ser strukturellt tydlig ut.</strong><span>Maplini hittade inga brutna flöden, saknade start-/slutpunkter eller andra strukturella problem.</span>';
+    analysisList.appendChild(empty);return;
+  }
+
+  for(const f of result.findings){
+    const item=document.createElement('div');item.className='p48-analysis-item '+f.severity;
+    const head=document.createElement('div');head.className='p48-analysis-item-head';
+    const badge=document.createElement('span');badge.className='p48-analysis-priority '+f.severity;badge.textContent=f.priority||'Kontrollera';
+    const title=document.createElement('div');title.className='p48-analysis-item-title';title.textContent=f.title;
+    head.append(badge,title);
+    const detail=document.createElement('div');detail.className='p48-analysis-item-detail';detail.textContent=f.detail;
+    const fix=document.createElement('div');fix.className='p48-analysis-item-fix';
+    const fixLabel=document.createElement('strong');fixLabel.textContent='Gör så här:';
+    const fixText=document.createElement('span');fixText.textContent=f.action||'Kontrollera flödet.';
+    fix.append(fixLabel,fixText);
+    item.append(head,detail,fix);
+    if(f.nodeIds.length){
+      const action=document.createElement('button');action.type='button';action.className='p48-analysis-item-action';
+      action.textContent=f.nodeIds.length===1?'Visa berörd ruta →':`Visa ${f.nodeIds.length} berörda rutor →`;
+      action.addEventListener('click',()=>focusAnalysisNodes(f.nodeIds));item.appendChild(action);
+    }
+    analysisList.appendChild(item);
+  }
 }
 function runProcessAnalysis(){
-  const data=[...nodes.values()].map(x=>x.data);const result=MapliniProcessIntelligenceCore.analyze(data,links,{longChainThreshold:5});renderProcessAnalysis(result);msg(`Processhälsa ${result.score.toFixed(1)}/10 · ${result.findings.length} fynd`);return result;
+  const data=[...nodes.values()].map(x=>x.data);const result=MapliniProcessIntelligenceCore.analyze(data,links,{longChainThreshold:5});renderProcessAnalysis(result);msg(result.findings.length?`Processkontroll klar · ${result.findings.length} saker att gå igenom`:'Processkontroll klar · inga strukturella problem hittades');return result;
 }
 if(analyzeBtn)analyzeBtn.addEventListener('click',runProcessAnalysis);if(analysisClose)analysisClose.addEventListener('click',()=>{analysisPanel.hidden=true});
 
@@ -4536,6 +4763,10 @@ function scaleWholeProcess(factor,fitToPage=false){
     const patch={};
     if(Number.isFinite(Number(s.viaX)))patch.viaX=anchorX+(Number(s.viaX)-minX)*actualFactor;
     if(Number.isFinite(Number(s.viaY)))patch.viaY=anchorY+(Number(s.viaY)-minY)*actualFactor;
+    if(s.routing==='free'){
+      patch.freeDx=(Number(s.freeDx)||0)*actualFactor;
+      patch.freeDy=(Number(s.freeDy)||0)*actualFactor;
+    }
     if(Object.keys(patch).length)setLinkStyle(i,patch);
   }
   updateCanvasExtentForPages();requestFullLinkRender(true);drawLinks();persist();refreshControls();updateSelectionUi();
@@ -4571,25 +4802,46 @@ function smartLayout(scope,orientation){
   const ids=scope==='selected'?[...selectedIds]:[...nodes.keys()];
   if(ids.length<2){msg(scope==='selected'?'Markera minst två rutor':'Processen behöver minst två rutor');return false}
   const wanted=new Set(ids),internalLinks=links.filter(l=>Array.isArray(l)&&wanted.has(String(l[0]))&&wanted.has(String(l[1])));
-  const positions=MapliniLayoutCore.smartLayout(selectedNodeRects(ids),internalLinks,{orientation,mainGap:150,crossGap:68,bounds:{width:2400,height:1400,padding:28}});
+  const positions=MapliniLayoutCore.smartLayout(selectedNodeRects(ids),internalLinks,{orientation,mainGap:150,crossGap:68,bounds:{width:canvasLogicalWidth,height:canvasLogicalHeight,padding:28}});
   const ok=applyNodePositions(positions,scope==='selected'?'Markerade rutor snyggades till':'Processen snyggades till');
   if(ok){
     // Smart Layout owns geometry: reset internal connectors to automatic, centered anchors.
     // This prevents legacy/manual side anchors from leaving diagonal arrows after vertical layout.
     for(let i=0;i<links.length;i++){
       const l=links[i];if(!Array.isArray(l)||!wanted.has(String(l[0]))||!wanted.has(String(l[1])))continue;
-      setLinkStyle(i,{anchorMode:'auto',viaX:null,viaY:null});dirtyLinks.add(i);
+      setLinkStyle(i,{routing:'orthogonal',anchorMode:'auto',viaX:null,viaY:null,freeDx:0,freeDy:0});dirtyLinks.add(i);
     }
     persist();requestFullLinkRender(true);drawLinks();fitProcessToScreen();
   }
   return ok;
 }
+
+function closeTransientMenus(except=null){
+  const menus=[smartLayoutMenu,root.querySelector('#p48-export-menu'),root.querySelector('#p48-more-menu'),scaleMenu,root.querySelector('#p48-logo-menu'),root.querySelector('.p48-canvas-menu'),root.querySelector('.p48-sheets-menu')];
+  for(const menu of menus){
+    // Nested menus (e.g. Sheets inside Export or Processyta inside More) must keep
+    // their parent details open. Close only unrelated transient menus.
+    const isAncestor=Boolean(except&&menu!==except&&menu.contains&&menu.contains(except));
+    if(menu&&menu!==except&&!isAncestor&&menu.open)menu.open=false;
+  }
+  const nextMenus=root.querySelectorAll('.p48-next-menu:not([hidden])');
+  nextMenus.forEach(menu=>{menu.hidden=true;const owner=menu.closest('.p48-node');const btn=owner&&owner.querySelector('.p48-next-btn');if(btn)btn.setAttribute('aria-expanded','false')});
+}
+for(const menu of [smartLayoutMenu,root.querySelector('#p48-export-menu'),root.querySelector('#p48-more-menu'),scaleMenu,root.querySelector('#p48-logo-menu'),root.querySelector('.p48-canvas-menu'),root.querySelector('.p48-sheets-menu')]){
+  if(menu)menu.addEventListener('toggle',()=>{if(menu.open)closeTransientMenus(menu)});
+}
+const exportMenu=root.querySelector('#p48-export-menu');
+const moreMenu=root.querySelector('#p48-more-menu');
+for(const id of ['#p48-pdf','#p48-doc','#p48-sheets','#p48-sheets-direct']){
+  const btn=root.querySelector(id);if(btn)btn.addEventListener('click',()=>{setTimeout(()=>{if(exportMenu)exportMenu.open=false},0)});
+}
+if(scroll)scroll.addEventListener('pointerdown',e=>{
+  if(e.target===scroll||e.target===canvas||e.target.classList?.contains('p48-print-page'))closeTransientMenus();
+},{capture:true});
 if(fitScreenBtn)fitScreenBtn.addEventListener('click',fitProcessToScreen);
 if(scaleDownBtn)scaleDownBtn.addEventListener('click',()=>{if(scaleWholeProcess(.9)&&scaleMenu)scaleMenu.open=false});
 if(scaleUpBtn)scaleUpBtn.addEventListener('click',()=>{if(scaleWholeProcess(1.1)&&scaleMenu)scaleMenu.open=false});
 if(scaleFitPageBtn)scaleFitPageBtn.addEventListener('click',()=>{if(scaleWholeProcess(1,true)&&scaleMenu)scaleMenu.open=false});
-alignChoices.forEach(btn=>btn.addEventListener('click',()=>{if(alignSelected(btn.dataset.align)&&arrangeMenu)arrangeMenu.open=false}));
-distributeChoices.forEach(btn=>btn.addEventListener('click',()=>{if(distributeSelected(btn.dataset.distribute)&&arrangeMenu)arrangeMenu.open=false}));
 smartLayoutChoices.forEach(btn=>btn.addEventListener('click',()=>{if(smartLayout(btn.dataset.layoutScope,btn.dataset.layoutOrientation)&&smartLayoutMenu)smartLayoutMenu.open=false}));
 
 if(nodeQuick){nodeQuick.addEventListener('pointerdown',e=>e.stopPropagation());nodeQuick.addEventListener('click',e=>e.stopPropagation())}
@@ -4598,8 +4850,6 @@ if(nodeQuickFormat)nodeQuickFormat.addEventListener('click',e=>{e.preventDefault
 if(nodeQuickColor)nodeQuickColor.addEventListener('change',e=>{e.stopPropagation();updateStyle({bgColor:String(nodeQuickColor.value||'#ffffff')})});
 if(nodeQuickDuplicate)nodeQuickDuplicate.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();duplicateSelectedNodes();refreshNodeQuickToolbar()});
 if(nodeQuickDelete)nodeQuickDelete.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();deleteSelectedMany()});
-nodeQuickAlign.forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(alignSelected(btn.dataset.nodeQuickAlign)&&nodeQuickArrange)nodeQuickArrange.open=false}));
-nodeQuickDistribute.forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();if(distributeSelected(btn.dataset.nodeQuickDistribute)&&nodeQuickArrange)nodeQuickArrange.open=false}));
 
 zoomOutBtn.addEventListener('click',()=>applyCanvasScale(MapliniCanvasCore.zoomStep(canvasScale,'out')));
 zoomInBtn.addEventListener('click',()=>applyCanvasScale(MapliniCanvasCore.zoomStep(canvasScale,'in')));
@@ -4620,6 +4870,13 @@ function ignorePendingRecovery(){pendingRecoveryStore=null;try{localStorage.remo
 if(recoveryRestore)recoveryRestore.addEventListener('click',restorePendingRecovery);
 if(recoveryIgnore)recoveryIgnore.addEventListener('click',ignorePendingRecovery);
 
+
+window.addEventListener('keydown',e=>{
+  if(e.key!=='Escape')return;
+  closeTransientMenus();
+  if(nodeQuickArrange)nodeQuickArrange.open=false;
+  if(linkQuick)linkQuick.classList.remove('on');
+},{capture:true});
 loadCloudSession();
 const SHARE_TOKEN="__SHARE_TOKEN__";
 (async()=>{
