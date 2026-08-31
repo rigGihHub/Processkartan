@@ -52,7 +52,7 @@ def extract_editor_html() -> str:
     for token, filename in CORE_REPLACEMENTS.items():
         html = html.replace(token, (ROOT / filename).read_text(encoding="utf-8"))
     html = html.replace("__MAPLINI_LOGO__", "")
-    html = html.replace("__MAPLINI_VERSION__", "0.15.9")
+    html = html.replace("__MAPLINI_VERSION__", "0.15.10")
     html = html.replace("__SUPABASE_URL__", "")
     html = html.replace("__SUPABASE_ANON_KEY__", "")
     html = html.replace("__PUBLIC_APP_URL__", "https://example.invalid")
@@ -153,6 +153,18 @@ def run() -> None:
         path_after = page.locator("#p48-links .p48-link-visible").first.get_attribute("d")
         assert page.locator("#p48-format-title").inner_text().strip() == "Ruta"
         assert "markerade rutan" in page.locator("#p48-format-hint").inner_text()
+
+        # Ctrl-click adds a second node to selection, then Ctrl-click removes it again.
+        node_ids = page.locator("#p48-canvas .p48-node")
+        assert node_ids.count() >= 2
+        first = node_ids.nth(0)
+        second = node_ids.nth(1)
+        first.click()
+        second.click(modifiers=["Control"])
+        assert page.locator("#p48-format-title").inner_text().strip() == "Flera rutor"
+        assert page.locator("#p48-canvas .p48-node.multi-selected").count() >= 2
+        second.click(modifiers=["Control"])
+        assert page.locator("#p48-format-title").inner_text().strip() == "Ruta"
         assert page.locator("#p48-delete-node").is_visible(), "Delete-node action did not appear for a selected node"
         free_after_node_move = page.evaluate("() => ({dx:Number(window.__mapliniTestState.link(0)[3].freeDx||0),dy:Number(window.__mapliniTestState.link(0)[3].freeDy||0)})")
         assert path_before != path_after, "Connector endpoint/path did not follow moved node"
@@ -250,6 +262,22 @@ def run() -> None:
         page.evaluate("() => window.__mapliniTestState.syncBackground('solid')")
         assert page.locator("#p48-bg-type option").count() == 5
         assert page.locator("#p48-bg-type").input_value() == "solid"
+
+        # v0.15.10: zoom must scale the actual embedded canvas, so child nodes/text
+        # visually scale with the canvas rather than only changing scroll dimensions.
+        transform_before = page.locator("#p48-canvas").evaluate("(el) => getComputedStyle(el).transform")
+        page.locator("#p48-zoom-out").click()
+        page.wait_for_timeout(80)
+        transform_after = page.locator("#p48-canvas").evaluate("(el) => getComputedStyle(el).transform")
+        assert transform_before != transform_after
+        assert page.locator("#p48-zoom-reset").inner_text().strip() != "100%"
+        page.locator("#p48-zoom-reset").click()
+        assert page.locator("#p48-zoom-reset").inner_text().strip() == "100%"
+
+        # The connector panel is hard-hidden until a connector is actually selected.
+        page.evaluate("() => window.__mapliniTestState.clear()")
+        assert page.locator("#p48-link-format").is_hidden()
+        assert (page.locator("#p48-format-title").text_content() or "").strip() == "Formatering"
 
         # v0.15.9 node style cleanup: three focused choices, but older saved
         # 3D/glass styles remain represented without being rewritten.

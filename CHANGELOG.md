@@ -1,3 +1,12 @@
+## v0.15.10 – Full Canvas Zoom & Ctrl Multi-Select
+- Fixed top-bar zoom so the scaling rule now lives inside the embedded editor iframe. `+` / `−` therefore scale the complete canvas contents: nodes, node text, connectors, connector labels, process logo and canvas guides together.
+- Kept logical canvas coordinates unchanged, so zoom remains visual and does not rewrite process data.
+- Added Ctrl-click / Cmd-click toggle selection for nodes. Existing selections remain active while additional nodes are added or removed.
+- Ctrl-click works both on the node body and its text label.
+- Multi-selected nodes can continue to be moved/formatted as a group using the existing multi-selection workflow.
+- Hardened selection context: connector controls are explicitly hidden whenever no connector is selected.
+- No database, Supabase or migration changes.
+
 ## v0.15.9 – Node Style Cleanup
 - Reduced the standard node-style picker from five variants to three clear choices: Standard, Upphöjd and Minimal.
 - Removed 3D and Glass from the normal picker because they add decorative complexity without improving process readability.

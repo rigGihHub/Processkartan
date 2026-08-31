@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.15.9"
+APP_VERSION = "0.15.10"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -175,6 +175,9 @@ header[data-testid="stHeader"]{height:2rem}
 
 .p48-link-format{display:none;margin-top:12px;padding-top:10px;border-top:1px solid #e1e7ed}
 .p48-link-format.on{display:block}
+/* v0.15.10 selection-context safety */
+.p48-link-format[hidden]{display:none!important}
+
 /* v0.10.15 contextual formatting: show only controls relevant to current selection */
 .p48-format[data-context="none"] #p48-controls{display:none}
 .p48-format[data-context="node"] .p48-link-format,.p48-format[data-context="multi"] .p48-link-format{display:none!important}
@@ -385,6 +388,20 @@ html = r"""
 .p48-node,.p48-handle,.p48-resize,.p48-link-hit-segment{touch-action:none}
 .p48-scroll{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 button,summary,select,input{-webkit-tap-highlight-color:transparent}
+
+/* v0.15.10 real canvas zoom — this MUST live inside the editor iframe.
+   Scaling the canvas itself makes nodes, text, connectors, labels, logos and print guides
+   grow/shrink as one visual unit. The wrapper carries the scaled scroll dimensions. */
+.p48-canvas-wrap{
+  width:var(--p48-canvas-visual-width,2400px)!important;
+  height:var(--p48-canvas-visual-height,1400px)!important;
+}
+#p48-canvas{
+  width:2400px!important;
+  height:1400px!important;
+  transform:scale(var(--p48-canvas-scale,1));
+  transform-origin:0 0;
+}
 
 /* v0.13.3 contextual toolbar regression fix — these controls live inside the editor iframe.
    Keep their visibility and presentation rules in this iframe stylesheet, not only in Streamlit's parent document. */
@@ -1355,7 +1372,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
         </div>
         <button type="button" class="p48-btn p48-node-only p48-single-node-only" id="p48-delete-node" style="width:100%;margin-top:10px;color:#a43d34;border-color:#e0c4c1">Ta bort markerad ruta</button>
 
-        <div id="p48-link-format" class="p48-link-format">
+        <div id="p48-link-format" class="p48-link-format" hidden>
           <div class="p48-link-context-note">Inställningarna gäller bara den markerade pilen.</div>
           <div class="p48-link-format-grid">
             <label>Pilfärg<input id="p48-link-color" type="color" value="#687584"></label>
@@ -2466,7 +2483,7 @@ function addFirstStep(type){
   if(item)requestAnimationFrame(()=>beginInlineEdit(item.el));
   return true;
 }
-function clearCanvas(){for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();selectedLinkIndex=null;selectedLinkIndices.clear();linkLayer.innerHTML='';clearLinkHitLayer();linkDomByIndex.clear();finishTempArrow();refreshControls();refreshLinkControls();updateSelectionUi();refreshEmptyState()}
+function clearCanvas(){for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();selectedLinkIndex=null;selectedLinkIndices.clear();linkLayer.innerHTML='';clearLinkHitLayer();linkDomByIndex.clear();finishTempArrow();setFormatEnabled(false);refreshControls();refreshLinkControls();updateSelectionUi();refreshEmptyState()}
 function restore(s){
   let raw;
   try{raw=typeof s==='string'?JSON.parse(s):clone(s)}
@@ -2745,6 +2762,20 @@ function select(el){
   refreshControls();updateSelectionUi();
   if(hadLinks)requestFullLinkRender(true);
 }
+function toggleNodeSelection(el){
+  if(!el||!el.dataset.id)return;
+  const hadLinks=(selectedLinkIndex!=null||selectedLinkIndices.size>0);
+  selectedLinkIndex=null;selectedLinkIndices.clear();refreshLinkControls();
+  const id=el.dataset.id;
+  if(selectedIds.has(id)){
+    selectedIds.delete(id);
+  }else{
+    selectedIds.add(id);
+  }
+  selectedId=selectedIds.size===1?[...selectedIds][0]:null;
+  refreshControls();updateSelectionUi();
+  if(hadLinks)requestFullLinkRender(true);
+}
 
 function ensureIO(item){
   if(!Array.isArray(item.data.inputs))item.data.inputs=[];
@@ -2939,7 +2970,7 @@ for(const h of Object.values(handles)){
   h.style.display=connectorPointsHidden?'none':'';
 }
 el.addEventListener('dblclick',e=>{e.stopPropagation();beginInlineEdit(el)});
-label.addEventListener('click',e=>{e.stopPropagation();select(el)});
+label.addEventListener('click',e=>{e.stopPropagation();if(e.ctrlKey||e.metaKey){e.preventDefault();toggleNodeSelection(el)}else select(el)});
 label.addEventListener('dblclick',e=>{e.stopPropagation();beginInlineEdit(el)});
 label.addEventListener('input',()=>{const item=nodes.get(el.dataset.id);if(item&&canEdit()){invalidateNodeGeom(item.data.id);markNodeLinksDirty(item.data.id);drawLinks()}});
 label.addEventListener('blur',()=>finishInlineEdit(el));
@@ -2948,10 +2979,18 @@ label.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();finishInlineEdit(el);el.focus();}
 });
 let suppressSelectClick=false;
-el.addEventListener('click',e=>{e.stopPropagation();if(suppressSelectClick){suppressSelectClick=false;return}select(el)});
+el.addEventListener('click',e=>{
+  e.stopPropagation();
+  if(suppressSelectClick){suppressSelectClick=false;return}
+  if(e.ctrlKey||e.metaKey){e.preventDefault();toggleNodeSelection(el);return}
+  select(el);
+});
 el.addEventListener('pointerdown',e=>{
   if(!canEdit())return;
   if(e.button!==0||e.target.classList.contains('p48-handle')||e.target.classList.contains('p48-label')||e.target.classList.contains('p48-resize')||e.target.classList.contains('p48-doc-open')||(e.target.closest&&e.target.closest('.p48-doc-inline-editor'))||(e.target.closest&&e.target.closest('.p48-next-step-wrap')))return;
+  if(e.ctrlKey||e.metaKey){
+    e.preventDefault();e.stopPropagation();toggleNodeSelection(el);suppressSelectClick=true;return;
+  }
   const groupIds=(selectedIds.size>1&&selectedIds.has(el.dataset.id))?[...selectedIds]:null;
   if(!groupIds)select(el);
   const activeIds=groupIds||[el.dataset.id];
@@ -3075,6 +3114,7 @@ function setLinkStyle(i,patch){return MapliniConnectorCore.setStyle(links,i,patc
 function dashArray(st){return st.dash==='dashed'?'10 7':st.dash==='dotted'?'2 6':''}
 function refreshLinkControls(){
   const link=selectedLinkIndex!=null?links[selectedLinkIndex]:null;
+  linkFormat.hidden=!link;
   linkFormat.classList.toggle('on',!!link);
   linkHandle.classList.toggle('on',!!link);
   if(linkQuick)linkQuick.classList.toggle('on',!!link&&canEdit());
