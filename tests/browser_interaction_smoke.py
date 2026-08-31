@@ -52,7 +52,7 @@ def extract_editor_html() -> str:
     for token, filename in CORE_REPLACEMENTS.items():
         html = html.replace(token, (ROOT / filename).read_text(encoding="utf-8"))
     html = html.replace("__MAPLINI_LOGO__", "")
-    html = html.replace("__MAPLINI_VERSION__", "0.16.3")
+    html = html.replace("__MAPLINI_VERSION__", "0.16.4")
     html = html.replace("__SUPABASE_URL__", "")
     html = html.replace("__SUPABASE_ANON_KEY__", "")
     html = html.replace("__PUBLIC_APP_URL__", "https://example.invalid")

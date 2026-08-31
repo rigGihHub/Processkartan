@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.16.3"
+APP_VERSION = "0.16.4"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -3758,8 +3758,14 @@ if(scroll){
   },{passive:false});
   const endDesktopPan=e=>{
     if(!desktopPan||desktopPan.id!==e.pointerId)return;
+    const wasClick=!desktopPanMoved;
     desktopPan=null;scroll.classList.remove('p48-desktop-panning');
     try{scroll.releasePointerCapture(e.pointerId)}catch(_){}
+    /* A press/release on blank canvas is a normal outside click, not a pan.
+       Clear node/link selection here because pointer capture can retarget the later click event to scroll. */
+    if(wasClick&&!selectionMode){
+      clearSelection();clearLinkSelection();finishTempArrow();
+    }
   };
   scroll.addEventListener('pointerup',endDesktopPan);
   scroll.addEventListener('pointercancel',endDesktopPan);
@@ -4442,7 +4448,9 @@ canvas.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEff
 canvas.addEventListener('drop',e=>{e.preventDefault();const type=e.dataTransfer.getData('text/plain');if(!type)return;const p=clientToCanvas(e.clientX,e.clientY);addNode(type,p.x,p.y)});
 canvas.addEventListener('click',e=>{
   if(desktopPanMoved){desktopPanMoved=false;e.preventDefault();e.stopPropagation();return}
-  if((e.target===canvas||e.target===linkLayer||e.target.id==='p48-svg'||e.target.id==='p48-links')&&!selectionMode){clearSelection();clearLinkSelection();finishTempArrow();}
+  if(desktopPanBlankTarget(e.target)||e.target===linkLayer){
+    if(!selectionMode){clearSelection();clearLinkSelection();finishTempArrow();}
+  }
 });
 nameInput.addEventListener('change',()=>{if(!requireEdit())return;persist(false,true);msg('Namn sparat')});
 root.querySelector('#p48-new').addEventListener('click',newProcess);

@@ -1,3 +1,10 @@
+## v0.16.4 – Click Outside to Deselect
+- Clicking blank canvas now always clears the selected node or connector.
+- Desktop drag-to-pan is preserved: a real drag pans the canvas and does not clear selection mid-gesture.
+- The deselection is handled at the end of a non-moving blank-canvas pointer gesture, which avoids pointer-capture retargeting from swallowing the normal click.
+- Broadened blank-canvas click recognition to canvas, scroll surface, SVG/link background and page background.
+- No data-schema, Supabase or migration changes.
+
 ## v0.16.3 – Canvas Pan & Scale Slider
 - Added desktop mouse navigation: press and drag on blank canvas to pan horizontally and vertically.
 - Panning ignores nodes, connectors, controls and other interactive elements so normal editing gestures remain intact.
