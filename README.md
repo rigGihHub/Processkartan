@@ -6,9 +6,9 @@
 - Båda toolbarerna är nu `display:none` som standard och visas endast när JavaScript sätter `.on` efter korrekt nod-/pilmarkering.
 - Ingen databas-, Supabase- eller dependencyändring.
 
-# Maplini v0.14.3
+# Maplini v0.14.4
 
-## Process Intelligence v0.14.3
+## Process Intelligence v0.14.4
 
 - **🔍 Analysera** öppnar Processkontroll med en deterministisk strukturanalys av aktuell process.
 - Visar processhälsa, fel, kontrollpunkter och insikter.
@@ -146,13 +146,17 @@ Maplini visar löpande sparstatus och använder en kortlivad recovery-snapshot m
 - Desktop sidebar scroll fix: persistent vertical scrolling, stable scrollbar gutter and bottom clearance so the final connector controls remain reachable.
 
 
-### v0.14.3
+### v0.14.4
 Connector drag, multi-page horizontal scrolling and verified zoom direction.
 
 
-### v0.14.3
+### v0.14.4
 Förfinar Smart Layout-pilarnas centrering, desktop-sidebarens åtkomlighet, rutstilar och den samlade textformateringen.
 
 
-### v0.14.3
+### v0.14.4
 UI simplified: Ordna removed, compact account panel, dedicated Logotyp menu, and whole-process scaling including fit to selected A4/A3 page.
+
+
+### v0.14.4
+Connector dragging fixed: click-drag works directly on the connector hit area without a separate pre-selection click.

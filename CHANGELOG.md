@@ -1,3 +1,9 @@
+## v0.14.4 – Connector Drag Fix
+- Connector click-drag now works in one gesture; pre-selection is no longer required.
+- Both SVG and HTML connector hit targets start the same drag path.
+- Pointer capture reduces lost drags inside the editor iframe.
+- A simple click still only selects because geometry is not changed until the movement threshold is crossed.
+
 ## v0.14.3 – UI Simplification & Process Scaling
 - Removed the Align/Distribute "Ordna" UI from the top toolbar and contextual toolbar.
 - Added "Skala process" with −10 %, +10 % and "Passa till vald sida".

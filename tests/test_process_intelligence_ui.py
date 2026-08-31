@@ -6,7 +6,7 @@ CORE = (ROOT / 'maplini_process_intelligence_core.js').read_text(encoding='utf-8
 
 
 def test_process_intelligence_is_embedded_and_exposed():
-    assert 'APP_VERSION = "0.14.3"' in APP
+    assert 'APP_VERSION = "0.14.4"' in APP
     assert '_PROCESS_INTELLIGENCE_CORE_PATH' in APP
     assert '__MAPLINI_PROCESS_INTELLIGENCE_CORE__' in APP
     assert 'id="p48-analyze"' in APP

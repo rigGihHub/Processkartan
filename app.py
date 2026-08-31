@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.14.3"
+APP_VERSION = "0.14.4"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -3043,6 +3043,7 @@ function startSelectedLinkDrag(index,e){
   if(!canEdit()||index==null||!links[index])return false;
   e.preventDefault();e.stopPropagation();
   if(selectedLinkIndex!==index)selectLink(index);
+  try{if(e.currentTarget&&e.currentTarget.setPointerCapture&&e.pointerId!=null)e.currentTarget.setPointerCapture(e.pointerId)}catch(_err){}
   const sx=e.clientX,sy=e.clientY,pointerType=e.pointerType||'mouse';
   let mutated=false;
   const move=ev=>{
@@ -3088,8 +3089,10 @@ function addHtmlLinkHitSegment(index,x1,y1,x2,y2){
   const choose=e=>{
     e.preventDefault();
     e.stopPropagation();
-    if(selectedLinkIndex===index&&canEdit()){
-      seg.classList.add('p48-selected-link-hit');
+    if(canEdit()){
+      // One gesture must be enough: select the connector and immediately arm dragging.
+      // startSelectedLinkDrag only mutates after the movement threshold, so a normal
+      // click still behaves as a pure selection.
       startSelectedLinkDrag(index,e);
       return;
     }
@@ -3145,7 +3148,8 @@ function renderAllLinksNow(){
     hit.addEventListener('pointerdown',e=>{
       e.preventDefault();
       e.stopPropagation();
-      if(selectedLinkIndex===index&&canEdit()){
+      if(canEdit()){
+        // Allow click-drag directly, even when the connector was not selected beforehand.
         startSelectedLinkDrag(index,e);
         return;
       }
