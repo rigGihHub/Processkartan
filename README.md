@@ -6,9 +6,9 @@
 - Båda toolbarerna är nu `display:none` som standard och visas endast när JavaScript sätter `.on` efter korrekt nod-/pilmarkering.
 - Ingen databas-, Supabase- eller dependencyändring.
 
-# Maplini v0.15.2
+# Maplini v0.15.9
 
-## Process Intelligence v0.15.2
+## Process Intelligence v0.15.9
 
 - **🔍 Analysera** öppnar Processkontroll med en deterministisk strukturanalys av aktuell process.
 - Visar processhälsa, fel, kontrollpunkter och insikter.
@@ -146,31 +146,31 @@ Maplini visar löpande sparstatus och använder en kortlivad recovery-snapshot m
 - Desktop sidebar scroll fix: persistent vertical scrolling, stable scrollbar gutter and bottom clearance so the final connector controls remain reachable.
 
 
-### v0.15.2
+### v0.15.9
 Connector drag, multi-page horizontal scrolling and verified zoom direction.
 
 
-### v0.15.2
+### v0.15.9
 Förfinar Smart Layout-pilarnas centrering, desktop-sidebarens åtkomlighet, rutstilar och den samlade textformateringen.
 
 
-### v0.15.2
+### v0.15.9
 UI simplified: Ordna removed, compact account panel, dedicated Logotyp menu, and whole-process scaling including fit to selected A4/A3 page.
 
 
-### v0.15.2
+### v0.15.9
 Connector dragging fixed: click-drag works directly on the connector hit area without a separate pre-selection click.
 
 
-### v0.15.2
+### v0.15.9
 Stability/UX cleanup: dynamic multi-page layout bounds, resilient toolbar positioning, resize recalculation and centralized popover cleanup.
 
 
-### v0.15.2
+### v0.15.9
 Free connector routing: drag the arrow body independently while endpoints remain attached and continue following moved nodes. Includes a small visual/UX polish pass.
 
 
-### v0.15.2 – Integrity & Core Interaction
+### v0.15.9 – Integrity & Core Interaction
 This release fixes workspace ownership integrity, connector one-gesture/free-drag behavior and Google Sheets column alignment.
 
 **Supabase:** deployments using workspaces must run `supabase_schema_v0147.sql` after updating the app. The migration preserves editor access but enforces the workspace owner as canonical `processes.owner_id`.
@@ -178,21 +178,49 @@ This release fixes workspace ownership integrity, connector one-gesture/free-dra
 **Browser smoke QA:** `python tests/browser_interaction_smoke.py` runs the embedded editor in Chromium and verifies one-gesture connector drag, attached endpoint behavior after moving a node, and Undo.
 
 
-### v0.15.2
+### v0.15.9
 30% Simpler: the main toolbar now exposes only core commands. Export/page settings are grouped under Export, secondary tools under More, and the normal mobile bar is reduced to four actions.
 
 
-### v0.15.2
+### v0.15.9
 Stability/polish pass for the simplified command surface. Nested menus now remain open correctly, mobile keeps four primary actions while Redo/Fullscreen remain available secondarily, and browser smoke coverage validates these flows together with free connector dragging.
 
 
-### v0.15.2
+### v0.15.9
 Actionable Process Check: structural findings now explain what to do next, are prioritized, and can focus affected nodes directly on the canvas. The analysis remains deterministic/local and does not add an AI dependency.
 
 
-### v0.15.2
+### v0.15.9
 First-Time User UX: empty editable processes now present a clear first-step card on the canvas with direct Start/Activity actions and guidance to continue with `＋ Nästa`.
 
 
-### v0.15.2
+### v0.15.9
 New Process UX: browser `prompt()` has been replaced by a Maplini-native naming dialog with Enter/Escape support, inline validation, cancel/backdrop behavior and direct continuation into the empty-canvas first-step flow.
+
+
+### v0.15.9
+Connector Labels & Selection UX: connector text is now per-connector, live-updating, visually offset from the drag handle and rendered as a readable badge. New connectors have no automatic Ja/Nej label. The node-delete action only appears for a single selected node.
+
+
+### v0.15.9
+Connector Interaction Polish: selected connector text, drag handle and routing quick toolbar are now spatially separated so they no longer stack on top of one another during editing.
+
+
+### v0.15.9
+Connector Formatting Cleanup: connector formatting is now fully self-contained, with its own width control and clearer Swedish terminology. Node border controls stay hidden during connector editing.
+
+
+### v0.15.9
+Context Panel Polish: the left formatting panel now clearly switches between Pil, Ruta, Flera rutor and an unselected state, with contextual guidance instead of mixed generic copy.
+
+
+### v0.15.9
+Typography Cleanup: the font picker is reduced from 27 options to 7 clear choices. Older saved fonts remain supported through a temporary legacy option rather than being silently changed.
+
+
+### v0.15.9
+Canvas Appearance Cleanup: Processyta now offers five focused background choices. Older saved backgrounds remain supported through a temporary legacy option instead of being silently changed.
+
+
+### v0.15.9
+Node Style Cleanup: the standard node-style picker is reduced to Standard, Upphöjd and Minimal. Older 3D/Glass styles remain fully supported when opening existing processes.

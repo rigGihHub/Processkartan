@@ -1,3 +1,64 @@
+## v0.15.9 – Node Style Cleanup
+- Reduced the standard node-style picker from five variants to three clear choices: Standard, Upphöjd and Minimal.
+- Removed 3D and Glass from the normal picker because they add decorative complexity without improving process readability.
+- Preserved backward compatibility: existing nodes using 3D or Glass keep their visual rendering and receive a temporary `Tidigare rutstil: …` option when selected.
+- Returning to a current node style removes the temporary legacy option.
+- Existing process data is not silently migrated.
+- No database, Supabase or deployment changes.
+
+## v0.15.8 – Canvas Appearance Cleanup
+- Reduced Processyta background choices to five focused options: Enfärgad, Prickar, Rutnät, Bild and Vattenstämpel.
+- Removed decorative/advanced backgrounds from the standard picker: gradients, lined/crosshatched/technical patterns, parchment, canvas, concrete and similar textures.
+- Preserved backward compatibility: an older saved background is shown temporarily as `Tidigare bakgrund: …` rather than being silently changed.
+- Returning to a current background removes the temporary legacy option.
+- Existing rendering support for older background types remains in place so old processes retain their appearance.
+- No database, Supabase or deployment changes.
+
+## v0.15.7 – Typography Cleanup
+- Reduced the font picker from 27 choices to 7 focused options suitable for process documentation: Inter, DM Sans, Poppins, Montserrat, Roboto, Georgia and System.
+- Removed decorative and overlapping font choices that added noise without improving process readability.
+- Added backward compatibility for saved processes using an older font: the existing font is shown temporarily as `Tidigare typsnitt: …` instead of being silently replaced.
+- Choosing a current font removes the temporary legacy option again.
+- Existing process data is never rewritten merely because its font is no longer in the standard picker.
+- No database, Supabase or deployment changes.
+
+## v0.15.6 – Context Panel Polish
+- The formatting panel now changes its heading based on selection: `Pil`, `Ruta`, `Flera rutor` or `Formatering`.
+- Help text is contextual instead of generic, so users immediately understand what the visible controls affect.
+- Removed the redundant inner `Pil / koppling` heading from connector formatting.
+- Added a concise note inside connector settings clarifying that changes affect only the selected connector.
+- Added subtle visual differentiation between connector and node formatting contexts.
+- Existing formatting controls, connector behavior and saved process data remain unchanged.
+- No database, Supabase or deployment changes.
+
+## v0.15.5 – Connector Formatting Cleanup
+- Made the connector formatting panel self-contained: connector color, width, line type, shape, end marker, anchoring and label now live together.
+- Added a dedicated connector width control instead of reusing the node border-width control.
+- Node border color and border width are now explicitly hidden whenever a connector is selected.
+- Connector color no longer writes into the node border-color control.
+- Replaced technical wording such as `Routing` with clearer Swedish labels such as `Pilform` and `Fästning`.
+- Clarified that connector text is custom for the currently selected connector.
+- No connector data format, database, Supabase or deployment changes.
+
+## v0.15.4 – Connector Interaction Polish
+- Separated the selected connector's three visual affordances: text label, drag handle and routing quick toolbar.
+- When a connector has text, the label sits on one side of the route and the routing toolbar is deliberately placed on the opposite side.
+- When there is no label, the routing toolbar still receives a clean offset from the drag handle.
+- Reused one placement helper in both full and incremental connector redraws so the UI stays stable while dragging and editing.
+- Kept connector data, routing logic and saved labels unchanged.
+- No database, Supabase or process-data schema changes.
+
+## v0.15.3 – Connector Labels & Selection UX
+- Reworked connector labels into professional white badges with stronger typography, spacing, contrast and subtle shadow.
+- Labels are positioned offset from the connector path so the connector drag handle no longer obscures the text.
+- Connector text updates live while typing instead of appearing only after the input loses focus.
+- Every connector keeps its own label value; editing one connector does not change any other connector.
+- New connectors no longer receive automatic standard Ja/Nej text. Connector text is explicit and user-defined.
+- Existing saved connector labels are preserved.
+- `Ta bort markerad ruta` is now explicitly hidden unless exactly one node is selected.
+- The node-delete action stays hidden when a connector or nothing is selected.
+- No database, Supabase or process-data schema changes.
+
 ## v0.15.2 – New Process UX
 - Replaced the browser-native `prompt()` used by New Process with a Maplini-styled modal dialog.
 - New Process now keeps the current process safe until the user explicitly creates the new one.

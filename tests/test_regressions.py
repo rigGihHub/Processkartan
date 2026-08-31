@@ -284,7 +284,7 @@ def test_v01016_canvas_core_node_test_when_available():
 
 
 def test_v01017_ui_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert '_UI_CORE_PATH' in APP
     assert '__MAPLINI_UI_CORE__' in APP
     assert 'MapliniUiCore.selectionHint' in APP
@@ -326,7 +326,7 @@ def test_v01017_ui_core_contains_selection_hint_logic():
 
 
 def test_v01018_state_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert '_STATE_CORE_PATH' in APP
     assert '__MAPLINI_STATE_CORE__' in APP
     assert 'MapliniStateCore.normalizeProcess' in APP
@@ -356,7 +356,7 @@ def test_v01018_state_core_drops_orphan_links():
 
 
 def test_v01019_reliability_core_loaded():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert '_RELIABILITY_CORE_PATH' in APP
     assert '__MAPLINI_RELIABILITY_CORE__' in APP
 
@@ -386,7 +386,7 @@ def test_v01019_reliability_primitives():
 
 
 def test_v01020_export_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert '_EXPORT_CORE_PATH' in APP
     assert '__MAPLINI_EXPORT_CORE__' in APP
     assert 'MapliniExportCore.validateBytes' in APP
@@ -430,7 +430,7 @@ def test_v01021_connector_persistence_format_is_preserved():
     assert "nodeIds.has(l[0])&&nodeIds.has(l[1])" in STATE_CORE
 
 def test_v01021_workflow_core_loaded_and_history_centralized():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert '_WORKFLOW_CORE_PATH' in APP
     assert '__MAPLINI_WORKFLOW_CORE__' in APP
     assert 'MapliniWorkflowCore.emptyProcess' in APP
@@ -455,7 +455,7 @@ def test_v01021_workflow_core_when_node_available():
 
 
 def test_v01022_performance_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert '_PERFORMANCE_CORE_PATH' in APP
     assert '__MAPLINI_PERFORMANCE_CORE__' in APP
     assert 'MapliniPerformanceCore.signature' in APP
@@ -483,7 +483,7 @@ def test_v01022_performance_core_primitives_exist():
 
 
 def test_v01023_mobile_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert '_MOBILE_CORE_PATH' in APP
     assert '__MAPLINI_MOBILE_CORE__' in APP
     assert 'MapliniMobileCore.clientToLocal' in APP
@@ -535,7 +535,7 @@ def test_v01023_mobile_core_primitives():
 
 
 def test_v01024_selection_core_loaded_and_used():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert '_SELECTION_CORE_PATH' in APP
     assert '__MAPLINI_SELECTION_CORE__' in APP
     assert 'MapliniSelectionCore.deleteAction' in APP
@@ -563,7 +563,7 @@ def test_v01024_escape_and_undo_redo_refresh_context():
 
 
 def test_v01025_desktop_guard_is_present_without_mobile_selector_regression():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     html=_template()
     assert "/* v0.10.25 desktop regression guard */" in html
     assert "grid-template-columns:220px minmax(0,1fr)!important" in html
@@ -579,7 +579,7 @@ def test_v01025_dead_outer_canvas_css_removed():
 
 
 def test_v01026_sync_core_is_loaded_and_used():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert '_SYNC_CORE_PATH' in APP
     assert '__MAPLINI_SYNC_CORE__' in APP
     assert 'MapliniSyncCore.contentChanged' in APP
@@ -619,7 +619,7 @@ def test_v01026_signout_removes_unmodified_cloud_copies():
 
 
 def test_v01027_session_core_loaded_and_used():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert '_SESSION_CORE_PATH' in APP
     assert '__MAPLINI_SESSION_CORE__' in APP
     assert 'MapliniSessionCore.chooseWorkspace' in APP
@@ -662,7 +662,7 @@ def test_v01027_session_core_primitives():
 
 
 def test_v01028_rc_core_loaded_and_used():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert '_RC_CORE_PATH' in APP
     assert '__MAPLINI_RC_CORE__' in APP
     assert 'MapliniRcCore.captureScopeState' in APP
@@ -699,7 +699,7 @@ def test_v01028_rc_core_primitives():
 
 
 def test_v01029_flow_core_loaded_and_used():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert '_FLOW_CORE_PATH' in APP
     assert '__MAPLINI_FLOW_CORE__' in APP
     assert 'MapliniFlowCore.sharedProcess' in APP
@@ -740,7 +740,7 @@ def test_v01029_flow_core_primitives():
 
 
 def test_v01030_access_core_loaded_and_used():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert '_ACCESS_CORE_PATH' in APP
     assert '__MAPLINI_ACCESS_CORE__' in APP
     assert "function canEdit(){return MapliniAccessCore.canEdit" in APP
@@ -783,7 +783,7 @@ def test_v01030_access_core_role_rules():
 
 
 def test_v01031_privacy_core_loaded_and_used():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert '_PRIVACY_CORE_PATH' in APP
     assert '__MAPLINI_PRIVACY_CORE__' in APP
     assert "MapliniPrivacyCore.shouldPersistLocally" in APP
@@ -825,7 +825,7 @@ def test_v01031_privacy_core_rules():
 
 
 def test_v01032_save_local_has_privacy_guard():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     chunk=APP[APP.index("function saveLocal(immediate=false)"):APP.index("function loadLocal()")]
     assert "if(!MapliniPrivacyCore.shouldPersistLocally({sharedView}))return true" in chunk
 
@@ -862,7 +862,7 @@ def test_v01032_direct_google_export_reports_runtime_error():
 
 
 def test_v01033_process_logo_is_selectable_and_draggable():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert ".p48-process-logo.selected" in APP
     assert "processLogo.addEventListener('pointerdown'" in APP
     chunk=APP[APP.index("processLogo.addEventListener('pointerdown'"):APP.index("logoSize.addEventListener")]
@@ -882,7 +882,7 @@ def test_v01033_process_logo_position_persists():
 
 
 def test_v01034_document_node_palette_and_state():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert 'data-type="document"' in APP
     assert "document:'Dokument'" in APP
     assert ".p48-node.document" in APP
@@ -925,7 +925,7 @@ def test_v01035_scroll_has_bottom_clearance():
 
 
 def test_v01036_selected_connector_can_be_dragged():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert "function startSelectedLinkDrag(index,e)" in APP
     assert "if(canEdit()){\n      startSelectedLinkDrag(hit,e);" in APP
     assert "startSelectedLinkDrag(hit,e)" in APP
@@ -950,9 +950,12 @@ def test_v01036_scaled_interactions_use_logical_canvas_coordinates():
 
 def test_v01037_background_library_controls():
     html=_template()
-    assert 'APP_VERSION = "0.15.2"' in APP
-    for value in ('dots','grid','lines','solid','gradient','image','watermark','texture-paper','texture-parchment','texture-canvas','texture-concrete'):
+    assert 'APP_VERSION = "0.15.9"' in APP
+    # v0.15.9 keeps a focused picker while preserving rendering support for legacy types.
+    for value in ('dots','grid','solid','image','watermark'):
         assert f'value="{value}"' in html
+    for legacy in ('lines','gradient','texture-paper','texture-parchment','texture-canvas','texture-concrete'):
+        assert f"type==='{legacy}'" in APP
     assert 'id="p48-gradient-start"' in html
     assert 'id="p48-gradient-end"' in html
     assert 'id="p48-bg-image-file"' in html
@@ -1000,7 +1003,7 @@ def test_node_secondary_text_inherits_typography():
     assert "item.docOpen.style.fontFamily=s.fontFamily" in text
 
 def test_v01040_dropdown_menus_close_on_outside_click():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert 'function closeOpenMenus(exceptTarget=null)' in APP
     assert "details.p48-canvas-menu[open]" in APP
     assert "details.p48-sheets-menu[open]" in APP
@@ -1010,10 +1013,12 @@ def test_v01040_dropdown_menus_close_on_outside_click():
 def test_v01040_node_visual_style_controls_exist():
     html=_template()
     assert 'id="p48-node-style"' in html
-    assert 'value="3d"' in html
+    assert 'value="standard"' in html
     assert 'value="raised"' in html
-    assert 'value="glass"' in html
     assert 'value="flat"' in html
+    # v0.15.9 keeps 3D/Glass rendering for legacy processes but no longer offers them by default.
+    assert 'value="3d"' not in html
+    assert 'value="glass"' not in html
     assert 'id="p48-node-style-all"' in html
 
 
@@ -1034,7 +1039,7 @@ def test_v01040_export_knows_visual_styles():
 
 
 def test_v01041_document_link_is_edited_inline_on_canvas():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert "function openDocumentInlineEditor(item)" in APP
     assert "p48-doc-inline-editor" in APP
     render = APP[APP.index("function renderDocumentLink(item){"):APP.index("function state(){")]
@@ -1071,7 +1076,7 @@ def test_v01042_connector_visual_polish_contract():
 
 
 def test_v01043_smart_connector_routing_controls_and_geometry():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     html=_template()
     assert 'id="p48-link-routing"' in html
     assert 'id="p48-link-anchor-mode"' in html
@@ -1097,7 +1102,7 @@ def test_v01044_connector_labels_and_decision_defaults():
 
 def test_v01045_insert_step_on_link_is_wired():
     text = APP
-    assert 'APP_VERSION = "0.15.2"' in text
+    assert 'APP_VERSION = "0.15.9"' in text
     assert 'id="p48-insert-link-step"' in text
     assert "function insertStepOnSelectedLink(type='process')" in text
     assert 'MapliniConnectorCore.splitLink(links,index,id)' in text
@@ -1123,7 +1128,7 @@ def test_v01046_insert_step_menu_closes_outside():
 
 
 def test_v0110_faster_editing_copy_paste_duplicate():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert 'maplini_editing_core.js' in APP
     assert '__MAPLINI_EDITING_CORE__' in APP
     assert 'id="p48-duplicate-selection"' in APP
@@ -1138,7 +1143,7 @@ def test_v0110_faster_editing_copy_paste_duplicate():
 
 
 def test_v0111_multi_select_group_move_contract():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert "const groupIds=(selectedIds.size>1&&selectedIds.has(el.dataset.id))?[...selectedIds]:null;" in APP
     assert 'MapliniEditingCore.groupMoveDelta(startItems' in APP
     assert 'MapliniEditingCore.movedInternalVias(links,activeIds,0,0)' in APP
@@ -1148,7 +1153,7 @@ def test_v0111_multi_select_group_move_contract():
 
 
 def test_v0112_quick_next_step_contract():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert "className='p48-next-step-wrap'" in APP
     assert "function addNextStepFromNode(sourceId,type='process')" in APP
     assert 'MapliniEditingCore.nextStepPosition' in APP
@@ -1158,7 +1163,7 @@ def test_v0112_quick_next_step_contract():
 
 
 def test_v0113_fit_screen_and_arrange_contract():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert 'id="p48-fit-screen"' in APP
     assert 'id="p48-arrange-menu"' not in APP
     assert 'MapliniEditingCore.fitToScreen' in APP
@@ -1169,24 +1174,24 @@ def test_v0113_fit_screen_and_arrange_contract():
 
 
 def test_v0115_link_quick_routing_contract():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert 'id="p48-link-quick"' in APP
     assert 'data-link-routing="straight"' in APP
     assert 'data-link-routing="orthogonal"' in APP
     assert 'function applySelectedLinkRouting(routing)' in APP
     assert "routing==='straight'" in APP
     assert "btn.classList.toggle('active'" in APP
-    assert "linkQuick.style.left=mp.x+'px'" in APP
+    assert "linkQuick.style.left=qp.x+'px'" in APP
 
 
 def test_v0116_multi_select_formatting_contract():
     html = _template()
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert '.p48-format[data-context="multi"] .p48-single-node-only{display:none!important}' in html
     assert 'function selectedNodeItems()' in APP
     assert 'function sharedStyleValue(items,key)' in APP
     assert 'const multiNodeMode=!linkMode&&selectedIds.size>1' in APP
-    assert 'ändringar nedan gäller alla markerade' in APP
+    assert 'ändringar gäller alla markerade' in APP
     chunk = APP[APP.index('function updateStyle(patch)'):APP.index('function beginInlineEdit(el)')]
     assert 'for(const item of items)' in chunk
     assert 'pushUndo();' in chunk
@@ -1198,7 +1203,7 @@ def test_v0116_multi_select_formatting_contract():
 
 
 def test_v0117_contextual_node_toolbar_contract():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert 'id="p48-node-quick"' in APP
     assert 'id="p48-node-quick-next"' in APP
     assert 'id="p48-node-quick-format"' in APP
@@ -1219,7 +1224,7 @@ def test_v0117_contextual_node_toolbar_contract():
 
 
 def test_v0120_smart_layout_integration():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert '_LAYOUT_CORE_PATH' in APP
     assert '__MAPLINI_LAYOUT_CORE__' in APP
     assert 'id="p48-smart-layout-menu"' in APP
@@ -1258,7 +1263,7 @@ def test_v0132_mobile_context_sheet_and_fullscreen_contract():
 
 
 def test_v0133_contextual_toolbars_are_hidden_and_styled_inside_editor_iframe():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     # The editor is rendered by components.html in its own iframe. These rules must
     # therefore exist in the raw editor HTML stylesheet, not only in st.markdown CSS.
     raw_html_start = APP.index('html = r"""')
@@ -1286,7 +1291,7 @@ def test_v0141_connector_drag_horizontal_pages_and_zoom_contract():
 
 
 def test_v0143_ui_simplification_and_scale_contract():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert 'id="p48-arrange-menu"' not in APP
     assert 'id="p48-node-quick-arrange"' not in APP
     assert 'id="p48-scale-menu"' in APP
@@ -1309,7 +1314,7 @@ def test_v0143_compact_account_and_logo_contract():
 
 
 def test_v0144_connector_drag_single_gesture_contract():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert "function startSelectedLinkDrag(index,e)" in APP
     assert "if(selectedLinkIndex!==index)selectLink(index)" in APP
     assert "startSelectedLinkDrag(index,e);" in APP
@@ -1318,7 +1323,7 @@ def test_v0144_connector_drag_single_gesture_contract():
 
 
 def test_v0145_stability_cleanup_contract():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert "width:canvasLogicalWidth,height:canvasLogicalHeight" in APP
     assert "const maxToolbarX=Math.max(120,canvasLogicalWidth-80)" in APP
     assert "function closeTransientMenus(except=null)" in APP
@@ -1334,7 +1339,7 @@ def test_v0145_stability_cleanup_contract():
 
 
 def test_v0146_free_connector_and_visual_polish_contract():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert '<option value="free">Fri</option>' in APP
     assert 'data-link-routing="free"' in APP
     assert "MapliniConnectorCore.setFreeOffset(links,index,baseFreeDx+dx,baseFreeDy+dy)" in APP
@@ -1371,7 +1376,7 @@ def test_v0147_google_sheet_document_link_column_contract():
 
 
 def test_v0148_simplified_command_surface_contract():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert 'id="p48-export-menu"' in APP
     assert 'id="p48-more-menu"' in APP
     assert '>Exportera ▾<' in APP
@@ -1391,7 +1396,7 @@ def test_v0148_simplified_command_surface_contract():
 
 
 def test_v0149_nested_menus_and_mobile_secondary_actions_contract():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert "const isAncestor=Boolean(except&&menu!==except&&menu.contains&&menu.contains(except));" in APP
     assert "if(menu&&menu!==except&&!isAncestor&&menu.open)menu.open=false;" in APP
     assert 'id="p48-mobile-sheet-redo"' in APP
@@ -1404,7 +1409,7 @@ def test_v0149_nested_menus_and_mobile_secondary_actions_contract():
 
 
 def test_v0150_process_check_is_actionable_not_feature_creep():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert 'Vad behöver förbättras – och vad gör du åt det?' in APP
     assert 'BÖRJA HÄR' in APP
     assert '>Åtgärda</div>' in APP
@@ -1415,7 +1420,7 @@ def test_v0150_process_check_is_actionable_not_feature_creep():
 
 
 def test_v0151_first_time_empty_canvas_contract():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert 'id="p48-empty-state"' in APP
     assert 'id="p48-empty-start"' in APP
     assert 'id="p48-empty-activity"' in APP
@@ -1429,7 +1434,7 @@ def test_v0151_first_time_empty_canvas_contract():
 
 
 def test_v0152_new_process_dialog_replaces_browser_prompt():
-    assert 'APP_VERSION = "0.15.2"' in APP
+    assert 'APP_VERSION = "0.15.9"' in APP
     assert 'id="p48-new-process-dialog"' in APP
     assert 'id="p48-new-process-backdrop"' in APP
     assert 'id="p48-new-process-name"' in APP
@@ -1443,3 +1448,112 @@ def test_v0152_new_process_dialog_replaces_browser_prompt():
     assert "else if(e.key==='Escape'){e.preventDefault();setNewProcessDialog(false)}" in APP
     assert "newProcessName.value='Ny process'" in APP
     assert "newProcessName.focus();newProcessName.select()" in APP
+
+
+def test_v0153_connector_labels_and_delete_visibility_contract():
+    assert 'APP_VERSION = "0.15.9"' in APP
+    assert 'function linkLabelPlacement(points,offset=22)' in APP
+    assert "const width=Math.min(300,Math.max(42,value.length*7.8+22)),height=26;" in APP
+    assert "if(deleteNodeBtn)deleteNodeBtn.hidden=!(context==='node'&&selectedIds.size===1&&selectedId!=null);" in APP
+    assert "linkLabel.addEventListener('input',()=>{" in APP
+    assert "setLinkStyle(selectedLinkIndex,{label:value});" in APP
+    assert "dirtyLinks.add(selectedLinkIndex);drawLinks();persistAfterIdle();" in APP
+    assert "Never inject a standard Ja/Nej label" in APP
+    assert "return '';" in APP[APP.index('function decisionAutoLabel'):APP.index('function selectedLinkMidpoint')]
+    assert ".p48-link-label rect{fill:#fff;stroke:#c7d2dc" in APP
+    assert ".p48-link-label text{font:750 12px/1 Inter" in APP
+
+
+def test_v0154_selected_connector_affordances_do_not_stack():
+    assert 'APP_VERSION = "0.15.9"' in APP
+    assert 'function linkQuickPlacement(points,st)' in APP
+    assert "return linkLabelPlacement(points,hasLabel?-42:-32);" in APP
+    assert 'function updateSelectedLinkUi(points,st)' in APP
+    assert "linkQuick.style.left=qp.x+'px';linkQuick.style.top=qp.y+'px';" in APP
+    assert 'if(selectedLinkIndex===index)updateSelectedLinkUi(points,st);' in APP
+    assert 'transform:translate(-50%,-50%)' in APP
+
+
+def test_v0155_connector_formatting_panel_is_self_contained():
+    assert 'APP_VERSION = "0.15.9"' in APP
+    assert 'id="p48-link-width"' in APP
+    assert 'id="p48-format-title"' in APP and 'Pil / koppling</div>' not in APP
+    assert 'Inställningarna gäller bara den markerade pilen.' in APP
+    assert '>Pilform<select id="p48-link-routing">' in APP
+    assert '>Fästning<select id="p48-link-anchor-mode">' in APP
+    assert 'Skriv valfri text för just denna pil' in APP
+    assert 'class="p48-node-only"><label>Kantfärg</label><input id="p48-bordercolor"' in APP
+    assert 'class="p48-node-only"><label>Kanttjocklek</label><select id="p48-borderwidth"' in APP
+    assert "const commonForLink=(el===linkColor||el===linkWidth" in APP
+    assert "if(linkWidth)linkWidth.addEventListener('change'" in APP
+    assert "setLinkStyle(selectedLinkIndex,{width});" in APP
+    assert "borderColor.value=linkColor.value" not in APP
+
+
+def test_v0156_context_panel_titles_match_selection():
+    assert 'APP_VERSION = "0.15.9"' in APP
+    assert 'id="p48-format-title"' in APP
+    assert "formatTitle.textContent=context==='link'?'Pil'" in APP
+    assert "context==='multi'?'Flera rutor'" in APP
+    assert "context==='node'?'Ruta':'Formatering'" in APP
+    assert "Ändra text, utseende och beteende för den markerade pilen." in APP
+    assert "Ändra text och utseende för den markerade rutan." in APP
+    assert 'class="p48-link-context-note"' in APP
+    assert 'Pil / koppling</div>' not in APP
+
+
+def test_v0157_typography_cleanup_preserves_legacy_fonts():
+    assert 'APP_VERSION = "0.15.9"' in APP
+    html = _template()
+    font_start = html.index('<select id="p48-font">')
+    font_end = html.index('</select>', font_start)
+    font_html = html[font_start:font_end]
+    for name in ('Inter','DM Sans','Poppins','Montserrat','Roboto','Georgia','system-ui'):
+        assert f'value="{name}"' in font_html
+    for removed in ('Pacifico','Caveat','Bebas Neue','Courier New','Nunito','Rubik'):
+        assert f'value="{removed}"' not in font_html
+    assert font_html.count('<option ') == 7
+    assert 'function syncFontSelect(value)' in APP
+    assert "option.textContent=`Tidigare typsnitt: ${wanted}`" in APP
+    assert "option.dataset.legacyFont='true'" in APP
+    assert "syncFontSelect(sharedStyleValue(items,'fontFamily')||s.fontFamily);" in APP
+
+
+def test_v0158_canvas_background_cleanup_preserves_legacy_types():
+    assert 'APP_VERSION = "0.15.9"' in APP
+    html = _template()
+    start = html.index('<select id="p48-bg-type">')
+    end = html.index('</select>', start)
+    bg_html = html[start:end]
+    for value in ('solid','dots','grid','image','watermark'):
+        assert f'value="{value}"' in bg_html
+    for removed in ('gradient','lines','crosshatch','diagonal','technical','texture-paper','texture-parchment','texture-canvas','texture-concrete','none'):
+        assert f'value="{removed}"' not in bg_html
+    assert bg_html.count('<option ') == 5
+    assert "const standardBackgroundTypes=new Set(['solid','dots','grid','image','watermark']);" in APP
+    assert 'function syncBackgroundTypeSelect(value)' in APP
+    assert "option.textContent=`Tidigare bakgrund: ${legacyBackgroundLabels[wanted]||wanted}`" in APP
+    assert "option.dataset.legacyBackground='true'" in APP
+    assert 'syncBackgroundTypeSelect(type);' in APP
+
+
+def test_v0159_node_style_cleanup_preserves_legacy_styles():
+    assert 'APP_VERSION = "0.15.9"' in APP
+    html = _template()
+    start = html.index('<select id="p48-node-style">')
+    end = html.index('</select>', start)
+    node_style_html = html[start:end]
+    for value in ('standard','raised','flat'):
+        assert f'value="{value}"' in node_style_html
+    for removed in ('3d','glass'):
+        assert f'value="{removed}"' not in node_style_html
+    assert node_style_html.count('<option ') == 3
+    assert "const standardNodeStyles=new Set(['standard','raised','flat']);" in APP
+    assert 'function syncNodeStyleSelect(value)' in APP
+    assert "option.textContent=`Tidigare rutstil: ${legacyNodeStyleLabels[wanted]||wanted}`" in APP
+    assert "option.dataset.legacyNodeStyle='true'" in APP
+    assert "syncNodeStyleSelect(sharedStyleValue(items,'nodeStyle')||s.nodeStyle);" in APP
+    # Legacy rendering support must remain.
+    assert "['standard','3d','raised','glass','flat']" in APP
+    assert "s.nodeStyle==='3d'" in APP
+    assert "s.nodeStyle==='glass'" in APP

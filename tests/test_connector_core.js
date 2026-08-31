@@ -75,3 +75,15 @@ assert.strictEqual(C.style(C.normalizeLink(JSON.parse(JSON.stringify(labeled))))
 
 const mixedDragged=C.routePoints(0,0,100,100,'right','top',{routing:'orthogonal',viaX:40,viaY:60});
 assert(mixedDragged.some(p=>p[0]===40&&p[1]===60));
+
+// v0.15.9 independent connector labels
+let labelLinks=[
+  C.create('a','b','right',{label:'Godkänd'}),
+  C.create('b','c','right',{label:'Avslag'})
+];
+assert.strictEqual(labelLinks[0][3].label,'Godkänd');
+assert.strictEqual(labelLinks[1][3].label,'Avslag');
+C.setStyle(labelLinks,0,{label:'Ja'});
+assert.strictEqual(labelLinks[0][3].label,'Ja');
+assert.strictEqual(labelLinks[1][3].label,'Avslag');
+console.log('independent connector labels ok');

@@ -52,13 +52,13 @@ def extract_editor_html() -> str:
     for token, filename in CORE_REPLACEMENTS.items():
         html = html.replace(token, (ROOT / filename).read_text(encoding="utf-8"))
     html = html.replace("__MAPLINI_LOGO__", "")
-    html = html.replace("__MAPLINI_VERSION__", "0.15.2")
+    html = html.replace("__MAPLINI_VERSION__", "0.15.9")
     html = html.replace("__SUPABASE_URL__", "")
     html = html.replace("__SUPABASE_ANON_KEY__", "")
     html = html.replace("__PUBLIC_APP_URL__", "https://example.invalid")
     html = html.replace("__SHARE_TOKEN__", "")
     test_hook = "let pdfView='A3L',pageCountMode='auto',canvasScale=1,canvasLogicalWidth=2400,canvasLogicalHeight=1400;"
-    html = html.replace(test_hook, test_hook + "window.__mapliniTestState={link:i=>JSON.parse(JSON.stringify(links[i])),scale:()=>canvasScale,node:id=>JSON.parse(JSON.stringify(nodes.get(id)?.data||null)),nodes:()=>[...nodes.values()].map(x=>JSON.parse(JSON.stringify(x.data))),links:()=>JSON.parse(JSON.stringify(links)),clear:()=>clearCanvas()};")
+    html = html.replace(test_hook, test_hook + "window.__mapliniTestState={link:i=>JSON.parse(JSON.stringify(links[i])),scale:()=>canvasScale,node:id=>JSON.parse(JSON.stringify(nodes.get(id)?.data||null)),nodes:()=>[...nodes.values()].map(x=>JSON.parse(JSON.stringify(x.data))),links:()=>JSON.parse(JSON.stringify(links)),clear:()=>clearCanvas(),syncFont:value=>syncFontSelect(value),syncBackground:value=>syncBackgroundTypeSelect(value),syncNodeStyle:value=>syncNodeStyleSelect(value)};")
     return html
 
 
@@ -104,6 +104,41 @@ def run() -> None:
         assert abs(after["dx"] - expected_dx) < 4, (before, after)
         assert abs(after["dy"] - expected_dy) < 4, (before, after)
 
+        # v0.15.3 connector labels: the selected connector gets its own live label,
+        # rendered away from the drag handle with a readable SVG label box.
+        label_input = page.locator("#p48-link-label")
+        label_input.fill("Godkänd")
+        page.wait_for_timeout(40)
+        assert page.evaluate("() => window.__mapliniTestState.link(0)[3].label") == "Godkänd"
+        label_box = page.locator("#p48-links .p48-link-label").first
+        assert label_box.is_visible()
+        assert "Godkänd" in (label_box.text_content() or "")
+        placement = page.evaluate("""() => {
+          const handle=document.querySelector('#p48-link-handle');
+          const quick=document.querySelector('#p48-link-quick');
+          const label=document.querySelector('#p48-links .p48-link-label');
+          const box=label.getBBox();
+          return {
+            handleY: parseFloat(handle.style.top),
+            quickY: parseFloat(quick.style.top),
+            labelY: box.y + box.height/2
+          };
+        }""")
+        assert (placement["quickY"]-placement["handleY"])*(placement["labelY"]-placement["handleY"]) < 0, placement
+
+        # v0.15.5 connector formatting panel is self-contained.
+        assert page.locator("#p48-link-width").is_visible()
+        assert page.locator("#p48-format-title").inner_text().strip() == "Pil"
+        assert "markerade pilen" in page.locator("#p48-format-hint").inner_text()
+        assert not page.locator("#p48-bordercolor").is_visible()
+        assert not page.locator("#p48-borderwidth").is_visible()
+        page.locator("#p48-link-width").select_option("4")
+        page.wait_for_timeout(30)
+        assert float(page.evaluate("() => window.__mapliniTestState.link(0)[3].width")) == 4
+
+        # Node delete control must not appear for connector-only selection.
+        assert not page.locator("#p48-delete-node").is_visible()
+
         path_before = page.locator("#p48-links .p48-link-visible").first.get_attribute("d")
         free_before_node_move = page.evaluate("() => ({dx:Number(window.__mapliniTestState.link(0)[3].freeDx||0),dy:Number(window.__mapliniTestState.link(0)[3].freeDy||0)})")
         node = page.locator('.p48-node[data-id="n1"]').first
@@ -116,6 +151,9 @@ def run() -> None:
         page.mouse.up()
         page.wait_for_timeout(60)
         path_after = page.locator("#p48-links .p48-link-visible").first.get_attribute("d")
+        assert page.locator("#p48-format-title").inner_text().strip() == "Ruta"
+        assert "markerade rutan" in page.locator("#p48-format-hint").inner_text()
+        assert page.locator("#p48-delete-node").is_visible(), "Delete-node action did not appear for a selected node"
         free_after_node_move = page.evaluate("() => ({dx:Number(window.__mapliniTestState.link(0)[3].freeDx||0),dy:Number(window.__mapliniTestState.link(0)[3].freeDy||0)})")
         assert path_before != path_after, "Connector endpoint/path did not follow moved node"
         assert abs(free_before_node_move["dx"] - free_after_node_move["dx"]) < 0.01
@@ -190,6 +228,39 @@ def run() -> None:
         first_node = page.locator("#p48-canvas .p48-node").first
         assert "start" in (first_node.get_attribute("class") or "")
         assert not page.locator("#p48-empty-state").is_visible()
+
+        # v0.15.7 typography cleanup: keep seven focused choices but preserve
+        # a legacy font from an older saved process when it is encountered.
+        assert page.locator("#p48-font option").count() == 7
+        page.evaluate("() => window.__mapliniTestState.syncFont('Caveat')")
+        assert page.locator('#p48-font option[value="Caveat"]').count() == 1
+        assert page.locator('#p48-font option[value="Caveat"]').inner_text().startswith("Tidigare typsnitt:")
+        assert page.locator("#p48-font").input_value() == "Caveat"
+        page.evaluate("() => window.__mapliniTestState.syncFont('Inter')")
+        assert page.locator("#p48-font option").count() == 7
+        assert page.locator("#p48-font").input_value() == "Inter"
+
+        # v0.15.8 canvas cleanup: five focused background choices, while a legacy
+        # background remains selectable when an older saved process uses it.
+        assert page.locator("#p48-bg-type option").count() == 5
+        page.evaluate("() => window.__mapliniTestState.syncBackground('texture-paper')")
+        assert page.locator('#p48-bg-type option[value="texture-paper"]').count() == 1
+        assert (page.locator('#p48-bg-type option[value="texture-paper"]').text_content() or '').startswith("Tidigare bakgrund:")
+        assert page.locator("#p48-bg-type").input_value() == "texture-paper"
+        page.evaluate("() => window.__mapliniTestState.syncBackground('solid')")
+        assert page.locator("#p48-bg-type option").count() == 5
+        assert page.locator("#p48-bg-type").input_value() == "solid"
+
+        # v0.15.9 node style cleanup: three focused choices, but older saved
+        # 3D/glass styles remain represented without being rewritten.
+        assert page.locator("#p48-node-style option").count() == 3
+        page.evaluate("() => window.__mapliniTestState.syncNodeStyle('glass')")
+        assert page.locator('#p48-node-style option[value="glass"]').count() == 1
+        assert (page.locator('#p48-node-style option[value="glass"]').text_content() or '').startswith("Tidigare rutstil:")
+        assert page.locator("#p48-node-style").input_value() == "glass"
+        page.evaluate("() => window.__mapliniTestState.syncNodeStyle('standard')")
+        assert page.locator("#p48-node-style option").count() == 3
+        assert page.locator("#p48-node-style").input_value() == "standard"
 
         # v0.15.2 New Process UX: use the real Maplini dialog rather than browser prompt.
         page.locator("#p48-new").click()
