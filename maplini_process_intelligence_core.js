@@ -28,7 +28,8 @@ const ACTIONS={
   merge_bottleneck:'Kontrollera om alla inkommande vägar behöver mötas här och om ansvar eller väntetid behöver tydliggöras.',
   fanout:'Kontrollera att varje utgående gren behövs och märk gärna alternativen så att vägvalet blir tydligt.',
   loop:'Kontrollera att återkopplingen är avsiktlig och ange vad som gör att processen lämnar loopen.',
-  long_chain:'Se om flera steg kan slås ihop, grupperas eller beskrivas enklare utan att tappa viktig information.'
+  long_chain:'Se om flera steg kan slås ihop, grupperas eller beskrivas enklare utan att tappa viktig information.',
+  direct_activity:'Kontrollera vad den första aktiviteten producerar. Lägg in resultatet som ett Objekt mellan aktiviteterna om det är det som triggar nästa steg.'
 };
 function priorityLabel(severity){return severity==='error'?'Åtgärda först':severity==='warning'?'Kontrollera':'Förbättring';}
 function finding(code,severity,title,detail,nodeIds=[],meta={}){
@@ -80,6 +81,18 @@ function analyze(nodes,links,options={}){
   if(!starts.length)findings.push(finding('missing_start','error','Processen saknar Start','Lägg till minst en tydlig startpunkt.'));
   else if(starts.length>1)findings.push(finding('multiple_starts','warning',`${starts.length} startpunkter`,'Kontrollera att flera startpunkter är avsiktliga.',starts.map(n=>n.id)));
   if(!ends.length)findings.push(finding('missing_end','error','Processen saknar Slut','Lägg till minst en tydlig slutpunkt.'));
+
+  for(const l of L){
+    const from=byId.get(l.from),to=byId.get(l.to);
+    if(from&&to&&from.type==='process'&&to.type==='process'){
+      findings.push(finding(
+        'direct_activity','warning',
+        `Aktiviteter kopplade direkt: ${from.text||'Aktivitet'} → ${to.text||'Aktivitet'}`,
+        'Direktkopplade aktiviteter kan dölja vilket resultat eller behov som faktiskt gör att nästa aktivitet kan börja.',
+        [from.id,to.id],{linkIndex:l.index}
+      ));
+    }
+  }
 
   for(const n of active){
     const inc=inMap.get(n.id)||[],out=outMap.get(n.id)||[];

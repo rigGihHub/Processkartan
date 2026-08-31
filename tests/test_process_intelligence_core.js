@@ -31,7 +31,7 @@ r=P.analyze([{id:'n',type:'note',text:'Notering'}],[]);
 assert(!r.findings.some(f=>f.code==='isolated'),'notes are annotations, not structural errors');
 console.log('process intelligence core ok');
 
-// v0.15.11 actionable guidance contract
+// v0.16.1 actionable guidance contract
 r=P.analyze([
  {id:'s',type:'start',text:'Start'},
  {id:'a',type:'process',text:'A'}
@@ -42,3 +42,18 @@ assert(dead.priority==='Åtgärda först');
 const missEnd=r.findings.find(f=>f.code==='missing_end');
 assert(missEnd && missEnd.action.includes('Slut'));
 console.log('actionable guidance contract ok');
+
+{
+  const nodes=[
+    {id:'a',type:'start',text:'Start'},
+    {id:'b',type:'process',text:'Granska'},
+    {id:'c',type:'process',text:'Skicka'},
+    {id:'d',type:'end',text:'Slut'}
+  ];
+  const links=[['a','b','right',{}],['b','c','right',{}],['c','d','right',{}]];
+  const r=MapliniProcessIntelligenceCore.analyze(nodes,links,{longChainThreshold:5});
+  const f=r.findings.find(x=>x.code==='direct_activity');
+  if(!f)throw new Error('direct activity dependency finding missing');
+  if(f.severity!=='warning')throw new Error('direct activity should be warning');
+  if(f.meta.linkIndex!==1)throw new Error('direct activity should expose link index');
+}

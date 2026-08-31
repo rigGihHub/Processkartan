@@ -5,7 +5,7 @@ function finiteNumber(v,fallback,min,max){const n=Number(v);return Number.isFini
 function safeString(v,fallback,maxLen){const s=typeof v==='string'?v:fallback;return s.slice(0,maxLen);}
 function normalizeNode(n,index){
   n=(n&&typeof n==='object')?clone(n):{};
-  const allowed=new Set(['start','process','decision','end','subprocess','group','note','document']);
+  const allowed=new Set(['start','object','process','decision','end','subprocess','group','note','document']);
   const type=allowed.has(n.type)?n.type:'process';
   const id=safeString(n.id||('node-'+(index+1)),'node-'+(index+1),120);
   return Object.assign({},n,{id,type,text:safeString(n.text||n.label||'','',5000),

@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.15.11"
+APP_VERSION = "0.16.1"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -388,6 +388,15 @@ html = r"""
 .p48-node,.p48-handle,.p48-resize,.p48-link-hit-segment{touch-action:none}
 .p48-scroll{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 button,summary,select,input{-webkit-tap-highlight-color:transparent}
+
+/* v0.16.0 method-first palette */
+.p48-method-flow{display:flex;align-items:center;justify-content:center;gap:5px;margin:8px 0 10px;padding:7px 5px;border-radius:8px;background:#f1f7f5;color:#315d51;font:700 9px/1.2 Inter,system-ui}
+.p48-method-flow b{color:#83948f}
+.p48-item-core{min-height:48px!important}
+.p48-item-core>span:last-child{display:flex;flex-direction:column;gap:2px}
+.p48-item-core small{display:block;font:500 9px/1.2 Inter,system-ui;color:#6d7b86}
+.p48-item-object{border-color:#a9c8cf!important;background:#f8fbfc!important}
+.p48-palette-more-label{margin:12px 0 5px;padding-top:9px;border-top:1px solid #e3e9ed;color:#71808b;font:800 9px/1 Inter,system-ui;text-transform:uppercase;letter-spacing:.08em}
 
 /* v0.15.11 empty-process first view — must live inside the editor iframe. */
 .p48-empty-state{
@@ -953,6 +962,16 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-node.decision.p48-style-flat::before{box-shadow:none!important}
 .p48-label{display:block;width:100%;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;line-height:1.28;cursor:text;outline:none}
 .p48-label[contenteditable="true"]{user-select:text;-webkit-user-select:text;cursor:text;min-width:40px}
+.p48-node.object{
+  min-width:150px;max-width:280px;min-height:42px;padding:10px 14px;
+  border:2px solid #0d596c;border-radius:8px;background:#f7fbfc;color:#173e49;
+  font-weight:700;
+}
+.p48-node.object::before{
+  content:"";position:absolute;left:-7px;top:50%;width:12px;height:12px;
+  transform:translateY(-50%);border-radius:2px;background:#0d596c;
+}
+.p48-node.object .p48-label{text-align:center}
 .p48-node.start,.p48-node.end{border-radius:38px}.p48-node.start{border-color:#2b7b61}.p48-node.end{border-color:#985148}
 .p48-node.decision{
   min-width:150px;
@@ -1310,13 +1329,17 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
       <div id="p48-processes" class="p48-list"></div>
     </div>
 
-    <div class="p48-section">
-      <div class="p48-title">Lägg till på arbetsytan</div>
-      <div class="p48-palette-hint">Tryck på en form för att lägga till den. På dator kan du även dra.</div>
-      <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Start" title="Dra eller tryck för att lägga till" data-type="start"><span class="p48-icon">▶</span>Start</div>
-      <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Aktivitet" title="Dra eller tryck för att lägga till" data-type="process"><span class="p48-icon">□</span>Aktivitet</div>
+    <div class="p48-section p48-method-palette">
+      <div class="p48-title">Bygg processen</div>
+      <div class="p48-palette-hint">Grundflödet är <strong>Objekt → Aktivitet → Objekt</strong>. Ett resultat kan bli nästa aktivitets input.</div>
+      <div class="p48-method-flow" aria-label="Processens grundmodell"><span>▪ Objekt in</span><b>→</b><span>▭ Aktivitet</span><b>→</b><span>▪ Objekt ut</span></div>
+      <div class="p48-item p48-item-core p48-item-object" draggable="true" role="button" tabindex="0" aria-label="Lägg till Objekt in" title="Det som triggar eller behövs före en aktivitet" data-type="object"><span class="p48-icon">▪</span><span><strong>Objekt in</strong><small>Trigger / det som behövs</small></span></div>
+      <div class="p48-item p48-item-core" draggable="true" role="button" tabindex="0" aria-label="Lägg till Aktivitet" title="Det som görs och transformerar objekt" data-type="process"><span class="p48-icon">▭</span><span><strong>Aktivitet</strong><small>Det som görs</small></span></div>
+      <div class="p48-item p48-item-core p48-item-object" draggable="true" role="button" tabindex="0" aria-label="Lägg till Objekt ut" title="Resultatet från en aktivitet" data-type="object"><span class="p48-icon">▪</span><span><strong>Objekt ut</strong><small>Resultat / det som blir</small></span></div>
+      <div class="p48-palette-more-label">Fler typer</div>
+      <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Start" title="Markera processens gräns" data-type="start"><span class="p48-icon">▶</span>Start</div>
       <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Beslut" title="Dra eller tryck för att lägga till" data-type="decision"><span class="p48-icon">◇</span>Beslut</div>
-      <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Slut" title="Dra eller tryck för att lägga till" data-type="end"><span class="p48-icon">■</span>Slut</div>
+      <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Slut" title="Markera processens gräns" data-type="end"><span class="p48-icon">■</span>Slut</div>
       <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Delprocess" title="Dra eller tryck för att lägga till" data-type="subprocess"><span class="p48-icon">▣</span>Delprocess</div>
       <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Anteckning" title="Dra eller tryck för att lägga till" data-type="note"><span class="p48-icon">N</span>Anteckning</div>
       <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Dokument" title="Dra eller tryck för att lägga till" data-type="document"><span class="p48-icon">📄</span>Dokument</div>
@@ -1428,7 +1451,8 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
           <div class="p48-insert-step-wrap" id="p48-insert-step-wrap">
             <button id="p48-insert-link-step" class="p48-insert-link-step" type="button" aria-haspopup="true" aria-expanded="false">＋ Infoga steg</button>
             <div id="p48-insert-step-menu" class="p48-insert-step-menu" hidden>
-              <button type="button" class="p48-insert-step-choice" data-insert-type="process">□ Aktivitet</button>
+              <button type="button" class="p48-insert-step-choice" data-insert-type="object">▪ Objekt / resultat</button>
+              <button type="button" class="p48-insert-step-choice" data-insert-type="process">▭ Aktivitet</button>
               <button type="button" class="p48-insert-step-choice" data-insert-type="decision">◇ Beslut</button>
               <button type="button" class="p48-insert-step-choice" data-insert-type="document">📄 Dokument</button>
               <button type="button" class="p48-insert-step-choice" data-insert-type="end">■ Slut</button>
@@ -1445,13 +1469,13 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
     <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><div id="p48-empty-state" class="p48-empty-state" hidden>
       <div class="p48-empty-card">
         <div class="p48-empty-kicker">NY PROCESS</div>
-        <div class="p48-empty-title">Börja med första steget</div>
-        <div class="p48-empty-copy">Lägg till en startpunkt eller börja direkt med en aktivitet. Du kan ändra allt efteråt.</div>
+        <div class="p48-empty-title">Vad startar processen?</div>
+        <div class="p48-empty-copy">Börja med det som triggar processen. Bygg sedan <strong>Objekt → Aktivitet → Objekt</strong>.</div>
         <div class="p48-empty-actions">
-          <button type="button" class="primary" id="p48-empty-start">▶ Lägg till Start</button>
-          <button type="button" id="p48-empty-activity">□ Lägg till Aktivitet</button>
+          <button type="button" class="primary" id="p48-empty-object">▪ Lägg till Objekt in</button>
+          <button type="button" id="p48-empty-activity">▭ Börja med Aktivitet</button>
         </div>
-        <div class="p48-empty-tip">Tips: markera sedan en ruta och välj <strong>＋ Nästa</strong> för att bygga vidare snabbt.</div>
+        <div class="p48-empty-tip">Tips: ett objekts resultat kan bli input till nästa aktivitet. <strong>＋ Nästa</strong> föreslår rätt typ.</div>
       </div>
     </div><div id="p48-canvas-watermark" class="p48-canvas-watermark" aria-hidden="true"></div><img id="p48-process-logo" class="p48-process-logo" alt="Processlogotype"><div id="p48-link-hit-layer" class="p48-link-hit-layer"></div><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-link-quick" class="p48-link-quick" role="toolbar" aria-label="Snabbval för pil"><button type="button" data-link-routing="straight" title="Gör pilen rak">— Rak</button><button type="button" data-link-routing="orthogonal" title="Gör pilen vinkelrät">⌜ Vinkelrät</button><button type="button" data-link-routing="free" title="Flytta pilens bana fritt">↝ Fri</button></div><div id="p48-node-quick" class="p48-node-quick" role="toolbar" aria-label="Snabbval för markerade rutor" data-mode="single"><button type="button" id="p48-node-quick-next" data-single-only title="Lägg till nästa steg">＋ Nästa</button><button type="button" id="p48-node-quick-format" title="Visa formatering">Formatera</button><label class="p48-quick-color-label" data-multi-only title="Ändra bakgrundsfärg för markerade"><input type="color" id="p48-node-quick-color" value="#ffffff"> Färg</label><button type="button" id="p48-node-quick-duplicate" title="Duplicera markerade">Duplicera</button><button type="button" id="p48-node-quick-delete" class="danger" title="Ta bort markerade">Ta bort</button></div><div id="p48-print-frame" class="p48-print-frame"></div>
       <div id="p48-marquee" class="p48-marquee"></div>
@@ -1546,7 +1570,7 @@ function clearRuntimeError(){if(runtimeErrorEl){runtimeErrorEl.hidden=true;runti
    Explicit Maplini operations still call reportRuntimeError() with the banner enabled. */
 window.addEventListener('error',e=>reportRuntimeError(e.error||e.message,'window.error',false));
 window.addEventListener('unhandledrejection',e=>reportRuntimeError(e.reason,'unhandledrejection',false));
-const canvas=root.querySelector('#p48-canvas'),scroll=root.querySelector('#p48-scroll'),emptyState=root.querySelector('#p48-empty-state'),emptyStart=root.querySelector('#p48-empty-start'),emptyActivity=root.querySelector('#p48-empty-activity'),linkLayer=root.querySelector('#p48-links'),temp=root.querySelector('#p48-temp');
+const canvas=root.querySelector('#p48-canvas'),scroll=root.querySelector('#p48-scroll'),emptyState=root.querySelector('#p48-empty-state'),emptyObject=root.querySelector('#p48-empty-object'),emptyActivity=root.querySelector('#p48-empty-activity'),linkLayer=root.querySelector('#p48-links'),temp=root.querySelector('#p48-temp');
 const mobileToolsBtn=root.querySelector('#p48-mobile-tools'),mobileBackdrop=root.querySelector('#p48-mobile-backdrop'),sidePanel=root.querySelector('#p48-side');
 const mobileBar=root.querySelector('#p48-mobile-bar'),mobileAdd=root.querySelector('#p48-mobile-add'),mobileUndo=root.querySelector('#p48-mobile-undo'),mobileRedo=root.querySelector('#p48-mobile-redo'),mobileFit=root.querySelector('#p48-mobile-fit'),mobileFullscreen=root.querySelector('#p48-mobile-fullscreen'),mobileMore=root.querySelector('#p48-mobile-more'),mobileNext=root.querySelector('#p48-mobile-next'),mobileFormat=root.querySelector('#p48-mobile-format'),mobileDuplicate=root.querySelector('#p48-mobile-duplicate'),mobileContext=root.querySelector('#p48-mobile-context'),mobileDelete=root.querySelector('#p48-mobile-delete');
 const mobileSheet=root.querySelector('#p48-mobile-sheet'),mobileSheetBackdrop=root.querySelector('#p48-mobile-sheet-backdrop'),mobileSheetClose=root.querySelector('#p48-mobile-sheet-close'),mobileSheetTitle=root.querySelector('#p48-mobile-sheet-title'),mobileAddSheet=root.querySelector('#p48-mobile-add-sheet'),mobileSheetRedo=root.querySelector('#p48-mobile-sheet-redo'),mobileSheetFullscreen=root.querySelector('#p48-mobile-sheet-fullscreen'),mobileContextSheet=root.querySelector('#p48-mobile-context-sheet'),mobileOpenTools=root.querySelector('#p48-mobile-open-tools'),mobileSheetTools=root.querySelector('#p48-mobile-sheet-tools'),mobileSheetCopy=root.querySelector('#p48-mobile-sheet-copy'),mobileSheetFormat=root.querySelector('#p48-mobile-sheet-format'),mobileSheetLayoutH=root.querySelector('#p48-mobile-sheet-layout-h'),mobileSheetLayoutV=root.querySelector('#p48-mobile-sheet-layout-v'),mobileSheetDelete=root.querySelector('#p48-mobile-sheet-delete');
@@ -2647,7 +2671,7 @@ async function deleteProcess(id){
     msg('Process raderad lokalt – molnradering misslyckades');
   }
 }
-function nodeText(t){return{start:'Start',process:'Ny aktivitet',decision:'Beslut?',end:'Slut',subprocess:'Ny delprocess',group:'Ny grupp / område',note:'Anteckning',document:'Dokument'}[t]||'Nytt steg'}
+function nodeText(t){return{start:'Start',object:'Nytt objekt',process:'Ny aktivitet',decision:'Beslut?',end:'Slut',subprocess:'Ny delprocess',group:'Ny grupp / område',note:'Anteckning',document:'Dokument'}[t]||'Nytt steg'}
 function place(el,x,y){const p=MapliniCanvasCore.place(x,y,el.offsetWidth,el.offsetHeight);el.style.left=p.x+'px';el.style.top=p.y+'px'}
 function sync(el){const x=nodes.get(el.dataset.id);if(x){x.data.x=parseFloat(el.style.left)||0;x.data.y=parseFloat(el.style.top)||0}}
 function center(el){return[(parseFloat(el.style.left)||0)+el.offsetWidth/2,(parseFloat(el.style.top)||0)+el.offsetHeight/2]}
@@ -3002,7 +3026,12 @@ const resizeHandles={};for(const corner of ['se','sw','ne','nw']){const rh=docum
 const nextWrap=document.createElement('div');nextWrap.className='p48-next-step-wrap';
 const nextBtn=document.createElement('button');nextBtn.type='button';nextBtn.className='p48-next-step-btn';nextBtn.textContent='＋';nextBtn.title='Lägg till nästa steg';nextBtn.setAttribute('aria-label','Lägg till nästa steg');nextBtn.setAttribute('aria-haspopup','true');nextBtn.setAttribute('aria-expanded','false');
 const nextMenu=document.createElement('div');nextMenu.className='p48-next-step-menu';nextMenu.hidden=true;
-for(const [type,caption] of [['process','□ Aktivitet'],['decision','◇ Beslut'],['document','📄 Dokument'],['end','■ Slut']]){const b=document.createElement('button');b.type='button';b.className='p48-next-step-choice';b.dataset.nextType=type;b.textContent=caption;nextMenu.appendChild(b)}
+const nextChoices=d.type==='process'
+  ? [['object','▪ Objekt / resultat'],['decision','◇ Beslut'],['document','📄 Dokument'],['end','■ Slut']]
+  : d.type==='object'
+    ? [['process','▭ Aktivitet'],['decision','◇ Beslut'],['end','■ Slut']]
+    : [['object','▪ Objekt'],['process','▭ Aktivitet'],['decision','◇ Beslut'],['document','📄 Dokument'],['end','■ Slut']];
+for(const [type,caption] of nextChoices){const b=document.createElement('button');b.type='button';b.className='p48-next-step-choice';b.dataset.nextType=type;b.textContent=caption;nextMenu.appendChild(b)}
 nextWrap.append(nextBtn,nextMenu);el.appendChild(nextWrap);
 canvas.appendChild(el);nodes.set(d.id,{el,data:d,label,handles,resizeHandles,io:null,docOpen:null,docInlineEditor:null,docInlineInput:null,nextWrap,nextBtn,nextMenu});refreshEmptyState();applyStyle(nodes.get(d.id));renderNodeIO(nodes.get(d.id));renderDocumentLink(nodes.get(d.id));
 nextBtn.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault()});
@@ -3101,7 +3130,13 @@ Object.values(handles).forEach(h=>h.addEventListener('pointerdown',e=>{
     finishTempArrow();
     if(!ev)return;
     const target=document.elementFromPoint(ev.clientX,ev.clientY)?.closest('.p48-node');
-    if(target&&target!==el){pushUndo();const autoLabel=decisionAutoLabel(el.dataset.id);links.push(MapliniConnectorCore.create(el.dataset.id,target.dataset.id,side,{label:autoLabel}));requestFullLinkRender();persist()}
+    if(target&&target!==el){
+      pushUndo();const autoLabel=decisionAutoLabel(el.dataset.id);
+      links.push(MapliniConnectorCore.create(el.dataset.id,target.dataset.id,side,{label:autoLabel}));
+      const newIndex=links.length-1;
+      requestFullLinkRender();persist();
+      coachDirectActivityLink(newIndex);
+    }
   };
   const cancel=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',finish);document.removeEventListener('pointercancel',cancel);finishTempArrow()};
   document.addEventListener('pointermove',mv);document.addEventListener('pointerup',finish);document.addEventListener('pointercancel',cancel);
@@ -3109,11 +3144,11 @@ Object.values(handles).forEach(h=>h.addEventListener('pointerdown',e=>{
 return el}
 
 function addNode(type,x,y){if(!requireEdit())return;pushUndo();seq++;const el=makeNode({id:'n'+seq,type,text:nodeText(type),x:x-90,y:y-38});place(el,x-90,y-38);sync(el);select(el);drawLinks();persist()}
-function isNextStepSource(item){return Boolean(item&&['start','process','decision','document','subprocess'].includes(String(item.data&&item.data.type||'')))}
+function isNextStepSource(item){return Boolean(item&&['start','object','process','decision','document','subprocess'].includes(String(item.data&&item.data.type||'')))}
 function closeNodeNextMenus(exceptWrap=null){for(const item of nodes.values()){if(!item.nextMenu||item.nextMenu.hidden||item.nextWrap===exceptWrap)continue;item.nextMenu.hidden=true;if(item.nextBtn)item.nextBtn.setAttribute('aria-expanded','false')}}
 function addNextStepFromNode(sourceId,type='process'){
   if(!requireEdit())return false;
-  const allowed=new Set(['process','decision','document','end']);type=allowed.has(String(type))?String(type):'process';
+  const allowed=new Set(['object','process','decision','document','end']);type=allowed.has(String(type))?String(type):'process';
   const source=nodes.get(sourceId);if(!isNextStepSource(source)){msg('Det går inte att lägga ett nästa steg här');return false}
   pushUndo(true);seq++;const id='n'+seq;
   const el=makeNode({id,type,text:nodeText(type),x:0,y:0});
@@ -3123,7 +3158,7 @@ function addNextStepFromNode(sourceId,type='process'){
   el.style.left=pos.x+'px';el.style.top=pos.y+'px';sync(el);
   const autoLabel=decisionAutoLabel(sourceId);links.push(MapliniConnectorCore.create(sourceId,id,'right',{label:autoLabel}));
   closeNodeNextMenus();select(el);requestFullLinkRender(true);persist();refreshControls();refreshLinkControls();updateSelectionUi();
-  const names={process:'Aktivitet',decision:'Beslut',document:'Dokument',end:'Slut'};msg((names[type]||'Steg')+' tillagt');
+  const names={object:'Objekt',process:'Aktivitet',decision:'Beslut',document:'Dokument',end:'Slut'};msg((names[type]||'Steg')+' tillagt');
   requestAnimationFrame(()=>beginInlineEdit(el));return true;
 }
 
@@ -3200,6 +3235,17 @@ function selectLink(i,deferRender=false){
   refreshLinkControls();
   if(!deferRender)requestFullLinkRender(true);
 }
+function coachDirectActivityLink(index){
+  const link=index!=null?links[index]:null;
+  if(!link)return false;
+  const from=nodes.get(link[0])?.data,to=nodes.get(link[1])?.data;
+  if(!from||!to||from.type!=='process'||to.type!=='process')return false;
+  selectLink(index,true);
+  setInsertStepMenu(true);
+  msg('Två aktiviteter är kopplade direkt. Vad är resultatet från den första som gör att nästa kan börja? Välj “Objekt / resultat”.');
+  requestFullLinkRender(true);
+  return true;
+}
 function setInsertStepMenu(open){
   if(!insertLinkStepMenu||!insertLinkStepBtn)return;
   const show=!!open&&selectedLinkIndex!=null&&canEdit();
@@ -3208,7 +3254,7 @@ function setInsertStepMenu(open){
 }
 function insertStepOnSelectedLink(type='process'){
   if(!requireEdit())return false;
-  const allowed=new Set(['process','decision','document','end']);
+  const allowed=new Set(['object','process','decision','document','end']);
   type=allowed.has(String(type))?String(type):'process';
   const index=selectedLinkIndex;
   const link=index!=null?links[index]:null;
@@ -3227,7 +3273,7 @@ function insertStepOnSelectedLink(type='process'){
   setInsertStepMenu(false);
   select(el);
   requestFullLinkRender(true);persist();refreshControls();refreshLinkControls();updateSelectionUi();
-  const names={process:'Aktivitet',decision:'Beslut',document:'Dokument',end:'Slut'};
+  const names={object:'Objekt',process:'Aktivitet',decision:'Beslut',document:'Dokument',end:'Slut'};
   msg((names[type]||'Steg')+' infogat på pilen');
   requestAnimationFrame(()=>beginInlineEdit(el));
   return true;
@@ -4331,7 +4377,7 @@ function addFromPalette(item,{closeMobile=false}={}){
   if(closeMobile)setMobileTools(false);
   msg('Form tillagd');
 }
-if(emptyStart)emptyStart.addEventListener('click',()=>addFirstStep('start'));
+if(emptyObject)emptyObject.addEventListener('click',()=>addFirstStep('object'));
 if(emptyActivity)emptyActivity.addEventListener('click',()=>addFirstStep('process'));
 root.querySelectorAll('.p48-item').forEach(i=>{
   i.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',i.dataset.type);e.dataTransfer.effectAllowed='copy'});

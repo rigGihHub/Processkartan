@@ -1,3 +1,26 @@
+## v0.16.1 – Dependency Coach
+- Added a process-method warning for direct Activity → Activity links.
+- When a user manually connects two activities directly, Maplini selects the new connector, opens `Infoga steg`, and asks what result from the first activity enables the next.
+- Added `Objekt / resultat` as the first insert-on-connector option.
+- `Infoga steg` can now insert the new Object node type and split the existing connector automatically.
+- Process Check now flags each direct Activity → Activity link as a warning with concrete guidance to identify the missing result/input.
+- Findings include the affected node IDs and connector index for future one-click fixes.
+- Object-based flows are not flagged.
+- No database, Supabase or migration changes.
+
+## v0.16.0 – Object → Activity → Object
+- Introduced `Objekt` as a first-class process node alongside Activity.
+- Reframed the main palette around the process method `Objekt → Aktivitet → Objekt`.
+- Added clear beginner-facing choices for `Objekt in`, `Aktivitet` and `Objekt ut`; input/output are the same underlying object type so an activity result can naturally become the next activity's input.
+- Moved Start, Decision, End, Subprocess, Note and Document under `Fler typer`.
+- Added a compact visual method guide directly in the palette.
+- Empty processes now ask `Vad startar processen?` and lead with `Objekt in`.
+- Object nodes use a distinct compact visual language from activities.
+- `+ Nästa` is context-aware: after an Activity it prioritizes an Object/result; after an Object it prioritizes an Activity.
+- State normalization now preserves the new `object` node type.
+- Existing process node types and saved processes remain backward compatible.
+- No database, Supabase or migration changes.
+
 ## v0.15.11 – First View & A4 Portrait Default
 - Fixed the empty-process onboarding so its card styling is present inside the embedded editor iframe instead of only in Streamlit's parent document.
 - New/empty processes now show a centered, clearly designed start card rather than raw text at the top-left of the canvas.

@@ -52,13 +52,13 @@ def extract_editor_html() -> str:
     for token, filename in CORE_REPLACEMENTS.items():
         html = html.replace(token, (ROOT / filename).read_text(encoding="utf-8"))
     html = html.replace("__MAPLINI_LOGO__", "")
-    html = html.replace("__MAPLINI_VERSION__", "0.15.11")
+    html = html.replace("__MAPLINI_VERSION__", "0.16.1")
     html = html.replace("__SUPABASE_URL__", "")
     html = html.replace("__SUPABASE_ANON_KEY__", "")
     html = html.replace("__PUBLIC_APP_URL__", "https://example.invalid")
     html = html.replace("__SHARE_TOKEN__", "")
     test_hook = "let pdfView='A4P',pageCountMode='auto',canvasScale=1,canvasLogicalWidth=2400,canvasLogicalHeight=1400;"
-    html = html.replace(test_hook, test_hook + "window.__mapliniTestState={link:i=>JSON.parse(JSON.stringify(links[i])),scale:()=>canvasScale,node:id=>JSON.parse(JSON.stringify(nodes.get(id)?.data||null)),nodes:()=>[...nodes.values()].map(x=>JSON.parse(JSON.stringify(x.data))),links:()=>JSON.parse(JSON.stringify(links)),clear:()=>clearCanvas(),syncFont:value=>syncFontSelect(value),syncBackground:value=>syncBackgroundTypeSelect(value),syncNodeStyle:value=>syncNodeStyleSelect(value)};")
+    html = html.replace(test_hook, test_hook + "window.__mapliniTestState={link:i=>JSON.parse(JSON.stringify(links[i])),scale:()=>canvasScale,node:id=>JSON.parse(JSON.stringify(nodes.get(id)?.data||null)),nodes:()=>[...nodes.values()].map(x=>JSON.parse(JSON.stringify(x.data))),links:()=>JSON.parse(JSON.stringify(links)),clear:()=>clearCanvas(),syncFont:value=>syncFontSelect(value),syncBackground:value=>syncBackgroundTypeSelect(value),syncNodeStyle:value=>syncNodeStyleSelect(value),coachDirect:(from,to)=>{links.push(MapliniConnectorCore.create(from,to,'right',{}));coachDirectActivityLink(links.length-1);return links.length-1},addNode:(type,x,y)=>addNode(type,x,y)};")
     return html
 
 
@@ -262,6 +262,13 @@ def run() -> None:
         page.evaluate("() => window.__mapliniTestState.syncBackground('solid')")
         assert page.locator("#p48-bg-type option").count() == 5
         assert page.locator("#p48-bg-type").input_value() == "solid"
+
+        # v0.16.0 process method: Object and Activity are first-class building blocks.
+        assert page.locator('[data-type="object"]').count() >= 2
+        page.evaluate("() => window.__mapliniTestState.clear()")
+        page.locator("#p48-empty-object").click()
+        assert page.locator("#p48-canvas .p48-node.object").count() == 1
+        assert page.locator("#p48-canvas .p48-node.object").first.is_visible()
 
         # v0.15.11 first view: empty process guidance is a styled card and A4 portrait is default.
         assert page.locator("#p48-pdf-view").input_value() == "A4P"
