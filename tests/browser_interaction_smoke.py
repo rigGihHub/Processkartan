@@ -52,13 +52,13 @@ def extract_editor_html() -> str:
     for token, filename in CORE_REPLACEMENTS.items():
         html = html.replace(token, (ROOT / filename).read_text(encoding="utf-8"))
     html = html.replace("__MAPLINI_LOGO__", "")
-    html = html.replace("__MAPLINI_VERSION__", "0.16.4")
+    html = html.replace("__MAPLINI_VERSION__", "0.16.5")
     html = html.replace("__SUPABASE_URL__", "")
     html = html.replace("__SUPABASE_ANON_KEY__", "")
     html = html.replace("__PUBLIC_APP_URL__", "https://example.invalid")
     html = html.replace("__SHARE_TOKEN__", "")
     test_hook = "let pdfView='A4P',pageCountMode='auto',canvasScale=1,canvasLogicalWidth=2400,canvasLogicalHeight=1400,processScalePercent=100,processScaleGesture=false;"
-    html = html.replace(test_hook, test_hook + "window.__mapliniTestState={link:i=>JSON.parse(JSON.stringify(links[i])),scale:()=>canvasScale,node:id=>JSON.parse(JSON.stringify(nodes.get(id)?.data||null)),nodes:()=>[...nodes.values()].map(x=>JSON.parse(JSON.stringify(x.data))),links:()=>JSON.parse(JSON.stringify(links)),clear:()=>clearCanvas(),syncFont:value=>syncFontSelect(value),syncBackground:value=>syncBackgroundTypeSelect(value),syncNodeStyle:value=>syncNodeStyleSelect(value),coachDirect:(from,to)=>{links.push(MapliniConnectorCore.create(from,to,'right',{}));coachDirectActivityLink(links.length-1);return links.length-1},addNode:(type,x,y)=>addNode(type,x,y)};")
+    html = html.replace(test_hook, test_hook + "window.__mapliniTestState={link:i=>JSON.parse(JSON.stringify(links[i])),scale:()=>canvasScale,node:id=>JSON.parse(JSON.stringify(nodes.get(id)?.data||null)),nodes:()=>[...nodes.values()].map(x=>JSON.parse(JSON.stringify(x.data))),links:()=>JSON.parse(JSON.stringify(links)),clear:()=>clearCanvas(),syncFont:value=>syncFontSelect(value),syncBackground:value=>syncBackgroundTypeSelect(value),syncNodeStyle:value=>syncNodeStyleSelect(value),coachDirect:(from,to)=>{links.push(MapliniConnectorCore.create(from,to,'right',{}));coachDirectActivityLink(links.length-1);return links.length-1},addNode:(type,x,y)=>addNode(type,x,y),connect:(from,to)=>{links.push(MapliniConnectorCore.create(from,to,'right',{}));requestFullLinkRender(true);return links.length-1},linkStyle:i=>JSON.parse(JSON.stringify(linkStyle(links[i])))};")
     return html
 
 

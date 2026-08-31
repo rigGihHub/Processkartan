@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.16.4"
+APP_VERSION = "0.16.5"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -388,6 +388,12 @@ html = r"""
 .p48-node,.p48-handle,.p48-resize,.p48-link-hit-segment{touch-action:none}
 .p48-scroll{overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 button,summary,select,input{-webkit-tap-highlight-color:transparent}
+
+/* v0.16.5 magnetic alignment — invisible grid with temporary snap guides */
+.p48-snap-guide{position:absolute;z-index:4;pointer-events:none;background:rgba(31,111,85,.52)}
+.p48-snap-guide[hidden]{display:none!important}
+.p48-snap-guide-x{left:0;width:100%;height:1px}
+.p48-snap-guide-y{top:0;height:100%;width:1px}
 
 /* v0.16.2 process scale quick access */
 .p48-scale-menu-top>summary{font-weight:750}
@@ -1490,7 +1496,8 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
         </div>
         <div class="p48-empty-tip">Tips: ett objekts resultat kan bli input till nästa aktivitet. <strong>＋ Nästa</strong> föreslår rätt typ.</div>
       </div>
-    </div><div id="p48-canvas-watermark" class="p48-canvas-watermark" aria-hidden="true"></div><img id="p48-process-logo" class="p48-process-logo" alt="Processlogotype"><div id="p48-link-hit-layer" class="p48-link-hit-layer"></div><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-link-quick" class="p48-link-quick" role="toolbar" aria-label="Snabbval för pil"><button type="button" data-link-routing="straight" title="Gör pilen rak">— Rak</button><button type="button" data-link-routing="orthogonal" title="Gör pilen vinkelrät">⌜ Vinkelrät</button><button type="button" data-link-routing="free" title="Flytta pilens bana fritt">↝ Fri</button></div><div id="p48-node-quick" class="p48-node-quick" role="toolbar" aria-label="Snabbval för markerade rutor" data-mode="single"><button type="button" id="p48-node-quick-next" data-single-only title="Lägg till nästa steg">＋ Nästa</button><button type="button" id="p48-node-quick-format" title="Visa formatering">Formatera</button><label class="p48-quick-color-label" data-multi-only title="Ändra bakgrundsfärg för markerade"><input type="color" id="p48-node-quick-color" value="#ffffff"> Färg</label><button type="button" id="p48-node-quick-duplicate" title="Duplicera markerade">Duplicera</button><button type="button" id="p48-node-quick-delete" class="danger" title="Ta bort markerade">Ta bort</button></div><div id="p48-print-frame" class="p48-print-frame"></div>
+    </div><div id="p48-canvas-watermark" class="p48-canvas-watermark" aria-hidden="true"></div><img id="p48-process-logo" class="p48-process-logo" alt="Processlogotype"><div id="p48-link-hit-layer" class="p48-link-hit-layer"></div><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-link-quick" class="p48-link-quick" role="toolbar" aria-label="Snabbval för pil"><button type="button" data-link-routing="straight" title="Gör pilen rak">— Rak</button><button type="button" data-link-routing="orthogonal" title="Gör pilen vinkelrät">⌜ Vinkelrät</button><button type="button" data-link-routing="free" title="Flytta pilens bana fritt">↝ Fri</button></div><div id="p48-node-quick" class="p48-node-quick" role="toolbar" aria-label="Snabbval för markerade rutor" data-mode="single"><button type="button" id="p48-node-quick-next" data-single-only title="Lägg till nästa steg">＋ Nästa</button><button type="button" id="p48-node-quick-format" title="Öppna egenskaper för markerad ruta">Egenskaper</button><label class="p48-quick-color-label" data-multi-only title="Ändra bakgrundsfärg för markerade"><input type="color" id="p48-node-quick-color" value="#ffffff"> Färg</label><button type="button" id="p48-node-quick-duplicate" title="Duplicera markerade">Duplicera</button><button type="button" id="p48-node-quick-delete" class="danger" title="Ta bort markerade">Ta bort</button></div><div id="p48-print-frame" class="p48-print-frame"></div>
+      <div id="p48-snap-guide-x" class="p48-snap-guide p48-snap-guide-x" hidden></div><div id="p48-snap-guide-y" class="p48-snap-guide p48-snap-guide-y" hidden></div>
       <div id="p48-marquee" class="p48-marquee"></div>
       <svg id="p48-svg" viewBox="0 0 2400 1400">
         <defs><marker id="p48-arrow" markerWidth="10" markerHeight="8" refX="9" refY="4" orient="auto"><polygon points="0,0 10,4 0,8" fill="#687584"></polygon></marker></defs>
@@ -1528,7 +1535,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
       <button type="button" class="wide" id="p48-mobile-open-tools">☰ Alla verktyg och inställningar</button>
     </div>
     <div class="p48-mobile-sheet-grid" id="p48-mobile-context-sheet" hidden>
-      <button type="button" id="p48-mobile-sheet-copy">Kopiera</button><button type="button" id="p48-mobile-sheet-format">Formatering</button>
+      <button type="button" id="p48-mobile-sheet-copy">Kopiera</button><button type="button" id="p48-mobile-sheet-format">Egenskaper</button>
       <button type="button" id="p48-mobile-sheet-layout-h">✨ Snygga till →</button><button type="button" id="p48-mobile-sheet-layout-v">✨ Snygga till ↓</button>
       <button type="button" class="wide" id="p48-mobile-sheet-tools">☰ Fler egenskaper</button>
       <button type="button" class="wide danger" id="p48-mobile-sheet-delete">Ta bort markerade</button>
@@ -1583,7 +1590,7 @@ function clearRuntimeError(){if(runtimeErrorEl){runtimeErrorEl.hidden=true;runti
    Explicit Maplini operations still call reportRuntimeError() with the banner enabled. */
 window.addEventListener('error',e=>reportRuntimeError(e.error||e.message,'window.error',false));
 window.addEventListener('unhandledrejection',e=>reportRuntimeError(e.reason,'unhandledrejection',false));
-const canvas=root.querySelector('#p48-canvas'),scroll=root.querySelector('#p48-scroll'),emptyState=root.querySelector('#p48-empty-state'),emptyObject=root.querySelector('#p48-empty-object'),emptyActivity=root.querySelector('#p48-empty-activity'),linkLayer=root.querySelector('#p48-links'),temp=root.querySelector('#p48-temp');
+const canvas=root.querySelector('#p48-canvas'),scroll=root.querySelector('#p48-scroll'),emptyState=root.querySelector('#p48-empty-state'),emptyObject=root.querySelector('#p48-empty-object'),emptyActivity=root.querySelector('#p48-empty-activity'),linkLayer=root.querySelector('#p48-links'),temp=root.querySelector('#p48-temp'),snapGuideX=root.querySelector('#p48-snap-guide-x'),snapGuideY=root.querySelector('#p48-snap-guide-y');
 const mobileToolsBtn=root.querySelector('#p48-mobile-tools'),mobileBackdrop=root.querySelector('#p48-mobile-backdrop'),sidePanel=root.querySelector('#p48-side');
 const mobileBar=root.querySelector('#p48-mobile-bar'),mobileAdd=root.querySelector('#p48-mobile-add'),mobileUndo=root.querySelector('#p48-mobile-undo'),mobileRedo=root.querySelector('#p48-mobile-redo'),mobileFit=root.querySelector('#p48-mobile-fit'),mobileFullscreen=root.querySelector('#p48-mobile-fullscreen'),mobileMore=root.querySelector('#p48-mobile-more'),mobileNext=root.querySelector('#p48-mobile-next'),mobileFormat=root.querySelector('#p48-mobile-format'),mobileDuplicate=root.querySelector('#p48-mobile-duplicate'),mobileContext=root.querySelector('#p48-mobile-context'),mobileDelete=root.querySelector('#p48-mobile-delete');
 const mobileSheet=root.querySelector('#p48-mobile-sheet'),mobileSheetBackdrop=root.querySelector('#p48-mobile-sheet-backdrop'),mobileSheetClose=root.querySelector('#p48-mobile-sheet-close'),mobileSheetTitle=root.querySelector('#p48-mobile-sheet-title'),mobileAddSheet=root.querySelector('#p48-mobile-add-sheet'),mobileSheetRedo=root.querySelector('#p48-mobile-sheet-redo'),mobileSheetFullscreen=root.querySelector('#p48-mobile-sheet-fullscreen'),mobileContextSheet=root.querySelector('#p48-mobile-context-sheet'),mobileOpenTools=root.querySelector('#p48-mobile-open-tools'),mobileSheetTools=root.querySelector('#p48-mobile-sheet-tools'),mobileSheetCopy=root.querySelector('#p48-mobile-sheet-copy'),mobileSheetFormat=root.querySelector('#p48-mobile-sheet-format'),mobileSheetLayoutH=root.querySelector('#p48-mobile-sheet-layout-h'),mobileSheetLayoutV=root.querySelector('#p48-mobile-sheet-layout-v'),mobileSheetDelete=root.querySelector('#p48-mobile-sheet-delete');
@@ -2567,7 +2574,7 @@ function addFirstStep(type){
   if(item)requestAnimationFrame(()=>beginInlineEdit(item.el));
   return true;
 }
-function clearCanvas(){for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();selectedLinkIndex=null;selectedLinkIndices.clear();linkLayer.innerHTML='';clearLinkHitLayer();linkDomByIndex.clear();finishTempArrow();setFormatEnabled(false);refreshControls();refreshLinkControls();updateSelectionUi();refreshEmptyState()}
+function clearCanvas(){hideSnapGuides();for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();selectedLinkIndex=null;selectedLinkIndices.clear();linkLayer.innerHTML='';clearLinkHitLayer();linkDomByIndex.clear();finishTempArrow();setFormatEnabled(false);refreshControls();refreshLinkControls();updateSelectionUi();refreshEmptyState()}
 function restore(s){
   let raw;
   try{raw=typeof s==='string'?JSON.parse(s):clone(s)}
@@ -2697,6 +2704,61 @@ function anchor(el,side){
   if(side==='right')return[x+w,y+h/2];
   if(side==='top')return[x+w/2,y];
   return[x+w/2,y+h];
+}
+const SNAP_GRID=10,SNAP_TOLERANCE=8;
+function hideSnapGuides(){if(snapGuideX)snapGuideX.hidden=true;if(snapGuideY)snapGuideY.hidden=true}
+function showSnapGuides(result){
+  if(snapGuideX){
+    snapGuideX.hidden=result.snapY==null;
+    if(result.snapY!=null)snapGuideX.style.top=result.snapY+'px';
+  }
+  if(snapGuideY){
+    snapGuideY.hidden=result.snapX==null;
+    if(result.snapX!=null)snapGuideY.style.left=result.snapX+'px';
+  }
+}
+function magneticSnap(start,proposedX,proposedY,excludeIds){
+  const w=start.width||180,h=start.height||70;
+  const movingX=[proposedX,proposedX+w/2,proposedX+w];
+  const movingY=[proposedY,proposedY+h/2,proposedY+h];
+  let bestX=null,bestY=null;
+  for(const item of nodes.values()){
+    if(excludeIds.has(item.data.id))continue;
+    const ox=parseFloat(item.el.style.left)||0,oy=parseFloat(item.el.style.top)||0,ow=item.el.offsetWidth,oh=item.el.offsetHeight;
+    const targetsX=[ox,ox+ow/2,ox+ow],targetsY=[oy,oy+oh/2,oy+oh];
+    /* Center-to-center alignment is the strongest snap because it produces a truly straight
+       connector between differently sized nodes. Give it a slightly larger capture range. */
+    const centerDx=targetsX[1]-movingX[1],centerDy=targetsY[1]-movingY[1];
+    if(Math.abs(centerDx)<=14&&(!bestX||-1<bestX.score))bestX={diff:centerDx,abs:Math.abs(centerDx),score:-1,line:targetsX[1],centerPair:true};
+    if(Math.abs(centerDy)<=14&&(!bestY||-1<bestY.score))bestY={diff:centerDy,abs:Math.abs(centerDy),score:-1,line:targetsY[1],centerPair:true};
+    for(let mi=0;mi<movingX.length;mi++)for(let ti=0;ti<targetsX.length;ti++){
+      const tx=targetsX[ti],diff=tx-movingX[mi],abs=Math.abs(diff);
+      const centerPair=mi===1&&ti===1,score=abs-(centerPair?4:0);
+      if(abs<=SNAP_TOLERANCE&&(!bestX||score<bestX.score))bestX={diff,abs,score,line:tx,centerPair};
+    }
+    for(let mi=0;mi<movingY.length;mi++)for(let ti=0;ti<targetsY.length;ti++){
+      const ty=targetsY[ti],diff=ty-movingY[mi],abs=Math.abs(diff);
+      const centerPair=mi===1&&ti===1,score=abs-(centerPair?4:0);
+      if(abs<=SNAP_TOLERANCE&&(!bestY||score<bestY.score))bestY={diff,abs,score,line:ty,centerPair};
+    }
+  }
+  let x=proposedX+(bestX?bestX.diff:0),y=proposedY+(bestY?bestY.diff:0);
+  /* If no nearby node alignment exists, use the invisible 10px base grid. */
+  if(!bestX)x=Math.round(x/SNAP_GRID)*SNAP_GRID;
+  if(!bestY)y=Math.round(y/SNAP_GRID)*SNAP_GRID;
+  return{x,y,snapX:bestX?bestX.line:null,snapY:bestY?bestY.line:null};
+}
+function straightenAlignedConnectedLinks(movedIds){
+  const moved=new Set(movedIds);
+  for(let i=0;i<links.length;i++){
+    const l=links[i];if(!Array.isArray(l)||(!moved.has(String(l[0]))&&!moved.has(String(l[1]))))continue;
+    const A=nodes.get(String(l[0]))?.el,B=nodes.get(String(l[1]))?.el;if(!A||!B)continue;
+    const [ax,ay]=center(A),[bx,by]=center(B);
+    if(Math.abs(ay-by)<=1||Math.abs(ax-bx)<=1){
+      setLinkStyle(i,{routing:'straight',anchorMode:'auto',viaX:null,viaY:null,freeDx:0,freeDy:0});
+      dirtyLinks.add(i);
+    }
+  }
 }
 function targetSide(a,b){const[ax,ay]=center(a),[bx,by]=center(b),dx=bx-ax,dy=by-ay;if(Math.abs(dx)>=Math.abs(dy))return dx>=0?'left':'right';return dy>=0?'top':'bottom'}
 function linkSides(link,A,B){const st=linkStyle(link),[ax,ay]=center(A),[bx,by]=center(B);if(st.anchorMode==='auto'){const sides=MapliniConnectorCore.autoSides(bx-ax,by-ay);return{source:sides[0],target:sides[1]}}return{source:link[2]||'right',target:targetSide(A,B)}}
@@ -3100,7 +3162,13 @@ el.addEventListener('pointerdown',e=>{
     if(!mutated&&MapliniMobileCore.movedEnough(screenDx,screenDy,pointerType)){pushUndo(true);mutated=true}
     if(!mutated)return;
     const raw=screenDeltaToCanvas(screenDx,screenDy);
-    const delta=MapliniEditingCore.groupMoveDelta(startItems,raw.dx,raw.dy,MapliniCanvasCore.DEFAULT_BOUNDS,20);
+    let delta=MapliniEditingCore.groupMoveDelta(startItems,raw.dx,raw.dy,MapliniCanvasCore.DEFAULT_BOUNDS,20);
+    const reference=startItems.find(x=>x.id===el.dataset.id)||startItems[0];
+    if(reference){
+      const snapped=magneticSnap(reference,reference.x+delta.dx,reference.y+delta.dy,new Set(activeIds));
+      delta={dx:snapped.x-reference.x,dy:snapped.y-reference.y};
+      showSnapGuides(snapped);
+    }
     for(const start of startItems){
       const item=nodes.get(start.id);if(!item)continue;
       item.el.style.left=(start.x+delta.dx)+'px';item.el.style.top=(start.y+delta.dy)+'px';sync(item.el);invalidateNodeGeom(start.id);markNodeLinksDirty(start.id);
@@ -3115,7 +3183,11 @@ el.addEventListener('pointerdown',e=>{
   const done=()=>{
     el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',done);el.removeEventListener('pointercancel',done);
     try{if(el.hasPointerCapture&&el.hasPointerCapture(e.pointerId))el.releasePointerCapture(e.pointerId)}catch(ignore){}
-    if(mutated){suppressSelectClick=Boolean(groupIds);persist();updateSelectionUi()}
+    hideSnapGuides();
+    if(mutated){
+      straightenAlignedConnectedLinks(activeIds);
+      suppressSelectClick=Boolean(groupIds);requestFullLinkRender(true);persist();updateSelectionUi();
+    }
   };
   el.addEventListener('pointermove',mv);el.addEventListener('pointerup',done);el.addEventListener('pointercancel',done);
 });

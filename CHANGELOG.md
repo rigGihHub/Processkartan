@@ -1,3 +1,14 @@
+## v0.16.5 – Magnetic Alignment
+- Added an invisible 10 px base grid for node movement.
+- Added magnetic alignment against other nodes' left/center/right and top/center/bottom lines within an 8 px snap tolerance.
+- While snapping to another node, a temporary subtle alignment guide is shown; the grid itself remains invisible.
+- Multi-node moves preserve relative geometry and snap the group using the dragged reference node.
+- When connected nodes end up with exactly aligned centers horizontally or vertically, their connector is normalized to a straight automatic route.
+- Manual connector via/free offsets are cleared only for those newly aligned connected links.
+- Renamed the quick-toolbar button `Formatera` to `Egenskaper` and clarified its tooltip.
+- Mobile context wording was aligned to `Egenskaper`.
+- No data-schema, Supabase or migration changes.
+
 ## v0.16.4 – Click Outside to Deselect
 - Clicking blank canvas now always clears the selected node or connector.
 - Desktop drag-to-pan is preserved: a real drag pans the canvas and does not clear selection mid-gesture.
