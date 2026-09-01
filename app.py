@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.18.2"
+APP_VERSION = "0.18.3"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -158,6 +158,16 @@ header[data-testid="stHeader"]{height:2rem}
 .p48-export-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
 .p48-export-popover select{width:100%;text-align:left}
 .p48-export-page-title{margin-top:4px;padding-top:8px;border-top:1px solid #e5ebf0}
+.p48-page-quick{position:sticky;top:10px;left:12px;z-index:175;width:max-content;margin:10px 0 -48px 12px}
+.p48-page-quick>summary{list-style:none;cursor:pointer;min-height:34px;display:flex;align-items:center;padding:0 11px;border:1px solid #b9cbc4;border-radius:9px;background:rgba(255,255,255,.96);box-shadow:0 3px 12px rgba(31,52,70,.10);font:750 11px/1 Inter,system-ui;color:#315c4d;backdrop-filter:blur(6px)}
+.p48-page-quick>summary::-webkit-details-marker{display:none}
+.p48-page-quick[open]>summary{border-color:#74a391;box-shadow:0 4px 16px rgba(31,52,70,.14)}
+.p48-page-quick-popover{position:absolute;top:calc(100% + 6px);left:0;width:220px;display:grid;gap:8px;padding:10px;background:#fff;border:1px solid #cbd7e3;border-radius:11px;box-shadow:0 12px 28px rgba(31,52,70,.17)}
+.p48-page-quick-title{font:800 11px/1.2 Inter,system-ui;color:#243e35}
+.p48-page-quick-popover label{display:grid;gap:4px;font:700 9px/1.2 Inter,system-ui;color:#64756e}
+.p48-page-quick-popover select{width:100%;padding:7px 8px;border:1px solid #ccd8d2;border-radius:7px;background:#fff;font:600 11px Inter,system-ui;color:#273d35}
+.p48-page-quick-hint{font:500 9px/1.4 Inter,system-ui;color:#73817b}
+@media(max-width:700px){.p48-page-quick{top:7px;left:7px;margin-left:7px}.p48-page-quick>summary{min-height:32px;font-size:10px}.p48-page-quick-popover{width:205px}}
 .p48-more-popover{width:300px;display:grid;gap:7px;max-height:min(70vh,620px);overflow:auto}
 .p48-more-wide{width:100%;text-align:left}
 .p48-more-selection-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
@@ -1205,6 +1215,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
       <select id="p48-page-count" class="p48-btn" title="Antal PDF-sidor">
         <option value="auto" selected>Automatiskt antal sidor</option>
         <option value="1">1 sida</option><option value="2">2 sidor</option><option value="3">3 sidor</option><option value="4">4 sidor</option>
+        <option value="5">5 sidor</option><option value="6">6 sidor</option><option value="7">7 sidor</option><option value="8">8 sidor</option>
       </select>
     </div>
   </details>
@@ -1561,6 +1572,29 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 
   <button type="button" class="p48-mobile-backdrop" id="p48-mobile-backdrop" aria-label="Stäng verktyg"></button>
   <main class="p48-scroll" id="p48-scroll">
+    <details class="p48-page-quick" id="p48-page-quick">
+      <summary id="p48-page-quick-summary" title="Ändra pappersformat och antal sidor">A4 stående · Auto ▾</summary>
+      <div class="p48-page-quick-popover">
+        <div class="p48-page-quick-title">Sidinställningar</div>
+        <label>Format
+          <select id="p48-page-format-quick">
+            <option value="off">Ingen sidyta</option>
+            <option value="A4P" selected>A4 stående</option>
+            <option value="A4L">A4 liggande</option>
+            <option value="A3P">A3 stående</option>
+            <option value="A3L">A3 liggande</option>
+          </select>
+        </label>
+        <label>Antal sidor
+          <select id="p48-page-count-quick">
+            <option value="auto" selected>Automatiskt</option>
+            <option value="1">1 sida</option><option value="2">2 sidor</option><option value="3">3 sidor</option><option value="4">4 sidor</option>
+            <option value="5">5 sidor</option><option value="6">6 sidor</option><option value="7">7 sidor</option><option value="8">8 sidor</option>
+          </select>
+        </label>
+        <div class="p48-page-quick-hint">Sidgränserna visar hur processen delas vid export.</div>
+      </div>
+    </details>
     <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><div id="p48-empty-state" class="p48-empty-state" hidden>
       <div class="p48-empty-card">
         <div class="p48-empty-kicker">NY PROCESS</div>
@@ -1692,7 +1726,7 @@ const loginBtn=root.querySelector('#p48-login'),signupBtn=root.querySelector('#p
 const signedOut=root.querySelector('#p48-account-signedout'),signedIn=root.querySelector('#p48-account-signedin'),userEmail=root.querySelector('#p48-user-email');
 const cloudBadge=root.querySelector('#p48-cloud-badge'),cloudHelp=root.querySelector('#p48-cloud-help');
 const printFrame=root.querySelector('#p48-print-frame');
-const pdfViewSelect=root.querySelector('#p48-pdf-view'),pageCountSelect=root.querySelector('#p48-page-count');
+const pdfViewSelect=root.querySelector('#p48-pdf-view'),pageCountSelect=root.querySelector('#p48-page-count'),pageQuick=root.querySelector('#p48-page-quick'),pageQuickSummary=root.querySelector('#p48-page-quick-summary'),pageFormatQuick=root.querySelector('#p48-page-format-quick'),pageCountQuick=root.querySelector('#p48-page-count-quick');
 const workspaceSelect=root.querySelector('#p48-workspace-select'),workspaceName=root.querySelector('#p48-workspace-name'),createWorkspaceBtn=root.querySelector('#p48-create-workspace'),roleBadge=root.querySelector('#p48-role');
 const authError=root.querySelector('#p48-auth-error');
 const shareBtn=root.querySelector('#p48-share'),shareBox=root.querySelector('#p48-sharebox'),shareUrlInput=root.querySelector('#p48-share-url'),copyShareBtn=root.querySelector('#p48-copy-share');
@@ -4968,15 +5002,30 @@ function renderPrintPages(){
     pg.style.width=spec.w+'px';pg.style.height=spec.h+'px';
     canvas.appendChild(pg);
   }
+  if(typeof refreshPageQuickUi==='function')refreshPageQuickUi();
 }
-pdfViewSelect.addEventListener('change',()=>{
-  pdfView=pdfViewSelect.value;
-  renderPrintPages();
-});
-pageCountSelect.addEventListener('change',()=>{
-  pageCountMode=pageCountSelect.value;
-  renderPrintPages();
-});
+function refreshPageQuickUi(){
+  if(pdfViewSelect&&pdfViewSelect.value!==pdfView)pdfViewSelect.value=pdfView;
+  if(pageFormatQuick&&pageFormatQuick.value!==pdfView)pageFormatQuick.value=pdfView;
+  if(pageCountSelect&&pageCountSelect.value!==String(pageCountMode))pageCountSelect.value=String(pageCountMode);
+  if(pageCountQuick&&pageCountQuick.value!==String(pageCountMode))pageCountQuick.value=String(pageCountMode);
+  if(pageQuickSummary){
+    const format=pdfView==='off'?'Ingen sidyta':pageSpec().name;
+    const count=pageCountMode==='auto'?'Auto':`${desiredPageCount()} ${desiredPageCount()===1?'sida':'sidor'}`;
+    pageQuickSummary.textContent=pdfView==='off'?`${format} ▾`:`${format} · ${count} ▾`;
+  }
+}
+function applyPageSettings(nextView,nextCount){
+  pdfView=String(nextView||pdfView);
+  pageCountMode=String(nextCount||pageCountMode);
+  renderPrintPages();refreshPageQuickUi();
+}
+pdfViewSelect.addEventListener('change',()=>applyPageSettings(pdfViewSelect.value,pageCountMode));
+pageCountSelect.addEventListener('change',()=>applyPageSettings(pdfView,pageCountSelect.value));
+if(pageFormatQuick)pageFormatQuick.addEventListener('change',()=>applyPageSettings(pageFormatQuick.value,pageCountMode));
+if(pageCountQuick)pageCountQuick.addEventListener('change',()=>applyPageSettings(pdfView,pageCountQuick.value));
+if(pageQuick)pageQuick.addEventListener('toggle',()=>{if(pageQuick.open)refreshPageQuickUi()});
+refreshPageQuickUi();
 function directGoogleSheetPayload(){
   persist();
   const st=state();

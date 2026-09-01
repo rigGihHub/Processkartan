@@ -31,7 +31,7 @@ r=P.analyze([{id:'n',type:'note',text:'Notering'}],[]);
 assert(!r.findings.some(f=>f.code==='isolated'),'notes are annotations, not structural errors');
 console.log('process intelligence core ok');
 
-// v0.18.2 actionable guidance contract
+// v0.18.3 actionable guidance contract
 r=P.analyze([
  {id:'s',type:'start',text:'Start'},
  {id:'a',type:'process',text:'A'}

@@ -1,3 +1,13 @@
+## v0.18.3 – Direct page settings
+- Added a compact sticky page control directly over the canvas: `A4 stående · Auto ▾`.
+- Paper format and orientation can now be changed without opening Export or More.
+- Direct options: no page area, A4 portrait, A4 landscape, A3 portrait and A3 landscape.
+- Page count can be set to automatic or manually from 1–8 pages.
+- The quick control stays synchronized with the existing Export page settings in both directions.
+- The control explains that page borders represent the export split.
+- Mobile sizing was tightened so the page control remains usable without dominating the canvas.
+- No data-model, Supabase or database migration changes.
+
 ## v0.18.2 – Direct drag & cleaner objects
 - Nodes can now be grabbed and dragged directly from their visible text area without being selected first.
 - The same pointer gesture automatically selects the node and starts movement; no separate preselection click is required.

@@ -6,9 +6,9 @@
 - Båda toolbarerna är nu `display:none` som standard och visas endast när JavaScript sätter `.on` efter korrekt nod-/pilmarkering.
 - Ingen databas-, Supabase- eller dependencyändring.
 
-# Maplini v0.18.2
+# Maplini v0.18.3
 
-## Process Intelligence v0.18.2
+## Process Intelligence v0.18.3
 
 - **🔍 Analysera** öppnar Processkontroll med en deterministisk strukturanalys av aktuell process.
 - Visar processhälsa, fel, kontrollpunkter och insikter.
@@ -146,31 +146,31 @@ Maplini visar löpande sparstatus och använder en kortlivad recovery-snapshot m
 - Desktop sidebar scroll fix: persistent vertical scrolling, stable scrollbar gutter and bottom clearance so the final connector controls remain reachable.
 
 
-### v0.18.2
+### v0.18.3
 Connector drag, multi-page horizontal scrolling and verified zoom direction.
 
 
-### v0.18.2
+### v0.18.3
 Förfinar Smart Layout-pilarnas centrering, desktop-sidebarens åtkomlighet, rutstilar och den samlade textformateringen.
 
 
-### v0.18.2
+### v0.18.3
 UI simplified: Ordna removed, compact account panel, dedicated Logotyp menu, and whole-process scaling including fit to selected A4/A3 page.
 
 
-### v0.18.2
+### v0.18.3
 Connector dragging fixed: click-drag works directly on the connector hit area without a separate pre-selection click.
 
 
-### v0.18.2
+### v0.18.3
 Stability/UX cleanup: dynamic multi-page layout bounds, resilient toolbar positioning, resize recalculation and centralized popover cleanup.
 
 
-### v0.18.2
+### v0.18.3
 Free connector routing: drag the arrow body independently while endpoints remain attached and continue following moved nodes. Includes a small visual/UX polish pass.
 
 
-### v0.18.2 – Integrity & Core Interaction
+### v0.18.3 – Integrity & Core Interaction
 This release fixes workspace ownership integrity, connector one-gesture/free-drag behavior and Google Sheets column alignment.
 
 **Supabase:** deployments using workspaces must run `supabase_schema_v0147.sql` after updating the app. The migration preserves editor access but enforces the workspace owner as canonical `processes.owner_id`.
@@ -178,129 +178,133 @@ This release fixes workspace ownership integrity, connector one-gesture/free-dra
 **Browser smoke QA:** `python tests/browser_interaction_smoke.py` runs the embedded editor in Chromium and verifies one-gesture connector drag, attached endpoint behavior after moving a node, and Undo.
 
 
-### v0.18.2
+### v0.18.3
 30% Simpler: the main toolbar now exposes only core commands. Export/page settings are grouped under Export, secondary tools under More, and the normal mobile bar is reduced to four actions.
 
 
-### v0.18.2
+### v0.18.3
 Stability/polish pass for the simplified command surface. Nested menus now remain open correctly, mobile keeps four primary actions while Redo/Fullscreen remain available secondarily, and browser smoke coverage validates these flows together with free connector dragging.
 
 
-### v0.18.2
+### v0.18.3
 Actionable Process Check: structural findings now explain what to do next, are prioritized, and can focus affected nodes directly on the canvas. The analysis remains deterministic/local and does not add an AI dependency.
 
 
-### v0.18.2
+### v0.18.3
 First-Time User UX: empty editable processes now present a clear first-step card on the canvas with direct Start/Activity actions and guidance to continue with `＋ Nästa`.
 
 
-### v0.18.2
+### v0.18.3
 New Process UX: browser `prompt()` has been replaced by a Maplini-native naming dialog with Enter/Escape support, inline validation, cancel/backdrop behavior and direct continuation into the empty-canvas first-step flow.
 
 
-### v0.18.2
+### v0.18.3
 Connector Labels & Selection UX: connector text is now per-connector, live-updating, visually offset from the drag handle and rendered as a readable badge. New connectors have no automatic Ja/Nej label. The node-delete action only appears for a single selected node.
 
 
-### v0.18.2
+### v0.18.3
 Connector Interaction Polish: selected connector text, drag handle and routing quick toolbar are now spatially separated so they no longer stack on top of one another during editing.
 
 
-### v0.18.2
+### v0.18.3
 Connector Formatting Cleanup: connector formatting is now fully self-contained, with its own width control and clearer Swedish terminology. Node border controls stay hidden during connector editing.
 
 
-### v0.18.2
+### v0.18.3
 Context Panel Polish: the left formatting panel now clearly switches between Pil, Ruta, Flera rutor and an unselected state, with contextual guidance instead of mixed generic copy.
 
 
-### v0.18.2
+### v0.18.3
 Typography Cleanup: the font picker is reduced from 27 options to 7 clear choices. Older saved fonts remain supported through a temporary legacy option rather than being silently changed.
 
 
-### v0.18.2
+### v0.18.3
 Canvas Appearance Cleanup: Processyta now offers five focused background choices. Older saved backgrounds remain supported through a temporary legacy option instead of being silently changed.
 
 
-### v0.18.2
+### v0.18.3
 Node Style Cleanup: the standard node-style picker is reduced to Standard, Upphöjd and Minimal. Older 3D/Glass styles remain fully supported when opening existing processes.
 
 
-### v0.18.2
+### v0.18.3
 Full Canvas Zoom & Ctrl Multi-Select: top-bar zoom now scales every visible object and text element in the embedded canvas, and Ctrl/Cmd-click toggles multiple node selection.
 
 
-### v0.18.2
+### v0.18.3
 First View & A4 Portrait Default: empty processes now present a proper centered start card inside the editor iframe, A4 portrait is the default page format, and generic browser/iframe noise no longer raises the red data-safety banner.
 
 
-### v0.18.2
+### v0.18.3
 Maplini's core process model is now Object → Activity → Object. Object in/out are two user-facing roles for the same underlying object type, allowing results to become inputs to later activities.
 
 
-### v0.18.2
+### v0.18.3
 Dependency Coach: direct Activity → Activity connections are now challenged in context, and Process Check explains that a missing result/object may be hiding the real dependency.
 
 
-### v0.18.2
+### v0.18.3
 Process Scale Quick Access: `Skala process` is now a main-toolbar control, and its +10% / −10% actions keep the menu open for repeated presses.
 
 
-### v0.18.2
+### v0.18.3
 Canvas Pan & Scale Slider: desktop users can drag blank canvas to navigate, and whole-process scaling uses a 50–150% slider that changes actual node dimensions as well as text and spacing.
 
 
-### v0.18.2
+### v0.18.3
 Blank canvas click now clears the current selection while drag-to-pan remains intact.
 
 
-### v0.18.2
+### v0.18.3
 Magnetic Alignment: node dragging snaps to an invisible grid and to other nodes' edges/centers. Connected nodes aligned on the same axis receive a straight connector. The quick `Formatera` action is now called `Egenskaper`.
 
 
-### v0.18.2
+### v0.18.3
 `Mer → Rensa hela canvasen` removes all nodes/connectors only after an explicit confirmation. The operation is undoable.
 
 
-### v0.18.2
+### v0.18.3
 Smart Connector Polish automatically keeps ordinary connectors straight when nodes share an axis and orthogonal otherwise, while preserving user-created free/manual routes during normal dragging.
 
 
-### v0.18.2
+### v0.18.3
 Object UX keeps one technical Object type but adds clear input/output/intermediate role hints in creation, node labels and properties guidance.
 
 
-### v0.18.2
+### v0.18.3
 Faster Process Building turns the contextual Next action into a one-click recommended continuation, while a separate dropdown preserves alternate step types. Ctrl/Cmd+Enter continues the flow directly from inline editing.
 
 
-### v0.18.2
+### v0.18.3
 Process Flow Assistant gives contextual methodology help for direct Activity-to-Activity links, with one-click insertion of an Object/result or an explicit intentional override.
 
 
-### v0.18.2
+### v0.18.3
 Automatic Cleanup adds a one-click process tidy action that chooses layout direction from the existing flow, aligns nodes, evens spacing and cleans connector geometry without changing graph logic.
 
 
-### v0.18.2
+### v0.18.3
 Undo Safety introduces atomic history transactions for clear, layout/automatic cleanup and scale gestures, ensuring one user action restores with one Undo and no-op gestures create no history noise.
 
 
-### v0.18.2
+### v0.18.3
 Canvas Performance reduces per-frame work on large maps with local geometry invalidation, cached node-to-link adjacency and path-only connector updates during drag/resize gestures.
 
 
-### v0.18.2
+### v0.18.3
 Build Flow UX Polish unifies the recent methodology features with a contextual flow cue, highlighted recommended alternatives, better next-step feedback and automatic viewport follow when extending a process.
 
 
-### v0.18.2
+### v0.18.3
 Processinformation adds structured business metadata to process steps: description, responsible role, system, instruction, risk, control, KPI and duration. The data is kept off-canvas in the properties panel and is backward compatible with older saved maps.
 
 
-### v0.18.2
+### v0.18.3
 Egenskapspanel UX makes process information faster to enter: essentials first, advanced details collapsed, reusable role/system suggestions, clearer optional completeness feedback and keyboard save/focus behavior.
 
 
-### v0.18.2
+### v0.18.3
 Direct drag removes the preselection step for moving nodes. Object-role badges are no longer rendered above object nodes; role metadata remains preserved in the process data.
+
+
+### v0.18.3
+Page setup is now available directly over the canvas through a compact sticky control for A4/A3, portrait/landscape and automatic or 1–8 pages. Existing Export settings remain synchronized.
