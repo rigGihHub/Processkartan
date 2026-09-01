@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.16.5"
+APP_VERSION = "0.18.1"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -22,6 +22,8 @@ _UI_CORE_PATH = Path(__file__).resolve().parent / "maplini_ui_core.js"
 _UI_CORE_JS = _UI_CORE_PATH.read_text(encoding="utf-8") if _UI_CORE_PATH.exists() else ""
 _STATE_CORE_PATH = Path(__file__).resolve().parent / "maplini_state_core.js"
 _STATE_CORE_JS = _STATE_CORE_PATH.read_text(encoding="utf-8") if _STATE_CORE_PATH.exists() else ""
+_PROCESS_INFO_CORE_PATH = Path(__file__).resolve().parent / "maplini_process_info_core.js"
+_PROCESS_INFO_CORE_JS = _PROCESS_INFO_CORE_PATH.read_text(encoding="utf-8") if _PROCESS_INFO_CORE_PATH.exists() else ""
 _RELIABILITY_CORE_PATH = Path(__file__).resolve().parent / "maplini_reliability_core.js"
 _RELIABILITY_CORE_JS = _RELIABILITY_CORE_PATH.read_text(encoding="utf-8") if _RELIABILITY_CORE_PATH.exists() else ""
 _EXPORT_CORE_PATH = Path(__file__).resolve().parent / "maplini_export_core.js"
@@ -192,6 +194,13 @@ header[data-testid="stHeader"]{height:2rem}
 .p48-link-format label{font:700 10px system-ui;color:#657281}
 .p48-link-format input,.p48-link-format select{width:100%;margin-top:4px;border:1px solid #cfd7df;border-radius:7px;padding:6px;font:12px system-ui;background:#fff}
 .p48-link-format .p48-link-label-field{grid-column:1/-1}
+ .p48-flow-coach{margin:9px 0;padding:10px;border:1px solid #b9d8cc;border-radius:10px;background:#f2faf6;display:grid;gap:6px}
+.p48-flow-coach[hidden]{display:none!important}
+.p48-flow-coach-kicker{font:800 8px/1 Inter,system-ui;letter-spacing:.09em;color:#28715c}
+.p48-flow-coach strong{font:800 11px/1.35 Inter,system-ui;color:#20364f}
+.p48-flow-coach>span{font:500 10px/1.4 Inter,system-ui;color:#566b63}
+.p48-flow-coach-actions{display:grid;grid-template-columns:1fr;gap:6px;margin-top:2px}
+.p48-flow-coach-actions .p48-btn{width:100%;text-align:left}
 .p48-insert-link-step{width:100%;margin-top:9px;border:1px solid #b9c8d8;border-radius:8px;padding:7px 9px;background:#f7fafc;color:#30445a;font:700 11px system-ui;cursor:pointer}
 .p48-insert-link-step:hover{background:#eef5fb;border-color:#8eb4d8}
 .p48-insert-step-wrap{position:relative}
@@ -208,6 +217,13 @@ header[data-testid="stHeader"]{height:2rem}
 .p48-next-step-menu[hidden]{display:none}
 .p48-next-step-choice{border:1px solid #d7e0e8;border-radius:7px;background:#f8fafc;color:#30445a;padding:8px 6px;font:700 11px system-ui;cursor:pointer;text-align:left;white-space:nowrap}
 .p48-next-step-choice:hover{background:#eef5fb;border-color:#9bbbd8}
+#p48-node-quick-next+#p48-node-quick-next-more{margin-left:-6px;min-width:28px;padding-left:6px;padding-right:6px;border-left-color:#dbe4ec}
+.p48-node-quick-flow{display:inline-flex;align-items:center;min-height:30px;padding:0 8px;border:1px solid #d7e3dd;border-radius:8px;background:#f4faf7;color:#426658;font:750 9px/1.2 Inter,system-ui;white-space:nowrap}
+.p48-next-step-choice.recommended{grid-column:1/-1;background:#f1f8f5;border-color:#a9cbbd;color:#245d4b;font-weight:800}
+.p48-next-step-choice.recommended::after{content:"Rekommenderas";float:right;margin-left:8px;color:#618074;font:700 8px/1.2 Inter,system-ui;text-transform:uppercase;letter-spacing:.04em}
+@media(max-width:700px){.p48-node-quick-flow{display:none!important}}
+
+
 @media (max-width:700px){.p48-next-step-wrap{left:calc(100% + 6px)}.p48-next-step-btn{width:38px;height:38px;font-size:22px}.p48-next-step-menu{left:44px;width:188px}.p48-next-step-choice{min-height:38px}}
 .p48-link-label rect{fill:#fff;stroke:#c7d2dc;stroke-width:1.2;filter:drop-shadow(0 2px 3px rgba(31,52,70,.14))}
 .p48-link-label text{font:750 12px/1 Inter,system-ui,sans-serif;fill:#263b4d;dominant-baseline:middle;text-anchor:middle}.p48-link-selected .p48-link-label rect{filter:drop-shadow(0 2px 4px rgba(31,52,70,.18))}
@@ -367,7 +383,28 @@ header[data-testid="stHeader"]{height:2rem}
 .p48-zoom-controls .p48-zoom-value{min-width:58px;font-variant-numeric:tabular-nums}
 .p48-arrange-menu,.p48-smart-layout-menu{position:relative}.p48-arrange-menu>summary,.p48-smart-layout-menu>summary{list-style:none}.p48-arrange-menu>summary::-webkit-details-marker,.p48-smart-layout-menu>summary::-webkit-details-marker{display:none}
 .p48-arrange-popover,.p48-smart-layout-popover{position:absolute;top:calc(100% + 7px);left:0;z-index:230;width:250px;padding:10px;background:#fff;border:1px solid #ccd6df;border-radius:10px;box-shadow:0 10px 30px rgba(30,45,60,.18)}
-.p48-smart-layout-popover{width:230px}.p48-smart-layout-popover .p48-mini{width:100%;min-height:34px;margin-top:5px;text-align:left}.p48-smart-layout-popover .p48-mini:disabled{opacity:.42;cursor:not-allowed}
+.p48-smart-layout-popover{width:230px}.p48-smart-layout-popover .p48-mini{width:100%;min-height:34px;margin-top:5px;text-align:left}.p48-smart-layout-popover .p48-mini:disabled{opacity:.42;cursor:not-allowed}.p48-smart-layout-popover #p48-auto-clean{min-height:40px;background:#1f6f55;color:#fff;border-color:#1f6f55;font-weight:800}
+.p48-smart-layout-popover #p48-auto-clean:hover{filter:brightness(.98)}
+.p48-auto-clean-hint{margin:6px 2px 1px;font-size:9px;line-height:1.35}
+.p48-process-info{margin:0 0 10px;padding:10px;border:1px solid #dbe7e1;border-radius:11px;background:#f8fbf9}
+.p48-process-info-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:8px}
+.p48-process-info-progress{flex:0 0 auto;padding:3px 6px;border-radius:999px;background:#e6f1ec;color:#315f4e;font:800 9px/1 Inter,system-ui}
+.p48-process-info label{display:grid;gap:4px;margin-top:7px;font-size:10px;font-weight:750;color:#44515d}
+.p48-process-info input,.p48-process-info textarea{width:100%;box-sizing:border-box;border:1px solid #d3dce3;border-radius:7px;background:#fff;padding:7px 8px;font:500 11px/1.35 Inter,system-ui;color:#1f2933;resize:vertical}
+.p48-process-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 7px}
+.p48-process-info-grid label:last-child{grid-column:1/-1}
+.p48-process-info-more{margin-top:9px;border-top:1px solid #dfe9e4;padding-top:2px}
+.p48-process-info-more>summary{cursor:pointer;list-style:none;padding:8px 0 5px;font:800 10px/1.3 Inter,system-ui;color:#345b4c}
+.p48-process-info-more>summary::-webkit-details-marker{display:none}
+.p48-process-info-more>summary::before{content:"＋";display:inline-block;width:16px;color:#4f7a69}
+.p48-process-info-more[open]>summary::before{content:"−"}
+.p48-process-info-more>summary span{font-weight:600;color:#718079}
+.p48-process-info-foot{margin-top:8px;padding-top:7px;border-top:1px solid #e5ece8;font:500 9px/1.4 Inter,system-ui;color:#77847e}
+@media(max-width:700px){.p48-process-info-grid{grid-template-columns:1fr}}
+.p48-visual-details{margin:0 0 9px;border:1px solid #e0e6eb;border-radius:9px;padding:0 8px 8px;background:#fff}
+.p48-visual-details>summary{cursor:pointer;padding:8px 0;font-size:10px;font-weight:800;color:#52606d}
+
+
 .p48-arrange-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}.p48-arrange-grid-two{grid-template-columns:repeat(2,1fr)}
 .p48-arrange-grid .p48-mini{width:100%;height:auto;min-height:32px;padding:5px 6px}.p48-arrange-grid .p48-mini:disabled{opacity:.42;cursor:not-allowed}
 
@@ -990,6 +1027,16 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   transform:translateY(-50%);border-radius:2px;background:#0d596c;
 }
 .p48-node.object .p48-label{text-align:center}
+.p48-node.object .p48-object-role{
+  position:absolute;left:50%;top:-18px;transform:translateX(-50%);
+  padding:2px 6px;border-radius:5px;background:#f4f8f9;color:#55717a;
+  border:1px solid #cbdadf;font:800 8px/1 Inter,system-ui;letter-spacing:.08em;
+  text-transform:uppercase;white-space:nowrap;pointer-events:none;
+}
+.p48-node.object[data-object-role="input"] .p48-object-role{background:#eef7f3;color:#346653;border-color:#bed8cc}
+.p48-node.object[data-object-role="output"] .p48-object-role{background:#f2f6fb;color:#45627e;border-color:#c8d6e4}
+.p48-node.process{border-radius:12px}
+
 .p48-node.start,.p48-node.end{border-radius:38px}.p48-node.start{border-color:#2b7b61}.p48-node.end{border-color:#985148}
 .p48-node.decision{
   min-width:150px;
@@ -1116,7 +1163,9 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   <details class="p48-smart-layout-menu" id="p48-smart-layout-menu">
     <summary class="p48-btn" title="Ordna processen automatiskt">✨ Snygga till ▾</summary>
     <div class="p48-smart-layout-popover">
-      <div class="p48-pop-title">Hela processen</div>
+      <button type="button" class="p48-mini primary" id="p48-auto-clean" title="Räta upp rutor, jämna avstånd och snygga till pilar utan att ändra processens logik">✨ Ordna processen automatiskt</button>
+      <div class="p48-muted p48-auto-clean-hint">Maplini behåller flödet men väljer riktning, avstånd och pilbanor åt dig.</div>
+      <div class="p48-pop-title" style="margin-top:10px">Manuell riktning</div>
       <button type="button" class="p48-mini p48-smart-layout-choice" data-layout-scope="all" data-layout-orientation="horizontal">Horisontellt →</button>
       <button type="button" class="p48-mini p48-smart-layout-choice" data-layout-scope="all" data-layout-orientation="vertical">Vertikalt ↓</button>
       <div class="p48-pop-title" style="margin-top:9px">Markerade rutor</div>
@@ -1177,6 +1226,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
         <button type="button" class="p48-btn" id="p48-duplicate-selection" disabled title="Duplicera markerade rutor (Ctrl/Cmd+D)">Duplicera</button>
         <button type="button" class="p48-btn danger" id="p48-delete-selection" disabled title="Ta bort markerat (Delete/Backspace)">Ta bort</button>
       </div>
+      <button type="button" class="p48-btn p48-more-wide danger" id="p48-clear-canvas" title="Ta bort alla rutor och kopplingar från canvasen">Rensa hela canvasen</button>
       <details class="p48-canvas-menu">
   <summary class="p48-btn">Processyta ▾</summary>
   <div class="p48-canvas-popover">
@@ -1352,9 +1402,9 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
       <div class="p48-title">Bygg processen</div>
       <div class="p48-palette-hint">Grundflödet är <strong>Objekt → Aktivitet → Objekt</strong>. Ett resultat kan bli nästa aktivitets input.</div>
       <div class="p48-method-flow" aria-label="Processens grundmodell"><span>▪ Objekt in</span><b>→</b><span>▭ Aktivitet</span><b>→</b><span>▪ Objekt ut</span></div>
-      <div class="p48-item p48-item-core p48-item-object" draggable="true" role="button" tabindex="0" aria-label="Lägg till Objekt in" title="Det som triggar eller behövs före en aktivitet" data-type="object"><span class="p48-icon">▪</span><span><strong>Objekt in</strong><small>Trigger / det som behövs</small></span></div>
+      <div class="p48-item p48-item-core p48-item-object" draggable="true" role="button" tabindex="0" aria-label="Lägg till Objekt in" title="Det som triggar eller behövs före en aktivitet" data-type="object" data-object-role="input"><span class="p48-icon">▪</span><span><strong>Objekt in</strong><small>Trigger / det som behövs</small></span></div>
       <div class="p48-item p48-item-core" draggable="true" role="button" tabindex="0" aria-label="Lägg till Aktivitet" title="Det som görs och transformerar objekt" data-type="process"><span class="p48-icon">▭</span><span><strong>Aktivitet</strong><small>Det som görs</small></span></div>
-      <div class="p48-item p48-item-core p48-item-object" draggable="true" role="button" tabindex="0" aria-label="Lägg till Objekt ut" title="Resultatet från en aktivitet" data-type="object"><span class="p48-icon">▪</span><span><strong>Objekt ut</strong><small>Resultat / det som blir</small></span></div>
+      <div class="p48-item p48-item-core p48-item-object" draggable="true" role="button" tabindex="0" aria-label="Lägg till Objekt ut" title="Resultatet från en aktivitet" data-type="object" data-object-role="output"><span class="p48-icon">▪</span><span><strong>Objekt ut</strong><small>Resultat / det som blir</small></span></div>
       <div class="p48-palette-more-label">Fler typer</div>
       <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Start" title="Markera processens gräns" data-type="start"><span class="p48-icon">▶</span>Start</div>
       <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Beslut" title="Dra eller tryck för att lägga till" data-type="decision"><span class="p48-icon">◇</span>Beslut</div>
@@ -1378,7 +1428,31 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
       <div class="p48-title p48-format-context-title" id="p48-format-title">Formatering</div>
       <div class="p48-sub p48-format-context-hint" id="p48-format-hint">Markera en ruta eller pil för att visa relevanta inställningar.</div>
       <div id="p48-controls">
-        <div class="p48-text-format-block p48-node-only">
+        <div id="p48-process-info" class="p48-process-info p48-node-only p48-single-node-only" hidden>
+          <div class="p48-process-info-head">
+            <div><div class="p48-title">Om steget</div><div class="p48-small">Beskriv arbetet – utan att belasta canvasen.</div></div>
+            <span id="p48-process-info-progress" class="p48-process-info-progress">0 av 8</span>
+          </div>
+          <label>Vad händer?<textarea id="p48-info-description" rows="3" maxlength="12000" placeholder="Beskriv kort vad som görs och varför."></textarea></label>
+          <div class="p48-process-info-grid">
+            <label>Vem ansvarar?<input id="p48-info-role" type="text" maxlength="300" list="p48-role-suggestions" placeholder="Ex. Kundtjänst"></label>
+            <label>Vilket system?<input id="p48-info-system" type="text" maxlength="500" list="p48-system-suggestions" placeholder="Ex. CRM"></label>
+            <label>Tidsåtgång<input id="p48-info-duration" type="text" maxlength="300" placeholder="Ex. 10 min"></label>
+          </div>
+          <datalist id="p48-role-suggestions"></datalist>
+          <datalist id="p48-system-suggestions"></datalist>
+          <details id="p48-process-info-more" class="p48-process-info-more">
+            <summary>Fördjupa beskrivningen <span id="p48-process-info-more-count"></span></summary>
+            <label>Instruktion<textarea id="p48-info-instruction" rows="2" maxlength="4000" placeholder="Kort instruktion eller arbetssätt"></textarea></label>
+            <label>Risk<textarea id="p48-info-risk" rows="2" maxlength="4000" placeholder="Vad kan gå fel?"></textarea></label>
+            <label>Kontroll<textarea id="p48-info-control" rows="2" maxlength="4000" placeholder="Hur förebyggs eller upptäcks risken?"></textarea></label>
+            <label>KPI / mått<input id="p48-info-kpi" type="text" maxlength="1000" placeholder="Ex. svarstid"></label>
+          </details>
+          <div class="p48-process-info-foot">Input och output hanteras separat och sparas med steget.</div>
+        </div>
+        <details class="p48-visual-details p48-node-only">
+          <summary>Utseende</summary>
+          <div class="p48-text-format-block p48-node-only">
         <div class="p48-format-grid-clean">
           <label>Typsnitt
             <select id="p48-font">
@@ -1447,6 +1521,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
           <div class="p48-node-only"><label>Kantfärg</label><input id="p48-bordercolor" type="color" value="#637387"></div>
           <div class="p48-node-only"><label>Kanttjocklek</label><select id="p48-borderwidth"><option value="1">1 px</option><option value="2" selected>2 px</option><option value="3">3 px</option><option value="4">4 px</option><option value="6">6 px</option></select></div>
         </div>
+        </details>
         <div id="p48-document-link-editor" class="p48-document-link-editor p48-node-only p48-single-node-only" hidden>
           <div class="p48-title">Dokument</div>
           <label for="p48-document-url">Dokumentlänk</label>
@@ -1466,6 +1541,15 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
             <label>Slutmarkör<select id="p48-link-end"><option value="arrow" selected>Pil</option><option value="none">Ingen</option><option value="circle">Cirkel</option><option value="diamond">Diamant</option></select></label>
             <label>Fästning<select id="p48-link-anchor-mode"><option value="auto">Automatisk</option><option value="manual">Behåll startpunkt</option></select></label>
             <label class="p48-link-label-field">Text på pil<input id="p48-link-label" type="text" maxlength="60" autocomplete="off" placeholder="Skriv valfri text för just denna pil"></label>
+          </div>
+          <div id="p48-flow-coach" class="p48-flow-coach" hidden>
+            <div class="p48-flow-coach-kicker">PROCESSFLÖDE</div>
+            <strong>Vad lämnar den första aktiviteten efter sig?</strong>
+            <span>Ett resultat eller objekt mellan aktiviteterna gör beroendet tydligt och visar vad som faktiskt startar nästa aktivitet.</span>
+            <div class="p48-flow-coach-actions">
+              <button type="button" class="p48-btn primary" id="p48-flow-coach-insert">＋ Infoga Objekt / resultat</button>
+              <button type="button" class="p48-btn" id="p48-flow-coach-keep">Behåll direktkoppling</button>
+            </div>
           </div>
           <div class="p48-insert-step-wrap" id="p48-insert-step-wrap">
             <button id="p48-insert-link-step" class="p48-insert-link-step" type="button" aria-haspopup="true" aria-expanded="false">＋ Infoga steg</button>
@@ -1496,7 +1580,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
         </div>
         <div class="p48-empty-tip">Tips: ett objekts resultat kan bli input till nästa aktivitet. <strong>＋ Nästa</strong> föreslår rätt typ.</div>
       </div>
-    </div><div id="p48-canvas-watermark" class="p48-canvas-watermark" aria-hidden="true"></div><img id="p48-process-logo" class="p48-process-logo" alt="Processlogotype"><div id="p48-link-hit-layer" class="p48-link-hit-layer"></div><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-link-quick" class="p48-link-quick" role="toolbar" aria-label="Snabbval för pil"><button type="button" data-link-routing="straight" title="Gör pilen rak">— Rak</button><button type="button" data-link-routing="orthogonal" title="Gör pilen vinkelrät">⌜ Vinkelrät</button><button type="button" data-link-routing="free" title="Flytta pilens bana fritt">↝ Fri</button></div><div id="p48-node-quick" class="p48-node-quick" role="toolbar" aria-label="Snabbval för markerade rutor" data-mode="single"><button type="button" id="p48-node-quick-next" data-single-only title="Lägg till nästa steg">＋ Nästa</button><button type="button" id="p48-node-quick-format" title="Öppna egenskaper för markerad ruta">Egenskaper</button><label class="p48-quick-color-label" data-multi-only title="Ändra bakgrundsfärg för markerade"><input type="color" id="p48-node-quick-color" value="#ffffff"> Färg</label><button type="button" id="p48-node-quick-duplicate" title="Duplicera markerade">Duplicera</button><button type="button" id="p48-node-quick-delete" class="danger" title="Ta bort markerade">Ta bort</button></div><div id="p48-print-frame" class="p48-print-frame"></div>
+    </div><div id="p48-canvas-watermark" class="p48-canvas-watermark" aria-hidden="true"></div><img id="p48-process-logo" class="p48-process-logo" alt="Processlogotype"><div id="p48-link-hit-layer" class="p48-link-hit-layer"></div><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-link-quick" class="p48-link-quick" role="toolbar" aria-label="Snabbval för pil"><button type="button" data-link-routing="straight" title="Gör pilen rak">— Rak</button><button type="button" data-link-routing="orthogonal" title="Gör pilen vinkelrät">⌜ Vinkelrät</button><button type="button" data-link-routing="free" title="Flytta pilens bana fritt">↝ Fri</button></div><div id="p48-node-quick" class="p48-node-quick" role="toolbar" aria-label="Snabbval för markerade rutor" data-mode="single"><span id="p48-node-quick-flow" class="p48-node-quick-flow" data-single-only></span><button type="button" id="p48-node-quick-next" data-single-only title="Lägg till rekommenderat nästa steg">＋ Nästa</button><button type="button" id="p48-node-quick-next-more" data-single-only title="Välj en annan typ av nästa steg" aria-label="Välj annan typ av nästa steg">▾</button><button type="button" id="p48-node-quick-format" title="Öppna egenskaper för markerad ruta">Egenskaper</button><label class="p48-quick-color-label" data-multi-only title="Ändra bakgrundsfärg för markerade"><input type="color" id="p48-node-quick-color" value="#ffffff"> Färg</label><button type="button" id="p48-node-quick-duplicate" title="Duplicera markerade">Duplicera</button><button type="button" id="p48-node-quick-delete" class="danger" title="Ta bort markerade">Ta bort</button></div><div id="p48-print-frame" class="p48-print-frame"></div>
       <div id="p48-snap-guide-x" class="p48-snap-guide p48-snap-guide-x" hidden></div><div id="p48-snap-guide-y" class="p48-snap-guide p48-snap-guide-y" hidden></div>
       <div id="p48-marquee" class="p48-marquee"></div>
       <svg id="p48-svg" viewBox="0 0 2400 1400">
@@ -1547,6 +1631,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 <script>__MAPLINI_CANVAS_CORE__</script>
 <script>__MAPLINI_UI_CORE__</script>
 <script>__MAPLINI_STATE_CORE__</script>
+<script>__MAPLINI_PROCESS_INFO_CORE__</script>
 <script>__MAPLINI_RELIABILITY_CORE__</script>
 <script>__MAPLINI_EXPORT_CORE__</script>
 <script>__MAPLINI_WORKFLOW_CORE__</script>
@@ -1621,17 +1706,28 @@ const authError=root.querySelector('#p48-auth-error');
 const shareBtn=root.querySelector('#p48-share'),shareBox=root.querySelector('#p48-sharebox'),shareUrlInput=root.querySelector('#p48-share-url'),copyShareBtn=root.querySelector('#p48-copy-share');
 const marquee=root.querySelector('#p48-marquee');
 const selectToolBtn=root.querySelector('#p48-select-tool');
-const deleteSelectionBtn=root.querySelector('#p48-delete-selection'),duplicateSelectionBtn=root.querySelector('#p48-duplicate-selection');
+const deleteSelectionBtn=root.querySelector('#p48-delete-selection'),duplicateSelectionBtn=root.querySelector('#p48-duplicate-selection'),clearCanvasBtn=root.querySelector('#p48-clear-canvas');
 const zoomOutBtn=root.querySelector('#p48-zoom-out'),zoomResetBtn=root.querySelector('#p48-zoom-reset'),zoomInBtn=root.querySelector('#p48-zoom-in');
 const fitScreenBtn=root.querySelector('#p48-fit-screen'),arrangeMenu=root.querySelector('#p48-arrange-menu'),arrangeHint=root.querySelector('#p48-arrange-hint'),alignChoices=[...root.querySelectorAll('.p48-align-choice')],distributeChoices=[...root.querySelectorAll('.p48-distribute-choice')];
 const scaleMenu=root.querySelector('#p48-scale-menu'),processScaleSlider=root.querySelector('#p48-process-scale'),processScaleValue=root.querySelector('#p48-process-scale-value'),scaleFitPageBtn=root.querySelector('#p48-scale-fit-page');
 const accountPanel=root.querySelector('#p48-account-panel'),accountSummaryState=root.querySelector('#p48-account-summary-state');
-const smartLayoutMenu=root.querySelector('#p48-smart-layout-menu'),smartLayoutHint=root.querySelector('#p48-smart-layout-hint'),smartLayoutChoices=[...root.querySelectorAll('.p48-smart-layout-choice')];
+const smartLayoutMenu=root.querySelector('#p48-smart-layout-menu'),autoCleanBtn=root.querySelector('#p48-auto-clean'),smartLayoutHint=root.querySelector('#p48-smart-layout-hint'),smartLayoutChoices=[...root.querySelectorAll('.p48-smart-layout-choice')];
 const inputsBox=root.querySelector('#p48-inputs'),outputsBox=root.querySelector('#p48-outputs');
+const processInfoPanel=root.querySelector('#p48-process-info'),processInfoProgress=root.querySelector('#p48-process-info-progress'),processInfoMore=root.querySelector('#p48-process-info-more'),processInfoMoreCount=root.querySelector('#p48-process-info-more-count'),roleSuggestions=root.querySelector('#p48-role-suggestions'),systemSuggestions=root.querySelector('#p48-system-suggestions');
+const processInfoFields={
+  description:root.querySelector('#p48-info-description'),
+  responsibleRole:root.querySelector('#p48-info-role'),
+  system:root.querySelector('#p48-info-system'),
+  duration:root.querySelector('#p48-info-duration'),
+  kpi:root.querySelector('#p48-info-kpi'),
+  instruction:root.querySelector('#p48-info-instruction'),
+  risk:root.querySelector('#p48-info-risk'),
+  control:root.querySelector('#p48-info-control')
+};
 const borderColor=root.querySelector('#p48-bordercolor'),borderWidth=root.querySelector('#p48-borderwidth');
-const linkFormat=root.querySelector('#p48-link-format'),linkColor=root.querySelector('#p48-link-color'),linkWidth=root.querySelector('#p48-link-width'),linkEnd=root.querySelector('#p48-link-end'),linkDash=root.querySelector('#p48-link-dash'),linkRouting=root.querySelector('#p48-link-routing'),linkAnchorMode=root.querySelector('#p48-link-anchor-mode'),linkLabel=root.querySelector('#p48-link-label'),insertLinkStepBtn=root.querySelector('#p48-insert-link-step'),insertLinkStepWrap=root.querySelector('#p48-insert-step-wrap'),insertLinkStepMenu=root.querySelector('#p48-insert-step-menu'),insertLinkStepChoices=[...root.querySelectorAll('.p48-insert-step-choice')],deleteLinkBtn=root.querySelector('#p48-delete-link'),linkHandle=root.querySelector('#p48-link-handle'),linkQuick=root.querySelector('#p48-link-quick'),linkQuickRouting=[...root.querySelectorAll('[data-link-routing]')];
+const linkFormat=root.querySelector('#p48-link-format'),linkColor=root.querySelector('#p48-link-color'),linkWidth=root.querySelector('#p48-link-width'),linkEnd=root.querySelector('#p48-link-end'),linkDash=root.querySelector('#p48-link-dash'),linkRouting=root.querySelector('#p48-link-routing'),linkAnchorMode=root.querySelector('#p48-link-anchor-mode'),linkLabel=root.querySelector('#p48-link-label'),flowCoach=root.querySelector('#p48-flow-coach'),flowCoachInsert=root.querySelector('#p48-flow-coach-insert'),flowCoachKeep=root.querySelector('#p48-flow-coach-keep'),insertLinkStepBtn=root.querySelector('#p48-insert-link-step'),insertLinkStepWrap=root.querySelector('#p48-insert-step-wrap'),insertLinkStepMenu=root.querySelector('#p48-insert-step-menu'),insertLinkStepChoices=[...root.querySelectorAll('.p48-insert-step-choice')],deleteLinkBtn=root.querySelector('#p48-delete-link'),linkHandle=root.querySelector('#p48-link-handle'),linkQuick=root.querySelector('#p48-link-quick'),linkQuickRouting=[...root.querySelectorAll('[data-link-routing]')];
 const addInputBtn=root.querySelector('#p48-add-input'),addOutputBtn=root.querySelector('#p48-add-output'),deleteNodeBtn=root.querySelector('#p48-delete-node');
-const nodeQuick=root.querySelector('#p48-node-quick'),nodeQuickNext=root.querySelector('#p48-node-quick-next'),nodeQuickFormat=root.querySelector('#p48-node-quick-format'),nodeQuickColor=root.querySelector('#p48-node-quick-color'),nodeQuickDuplicate=root.querySelector('#p48-node-quick-duplicate'),nodeQuickArrange=root.querySelector('#p48-node-quick-arrange'),nodeQuickDelete=root.querySelector('#p48-node-quick-delete'),nodeQuickAlign=[...root.querySelectorAll('[data-node-quick-align]')],nodeQuickDistribute=[...root.querySelectorAll('[data-node-quick-distribute]')];
+const nodeQuick=root.querySelector('#p48-node-quick'),nodeQuickFlow=root.querySelector('#p48-node-quick-flow'),nodeQuickNext=root.querySelector('#p48-node-quick-next'),nodeQuickNextMore=root.querySelector('#p48-node-quick-next-more'),nodeQuickFormat=root.querySelector('#p48-node-quick-format'),nodeQuickColor=root.querySelector('#p48-node-quick-color'),nodeQuickDuplicate=root.querySelector('#p48-node-quick-duplicate'),nodeQuickArrange=root.querySelector('#p48-node-quick-arrange'),nodeQuickDelete=root.querySelector('#p48-node-quick-delete'),nodeQuickAlign=[...root.querySelectorAll('[data-node-quick-align]')],nodeQuickDistribute=[...root.querySelectorAll('[data-node-quick-distribute]')];
 
 let nodes=new Map(),links=[],selectedId=null,selectedIds=new Set(),selectionMode=false,seq=8,undo=[],redo=[],currentId='proc-1',processes={};
 let editingClipboard=null,clipboardPasteOffset=28;
@@ -2246,24 +2342,30 @@ function applyProcessStyle(force=false){
   return true;
 }
 
+const nodeGeomRevision=new Map();
 function invalidateNodeGeom(id=null){
-  geomVersion++;
-  if(id==null)nodeGeomCache.clear();
-  else nodeGeomCache.delete(id);
+  if(id==null){
+    nodeGeomCache.clear();nodeGeomRevision.clear();geomVersion++;
+    return;
+  }
+  const key=String(id);
+  nodeGeomRevision.set(key,(nodeGeomRevision.get(key)||0)+1);
+  nodeGeomCache.delete(key);
 }
 function nodeGeom(id){
-  const cached=nodeGeomCache.get(id);
-  if(cached&&cached.v===geomVersion)return cached;
-  const el=nodes.get(id)?.el;
+  const key=String(id),rev=nodeGeomRevision.get(key)||0;
+  const cached=nodeGeomCache.get(key);
+  if(cached&&cached.rev===rev)return cached;
+  const el=nodes.get(key)?.el;
   if(!el)return null;
   const g={
-    v:geomVersion,
+    rev,
     left:el.offsetLeft,
     top:el.offsetTop,
     width:el.offsetWidth,
     height:el.offsetHeight
   };
-  nodeGeomCache.set(id,g);
+  nodeGeomCache.set(key,g);
   return g;
 }
 function anchorCached(id,side){
@@ -2545,36 +2647,63 @@ function persist(show=false,refreshList=false){
   scheduleHorizontalNavSync();
   return st;
 }
-let lastUndoAt=0,lastUndoSnapshot='';
-function resetHistory(){undo=[];redo=[];lastUndoSnapshot='';lastUndoAt=0}
-function pushUndo(force=false){
+let lastUndoAt=0,lastUndoSnapshot='',historyTransactionDepth=0,undoGestureSnapshot=null;
+function resetHistory(){undo=[];redo=[];lastUndoSnapshot='';lastUndoAt=0;historyTransactionDepth=0;undoGestureSnapshot=null}
+function recordUndoSnapshot(snapshot,force=false){
   const now=performance.now();
-  const snapshot=JSON.stringify(state());
-  if(!force && now-lastUndoAt<220 && lastUndoSnapshot){
-    // During sliders/colors/rapid UI input, keep one undo checkpoint
-    // rather than serializing dozens of nearly identical states.
-    return;
-  }
-  undo.push(snapshot);
-  lastUndoSnapshot=snapshot;
-  lastUndoAt=now;
-  if(undo.length>50)undo.shift();
-  redo=[];
+  snapshot=String(snapshot||'');if(!snapshot)return false;
+  if(!force && now-lastUndoAt<220 && lastUndoSnapshot)return false;
+  if(undo.length&&undo[undo.length-1]===snapshot)return false;
+  undo.push(snapshot);lastUndoSnapshot=snapshot;lastUndoAt=now;
+  if(undo.length>50)undo.shift();redo=[];return true;
+}
+function pushUndo(force=false){
+  if(historyTransactionDepth>0)return false;
+  return recordUndoSnapshot(JSON.stringify(state()),force);
+}
+function runAtomicUndoOperation(operation){
+  if(typeof operation!=='function')return false;
+  const before=JSON.stringify(state());historyTransactionDepth++;
+  let result=false;
+  try{result=operation()}
+  finally{historyTransactionDepth=Math.max(0,historyTransactionDepth-1)}
+  const after=JSON.stringify(state());
+  if(before!==after)recordUndoSnapshot(before,true);
+  return result;
+}
+function beginUndoGesture(){
+  if(undoGestureSnapshot!=null)return false;
+  undoGestureSnapshot=JSON.stringify(state());historyTransactionDepth++;return true;
+}
+function endUndoGesture(){
+  if(undoGestureSnapshot==null)return false;
+  const before=undoGestureSnapshot;undoGestureSnapshot=null;
+  historyTransactionDepth=Math.max(0,historyTransactionDepth-1);
+  if(before!==JSON.stringify(state()))return recordUndoSnapshot(before,true);
+  return false;
 }
 function refreshEmptyState(){
   if(!emptyState)return;
   emptyState.hidden=sharedView||nodes.size>0;
 }
-function addFirstStep(type){
+function addFirstStep(type,objectRole=null){
   if(!requireEdit())return false;
   const x=Math.max(240,Math.min(canvasLogicalWidth*.32,620));
   const y=Math.max(180,Math.min(canvasLogicalHeight*.28,360));
-  addNode(type,x,y);
+  addNode(type,x,y,{objectRole});
   const item=selectedId?nodes.get(selectedId):null;
   if(item)requestAnimationFrame(()=>beginInlineEdit(item.el));
   return true;
 }
 function clearCanvas(){hideSnapGuides();for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();selectedLinkIndex=null;selectedLinkIndices.clear();linkLayer.innerHTML='';clearLinkHitLayer();linkDomByIndex.clear();finishTempArrow();setFormatEnabled(false);refreshControls();refreshLinkControls();updateSelectionUi();refreshEmptyState()}
+function clearEntireCanvas(){
+  if(!requireEdit())return false;
+  if(nodes.size===0&&links.length===0){msg('Canvasen är redan tom');return false}
+  if(!confirm('Är du säker på att du vill rensa hela canvasen? Alla rutor och kopplingar tas bort.'))return false;
+  const changed=runAtomicUndoOperation(()=>{clearCanvas();persist();return true});
+  if(changed)msg('Canvasen rensades · Ångra återställer innehållet');
+  return changed;
+}
 function restore(s){
   let raw;
   try{raw=typeof s==='string'?JSON.parse(s):clone(s)}
@@ -2748,17 +2877,26 @@ function magneticSnap(start,proposedX,proposedY,excludeIds){
   if(!bestY)y=Math.round(y/SNAP_GRID)*SNAP_GRID;
   return{x,y,snapX:bestX?bestX.line:null,snapY:bestY?bestY.line:null};
 }
-function straightenAlignedConnectedLinks(movedIds){
-  const moved=new Set(movedIds);
+function polishAutomaticConnectedLinks(movedIds,{forceAuto=false}={}){
+  const moved=new Set((movedIds||[]).map(String));
+  let changed=0;
   for(let i=0;i<links.length;i++){
     const l=links[i];if(!Array.isArray(l)||(!moved.has(String(l[0]))&&!moved.has(String(l[1]))))continue;
     const A=nodes.get(String(l[0]))?.el,B=nodes.get(String(l[1]))?.el;if(!A||!B)continue;
+    const st=linkStyle(l);
+    /* Respect deliberate manual connector work. A free route or fixed anchor is user-owned
+       unless Smart Layout explicitly asks us to normalize the whole selection. */
+    if(!forceAuto&&(st.routing==='free'||st.anchorMode!=='auto'))continue;
     const [ax,ay]=center(A),[bx,by]=center(B);
-    if(Math.abs(ay-by)<=1||Math.abs(ax-bx)<=1){
-      setLinkStyle(i,{routing:'straight',anchorMode:'auto',viaX:null,viaY:null,freeDx:0,freeDy:0});
-      dirtyLinks.add(i);
-    }
+    const alignedH=Math.abs(ay-by)<=1,alignedV=Math.abs(ax-bx)<=1;
+    const routing=(alignedH||alignedV)?'straight':'orthogonal';
+    setLinkStyle(i,{routing,anchorMode:'auto',viaX:null,viaY:null,freeDx:0,freeDy:0});
+    dirtyLinks.add(i);changed++;
   }
+  return changed;
+}
+function straightenAlignedConnectedLinks(movedIds){
+  return polishAutomaticConnectedLinks(movedIds);
 }
 function targetSide(a,b){const[ax,ay]=center(a),[bx,by]=center(b),dx=bx-ax,dy=by-ay;if(Math.abs(dx)>=Math.abs(dy))return dx>=0?'left':'right';return dy>=0?'top':'bottom'}
 function linkSides(link,A,B){const st=linkStyle(link),[ax,ay]=center(A),[bx,by]=center(B);if(st.anchorMode==='auto'){const sides=MapliniConnectorCore.autoSides(bx-ax,by-ay);return{source:sides[0],target:sides[1]}}return{source:link[2]||'right',target:targetSide(A,B)}}
@@ -2780,7 +2918,21 @@ function refreshNodeQuickToolbar(){
   const x=Math.max(80,Math.min(maxToolbarX,(left+right)/2));
   const y=Math.max(56,top);nodeQuick.style.left=x+'px';nodeQuick.style.top=y+'px';
   if(nodeQuickColor){const shared=sharedStyleValue(items,'bgColor');nodeQuickColor.value=shared||styleOf(items[0].data).bgColor||'#ffffff'}
-  if(nodeQuickNext){const source=!multi&&isNextStepSource(items[0]);nodeQuickNext.disabled=!source;nodeQuickNext.hidden=!source}
+  if(nodeQuickFlow){
+    const source=!multi&&isNextStepSource(items[0]);
+    nodeQuickFlow.hidden=!source;
+    nodeQuickFlow.textContent=source?workflowCue(items[0]):'';
+    nodeQuickFlow.title=source?'Rekommenderad ordning i processflödet':'';
+  }
+  if(nodeQuickNext){
+    const source=!multi&&isNextStepSource(items[0]);
+    nodeQuickNext.disabled=!source;nodeQuickNext.hidden=!source;
+    if(source){nodeQuickNext.textContent=preferredNextLabel(items[0]);nodeQuickNext.title='Lägg till rekommenderat nästa steg direkt';}
+  }
+  if(nodeQuickNextMore){
+    const source=!multi&&isNextStepSource(items[0]);
+    nodeQuickNextMore.disabled=!source;nodeQuickNextMore.hidden=!source;
+  }
 }
 function focusFormattingPanel(){
   if(isMobileLayout())setMobileTools(true);
@@ -2791,7 +2943,11 @@ function refreshMobileBar(){
   const nodeCount=selectedIds.size||(selectedId?1:0);
   const selectedMode=isMobileLayout()&&canEdit()&&selectedLinkIndex==null&&nodeCount>0;
   mobileBar.dataset.mode=selectedMode?'selected':'normal';
-  if(mobileNext){const item=selectedId&&nodeCount===1?nodes.get(selectedId):null;mobileNext.hidden=!(item&&isNextStepSource(item));}
+  if(mobileNext){
+    const item=selectedId&&nodeCount===1?nodes.get(selectedId):null;
+    mobileNext.hidden=!(item&&isNextStepSource(item));
+    if(item&&isNextStepSource(item))mobileNext.textContent=preferredNextLabel(item);
+  }
   if(mobileUndo)mobileUndo.disabled=!canEdit()||undo.length===0;
   if(mobileRedo)mobileRedo.disabled=!canEdit()||redo.length===0;
 }
@@ -2807,7 +2963,9 @@ function updateSelectionUi(){
   deleteSelectionBtn.disabled=selectedIds.size===0&&selectedLinkIndices.size===0;
   if(duplicateSelectionBtn)duplicateSelectionBtn.disabled=!canEdit()||selectedIds.size===0;
 
-  smartLayoutChoices.forEach(btn=>{btn.disabled=!canEdit()||(btn.dataset.layoutScope==='selected'&&selectedIds.size<2)});if(smartLayoutHint)smartLayoutHint.textContent=selectedIds.size>=2?`${selectedIds.size} markerade · välj hela processen eller markeringen.`:'Markera minst två rutor för att snygga till bara en del.';
+  smartLayoutChoices.forEach(btn=>{btn.disabled=!canEdit()||(btn.dataset.layoutScope==='selected'&&selectedIds.size<2)});
+  if(autoCleanBtn)autoCleanBtn.disabled=!canEdit()||nodes.size<2;
+  if(smartLayoutHint)smartLayoutHint.textContent=selectedIds.size>=2?`${selectedIds.size} markerade · välj hela processen eller markeringen.`:'Markera minst två rutor för att snygga till bara en del.';
   selectToolBtn.classList.toggle('primary',selectionMode);
   selectToolBtn.setAttribute('aria-pressed',selectionMode?'true':'false');
   selectToolBtn.textContent=selectionMode?'Avsluta markering':'Markera område';
@@ -2952,6 +3110,55 @@ function renderIOEditor(item){
   item.data.outputs.forEach((v,i)=>outputsBox.appendChild(row(v,i,'outputs')));
 }
 
+function ensureProcessInfo(item){
+  if(!item)return MapliniProcessInfoCore.normalize({});
+  item.data.processInfo=MapliniProcessInfoCore.normalize(item.data.processInfo);
+  return item.data.processInfo;
+}
+function processInfoEligible(item){
+  return Boolean(item&&['process','subprocess','decision'].includes(String(item.data?.type||'')));
+}
+function processInfoSuggestions(key){
+  const values=[];
+  for(const candidate of nodes.values()){
+    if(!processInfoEligible(candidate))continue;
+    const info=ensureProcessInfo(candidate),value=String(info[key]||'').trim();
+    if(value&&!values.some(v=>v.toLocaleLowerCase('sv-SE')===value.toLocaleLowerCase('sv-SE')))values.push(value);
+  }
+  return values.sort((a,b)=>a.localeCompare(b,'sv-SE')).slice(0,40);
+}
+function renderSuggestionList(el,values){
+  if(!el)return;el.innerHTML='';
+  for(const value of values){const option=document.createElement('option');option.value=value;el.appendChild(option);}
+}
+function renderProcessInfoEditor(item){
+  const eligible=processInfoEligible(item);
+  if(processInfoPanel)processInfoPanel.hidden=!eligible;
+  if(!eligible)return;
+  const info=ensureProcessInfo(item);
+  for(const [key,el] of Object.entries(processInfoFields))if(el&&document.activeElement!==el)el.value=info[key]||'';
+  renderSuggestionList(roleSuggestions,processInfoSuggestions('responsibleRole'));
+  renderSuggestionList(systemSuggestions,processInfoSuggestions('system'));
+  const c=MapliniProcessInfoCore.completion(info);
+  if(processInfoProgress){
+    processInfoProgress.textContent=`${c.filled} av ${c.total}`;
+    processInfoProgress.title=c.filled===c.total?'Steget är väl beskrivet':'Frivilligt – fyll bara i det som är relevant';
+  }
+  if(processInfoMoreCount){
+    const advanced=['instruction','risk','control','kpi'].filter(k=>Boolean(info[k])).length;
+    processInfoMoreCount.textContent=advanced?`· ${advanced}/4 ifyllda`:'';
+  }
+}
+function saveProcessInfoField(key,value){
+  if(!requireEdit())return false;
+  const item=selectedId?nodes.get(selectedId):null;
+  if(!processInfoEligible(item)||!Object.prototype.hasOwnProperty.call(processInfoFields,key))return false;
+  const before=JSON.stringify(ensureProcessInfo(item));
+  const next=MapliniProcessInfoCore.normalize(Object.assign({},item.data.processInfo,{[key]:String(value||'')}));
+  if(before===JSON.stringify(next))return false;
+  pushUndo(true);item.data.processInfo=next;persist();renderProcessInfoEditor(item);
+  msg('Processinformation sparad');return true;
+}
 function selectedNodeItems(){
   const ids=selectedIds.size?[...selectedIds]:(selectedId?[selectedId]:[]);
   return ids.map(id=>nodes.get(id)).filter(Boolean);
@@ -3001,10 +3208,17 @@ function setFormatEnabled(enabled){
   if(formatHint){
     if(context==='link')formatHint.textContent='Ändra text, utseende och beteende för den markerade pilen.';
     else if(context==='multi')formatHint.textContent=`${selectedIds.size} rutor markerade · ändringar gäller alla markerade.`;
-    else if(context==='node')formatHint.textContent='Ändra text och utseende för den markerade rutan.';
+    else if(context==='node'){
+      const item=selectedId?nodes.get(selectedId):null;
+      if(item?.data?.type==='object'){
+        const role=item.data.objectRole==='input'?'Objekt in · det som triggar eller behövs före en aktivitet.':(item.data.objectRole==='output'?'Objekt ut · resultatet som aktiviteten producerar.':'Objekt · kan vara både resultat från ett steg och input till nästa.');
+        formatHint.textContent=role+' Ändra text och utseende här.';
+      }else if(processInfoEligible(item))formatHint.textContent='Beskriv vad som händer, vem som ansvarar och vilket system som används. Utseendet ligger separat.';
+      else formatHint.textContent='Ändra text och utseende för den markerade rutan.';
+    }
     else formatHint.textContent='Markera en ruta eller pil för att visa relevanta inställningar.';
   }
-  controls.querySelectorAll('select,input,button').forEach(el=>{
+  controls.querySelectorAll('select,input,textarea,button').forEach(el=>{
     const commonForLink=(el===linkColor||el===linkWidth||el===linkEnd||el===linkDash||el===linkRouting||el===linkAnchorMode||el===linkLabel||el===insertLinkStepBtn||el===deleteLinkBtn);
     if(linkMode)el.disabled=!editable||!commonForLink;
     else el.disabled=!editable||!enabled;
@@ -3020,7 +3234,7 @@ function refreshControls(){
   const items=selectedNodeItems();
   const item=selectedId?nodes.get(selectedId):null;
   if(!items.length){
-    setFormatEnabled(false);inputsBox.innerHTML='';outputsBox.innerHTML='';
+    setFormatEnabled(false);inputsBox.innerHTML='';outputsBox.innerHTML='';if(processInfoPanel)processInfoPanel.hidden=true;
     if(documentLinkEditor)documentLinkEditor.hidden=true;
     if(documentUrlInput)documentUrlInput.value='';
     if(documentOpenEditor){documentOpenEditor.hidden=true;documentOpenEditor.removeAttribute('href');}
@@ -3043,7 +3257,17 @@ function refreshControls(){
   if(documentLinkEditor)documentLinkEditor.hidden=multi||!item||item.data.type!=='document';
   if(documentUrlInput)documentUrlInput.value=(!multi&&item&&item.data.type==='document')?(item.data.documentUrl||''):'';
   if(documentOpenEditor){const u=(!multi&&item&&item.data.type==='document')?safeDocumentUrl(item.data.documentUrl):'';documentOpenEditor.hidden=!u;if(u)documentOpenEditor.href=u;else documentOpenEditor.removeAttribute('href');}
-  if(!multi&&item)renderIOEditor(item);else{inputsBox.innerHTML='';outputsBox.innerHTML='';}
+  if(!multi&&item){renderIOEditor(item);renderProcessInfoEditor(item)}else{inputsBox.innerHTML='';outputsBox.innerHTML='';if(processInfoPanel)processInfoPanel.hidden=true;}
+}
+for(const [key,el] of Object.entries(processInfoFields)){
+  if(!el)continue;
+  el.addEventListener('change',()=>saveProcessInfoField(key,el.value));
+  el.addEventListener('keydown',e=>{
+    if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){
+      e.preventDefault();saveProcessInfoField(key,el.value);el.blur();
+      const item=selectedId?nodes.get(selectedId):null;if(item)item.el.focus();
+    }
+  });
 }
 function updateStyle(patch){
   if(!requireEdit())return;
@@ -3102,18 +3326,29 @@ if(d.width){
   el.style.boxSizing='border-box';el.style.minWidth='0px';el.style.maxWidth='none';el.style.width=d.width+'px';
 }
 if(d.height){el.style.boxSizing='border-box';el.style.minHeight='0px';el.style.height=d.height+'px';}
+if(d.type==='object'){
+  d.objectRole=['input','output','intermediate'].includes(d.objectRole)?d.objectRole:'intermediate';
+  el.dataset.objectRole=d.objectRole;
+  const role=document.createElement('span');role.className='p48-object-role';
+  role.textContent=d.objectRole==='input'?'OBJEKT IN':(d.objectRole==='output'?'OBJEKT UT':'OBJEKT');
+  el.appendChild(role);
+}
 const label=document.createElement('span');label.className='p48-label';label.textContent=d.text;label.contentEditable='false';label.spellcheck=true;el.appendChild(label);
 const handles={};for(const side of ['right','left','top','bottom']){const h=document.createElement('span');h.className='p48-handle '+side;h.dataset.side=side;el.appendChild(h);handles[side]=h}
 const resizeHandles={};for(const corner of ['se','sw','ne','nw']){const rh=document.createElement('span');rh.className='p48-resize '+corner;rh.dataset.corner=corner;el.appendChild(rh);resizeHandles[corner]=rh}
 const nextWrap=document.createElement('div');nextWrap.className='p48-next-step-wrap';
-const nextBtn=document.createElement('button');nextBtn.type='button';nextBtn.className='p48-next-step-btn';nextBtn.textContent='＋';nextBtn.title='Lägg till nästa steg';nextBtn.setAttribute('aria-label','Lägg till nästa steg');nextBtn.setAttribute('aria-haspopup','true');nextBtn.setAttribute('aria-expanded','false');
+const nextBtn=document.createElement('button');nextBtn.type='button';nextBtn.className='p48-next-step-btn';nextBtn.textContent='＋';nextBtn.title='Välj typ av nästa steg';nextBtn.setAttribute('aria-label','Lägg till nästa steg');nextBtn.setAttribute('aria-haspopup','true');nextBtn.setAttribute('aria-expanded','false');
 const nextMenu=document.createElement('div');nextMenu.className='p48-next-step-menu';nextMenu.hidden=true;
 const nextChoices=d.type==='process'
   ? [['object','▪ Objekt / resultat'],['decision','◇ Beslut'],['document','📄 Dokument'],['end','■ Slut']]
   : d.type==='object'
     ? [['process','▭ Aktivitet'],['decision','◇ Beslut'],['end','■ Slut']]
     : [['object','▪ Objekt'],['process','▭ Aktivitet'],['decision','◇ Beslut'],['document','📄 Dokument'],['end','■ Slut']];
-for(const [type,caption] of nextChoices){const b=document.createElement('button');b.type='button';b.className='p48-next-step-choice';b.dataset.nextType=type;b.textContent=caption;nextMenu.appendChild(b)}
+for(const [type,caption] of nextChoices){
+  const b=document.createElement('button');b.type='button';b.className='p48-next-step-choice';b.dataset.nextType=type;b.textContent=caption;
+  if(type===preferredNextType({data:d}))b.classList.add('recommended');
+  nextMenu.appendChild(b);
+}
 nextWrap.append(nextBtn,nextMenu);el.appendChild(nextWrap);
 canvas.appendChild(el);nodes.set(d.id,{el,data:d,label,handles,resizeHandles,io:null,docOpen:null,docInlineEditor:null,docInlineInput:null,nextWrap,nextBtn,nextMenu});refreshEmptyState();applyStyle(nodes.get(d.id));renderNodeIO(nodes.get(d.id));renderDocumentLink(nodes.get(d.id));
 nextBtn.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault()});
@@ -3134,6 +3369,12 @@ label.addEventListener('input',()=>{const item=nodes.get(el.dataset.id);if(item&
 label.addEventListener('blur',()=>finishInlineEdit(el));
 label.addEventListener('keydown',e=>{
   if(e.key==='Escape'){e.preventDefault();finishInlineEdit(el);el.focus();}
+  if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){
+    e.preventDefault();finishInlineEdit(el);
+    const item=nodes.get(el.dataset.id),type=preferredNextType(item);
+    if(type)addNextStepFromNode(el.dataset.id,type);
+    return;
+  }
   if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();finishInlineEdit(el);el.focus();}
 });
 let suppressSelectClick=false;
@@ -3156,6 +3397,7 @@ el.addEventListener('pointerdown',e=>{
   const startVia=MapliniEditingCore.movedInternalVias(links,activeIds,0,0).map(v=>({index:v.index,viaX:v.viaX,viaY:v.viaY}));
   const sx=e.clientX,sy=e.clientY,pointerType=e.pointerType||'mouse';
   let mutated=false;
+  fastGeometryInteraction=true;
   try{el.setPointerCapture(e.pointerId)}catch(ignore){}
   const mv=ev=>{
     const screenDx=ev.clientX-sx,screenDy=ev.clientY-sy;
@@ -3184,9 +3426,12 @@ el.addEventListener('pointerdown',e=>{
     el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',done);el.removeEventListener('pointercancel',done);
     try{if(el.hasPointerCapture&&el.hasPointerCapture(e.pointerId))el.releasePointerCapture(e.pointerId)}catch(ignore){}
     hideSnapGuides();
+    fastGeometryInteraction=false;
     if(mutated){
       straightenAlignedConnectedLinks(activeIds);
       suppressSelectClick=Boolean(groupIds);requestFullLinkRender(true);persist();updateSelectionUi();
+    }else{
+      drawLinks(true);
     }
   };
   el.addEventListener('pointermove',mv);el.addEventListener('pointerup',done);el.addEventListener('pointercancel',done);
@@ -3198,6 +3443,7 @@ Object.values(resizeHandles).forEach(rh=>rh.addEventListener('pointerdown',e=>{
   const corner=rh.dataset.corner,sx=e.clientX,sy=e.clientY;
   const ox=parseFloat(el.style.left)||0,oy=parseFloat(el.style.top)||0,ow=el.offsetWidth,oh=el.offsetHeight;
   let mutated=false;
+  fastGeometryInteraction=true;
   const mv=ev=>{
     const screenDx=ev.clientX-sx,screenDy=ev.clientY-sy;
     if(!mutated&&MapliniMobileCore.movedEnough(screenDx,screenDy,e.pointerType||'mouse')){pushUndo(true);mutated=true}
@@ -3207,7 +3453,11 @@ Object.values(resizeHandles).forEach(rh=>rh.addEventListener('pointerdown',e=>{
     el.style.left=box.x+'px';el.style.top=box.y+'px';el.style.width=box.width+'px';el.style.height=box.height+'px';el.style.minHeight=box.height+'px';
     sync(el);const item=nodes.get(el.dataset.id);item.data.width=box.width;item.data.height=box.height;invalidateNodeGeom(el.dataset.id);markNodeLinksDirty(el.dataset.id);drawLinks();
   };
-  const done=()=>{document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',done);document.removeEventListener('pointercancel',done);if(mutated)persist()};
+  const done=()=>{
+    document.removeEventListener('pointermove',mv);document.removeEventListener('pointerup',done);document.removeEventListener('pointercancel',done);
+    fastGeometryInteraction=false;
+    if(mutated){requestFullLinkRender(true);persist()}else drawLinks(true);
+  };
   document.addEventListener('pointermove',mv);document.addEventListener('pointerup',done);document.addEventListener('pointercancel',done);
 }));
 
@@ -3226,6 +3476,7 @@ Object.values(handles).forEach(h=>h.addEventListener('pointerdown',e=>{
       pushUndo();const autoLabel=decisionAutoLabel(el.dataset.id);
       links.push(MapliniConnectorCore.create(el.dataset.id,target.dataset.id,side,{label:autoLabel}));
       const newIndex=links.length-1;
+      polishAutomaticConnectedLinks([el.dataset.id,target.dataset.id],{forceAuto:true});
       requestFullLinkRender();persist();
       coachDirectActivityLink(newIndex);
     }
@@ -3235,23 +3486,64 @@ Object.values(handles).forEach(h=>h.addEventListener('pointerdown',e=>{
 }));
 return el}
 
-function addNode(type,x,y){if(!requireEdit())return;pushUndo();seq++;const el=makeNode({id:'n'+seq,type,text:nodeText(type),x:x-90,y:y-38});place(el,x-90,y-38);sync(el);select(el);drawLinks();persist()}
+function addNode(type,x,y,options={}){
+  if(!requireEdit())return;pushUndo();seq++;
+  const objectRole=type==='object'&&['input','output','intermediate'].includes(options.objectRole)?options.objectRole:'intermediate';
+  const el=makeNode({id:'n'+seq,type,text:nodeText(type),x:x-90,y:y-38,objectRole,processInfo:MapliniProcessInfoCore.normalize({})});
+  place(el,x-90,y-38);sync(el);select(el);drawLinks();persist();
+}
 function isNextStepSource(item){return Boolean(item&&['start','object','process','decision','document','subprocess'].includes(String(item.data&&item.data.type||'')))}
+function preferredNextType(item){
+  const type=String(item?.data?.type||'');
+  if(type==='process')return'object';
+  if(['start','object','decision','document','subprocess'].includes(type))return'process';
+  return null;
+}
+function preferredNextLabel(item){
+  const type=preferredNextType(item);
+  if(type==='object')return'＋ Objekt ut';
+  if(type==='process')return'＋ Aktivitet';
+  return'＋ Nästa';
+}
+function workflowCue(item){
+  const current=String(item?.data?.type||'');
+  const currentLabel=current==='process'?'Aktivitet':(current==='object'?(item.data.objectRole==='input'?'Objekt in':(item.data.objectRole==='output'?'Objekt ut':'Objekt')):(current==='start'?'Start':(current==='decision'?'Beslut':(current==='document'?'Dokument':(current==='subprocess'?'Delprocess':'')))));
+  const next=preferredNextType(item),nextLabel=next==='object'?'Objekt ut':(next==='process'?'Aktivitet':'');
+  return currentLabel&&nextLabel?`${currentLabel} → ${nextLabel}`:'';
+}
+function ensureNodeVisible(el){
+  if(!el||!scroll)return;
+  const left=parseFloat(el.style.left)||0,top=parseFloat(el.style.top)||0,w=el.offsetWidth||180,h=el.offsetHeight||76;
+  const visualLeft=left*canvasScale,visualTop=top*canvasScale,visualRight=(left+w)*canvasScale,visualBottom=(top+h)*canvasScale;
+  const margin=84;
+  let nextLeft=scroll.scrollLeft,nextTop=scroll.scrollTop;
+  if(visualLeft<scroll.scrollLeft+margin)nextLeft=Math.max(0,visualLeft-margin);
+  else if(visualRight>scroll.scrollLeft+scroll.clientWidth-margin)nextLeft=Math.max(0,visualRight-scroll.clientWidth+margin);
+  if(visualTop<scroll.scrollTop+margin)nextTop=Math.max(0,visualTop-margin);
+  else if(visualBottom>scroll.scrollTop+scroll.clientHeight-margin)nextTop=Math.max(0,visualBottom-scroll.clientHeight+margin);
+  if(nextLeft!==scroll.scrollLeft||nextTop!==scroll.scrollTop){
+    scroll.scrollTo({left:nextLeft,top:nextTop,behavior:'smooth'});
+  }
+}
+
 function closeNodeNextMenus(exceptWrap=null){for(const item of nodes.values()){if(!item.nextMenu||item.nextMenu.hidden||item.nextWrap===exceptWrap)continue;item.nextMenu.hidden=true;if(item.nextBtn)item.nextBtn.setAttribute('aria-expanded','false')}}
 function addNextStepFromNode(sourceId,type='process'){
   if(!requireEdit())return false;
   const allowed=new Set(['object','process','decision','document','end']);type=allowed.has(String(type))?String(type):'process';
   const source=nodes.get(sourceId);if(!isNextStepSource(source)){msg('Det går inte att lägga ett nästa steg här');return false}
   pushUndo(true);seq++;const id='n'+seq;
-  const el=makeNode({id,type,text:nodeText(type),x:0,y:0});
+  const nextObjectRole=type==='object'?(source.data.type==='process'?'output':'intermediate'):null;
+  const el=makeNode({id,type,text:nodeText(type),x:0,y:0,objectRole:nextObjectRole,processInfo:MapliniProcessInfoCore.normalize({})});
   const sourceRect={x:source.el.offsetLeft,y:source.el.offsetTop,width:source.el.offsetWidth,height:source.el.offsetHeight};
   const existing=[...nodes.values()].filter(x=>x.data.id!==id).map(x=>({x:x.el.offsetLeft,y:x.el.offsetTop,width:x.el.offsetWidth,height:x.el.offsetHeight}));
   const pos=MapliniEditingCore.nextStepPosition(sourceRect,{width:el.offsetWidth,height:el.offsetHeight},existing,MapliniCanvasCore.DEFAULT_BOUNDS,120);
   el.style.left=pos.x+'px';el.style.top=pos.y+'px';sync(el);
   const autoLabel=decisionAutoLabel(sourceId);links.push(MapliniConnectorCore.create(sourceId,id,'right',{label:autoLabel}));
+  polishAutomaticConnectedLinks([sourceId,id],{forceAuto:true});
   closeNodeNextMenus();select(el);requestFullLinkRender(true);persist();refreshControls();refreshLinkControls();updateSelectionUi();
-  const names={object:'Objekt',process:'Aktivitet',decision:'Beslut',document:'Dokument',end:'Slut'};msg((names[type]||'Steg')+' tillagt');
-  requestAnimationFrame(()=>beginInlineEdit(el));return true;
+  const names={object:(nextObjectRole==='output'?'Objekt ut':'Objekt'),process:'Aktivitet',decision:'Beslut',document:'Dokument',end:'Slut'};
+  msg((names[type]||'Steg')+' tillagt · skriv namnet · Ctrl+Enter fortsätter');
+  requestAnimationFrame(()=>{ensureNodeVisible(el);beginInlineEdit(el)});return true;
 }
 
 
@@ -3292,7 +3584,7 @@ function refreshLinkControls(){
   linkFormat.classList.toggle('on',!!link);
   linkHandle.classList.toggle('on',!!link);
   if(linkQuick)linkQuick.classList.toggle('on',!!link&&canEdit());
-  if(!link){linkQuickRouting.forEach(btn=>btn.classList.remove('active'));return;}
+  if(!link){linkQuickRouting.forEach(btn=>btn.classList.remove('active'));refreshFlowCoach();return;}
   const st=linkStyle(link);
   linkQuickRouting.forEach(btn=>{btn.disabled=!canEdit();btn.classList.toggle('active',btn.dataset.linkRouting===(st.routing||'straight'));});
   setFormatEnabled(false);
@@ -3315,6 +3607,7 @@ function refreshLinkControls(){
   linkRouting.value=st.routing||'straight';
   linkAnchorMode.value=st.anchorMode||'manual';
   linkLabel.value=st.label||'';
+  refreshFlowCoach();
 }
 function selectLink(i,deferRender=false){
   if(i==null||!links[i])return;
@@ -3327,14 +3620,25 @@ function selectLink(i,deferRender=false){
   refreshLinkControls();
   if(!deferRender)requestFullLinkRender(true);
 }
+function isDirectActivityLink(index){
+  const link=index!=null?links[index]:null;if(!link)return false;
+  const from=nodes.get(String(link[0]))?.data,to=nodes.get(String(link[1]))?.data;
+  const st=linkStyle(link);
+  return Boolean(from&&to&&from.type==='process'&&to.type==='process'&&st.methodOverride!=='direct_activity_ok');
+}
+function refreshFlowCoach(){
+  if(!flowCoach)return;
+  flowCoach.hidden=!(selectedLinkIndex!=null&&canEdit()&&isDirectActivityLink(selectedLinkIndex));
+}
 function coachDirectActivityLink(index){
   const link=index!=null?links[index]:null;
   if(!link)return false;
   const from=nodes.get(link[0])?.data,to=nodes.get(link[1])?.data;
   if(!from||!to||from.type!=='process'||to.type!=='process')return false;
   selectLink(index,true);
-  setInsertStepMenu(true);
-  msg('Två aktiviteter är kopplade direkt. Vad är resultatet från den första som gör att nästa kan börja? Välj “Objekt / resultat”.');
+  setInsertStepMenu(false);
+  refreshFlowCoach();
+  msg('Två aktiviteter är kopplade direkt. Lägg gärna in resultatet som gör att nästa aktivitet kan börja.');
   requestFullLinkRender(true);
   return true;
 }
@@ -3358,7 +3662,8 @@ function insertStepOnSelectedLink(type='process'){
   pushUndo(true);
   seq++;
   const id='n'+seq;
-  const el=makeNode({id,type,text:nodeText(type),x:mp.x-90,y:mp.y-38});
+  const objectRole=type==='object'?'intermediate':null;
+  const el=makeNode({id,type,text:nodeText(type),x:mp.x-90,y:mp.y-38,objectRole});
   place(el,mp.x-90,mp.y-38);sync(el);
   links=MapliniConnectorCore.splitLink(links,index,id);
   selectedLinkIndex=null;selectedLinkIndices.clear();
@@ -3543,6 +3848,7 @@ function addHtmlLinkHitSegment(index,x1,y1,x2,y2){
 }
 
 function renderAllLinksNow(){
+  rebuildLinkAdjacency();
   linkLayer.innerHTML='';clearLinkHitLayer();
   links.forEach((link,index)=>{
     const [a,b,side]=link;
@@ -3630,12 +3936,29 @@ function renderAllLinksNow(){
 const linkDomByIndex=new Map();
 let dirtyLinks=new Set();
 let fullLinkRenderNeeded=true;
+const linkIndicesByNode=new Map();
+let linkAdjacencyReady=false;
+let fastGeometryInteraction=false;
 
+function rebuildLinkAdjacency(){
+  linkIndicesByNode.clear();
+  for(let i=0;i<links.length;i++){
+    const l=links[i];if(!Array.isArray(l)||l.length<2)continue;
+    const a=String(l[0]),b=String(l[1]);
+    if(!linkIndicesByNode.has(a))linkIndicesByNode.set(a,[]);
+    if(!linkIndicesByNode.has(b))linkIndicesByNode.set(b,[]);
+    linkIndicesByNode.get(a).push(i);
+    if(b!==a)linkIndicesByNode.get(b).push(i);
+  }
+  linkAdjacencyReady=true;
+}
 function linksForNode(id){
+  const key=String(id);
+  if(linkAdjacencyReady)return linkIndicesByNode.get(key)||[];
   const out=[];
   for(let i=0;i<links.length;i++){
     const l=links[i];
-    if(l[0]===id||l[1]===id)out.push(i);
+    if(Array.isArray(l)&&(String(l[0])===key||String(l[1])===key))out.push(i);
   }
   return out;
 }
@@ -3656,6 +3979,14 @@ function redrawSingleLink(index){
   entry.visible.setAttribute('d',d);
   entry.hit.setAttribute('d',d);
   if(entry.halo)entry.halo.setAttribute('d',d);
+
+  /* During node drag/resize, keep the hot frame path-only. Rebuilding HTML hit
+     segments, markers and labels for every pointermove is expensive on large maps.
+     A complete render runs when the gesture ends. */
+  if(fastGeometryInteraction){
+    if(selectedLinkIndex===index)updateSelectedLinkUi(points,st);
+    return;
+  }
 
   // update HTML hit segments only for this link
   for(const el of linkHitLayer.querySelectorAll(`[data-link-index="${index}"]`))el.remove();
@@ -3695,6 +4026,7 @@ function renderDirtyLinksNow(){
 
 function requestFullLinkRender(immediate=false){
   fullLinkRenderNeeded=true;
+  linkAdjacencyReady=false;
   drawLinks(immediate);
 }
 
@@ -3702,13 +4034,15 @@ let linkRenderRaf=0;
 function drawLinks(immediate=false){
   if(immediate){
     if(linkRenderRaf){cancelAnimationFrame(linkRenderRaf);linkRenderRaf=0;}
-    renderDirtyLinksNow();refreshNodeQuickToolbar();
+    renderDirtyLinksNow();
+    if(selectedId||selectedIds.size)refreshNodeQuickToolbar();
     return;
   }
   if(linkRenderRaf)return;
   linkRenderRaf=requestAnimationFrame(()=>{
     linkRenderRaf=0;
-    renderDirtyLinksNow();refreshNodeQuickToolbar();
+    renderDirtyLinksNow();
+    if(selectedId||selectedIds.size)refreshNodeQuickToolbar();
   });
 }
 
@@ -4446,6 +4780,7 @@ selectToolBtn.addEventListener('click',()=>{
   updateSelectionUi();
 });
 deleteSelectionBtn.addEventListener('click',deleteSelectedMany);
+if(clearCanvasBtn)clearCanvasBtn.addEventListener('click',()=>{if(clearEntireCanvas()&&moreMenu)moreMenu.open=false});
 
 canvas.addEventListener('pointerdown',e=>{
   if(!selectionMode||e.button!==0||e.target.closest('.p48-node'))return;
@@ -4505,19 +4840,24 @@ function paletteInsertPoint(){
 function addFromPalette(item,{closeMobile=false}={}){
   if(!item||sharedView)return;
   const [x,y]=paletteInsertPoint();
-  addNode(item.dataset.type,x,y);
+  addNode(item.dataset.type,x,y,{objectRole:item.dataset.objectRole||null});
   if(closeMobile)setMobileTools(false);
-  msg('Form tillagd');
+  const paletteName=item.dataset.type==='object'?(item.dataset.objectRole==='input'?'Objekt in':'Objekt ut'):(item.dataset.type==='process'?'Aktivitet':'Steg');
+  msg(`${paletteName} tillagt · markera rutan och använd Nästa för att fortsätta`);
 }
-if(emptyObject)emptyObject.addEventListener('click',()=>addFirstStep('object'));
+if(emptyObject)emptyObject.addEventListener('click',()=>addFirstStep('object','input'));
 if(emptyActivity)emptyActivity.addEventListener('click',()=>addFirstStep('process'));
 root.querySelectorAll('.p48-item').forEach(i=>{
-  i.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',i.dataset.type);e.dataTransfer.effectAllowed='copy'});
+  i.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',JSON.stringify({type:i.dataset.type,objectRole:i.dataset.objectRole||null}));e.dataTransfer.effectAllowed='copy'});
   i.addEventListener('click',e=>{if(isMobileLayout()){e.preventDefault();addFromPalette(i,{closeMobile:true})}});
   i.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();addFromPalette(i,{closeMobile:isMobileLayout()})}});
 });
 canvas.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='copy'});
-canvas.addEventListener('drop',e=>{e.preventDefault();const type=e.dataTransfer.getData('text/plain');if(!type)return;const p=clientToCanvas(e.clientX,e.clientY);addNode(type,p.x,p.y)});
+canvas.addEventListener('drop',e=>{
+  e.preventDefault();const raw=e.dataTransfer.getData('text/plain');if(!raw)return;
+  let payload={type:raw,objectRole:null};try{const parsed=JSON.parse(raw);if(parsed&&parsed.type)payload=parsed}catch(_){}
+  const p=clientToCanvas(e.clientX,e.clientY);addNode(payload.type,p.x,p.y,{objectRole:payload.objectRole});
+});
 canvas.addEventListener('click',e=>{
   if(desktopPanMoved){desktopPanMoved=false;e.preventDefault();e.stopPropagation();return}
   if(desktopPanBlankTarget(e.target)||e.target===linkLayer){
@@ -4988,6 +5328,16 @@ linkLabel.addEventListener('blur',()=>{
 });
 if(insertLinkStepBtn)insertLinkStepBtn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();setInsertStepMenu(insertLinkStepMenu?.hidden!==false)});
 insertLinkStepChoices.forEach(btn=>btn.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();insertStepOnSelectedLink(btn.dataset.insertType)}));
+if(flowCoachInsert)flowCoachInsert.addEventListener('click',e=>{
+  e.preventDefault();e.stopPropagation();
+  if(selectedLinkIndex!=null&&isDirectActivityLink(selectedLinkIndex))insertStepOnSelectedLink('object');
+});
+if(flowCoachKeep)flowCoachKeep.addEventListener('click',e=>{
+  e.preventDefault();e.stopPropagation();
+  if(selectedLinkIndex==null||!links[selectedLinkIndex])return;
+  pushUndo(true);setLinkStyle(selectedLinkIndex,{methodOverride:'direct_activity_ok'});persist();refreshFlowCoach();
+  msg('Direktkopplingen behålls och markeras som avsiktlig');
+});
 linkLabel.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();linkLabel.blur()}});
 deleteLinkBtn.addEventListener('click',()=>{if(deleteLinkAt(selectedLinkIndex,true))msg('Koppling borttagen')});
 linkHandle.addEventListener('pointerdown',e=>{if(selectedLinkIndex==null)return;startSelectedLinkDrag(selectedLinkIndex,e)});
@@ -5044,6 +5394,14 @@ function renderProcessAnalysis(result){
       const action=document.createElement('button');action.type='button';action.className='p48-analysis-item-action';
       action.textContent=f.nodeIds.length===1?'Visa berörd ruta →':`Visa ${f.nodeIds.length} berörda rutor →`;
       action.addEventListener('click',()=>focusAnalysisNodes(f.nodeIds));item.appendChild(action);
+    }
+    if(f.code==='direct_activity'&&Number.isInteger(f.meta?.linkIndex)&&links[f.meta.linkIndex]){
+      const fixNow=document.createElement('button');fixNow.type='button';fixNow.className='p48-btn primary';fixNow.style.marginTop='7px';
+      fixNow.textContent='＋ Infoga Objekt / resultat';
+      fixNow.addEventListener('click',()=>{
+        analysisPanel.hidden=true;selectLink(f.meta.linkIndex,true);insertStepOnSelectedLink('object');
+      });
+      item.appendChild(fixNow);
     }
     analysisList.appendChild(item);
   }
@@ -5127,9 +5485,9 @@ function fitProcessToScreen(){
   requestAnimationFrame(()=>{scroll.scrollLeft=result.scrollLeft;scroll.scrollTop=result.scrollTop;if(hnav)hnav.scrollLeft=scroll.scrollLeft;scheduleHorizontalNavSync()});
   msg(`Anpassad till ${Math.round(result.scale*100)}%`);return true;
 }
-function applyNodePositions(positionMap,label){
+function applyNodePositions(positionMap,label,recordHistory=true){
   if(!requireEdit())return false;if(!positionMap||!Object.keys(positionMap).length)return false;
-  pushUndo(true);
+  if(recordHistory)pushUndo(true);
   for(const [id,pos] of Object.entries(positionMap)){
     const item=nodes.get(id);if(!item)continue;
     item.el.style.left=Number(pos.x)+'px';item.el.style.top=Number(pos.y)+'px';sync(item.el);invalidateNodeGeom(id);markNodeLinksDirty(id);
@@ -5144,23 +5502,46 @@ function distributeSelected(axis){
   if(selectedIds.size<3){msg('Markera minst tre rutor för att fördela');return false}
   return applyNodePositions(MapliniEditingCore.distributeNodes(selectedNodeRects([...selectedIds]),axis),'Markerade rutor fördelade jämnt');
 }
+function preferredLayoutOrientation(ids=[...nodes.keys()]){
+  const wanted=new Set((ids||[]).map(String));
+  let horizontalWeight=0,verticalWeight=0,usable=0;
+  for(const l of links){
+    if(!Array.isArray(l)||!wanted.has(String(l[0]))||!wanted.has(String(l[1])))continue;
+    const A=nodes.get(String(l[0]))?.el,B=nodes.get(String(l[1]))?.el;if(!A||!B)continue;
+    const [ax,ay]=center(A),[bx,by]=center(B),dx=Math.abs(bx-ax),dy=Math.abs(by-ay);
+    if(dx<2&&dy<2)continue;
+    horizontalWeight+=dx;verticalWeight+=dy;usable++;
+  }
+  if(usable)return verticalWeight>horizontalWeight*1.15?'vertical':'horizontal';
+  const rects=selectedNodeRects(ids);if(!rects.length)return'horizontal';
+  const left=Math.min(...rects.map(r=>r.x)),right=Math.max(...rects.map(r=>r.x+r.width));
+  const top=Math.min(...rects.map(r=>r.y)),bottom=Math.max(...rects.map(r=>r.y+r.height));
+  return (bottom-top)>(right-left)*1.2?'vertical':'horizontal';
+}
+function autoCleanProcess(){
+  if(!requireEdit())return false;
+  const ids=[...nodes.keys()];
+  if(ids.length<2){msg('Processen behöver minst två rutor');return false}
+  const orientation=preferredLayoutOrientation(ids);
+  const ok=smartLayout('all',orientation);
+  if(ok)msg(`Processen ordnades automatiskt · ${orientation==='horizontal'?'vänster → höger':'uppifrån ↓'}`);
+  return ok;
+}
 function smartLayout(scope,orientation){
   if(!requireEdit())return false;
   const ids=scope==='selected'?[...selectedIds]:[...nodes.keys()];
   if(ids.length<2){msg(scope==='selected'?'Markera minst två rutor':'Processen behöver minst två rutor');return false}
-  const wanted=new Set(ids),internalLinks=links.filter(l=>Array.isArray(l)&&wanted.has(String(l[0]))&&wanted.has(String(l[1])));
-  const positions=MapliniLayoutCore.smartLayout(selectedNodeRects(ids),internalLinks,{orientation,mainGap:150,crossGap:68,bounds:{width:canvasLogicalWidth,height:canvasLogicalHeight,padding:28}});
-  const ok=applyNodePositions(positions,scope==='selected'?'Markerade rutor snyggades till':'Processen snyggades till');
-  if(ok){
-    // Smart Layout owns geometry: reset internal connectors to automatic, centered anchors.
-    // This prevents legacy/manual side anchors from leaving diagonal arrows after vertical layout.
-    for(let i=0;i<links.length;i++){
-      const l=links[i];if(!Array.isArray(l)||!wanted.has(String(l[0]))||!wanted.has(String(l[1])))continue;
-      setLinkStyle(i,{routing:'orthogonal',anchorMode:'auto',viaX:null,viaY:null,freeDx:0,freeDy:0});dirtyLinks.add(i);
+  return runAtomicUndoOperation(()=>{
+    const wanted=new Set(ids),internalLinks=links.filter(l=>Array.isArray(l)&&wanted.has(String(l[0]))&&wanted.has(String(l[1])));
+    const positions=MapliniLayoutCore.smartLayout(selectedNodeRects(ids),internalLinks,{orientation,mainGap:150,crossGap:68,bounds:{width:canvasLogicalWidth,height:canvasLogicalHeight,padding:28}});
+    const ok=applyNodePositions(positions,scope==='selected'?'Markerade rutor snyggades till':'Processen snyggades till',false);
+    if(ok){
+      // Layout + connector cleanup is one atomic Undo operation.
+      polishAutomaticConnectedLinks(ids,{forceAuto:true});
+      persist();requestFullLinkRender(true);drawLinks();fitProcessToScreen();
     }
-    persist();requestFullLinkRender(true);drawLinks();fitProcessToScreen();
-  }
-  return ok;
+    return ok;
+  });
 }
 
 function closeTransientMenus(except=null){
@@ -5196,22 +5577,33 @@ function applyProcessScaleSlider(next){
   return ok;
 }
 if(processScaleSlider){
-  processScaleSlider.addEventListener('pointerdown',e=>{e.stopPropagation();if(!processScaleGesture){pushUndo(true);processScaleGesture=true}});
+  processScaleSlider.addEventListener('pointerdown',e=>{e.stopPropagation();if(!processScaleGesture){beginUndoGesture();processScaleGesture=true}});
   processScaleSlider.addEventListener('input',e=>{e.stopPropagation();applyProcessScaleSlider(processScaleSlider.value);if(scaleMenu)scaleMenu.open=true});
-  const finishScaleGesture=()=>{processScaleGesture=false;if(scaleMenu)scaleMenu.open=true};
+  const finishScaleGesture=()=>{if(processScaleGesture)endUndoGesture();processScaleGesture=false;if(scaleMenu)scaleMenu.open=true};
   processScaleSlider.addEventListener('pointerup',finishScaleGesture);
   processScaleSlider.addEventListener('pointercancel',finishScaleGesture);
   processScaleSlider.addEventListener('keydown',e=>{
     if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','PageUp','PageDown'].includes(e.key))return;
-    if(!processScaleGesture){pushUndo(true);processScaleGesture=true}
+    if(!processScaleGesture){beginUndoGesture();processScaleGesture=true}
   });
-  processScaleSlider.addEventListener('change',()=>{processScaleGesture=false;if(scaleMenu)scaleMenu.open=true});
+  processScaleSlider.addEventListener('change',()=>{if(processScaleGesture)endUndoGesture();processScaleGesture=false;if(scaleMenu)scaleMenu.open=true});
 }
 if(scaleFitPageBtn)scaleFitPageBtn.addEventListener('click',()=>{if(scaleWholeProcess(1,true)&&scaleMenu)scaleMenu.open=false});
+if(autoCleanBtn)autoCleanBtn.addEventListener('click',()=>{if(autoCleanProcess()&&smartLayoutMenu)smartLayoutMenu.open=false});
 smartLayoutChoices.forEach(btn=>btn.addEventListener('click',()=>{if(smartLayout(btn.dataset.layoutScope,btn.dataset.layoutOrientation)&&smartLayoutMenu)smartLayoutMenu.open=false}));
 
 if(nodeQuick){nodeQuick.addEventListener('pointerdown',e=>e.stopPropagation());nodeQuick.addEventListener('click',e=>e.stopPropagation())}
-if(nodeQuickNext)nodeQuickNext.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();const item=selectedId&&selectedIds.size===1?nodes.get(selectedId):null;if(item&&isNextStepSource(item)&&item.nextBtn)item.nextBtn.click()});
+if(nodeQuickNext)nodeQuickNext.addEventListener('click',e=>{
+  e.preventDefault();e.stopPropagation();
+  const item=selectedId&&selectedIds.size===1?nodes.get(selectedId):null;
+  const type=preferredNextType(item);
+  if(item&&type)addNextStepFromNode(item.data.id,type);
+});
+if(nodeQuickNextMore)nodeQuickNextMore.addEventListener('click',e=>{
+  e.preventDefault();e.stopPropagation();
+  const item=selectedId&&selectedIds.size===1?nodes.get(selectedId):null;
+  if(item&&isNextStepSource(item)&&item.nextBtn)item.nextBtn.click();
+});
 if(nodeQuickFormat)nodeQuickFormat.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();focusFormattingPanel()});
 if(nodeQuickColor)nodeQuickColor.addEventListener('change',e=>{e.stopPropagation();updateStyle({bgColor:String(nodeQuickColor.value||'#ffffff')})});
 if(nodeQuickDuplicate)nodeQuickDuplicate.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();duplicateSelectedNodes();refreshNodeQuickToolbar()});
@@ -5332,6 +5724,7 @@ html = html.replace("__MAPLINI_CONNECTOR_CORE__", _CONNECTOR_CORE_JS)
 html = html.replace("__MAPLINI_CANVAS_CORE__", _CANVAS_CORE_JS)
 html = html.replace("__MAPLINI_UI_CORE__", _UI_CORE_JS)
 html = html.replace("__MAPLINI_STATE_CORE__", _STATE_CORE_JS)
+html = html.replace("__MAPLINI_PROCESS_INFO_CORE__", _PROCESS_INFO_CORE_JS)
 html = html.replace("__MAPLINI_RELIABILITY_CORE__", _RELIABILITY_CORE_JS)
 html = html.replace("__MAPLINI_EXPORT_CORE__", _EXPORT_CORE_JS)
 html = html.replace("__MAPLINI_WORKFLOW_CORE__", _WORKFLOW_CORE_JS)

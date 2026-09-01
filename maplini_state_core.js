@@ -12,6 +12,8 @@ function normalizeNode(n,index){
     x:finiteNumber(n.x,80,0,20000),y:finiteNumber(n.y,80,0,20000),
     w:finiteNumber(n.w||n.width,180,60,4000),h:finiteNumber(n.h||n.height,80,36,4000),
     documentUrl:safeString(n.documentUrl||'','',4000),
+    processInfo:(global.MapliniProcessInfoCore&&global.MapliniProcessInfoCore.normalize)?global.MapliniProcessInfoCore.normalize(n.processInfo):((n.processInfo&&typeof n.processInfo==='object')?clone(n.processInfo):{}),
+    objectRole:type==='object'&&['input','output','intermediate'].includes(n.objectRole)?n.objectRole:(type==='object'?'intermediate':undefined),
     nodeStyle:['standard','3d','raised','glass','flat'].includes(n.nodeStyle)?n.nodeStyle:'standard'});
 }
 function normalizeLink(l){

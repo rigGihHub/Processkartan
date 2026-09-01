@@ -1,0 +1,12 @@
+# QA Audit v0.16.6
+- Clear entire canvas action added under More.
+- Explicit confirmation required before deletion.
+- Cancel leaves canvas unchanged.
+- Confirm removes all nodes/connectors while keeping current process.
+- Undo checkpoint is created before clearing.
+- py_compile passed.
+- pytest: 204/204 passed.
+- JavaScript suites: 25/25 passed.
+- Chromium cancel + confirm smoke passed.
+- Embedded JS syntax, critical DOM and duplicate-ID checks passed.
+- No database migration.

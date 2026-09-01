@@ -20,6 +20,7 @@ CORE_REPLACEMENTS = {
     "__MAPLINI_CANVAS_CORE__": "maplini_canvas_core.js",
     "__MAPLINI_UI_CORE__": "maplini_ui_core.js",
     "__MAPLINI_STATE_CORE__": "maplini_state_core.js",
+    "__MAPLINI_PROCESS_INFO_CORE__": "maplini_process_info_core.js",
     "__MAPLINI_RELIABILITY_CORE__": "maplini_reliability_core.js",
     "__MAPLINI_EXPORT_CORE__": "maplini_export_core.js",
     "__MAPLINI_WORKFLOW_CORE__": "maplini_workflow_core.js",
@@ -52,13 +53,13 @@ def extract_editor_html() -> str:
     for token, filename in CORE_REPLACEMENTS.items():
         html = html.replace(token, (ROOT / filename).read_text(encoding="utf-8"))
     html = html.replace("__MAPLINI_LOGO__", "")
-    html = html.replace("__MAPLINI_VERSION__", "0.16.5")
+    html = html.replace("__MAPLINI_VERSION__", "0.18.1")
     html = html.replace("__SUPABASE_URL__", "")
     html = html.replace("__SUPABASE_ANON_KEY__", "")
     html = html.replace("__PUBLIC_APP_URL__", "https://example.invalid")
     html = html.replace("__SHARE_TOKEN__", "")
     test_hook = "let pdfView='A4P',pageCountMode='auto',canvasScale=1,canvasLogicalWidth=2400,canvasLogicalHeight=1400,processScalePercent=100,processScaleGesture=false;"
-    html = html.replace(test_hook, test_hook + "window.__mapliniTestState={link:i=>JSON.parse(JSON.stringify(links[i])),scale:()=>canvasScale,node:id=>JSON.parse(JSON.stringify(nodes.get(id)?.data||null)),nodes:()=>[...nodes.values()].map(x=>JSON.parse(JSON.stringify(x.data))),links:()=>JSON.parse(JSON.stringify(links)),clear:()=>clearCanvas(),syncFont:value=>syncFontSelect(value),syncBackground:value=>syncBackgroundTypeSelect(value),syncNodeStyle:value=>syncNodeStyleSelect(value),coachDirect:(from,to)=>{links.push(MapliniConnectorCore.create(from,to,'right',{}));coachDirectActivityLink(links.length-1);return links.length-1},addNode:(type,x,y)=>addNode(type,x,y),connect:(from,to)=>{links.push(MapliniConnectorCore.create(from,to,'right',{}));requestFullLinkRender(true);return links.length-1},linkStyle:i=>JSON.parse(JSON.stringify(linkStyle(links[i])))};")
+    html = html.replace(test_hook, test_hook + "window.__mapliniTestState={link:i=>JSON.parse(JSON.stringify(links[i])),scale:()=>canvasScale,node:id=>JSON.parse(JSON.stringify(nodes.get(id)?.data||null)),nodes:()=>[...nodes.values()].map(x=>JSON.parse(JSON.stringify(x.data))),links:()=>JSON.parse(JSON.stringify(links)),clear:()=>clearCanvas(),syncFont:value=>syncFontSelect(value),syncBackground:value=>syncBackgroundTypeSelect(value),syncNodeStyle:value=>syncNodeStyleSelect(value),coachDirect:(from,to)=>{links.push(MapliniConnectorCore.create(from,to,'right',{}));coachDirectActivityLink(links.length-1);return links.length-1},addNode:(type,x,y)=>addNode(type,x,y),connect:(from,to)=>{links.push(MapliniConnectorCore.create(from,to,'right',{}));requestFullLinkRender(true);return links.length-1},linkStyle:i=>JSON.parse(JSON.stringify(linkStyle(links[i]))),polish:(ids,force=false)=>polishAutomaticConnectedLinks(ids,{forceAuto:force}),undoCount:()=>undo.length,redoCount:()=>redo.length,resetHistory:()=>resetHistory(),geomCacheSize:()=>nodeGeomCache.size,geom:(id)=>nodeGeom(id),adjacency:(id)=>linksForNode(id).slice(),fastMode:()=>fastGeometryInteraction};")
     return html
 
 

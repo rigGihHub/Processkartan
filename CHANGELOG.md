@@ -1,3 +1,115 @@
+## v0.18.1 – Egenskapspanel UX
+- Reworked Processinformation into a lighter, task-oriented panel: `Vad händer?`, `Vem ansvarar?`, `Vilket system?` and `Tidsåtgång` are immediately visible.
+- Advanced fields (instruction, risk, control and KPI) now live under a collapsible `Fördjupa beskrivningen` section instead of forming a long permanent form.
+- Responsible role and system fields now reuse values already present in the current process through native suggestion lists.
+- Suggestions are deduplicated case-insensitively, alphabetized and capped to keep the UI light.
+- Completion feedback is now phrased as `x av 8` and explicitly remains optional rather than implying every field must be filled.
+- Advanced-section summary shows how many of its four fields are populated.
+- Ctrl/Cmd+Enter saves the active process-information field and returns keyboard focus to the selected canvas node.
+- Read-only permissions now also disable textareas, not only inputs/selects/buttons.
+- No data-model, Supabase or database migration changes.
+
+## v0.18.0 – Processinformation
+- Added structured business information for Activity, Subprocess and Decision nodes.
+- New fields: description, responsible role, system, instruction, risk, control, KPI/measure and duration.
+- Process information lives in the properties panel and does not clutter the canvas.
+- Visual formatting is now grouped under a collapsible `Utseende` section so business information gets priority.
+- Added a small completeness indicator (0/8–8/8) for the selected process step.
+- Existing Input/Output lists remain part of the step and continue to work unchanged.
+- Added `maplini_process_info_core.js` for safe normalization, field length limits and completeness calculation.
+- `maplini_state_core.js` now preserves and normalizes `processInfo`; older saved processes without the field open with empty metadata.
+- New nodes initialize an empty process information object.
+- No Supabase/database migration is required because metadata is stored inside the existing process payload.
+
+## v0.17.4 – Build Flow UX Polish
+- Added a compact contextual flow cue next to the selected node, e.g. `Aktivitet → Objekt ut` or `Objekt → Aktivitet`.
+- The flow cue mirrors the same methodology used by the one-click Next action, reducing ambiguity between the canvas and toolbar.
+- The node-side alternative Next menu now highlights the recommended choice while keeping all alternate step types available.
+- Newly created next steps are automatically kept inside the visible viewport before inline editing begins.
+- Add-next feedback now explains the fastest continuation: write the name, then use `Ctrl/Cmd+Enter` to continue.
+- Palette-created core steps now give consistent guidance to continue with `Nästa`.
+- No process logic, schema, database or Supabase migration changes.
+
+## v0.17.3 – Canvas Performance
+- Node geometry caching is now invalidated per node instead of globally; moving one box no longer makes every cached node geometry stale.
+- Added a node-to-connector adjacency cache so dragging a node can find its connected arrows without scanning the entire connector list every frame.
+- Full connector renders rebuild the adjacency cache automatically after graph changes.
+- Node drag and resize now use a fast geometry mode: visible connector paths update live, while expensive hit-segment, marker and label DOM rebuilding is deferred until the gesture ends.
+- A complete connector render is forced at gesture end, so final arrows, labels and click targets remain fully accurate.
+- Contextual node toolbar refresh is skipped on connector-only redraw frames when no node selection exists.
+- No process data model, database or Supabase migration changes.
+
+## v0.17.2 – Undo Safety
+- Added atomic undo transactions for large operations so one user action maps to one Undo checkpoint.
+- `Rensa hela canvasen` now records the entire clear as one atomic operation and restores all nodes/connectors with one Undo.
+- Smart Layout and `Ordna processen automatiskt` now group node movement plus connector cleanup into the same Undo checkpoint.
+- Nested internal history writes are suppressed while an atomic operation is running, preventing duplicate Undo steps.
+- Process-scale slider gestures now create a checkpoint only if the slider actually changes the process.
+- Multiple slider `input` events during one drag/keyboard gesture still collapse into one Undo step.
+- Cancelled/no-op large actions no longer pollute Undo history.
+- No database or Supabase migration changes.
+
+## v0.17.1 – Automatic Cleanup
+- Added a one-click `Ordna processen automatiskt` action at the top of `Snygga till`.
+- Maplini automatically chooses horizontal or vertical layout based on the direction of the process's existing connected flow.
+- If there are too few usable links, Maplini falls back to the current process shape to choose the most natural orientation.
+- The action reuses Smart Layout to align nodes, equalize spacing and reduce crossings.
+- Connectors are normalized after cleanup: aligned nodes use straight routes, other automatic routes use orthogonal geometry.
+- The process graph itself is not changed: no nodes or connections are added, removed or reordered logically.
+- The whole cleanup is undoable as one layout operation.
+- Manual horizontal/vertical Smart Layout controls remain available below the automatic action.
+- No database or Supabase migration changes.
+
+## v0.17.0 – Process Flow Assistant
+- Direct Activity → Activity links now open a focused methodology coach instead of only a generic insert-step menu.
+- The coach asks what result from the first Activity enables the next one.
+- One click on `Infoga Objekt / resultat` splits the connector and inserts an Object between the Activities.
+- The inserted Object is a normal technical `object` node with intermediate/result semantics.
+- Users can explicitly choose `Behåll direktkoppling`; Maplini stores that as an intentional methodology override.
+- Intentional direct Activity links are no longer repeatedly flagged by Process Analysis.
+- Process Analysis findings for unacknowledged direct Activity links now include a one-click `Infoga Objekt / resultat` fix.
+- No database or Supabase migration changes.
+
+## v0.16.9 – Faster Process Building
+- The contextual quick action no longer opens a menu for the normal path; it adds the recommended next step immediately.
+- After an Activity, the primary action becomes `＋ Objekt ut`.
+- After an Object, Start, Decision, Document or Subprocess, the primary action becomes `＋ Aktivitet`.
+- A separate small dropdown button keeps access to all alternative next-step types.
+- Mobile uses the same dynamic recommended-next label and direct action.
+- `Ctrl/Cmd + Enter` while editing a node finishes the text and immediately creates the recommended next step.
+- The new step remains selected and enters inline editing, supporting a fast write → continue → write workflow.
+- Existing node-side `+` remains available as the explicit chooser for alternate step types.
+- No database, Supabase or process-schema migration changes.
+
+## v0.16.8 – Object UX
+- Kept `Objekt in` and `Objekt ut` as the same underlying `object` node type.
+- Added lightweight semantic role metadata (`input`, `output`, `intermediate`) only as a UX hint; it does not change graph logic.
+- Palette-created `Objekt in` and `Objekt ut` now retain the intended role after click/drag creation.
+- Object nodes show a compact role chip (`OBJEKT IN`, `OBJEKT UT`, or `OBJEKT`) above the node.
+- `+ Nästa` from an Activity creates an Object with output/result semantics.
+- Generic/intermediate Objects remain valid as both a prior result and the next Activity's input.
+- Object selection now explains the role directly in the properties panel.
+- State normalization preserves object-role hints while older object nodes safely default to `intermediate`.
+- No database or Supabase migration changes.
+
+## v0.16.7 – Smart Connector Polish
+- Automatic connectors now choose the cleanest route after node movement: straight when connected node centers share an axis, otherwise orthogonal.
+- Newly created connectors are polished immediately instead of inheriting avoidable diagonal geometry.
+- `+ Nästa` connectors receive the same route cleanup automatically.
+- Smart Layout now chooses straight routes for aligned pairs instead of forcing every connector to orthogonal.
+- Stale automatic via/free offsets are cleared when geometry is normalized.
+- Deliberately manual connector work is protected: free-routing and fixed-anchor connectors are not auto-polished during ordinary node dragging.
+- Smart Layout may still normalize manual connector geometry because the user explicitly asked it to reorganize the layout.
+- No process logic, node data, database schema or Supabase migration changes.
+
+## v0.16.6 – Clear Canvas
+- Added `Rensa hela canvasen` under `Mer`.
+- The action always asks `Är du säker på att du vill rensa hela canvasen?` before deleting anything.
+- Confirming removes all nodes and connectors but keeps the current process itself.
+- Clearing creates an undo checkpoint, so `Ångra` can restore the canvas contents.
+- Empty canvases are left untouched and show a short status message instead.
+- No data-schema, Supabase or migration changes.
+
 ## v0.16.5 – Magnetic Alignment
 - Added an invisible 10 px base grid for node movement.
 - Added magnetic alignment against other nodes' left/center/right and top/center/bottom lines within an 8 px snap tolerance.

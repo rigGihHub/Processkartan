@@ -12,7 +12,7 @@ function normLinks(links,ids){
     const l=links[i];if(!Array.isArray(l)||l.length<2)continue;
     const from=String(l[0]),to=String(l[1]);if(!ids.has(from)||!ids.has(to))continue;
     const style=l[3]&&typeof l[3]==='object'?l[3]:{};
-    out.push({from,to,index:i,label:String(style.label||'').trim()});
+    out.push({from,to,index:i,label:String(style.label||'').trim(),methodOverride:String(style.methodOverride||'')});
   }
   return out;
 }
@@ -84,7 +84,7 @@ function analyze(nodes,links,options={}){
 
   for(const l of L){
     const from=byId.get(l.from),to=byId.get(l.to);
-    if(from&&to&&from.type==='process'&&to.type==='process'){
+    if(from&&to&&from.type==='process'&&to.type==='process'&&l.methodOverride!=='direct_activity_ok'){
       findings.push(finding(
         'direct_activity','warning',
         `Aktiviteter kopplade direkt: ${from.text||'Aktivitet'} → ${to.text||'Aktivitet'}`,

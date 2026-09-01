@@ -2,14 +2,14 @@ from pathlib import Path
 APP = (Path(__file__).resolve().parents[1] / "app.py").read_text(encoding="utf-8")
 
 def test_v0142_contract():
-    assert 'APP_VERSION = "0.16.5"' in APP
+    assert 'APP_VERSION = "0.18.1"' in APP
     assert "syncDesktopViewportHeight" in APP
     assert "--p48-desktop-body-h" in APP
     assert "components.html(html, height=920, scrolling=False)" in APP
 
 def test_smart_layout_recenters_connectors():
-    assert "setLinkStyle(i,{routing:'orthogonal',anchorMode:'auto',viaX:null,viaY:null,freeDx:0,freeDy:0})" in APP
-    assert "Smart Layout owns geometry" in APP
+    assert "polishAutomaticConnectedLinks(ids,{forceAuto:true});" in APP
+    assert "Layout + connector cleanup is one atomic Undo operation." in APP
 
 def test_typography_controls_are_grouped():
     start = APP.index('<div class="p48-text-format-block p48-node-only">')

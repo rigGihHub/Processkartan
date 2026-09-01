@@ -1,0 +1,12 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+vm.runInThisContext(fs.readFileSync('maplini_process_info_core.js','utf8'));
+const C=global.MapliniProcessInfoCore;
+let n=C.normalize({description:'  Test  ',responsibleRole:' Kundtjänst ',system:'CRM',risk:'Fel',control:'Kontroll'});
+assert.strictEqual(n.description,'Test');
+assert.strictEqual(n.responsibleRole,'Kundtjänst');
+assert.strictEqual(n.system,'CRM');
+assert.strictEqual(C.completion(n).filled,5);
+assert.strictEqual(C.isEmpty({}),true);
+assert.strictEqual(C.isEmpty(n),false);
+assert.ok(C.normalize({description:'x'.repeat(13000)}).description.length<=12000);
+console.log('process info core ok');
