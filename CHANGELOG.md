@@ -1,3 +1,12 @@
+## v0.18.2 – Direct drag & cleaner objects
+- Nodes can now be grabbed and dragged directly from their visible text area without being selected first.
+- The same pointer gesture automatically selects the node and starts movement; no separate preselection click is required.
+- Inline text editing remains protected: when the label is content-editable, dragging does not steal the text interaction.
+- Object type badges (`OBJEKT`, `OBJEKT IN`, `OBJEKT UT`) have been removed from the canvas to reduce visual noise.
+- `objectRole` remains fully preserved in node data and continues to drive methodology, analysis and property-panel context.
+- Node labels use grab/grabbing cursor feedback when not editing.
+- No data-model, Supabase or database migration changes.
+
 ## v0.18.1 – Egenskapspanel UX
 - Reworked Processinformation into a lighter, task-oriented panel: `Vad händer?`, `Vem ansvarar?`, `Vilket system?` and `Tidsåtgång` are immediately visible.
 - Advanced fields (instruction, risk, control and KPI) now live under a collapsible `Fördjupa beskrivningen` section instead of forming a long permanent form.

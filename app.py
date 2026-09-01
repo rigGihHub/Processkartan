@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.18.1"
+APP_VERSION = "0.18.2"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -1015,7 +1015,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-node.decision.p48-style-raised::before{box-shadow:10px 12px 30px rgba(31,42,55,.28)}
 .p48-node.decision.p48-style-glass::before{box-shadow:inset 2px 2px 0 rgba(255,255,255,.82),8px 10px 24px rgba(31,42,55,.17)}
 .p48-node.decision.p48-style-flat::before{box-shadow:none!important}
-.p48-label{display:block;width:100%;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;line-height:1.28;cursor:text;outline:none}
+.p48-label{display:block;width:100%;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;line-height:1.28;cursor:grab;outline:none}.p48-node:active .p48-label{cursor:grabbing}
 .p48-label[contenteditable="true"]{user-select:text;-webkit-user-select:text;cursor:text;min-width:40px}
 .p48-node.object{
   min-width:150px;max-width:280px;min-height:42px;padding:10px 14px;
@@ -1027,14 +1027,6 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   transform:translateY(-50%);border-radius:2px;background:#0d596c;
 }
 .p48-node.object .p48-label{text-align:center}
-.p48-node.object .p48-object-role{
-  position:absolute;left:50%;top:-18px;transform:translateX(-50%);
-  padding:2px 6px;border-radius:5px;background:#f4f8f9;color:#55717a;
-  border:1px solid #cbdadf;font:800 8px/1 Inter,system-ui;letter-spacing:.08em;
-  text-transform:uppercase;white-space:nowrap;pointer-events:none;
-}
-.p48-node.object[data-object-role="input"] .p48-object-role{background:#eef7f3;color:#346653;border-color:#bed8cc}
-.p48-node.object[data-object-role="output"] .p48-object-role{background:#f2f6fb;color:#45627e;border-color:#c8d6e4}
 .p48-node.process{border-radius:12px}
 
 .p48-node.start,.p48-node.end{border-radius:38px}.p48-node.start{border-color:#2b7b61}.p48-node.end{border-color:#985148}
@@ -3329,9 +3321,6 @@ if(d.height){el.style.boxSizing='border-box';el.style.minHeight='0px';el.style.h
 if(d.type==='object'){
   d.objectRole=['input','output','intermediate'].includes(d.objectRole)?d.objectRole:'intermediate';
   el.dataset.objectRole=d.objectRole;
-  const role=document.createElement('span');role.className='p48-object-role';
-  role.textContent=d.objectRole==='input'?'OBJEKT IN':(d.objectRole==='output'?'OBJEKT UT':'OBJEKT');
-  el.appendChild(role);
 }
 const label=document.createElement('span');label.className='p48-label';label.textContent=d.text;label.contentEditable='false';label.spellcheck=true;el.appendChild(label);
 const handles={};for(const side of ['right','left','top','bottom']){const h=document.createElement('span');h.className='p48-handle '+side;h.dataset.side=side;el.appendChild(h);handles[side]=h}
@@ -3386,7 +3375,7 @@ el.addEventListener('click',e=>{
 });
 el.addEventListener('pointerdown',e=>{
   if(!canEdit())return;
-  if(e.button!==0||e.target.classList.contains('p48-handle')||e.target.classList.contains('p48-label')||e.target.classList.contains('p48-resize')||e.target.classList.contains('p48-doc-open')||(e.target.closest&&e.target.closest('.p48-doc-inline-editor'))||(e.target.closest&&e.target.closest('.p48-next-step-wrap')))return;
+  if(e.button!==0||e.target.classList.contains('p48-handle')||e.target.classList.contains('p48-resize')||e.target.classList.contains('p48-doc-open')||(e.target.closest&&e.target.closest('.p48-doc-inline-editor'))||(e.target.closest&&e.target.closest('.p48-next-step-wrap'))||(e.target.classList.contains('p48-label')&&e.target.isContentEditable))return;
   if(e.ctrlKey||e.metaKey){
     e.preventDefault();e.stopPropagation();toggleNodeSelection(el);suppressSelectClick=true;return;
   }
