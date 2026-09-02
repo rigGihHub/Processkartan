@@ -1,3 +1,310 @@
+# Changelog
+
+## v0.20.9 – Walkthrough Transition Polish
+- Ja/Nej-vägval läses nu direkt på canvasen genom små grenetiketter vid möjliga nästa rutor när pilarna har vägvalsetiketter.
+- När ett svar entydigt väljer en gren tonas övriga alternativ bort och vald nästa ruta får en tydligare men kortvarigt lugn fokusmarkering.
+- Den valda pilen förstärks mer än övriga möjliga pilar så riktningen blir självklar innan nästa steg öppnas.
+- Grenetiketter och valmarkeringar rensas alltid när genomgången går vidare, stängs eller avslutas.
+- Befintlig auto-vidare, avvikelsehantering, canvasföljning och manuell routing är bevarad.
+- Ingen gamification, ingen datamodellsändring och ingen Supabase-migrering.
+
+## v0.20.8 – Visual Walkthrough Position
+- Följ processen visar nu själva positionen direkt på canvasen: aktuell ruta får tydligt fokus utan att resten av processen försvinner.
+- Redan passerade steg tonas ned diskret så att användaren ser varifrån genomgången kommer.
+- Möjliga nästa steg markeras subtilt direkt i flödet.
+- Den eller de relevanta utgående pilarna förstärks; efter ett entydigt Ja/Nej-vägval framhävs bara vald gren.
+- Canvasen följer mjukt med när nästa steg hamnar utanför den centrala läszonen, utan automatisk zoom.
+- Walkthrough-bakgrunden är mindre dimmad så processkartan fortsätter vara en aktiv del av upplevelsen.
+- Ingen gamification, ingen datamodellsändring och ingen Supabase-migrering.
+
+## v0.20.7 – Focused Follow Process
+- Förenklade introduktionen till Följ processen: en fråga i taget, Ja/Nej och vidare längs rätt väg.
+- En ensam fråga visas utan onödig numrering och får tydligare fokus.
+- **J** och **N** fungerar som tangentbordsgenvägar för Ja respektive Nej när exakt en fråga visas.
+- Snabba standardfrågor fortsätter automatiskt efter Ja/Nej när det bara finns en möjlig väg.
+- En ensam explicit kontrollfråga med **Ja** fortsätter automatiskt när nästa steg är entydigt.
+- En styrfråga/vägvalsfråga fortsätter automatiskt på unik Ja/Nej-gren när svaret räcker för att avgöra vägen.
+- Explicit kontrollfråga med **Nej** stannar kvar när uppföljningsdetaljer krävs.
+- Noll avvikelser visas inte längre som en ständig administrativ räknare under genomgången.
+- Ingen gamification, ingen datamodellsändring och ingen Supabase-migrering.
+
+## v0.20.7 – Direct Follow Process
+- Standardfrågan **Har du gjort detta?** är nu den visuellt primära handlingen.
+- Större och tydligare Ja/Nej-knappar.
+- Vid exakt en möjlig nästa väg går snabbfrågan automatiskt vidare efter svaret.
+- Auto-vidare används inte vid verkliga vägval, flera utgående vägar eller explicita kontrollfrågor.
+- Nej på snabbfrågan registreras fortsatt utan att kräva extra administration före nästa steg.
+- Ingen Supabase-migrering.
+
+## v0.20.6 – Visual Flow Rhythm
+- Förfinade avstånden när nya steg skapas så att flödet ser mer genomarbetat ut direkt.
+- Objekt ↔ Aktivitet får något tätare rytm för att tydligare kännas som en sammanhängande arbetssekvens.
+- Beslut får mer luft både framåt och mellan Ja/Nej-grenar för bättre läsbarhet.
+- Slutsteg får lite extra avstånd så att avslut visuellt separeras från arbetsstegen.
+- `smartNextStepPosition` stödjer nu konfigurerbart tväravstånd (`crossGap`) i stället för ett fast värde.
+- En markerad ruta tonar subtilt fram sina automatiskt hanterade in- och utgående pilar för att göra den lokala flödesrelationen lättare att läsa.
+- Manuellt placerade rutor och manuellt redigerade pilar påverkas inte av den nya rytmlogiken.
+- Ingen gamification och ingen Supabase-migrering.
+
+## v0.20.5 – Smart Connector Flow
+- Automatiskt skapade pilar får nu ett eget internt läge, **autoManaged**, så Maplini kan hålla dem snygga utan att skriva över manuellt pilarbete.
+- När en auto-pil följer en ruta under dragning växlar den live mellan rak och vinkelrät geometri beroende på hur rutorna ligger.
+- Nästan horisontella eller vertikala flöden får en rak pil redan inom 10 px tolerans.
+- När rutorna lämnar samma axel går auto-pilen tillbaka till en ren vinkelrät bana.
+- Om användaren själv väljer Rak, Vinkelrät, Fri eller ändrar fästpunkter lämnas pilen därefter i fred av auto-poleringen.
+- Ingen gamification och ingen Supabase-migrering.
+
+## v0.20.4 – Formation Selection
+- Flera markerade rutor visas nu som en tydlig sammanhållen **formation** med en diskret gemensam ram.
+- Formationens ram följer med live när gruppen dras.
+- Alla rutor i gruppen får en lätt gemensam dragrespons medan de flyttas.
+- Ny kompakt **Ordna**-meny i snabbverktyget för fler-markering:
+  - justera överkant
+  - justera vänsterkant
+  - fördela jämnt horisontellt
+  - fördela jämnt vertikalt
+  - Snygga till markerade horisontellt/vertikalt
+- Pilarna flyttas fortsatt tillsammans med gruppens interna kopplingsgeometri.
+- Markerade rutor kan finjusteras med piltangenter:
+  - pil = 2 px
+  - Shift + pil = 20 px
+- Ingen permanent gruppering skapas; detta är endast ett snabbare sätt att manipulera en tillfällig markering.
+- Ingen gamification, ingen datamodellsändring och ingen Supabase-migrering.
+
+## v0.20.3 – Canvas Build Rhythm
+- Gjorde det möjligt att bygga fler delar av processen utan att lämna canvasen.
+- **Tab** på en markerad ruta skapar direkt Maplinis rekommenderade nästa steg.
+- På ett Beslut skapar **Tab** Ja- och Nej-grenarna.
+- **Shift+Tab** öppnar rutans befintliga meny för alternativa nästa steg.
+- **Enter** på en markerad ruta startar direkt textredigering.
+- **Ctrl/Cmd+D** och snabbknappen Duplicera behåller befintlig funktion men duplicerade rutor får nu direkt visuell feedback och förs in i vyn.
+- När användaren drar en koppling från en kopplingspunkt till **tom canvas** längre än en liten säkerhetsmarginal skapas automatiskt rekommenderad nästa ruttyp där pilen släpps och kopplas direkt.
+- Kopplingslinjen visar ett separat visuellt läge när släpp på tom canvas kommer skapa ett nytt steg.
+- Släpp på en befintlig ruta fungerar som tidigare.
+- Ingen gamification, ingen datamodellsändring och ingen Supabase-migrering.
+
+## v0.20.2 – Navigation Feel
+- Gjorde navigeringen i större processer mer direkt och spel-lik utan gamification.
+- **Ctrl/Cmd + mushjul** zoomar nu mot muspekaren i stället för mot mitten av canvasen.
+- **Mellanslag + dra** ger tillfällig panorering även när markeringsläget är aktivt.
+- **Mittenknapp + dra** panorerar canvasen direkt.
+- Markeringsramen har fått tydligare men diskret visuell feedback.
+- Rutor som ligger inom markeringsramen förhandsmarkeras medan ramen dras.
+- Markera område visar nu ett tydligare tips om att Mellanslag tillfälligt växlar till panorering.
+- Befintlig mobil pinch-zoom och en-finger-pan lämnas oförändrad.
+- Ingen datamodellsändring och ingen Supabase-migrering.
+
+## v0.20.1 – Canvas Feel, No Rewards
+- Tog bort FLOW-streaken och den belöningsliknande avslutningsanimationen från v0.20.0.
+- Behöll den responsiva känslan men flyttade fokus till själva interaktionen.
+- Rutor lyfter visuellt när de dras.
+- När en ruta magnetiskt linjerar med en annan blir snap-guiden tydligare och rutan får en subtil snap-respons.
+- Vid ritning av en ny koppling markeras giltig målruta direkt.
+- Den tillfälliga pilen byter visuellt läge när den ligger över ett giltigt mål.
+- När kopplingen släpps får målrutan en mycket kort bekräftelsepuls.
+- Följ processen använder nu samma neutrala knapprespons för både Ja och Nej.
+- Nya steg får fortsatt en kort spawn-animation eftersom den ger direkt input-feedback, inte belöning.
+- `prefers-reduced-motion` respekteras.
+- Ingen datamodellsändring och ingen Supabase-migrering.
+
+## v0.20.0 – Game Feel / Flow Streak
+- Gjorde Maplini mer responsivt och roligare att använda utan att göra gränssnittet barnsligt.
+- Nya steg som skapas via **+ Nästa** får en snabb, mjuk spawn-animation.
+- När användaren bygger flera steg i följd inom 12 sekunder visas en faktisk **FLOW ×N**-streak i snabbverktyget.
+- Ja/Nej-grenar räknas in i samma bygg-flow och ger direkt visuell respons när de skapas.
+- Följ processen har fått tydligare mikrofeedback:
+  - Ja får en kort positiv pulseffekt.
+  - Nej får en diskret respons utan att framställas som ett “fel”.
+  - Varje nytt steg glider in mjukt.
+  - En helt godkänd genomgång får en kort avslutningsanimation.
+- Animationer respekterar `prefers-reduced-motion`.
+- Ingen poäng eller kvalitetsrating hittas på – FLOW räknar bara faktiska byggsteg.
+- Ingen datamodellsändring eller Supabase-migrering.
+
+## v0.19.9 – Quick Shape Picker
+- Lade till **Form** direkt i snabbverktyget ovanför markerad ruta.
+- Ett klick öppnar fyra visuella standardval: Typstandard, Rektangel, Rundad och Kapsel.
+- Aktuell form visas direkt i snabbverktygets ikon.
+- Vid flera markerade rutor visar snabbvalet gemensam form när alla matchar; ett val appliceras på hela markeringen.
+- Formbytet använder samma befintliga undo/persist/style-väg som Utseende-panelen.
+- Den fullständiga Form-inställningen under Utseende finns kvar.
+- Ingen ny panel, ingen datamodellsändring och ingen Supabase-migrering.
+
+## v0.19.8 – Shape Presets + Better Flow Rhythm
+- Lade till ett nytt **Form**-val i befintliga Utseende-inställningar för rutor.
+- Standardformer:
+  - Typstandard
+  - Rektangel
+  - Rundad
+  - Kapsel
+- Formvalet fungerar på markerad ruta och på flera markerade rutor samtidigt.
+- Beslutspunkter kan också byta från diamant till de valbara standardformerna när användaren vill frångå typstandarden.
+- Formvalet sparas med noden och följer med i lokalt sparande, molnlagring och export via den befintliga processdatan.
+- Ogiltiga/äldre formvärden normaliseras säkert till Typstandard.
+- **Snygga till** har fått luftigare grundspacing: större avstånd i huvudflödet och mellan parallella grenar.
+- Ingen ny panel eller extra arbetsyta har lagts till.
+- Ingen Supabase-migrering krävs.
+
+## v0.19.7 – Clearer Node Hierarchy
+- Förtydligade de tre viktigaste byggstenarna visuellt utan att lägga till fler inställningar.
+- **Objekt** är nu kompaktare och känns mer som input/output/resultat än som en aktivitet.
+- **Aktivitet** har fått starkare visuell tyngd som processens primära arbetssteg, med diskret vänsteraccent och något tydligare kortkänsla.
+- **Beslut** behåller diamantformen men har fått lugnare, mer professionell kontrast och subtilt djup.
+- Textvikter och spacing har justerats så att Objekt → Aktivitet → Beslut går snabbare att skanna visuellt.
+- Start/Slut, routing, Följ processen och processlogik är oförändrade.
+- Ingen ny Supabase-migrering.
+
+## v0.19.6 – Cleaner Decision Flows
+- Förfinade pilarnas visuella uttryck utan att lägga till nya inställningar.
+- Vinkelräta automatiska pilar får nu mjukt rundade hörn i stället för hårda 90°-knäckar.
+- Ja/Nej-etiketter får diskret semantisk styling: Ja i grön ton och Nej i röd ton, medan själva pilen behåller processens neutrala linjestil.
+- Ja/Nej-kopplingar får semantiska SVG-klasser för konsekvent rendering och framtida finjusteringar.
+- Rak och fri routing påverkas inte.
+- Befintlig connector-logik, manuell routing, markering, dragning och Följ processen-routing är bevarad.
+- Ingen ny Supabase-migrering.
+
+## v0.19.5 – Guided Follow Process
+- Gjorde **Följ processen** mer fokuserad och lättare att använda som ett guidat arbetsflöde.
+- Aktuell aktivitet visas större och tydligare.
+- Ja/Nej-knapparna är större och mer lätttryckta på både desktop och mobil.
+- Ny positionsrad visar de senaste stegen och vilket steg som är aktuellt.
+- Aktiviteter/delprocesser utan egna kontrollfrågor får automatiskt den enkla frågan **”Har du gjort detta?”**.
+- Ett Nej på den automatiska snabbfrågan registreras som avvikelse utan att tvinga fram ett administrativt formulär direkt.
+- Egna konfigurerade kontrollfrågor behåller befintlig avvikelseuppföljning med förklaring, ansvarig och datum.
+- Befintlig Ja/Nej-routing, historik, molnsynk och avvikelselogik är bevarad.
+- Ingen ny Supabase-migrering.
+
+# v0.19.4 – Smart decision branches
+
+- Beslutspunkter kan skapa Ja- och Nej-grenar i ett klick.
+- Grenarna placeras automatiskt på varsin sida om huvudflödet och märks Ja/Nej.
+- Ctrl/Cmd+Enter från ett beslut skapar båda grenarna direkt.
+- Om en Ja- eller Nej-gren redan finns skapas bara den saknade grenen.
+
+# Changelog
+
+## 0.19.3 – Smart Next Build
+- `+ Nästa` fortsätter nu i samma riktning som det befintliga processflödet.
+- Nya steg placeras på samma baslinje när det finns plats och i parallell körlinje vid kollision, i stället för att hoppa slumpmässigt nedåt.
+- Beslutsgrenar sprids automatiskt ovanför/under beslutet.
+- Nya steg snappas till 20 px-grid och kopplingen använder rätt sida för flödesriktningen.
+- Följ processen och befintlig processlogik är oförändrade.
+
+## v0.19.2 – Visual Flow Polish
+- `✨ Snygga till` is now a true one-click action in the top toolbar instead of requiring the user to open a menu first.
+- The small adjacent dropdown keeps manual horizontal/vertical and selected-node layout options.
+- Smart layout now centers every rank on the actual connected flow rather than only on the old drawing's overall bounding box.
+- Decision branches are visually balanced around their source step; merge steps are centered between their incoming branches.
+- Long straight chains are gently aligned in a reverse pass, reducing unnecessary zig-zag connector routes.
+- Default automatic spacing is slightly tighter (`mainGap 118`, `crossGap 52`) for a cleaner professional rhythm without changing process logic.
+- Existing connector cleanup still runs in the same atomic Undo operation.
+- No Supabase/database migration is required.
+
+## v0.19.1 – Individual deviation status
+- Each deviation now has its own `open` / `resolved` status instead of inheriting one status for the entire walkthrough run.
+- The deviation dashboard action now updates only the selected deviation: `Markera avvikelse hanterad` / `Öppna avvikelse igen`.
+- Walkthrough history shows a status badge and individual follow-up button per deviation.
+- Run-level follow-up status is derived automatically: the run is resolved only when all deviations are resolved.
+- Reopening one deviation leaves other resolved deviations unchanged.
+- Backward compatibility: older runs that only have run-level follow-up status are materialized safely into per-deviation statuses when first edited.
+- Cloud PATCH now persists the updated `result` and `history`, so individual deviation statuses sync through the existing `walkthrough_runs` table.
+- No new Supabase migration is required beyond v0.18.9.
+
+## v0.19.0 – Avvikelseöversikt
+- Added a dedicated **⚠ Avvikelser** dashboard in the top toolbar.
+- Aggregates deviations from walkthrough history across all processes currently available in the active personal/workspace scope.
+- Summary counters show open, overdue and resolved deviations.
+- Filters: open/all/resolved status, responsible owner search and overdue-only.
+- Open deviations are sorted with overdue items first, then by due date.
+- Overdue actions are visually highlighted and based on the saved deviation due date.
+- Each row shows process, walkthrough date, process step/question, explanation, responsible owner, due date, status and cloud marker.
+- `Visa i process` opens the source process and selects the affected node when the process is loaded.
+- Follow-up can be marked handled/reopened directly from the dashboard; the existing run-level status is reused and cloud-synced through v0.18.9.
+- When signed in, the dashboard loads walkthrough runs for the active personal/workspace scope from Supabase and merges them with local-first history.
+- No new database migration is required for v0.19.0; `supabase_schema_v0189.sql` remains the prerequisite for cloud history.
+- The current data model tracks follow-up status per walkthrough run. If one run contains several deviations, marking the run handled resolves that run's deviations together.
+
+## v0.18.9 – Cloud walkthrough history
+- Added a dedicated Supabase-backed `walkthrough_runs` model for cross-device walkthrough history.
+- Completed walkthroughs still save locally first, then sync to Supabase when the user is signed in and the v0.18.9 migration is installed.
+- Opening `Följ processen` now loads cloud history for the current process and merges it with local history by run ID.
+- Cloud-synced runs are marked `Moln` in the history UI.
+- Follow-up status changes (`Hanterad` / `Öppna igen`) are synced back to the cloud.
+- Cloud payload preserves process, creator, workspace, person, timestamps, result, detailed deviations and the traversed walkthrough history.
+- Workspace members can read and create walkthrough runs; run creator, process owner and workspace owner/editor can update follow-up status.
+- Local fallback is explicit: if the table/migration is unavailable, Maplini continues to work and explains that history is local.
+- Added `supabase_schema_v0189.sql` with table, indexes, RLS and workspace-aware policies.
+- No existing process table is altered by this migration.
+
+## v0.18.8 – Deviation follow-up
+- `Följ processen` now opens a structured deviation form immediately when a user answers `Nej` on a **Kontrollfråga**.
+- Every control deviation now requires three follow-up fields before the walkthrough can continue:
+  - explanation of what deviated,
+  - responsible person/role/function,
+  - due date.
+- Route-question `Nej` answers remain normal process routing and never open a deviation form.
+- Deviation details are stored with the walkthrough answer and preserved in the saved run history.
+- The completion summary now shows explanation, responsible owner and due date for each deviation.
+- Copied walkthrough results include the same follow-up information.
+- Previous-run history shows responsible owner and due date for open deviations, making the history useful as a lightweight action list.
+- The existing run-level `Markera hanterad` / `Öppna igen` follow-up state remains available.
+- No database/Supabase migration required; history remains browser-local in this release.
+
+## v0.18.7 – Control questions vs route questions
+- Walkthrough questions now have an explicit type: **Kontrollfråga** or **Vägvalsfråga**.
+- A `Kontrollfråga` keeps the compliance meaning: `Nej` is counted as an actionable deviation.
+- A `Vägvalsfråga` treats both `Ja` and `Nej` as normal process outcomes; neither answer is a deviation.
+- Vägvalsfrågor automatically drive a unique outgoing `Ja` or `Nej` connector when available.
+- Only one route question is kept per step in the editor; selecting a new route question returns the previous one to control type.
+- Walkthrough question cards now show `KONTROLL` or `VÄGVAL` so users understand why an answer affects compliance or routing.
+- The live deviation counter now ignores neutral `Nej` answers from route questions.
+- Completion status, saved walkthrough history and follow-up state are now based on actual deviations rather than the raw number of `Nej` answers.
+- Summary shows separate counts for steps, Ja, Nej and deviations.
+- Saved run data now preserves question kind and separate control/route counts for future reporting.
+- Backward compatibility: old questions marked `route:true` are normalized as `Vägvalsfråga`; questions without a type remain `Kontrollfråga`.
+- No database/Supabase migration required.
+
+## v0.18.6 – Smart Ja/Nej routing
+- Added explicit **Styr Ja/Nej-väg** on walkthrough control questions.
+- Only one question per step can be designated as the routing question in the editor; choosing another automatically replaces the previous routing question.
+- During `Följ processen`, a routing question now resolves the next branch automatically when the current step has one outgoing `Ja` edge and one outgoing `Nej` edge.
+- Before the routing question is answered, manual branch buttons are hidden and Maplini explains that the answer will choose the path.
+- After answering, the user gets one clear continuation action such as `Fortsätt på Ja: ...` instead of manually choosing a branch.
+- Branch labels are matched case-insensitively and support common equivalents such as Yes/No.
+- If Ja/Nej labels are missing or ambiguous, Maplini does not guess: it explains the issue and falls back to manual branch selection.
+- Single-path steps and end steps continue to behave exactly as before.
+- Routing metadata is stored with the existing walkthrough question data; no database/Supabase migration is required.
+
+## v0.18.5 – Walkthrough history & follow-up
+- `Följ processen` now stores completed walkthroughs locally per process in the browser.
+- Name or initials are required before a walkthrough starts so completed checks can be traced to a person.
+- Each saved run includes process, person, start/completion time, step count, yes/no totals and detailed deviations.
+- Up to 50 recent runs are kept per process (500 total locally) to avoid unbounded browser storage growth.
+- The start view now shows `Tidigare genomgångar` with date/time, person, result and follow-up state.
+- Runs with no deviations are shown as approved.
+- Runs with deviations are shown as `Kräver uppföljning` and can be marked `Hanterad` or reopened.
+- Stored run summaries can be copied directly for follow-up/documentation.
+- The completion screen confirms whether the run was saved successfully.
+- This release deliberately uses browser-local history only; workspace/cloud-synced audit history is the next architectural step and requires a deliberate backend model.
+- No Supabase/database migration required.
+
+## v0.18.4 – Follow the process + workflow polish
+- Added a new top-level **Följ processen** mode for interactive, step-by-step process walkthroughs.
+- Process owners can add reusable **Ja/Nej control questions** to Activity, Decision and Subprocess nodes from the properties panel.
+- Walkthrough mode starts from explicit Start nodes when present, otherwise from graph roots, and follows the actual process connectors.
+- Branches with multiple outgoing connectors are presented as explicit next-step choices using connector labels when available.
+- Required questions must be answered before the walkthrough can continue.
+- `Nej` answers are tracked as deviations and surfaced in a final summary with step/question context.
+- The current walkthrough result can be copied for follow-up. This first release keeps run results in the current browser session only; permanent run history is deliberately deferred.
+- Added a dedicated `maplini_walkthrough_core.js` with question normalization, graph traversal helpers and deterministic result summaries.
+- `walkthroughQuestions` are normalized/preserved in the existing process JSON; no database migration is required.
+- **Snygga till** is now safer and more predictable: automatic cleanup only rearranges nodes that participate in the connected flow, leaves isolated draft nodes untouched, uses tighter spacing, and no longer changes canvas zoom automatically.
+- If no connected flow exists, Snygga till now explains that at least two connected nodes are required instead of arbitrarily rearranging loose nodes.
+- Fixed a Ctrl/Cmd multi-select regression introduced by direct label dragging.
+- Hardened the desktop sidebar in Chrome with additional scroll end-space and scroll padding so the final controls can be reached reliably.
+- Updated browser smoke coverage to the current Objekt → Aktivitet methodology.
+- No Supabase/database migration required.
+
 ## v0.18.3 – Direct page settings
 - Added a compact sticky page control directly over the canvas: `A4 stående · Auto ▾`.
 - Paper format and orientation can now be changed without opening Export or More.
@@ -483,7 +790,6 @@
 - Align/Distribute bevarar multi-select, nodstorlekar och kopplade pilar samt skapar en Undo-checkpoint per operation.
 - Fit-to-screen kan zooma ned till 25% för stora processkartor.
 
-# Changelog
 
 ## v0.11.1 — Faster Editing: multi-select group move
 - Flera markerade rutor kan nu flyttas tillsammans genom att dra i valfri ruta i markeringen.

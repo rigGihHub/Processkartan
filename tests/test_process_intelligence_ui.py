@@ -6,7 +6,7 @@ CORE = (ROOT / 'maplini_process_intelligence_core.js').read_text(encoding='utf-8
 
 
 def test_process_intelligence_is_embedded_and_exposed():
-    assert 'APP_VERSION = "0.18.3"' in APP
+    assert 'APP_VERSION = "0.20.9"' in APP
     assert '_PROCESS_INTELLIGENCE_CORE_PATH' in APP
     assert '__MAPLINI_PROCESS_INTELLIGENCE_CORE__' in APP
     assert 'id="p48-analyze"' in APP
@@ -24,7 +24,7 @@ def test_analysis_panel_starts_hidden_and_findings_are_canvas_clickable():
 
 
 def test_v0150_actionable_analysis_ui_contract():
-    assert 'APP_VERSION = "0.18.3"' in APP
+    assert 'APP_VERSION = "0.20.9"' in APP
     assert 'id="p48-analysis-next"' in APP
     assert 'id="p48-analysis-next-title"' in APP
     assert 'id="p48-analysis-next-action"' in APP

@@ -103,6 +103,46 @@ function nextStepPosition(source,targetSize,existingRects,bounds,gap){
 }
 
 
+function smartNextStepPosition(source,targetSize,existingRects,bounds,options){
+  const src=source||{},target=targetSize||{},list=Array.isArray(existingRects)?existingRects:[];
+  const b=Object.assign({width:2400,height:1400,padding:10},bounds||{}),o=options||{},pad=Number(b.padding)||0;
+  const sw=Math.max(1,Number(src.width)||180),sh=Math.max(1,Number(src.height)||76),tw=Math.max(1,Number(target.width)||180),th=Math.max(1,Number(target.height)||76);
+  const sx=Number(src.x)||0,sy=Number(src.y)||0,g=Math.max(50,Number(o.gap)||110),grid=Math.max(1,Number(o.grid)||20);
+  const direction=['right','left','down','up'].includes(String(o.direction))?String(o.direction):'right';
+  const branchIndex=Number.isInteger(o.branchIndex)?o.branchIndex:null;
+  const branchSlots=branchIndex===0?[-1,1,0,-2,2,3,-3]:(branchIndex===1?[1,-1,0,2,-2,3,-3]:[0,-1,1,-2,2,-3,3]);
+  const crossGap=Math.max(36,Number(o.crossGap)||54);
+  const step=Math.max(100,Math.round((Math.max(sh,th)+crossGap)/grid)*grid);
+  const snap=v=>Math.round(v/grid)*grid;
+  const areaOverlap=(a,r)=>{const left=Math.max(a.x,Number(r.x)||0),top=Math.max(a.y,Number(r.y)||0),right=Math.min(a.x+tw,(Number(r.x)||0)+(Number(r.width)||0)),bottom=Math.min(a.y+th,(Number(r.y)||0)+(Number(r.height)||0));return Math.max(0,right-left)*Math.max(0,bottom-top)};
+  const raw=[];
+  for(const slot of branchSlots){
+    let x=sx,y=sy;
+    if(direction==='right'){x=sx+sw+g;y=sy+(sh-th)/2+slot*step;}
+    else if(direction==='left'){x=sx-tw-g;y=sy+(sh-th)/2+slot*step;}
+    else if(direction==='down'){x=sx+(sw-tw)/2+slot*step;y=sy+sh+g;}
+    else{x=sx+(sw-tw)/2+slot*step;y=sy-th-g;}
+    raw.push({x:snap(x),y:snap(y),slot});
+  }
+  // Keep the process moving in the same direction. Only use a reverse-axis fallback when every forward slot is blocked.
+  let best=null;
+  for(const c of raw){
+    const x=Math.max(pad,Math.min((Number(b.width)||2400)-pad-tw,c.x));
+    const y=Math.max(pad,Math.min((Number(b.height)||1400)-pad-th,c.y));
+    const overlap=list.reduce((sum,r)=>sum+areaOverlap({x,y},r),0);
+    const clampPenalty=Math.abs(x-c.x)+Math.abs(y-c.y);
+    const slotPenalty=Math.abs(c.slot)*6;
+    const score=overlap*1000+clampPenalty*20+slotPenalty;
+    if(!best||score<best.score)best={x,y,score,overlap};
+    if(overlap===0&&clampPenalty===0)break;
+  }
+  if(!best||best.overlap>0){
+    const fallback=nextStepPosition(src,target,list,b,g);
+    return {x:snap(fallback.x),y:snap(fallback.y),direction};
+  }
+  return {x:Math.round(best.x),y:Math.round(best.y),direction};
+}
+
 function boundingBox(items){
   const list=(Array.isArray(items)?items:[]).filter(Boolean);
   if(!list.length)return null;
@@ -160,5 +200,5 @@ function parse(text){
   try{const payload=JSON.parse(text.slice('MAPLINI_CLIPBOARD_V1\n'.length));return hasNodes(payload)?payload:null}catch(_){return null}
 }
 
-global.MapliniEditingCore={makeClipboard,hasNodes,instantiate,groupMoveDelta,movedInternalVias,nextStepPosition,boundingBox,fitToScreen,alignNodes,distributeNodes,serialize,parse};
+global.MapliniEditingCore={makeClipboard,hasNodes,instantiate,groupMoveDelta,movedInternalVias,nextStepPosition,smartNextStepPosition,boundingBox,fitToScreen,alignNodes,distributeNodes,serialize,parse};
 })(typeof window!=='undefined'?window:globalThis);

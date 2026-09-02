@@ -1,6 +1,6 @@
 (function(global){
 'use strict';
-const DEFAULT_STYLE={color:'#5b6775',width:2,end:'arrow',dash:'solid',viaX:null,viaY:null,freeDx:0,freeDy:0,routing:'straight',anchorMode:'manual',label:''};
+const DEFAULT_STYLE={color:'#5b6775',width:2,end:'arrow',dash:'solid',viaX:null,viaY:null,freeDx:0,freeDy:0,routing:'straight',anchorMode:'manual',label:'',autoManaged:false};
 
 function cloneStyle(value){return Object.assign({},DEFAULT_STYLE,value&&typeof value==='object'?value:{});}
 function normalizeLink(link){
@@ -19,7 +19,7 @@ function setStyle(links,index,patch){
   return links[index][3];
 }
 function create(sourceId,targetId,side,stylePatch){
-  return [String(sourceId),String(targetId),side||'right',Object.assign(cloneStyle(),{routing:'orthogonal',anchorMode:'auto'},stylePatch||{})];
+  return [String(sourceId),String(targetId),side||'right',Object.assign(cloneStyle(),{routing:'orthogonal',anchorMode:'auto',autoManaged:true},stylePatch||{})];
 }
 function autoSides(dx,dy){
   if(Math.abs(dx)>=Math.abs(dy))return dx>=0?['right','left']:['left','right'];

@@ -1,3 +1,155 @@
+# Maplini v0.20.9 – Walkthrough Transition Polish
+
+Följ processen visar nu vägval tydligare direkt i processkartan. När ett steg har märkta Ja/Nej-grenar visas diskreta etiketter vid de möjliga nästa rutorna. När användaren svarar och vägen blir entydig tonas de andra alternativen bort, medan den valda rutan och pilen förstärks innan genomgången går vidare.
+
+Det gör att övergången känns mer som att faktiskt följa ett flöde: **jag är här → jag svarar → jag ser exakt vart processen går**. Ingen extra panel, HUD eller administration har lagts till. Befintlig avvikelsehantering och automatisk fortsättning är oförändrad.
+
+Ingen gamification och ingen Supabase-migrering krävs.
+
+---
+
+# Maplini v0.20.8 – Visual Walkthrough Position
+
+Följ processen är nu tydligare kopplat till själva processkartan. Den aktuella rutan markeras direkt på canvasen, tidigare passerade steg tonas ned och nästa möjliga steg samt relevanta pilar framhävs diskret. Vid ett entydigt Ja/Nej-vägval visas den valda grenen tydligare redan innan nästa steg öppnas.
+
+När genomgången flyttar vidare följer canvasen mjukt med om nästa steg ligger utanför den centrala läszonen. Maplini zoomar inte automatiskt och lägger inte till någon permanent HUD eller extra administrationspanel.
+
+Ingen gamification och ingen Supabase-migrering krävs.
+
+---
+
+# Maplini v0.20.7 – Direct Follow Process
+
+Följ processen är nu mer direkt. På vanliga aktivitetssteg står **Har du gjort detta?** i centrum med större Ja/Nej-knappar. När det bara finns en möjlig nästa väg tar Ja eller Nej dig automatiskt vidare efter en kort knapprespons.
+
+Maplini auto-fortsätter inte när det finns ett verkligt vägval eller flera möjliga nästa steg. Explicita kontrollfrågor behåller sin detaljerade hantering.
+
+Ingen Supabase-migrering krävs.
+
+---
+
+# Maplini v0.20.6 – Visual Flow Rhythm
+
+Den här releasen putsar själva rytmen i processflödet. Nya steg får nu mer genomtänkta avstånd beroende på vad som byggs: Objekt och Aktivitet hålls relativt nära varandra, Beslut får mer luft och Ja/Nej-grenar separeras tydligare.
+
+När en ensam ruta markeras förstärks dess automatiskt hanterade in- och utgående pilar mycket subtilt, så det blir lättare att se exakt var steget hör hemma utan extra paneler eller markeringar.
+
+Ingen Supabase-migrering krävs.
+
+---
+
+# Maplini v0.20.5 – Smart Connector Flow
+
+Automatiskt skapade pilar beter sig nu mer intelligent när du flyttar rutor. De följer relationen mellan rutorna live och växlar mellan rak och vinkelrät form när det ger ett renare flöde.
+
+Manuellt pilarbete skyddas samtidigt bättre. Så fort du själv väljer piltyp eller ändrar fästpunkter slutar Maplini auto-styra just den pilen.
+
+Ingen Supabase-migrering krävs.
+
+---
+
+# Maplini v0.20.4 – Formation Selection
+
+Flera markerade rutor känns nu mer som en sammanhållen formation. En diskret ram omsluter markeringen och följer med medan du drar hela gruppen.
+
+Snabbverktyget får samtidigt **Ordna** när flera rutor är markerade. Där kan du justera kanter, fördela rutor jämnt eller köra Snygga till bara på markeringen. För små korrigeringar fungerar piltangenterna direkt; håll Shift för större steg.
+
+Det här skapar ingen permanent grupp i processdata. Det är bara snabbare och tydligare manipulation av en tillfällig markering. Ingen Supabase-migrering krävs.
+
+---
+
+# Maplini v0.20.3 – Canvas Build Rhythm
+
+Nu går det snabbare att bygga processen direkt på canvasen. Markera ett steg och tryck **Tab** för att skapa rekommenderat nästa steg. På ett Beslut skapar Tab Ja/Nej-grenarna, medan **Shift+Tab** öppnar valet av alternativa nästa steg. **Enter** går direkt in i textredigering.
+
+Det går också att dra en pil från en kopplingspunkt och släppa den på tom canvas. Om draget är tydligt nog skapar Maplini då automatiskt den rekommenderade nästa ruttypen där du släpper och kopplar den direkt. Det går fortfarande att släppa pilen på en befintlig ruta precis som tidigare.
+
+Ingen gamification och ingen Supabase-migrering krävs.
+
+---
+
+# Maplini v0.20.2 – Navigation Feel
+
+Den här releasen fortsätter på samma spår: mer känsla av ett välkontrollerat bygg-/strategiverktyg utan poäng eller belöningar.
+
+På desktop kan du nu zooma mot den punkt du faktiskt tittar på med **Ctrl/Cmd + mushjul**. Håll **Mellanslag** och dra för att panorera tillfälligt, även när du står i markeringsläge. Mittenknappen kan också användas för snabb panorering. Markeringsramen visar dessutom direkt vilka rutor som kommer att följa med innan du släpper.
+
+Mobilens befintliga pan och pinch-zoom är oförändrade. Ingen Supabase-migrering krävs.
+
+---
+
+# Maplini v0.20.1 – Canvas Feel, No Rewards
+
+Den här releasen justerar “dataspelskänslan” bort från gamification och mot **responsiv interaktion**. FLOW-streaken är borttagen. I stället känns canvasen mer fysisk och direkt: rutor lyfter när de dras, snap blir tydligare när något linjerar och kopplingsmål markeras medan man drar en pil.
+
+Ja och Nej i Följ processen får samma neutrala tryckrespons. Nya steg får fortfarande en kort spawn-rörelse eftersom den fungerar som omedelbar feedback på att kommandot genomförts, inte som belöning.
+
+Ingen Supabase-migrering krävs.
+
+---
+
+# Maplini v0.20.0 – Game Feel / Flow Streak
+
+Maplini ska inte bara vara effektivt utan också kännas bra att använda. Den här releasen lägger därför till diskret **game feel** i kärnflödet.
+
+När du bygger vidare med **+ Nästa** poppar nya steg in mjukt. Fortsätter du bygga inom kort tid visas en **FLOW ×N**-streak som räknar faktiska skapade steg. Den är bara visuell och påverkar varken processdata eller någon påhittad kvalitetspoäng.
+
+Även **Följ processen** har fått mer taktil respons med korta Ja/Nej-animationer, mjuk övergång mellan steg och en liten avslutningspuls när en genomgång klaras utan avvikelser. All rörelse stängs av automatiskt för användare som föredrar reducerad animation.
+
+Ingen Supabase-migrering krävs.
+
+---
+
+# Maplini v0.19.9 – Quick Shape Picker
+
+Formvalet från v0.19.8 finns nu även direkt i snabbverktyget ovanför markerad ruta. **Form** öppnar fyra visuella ikoner för Typstandard, Rektangel, Rundad och Kapsel. Det gör att formen kan bytas utan att öppna Utseende-panelen.
+
+Snabbvalet fungerar även på flera markerade rutor och använder samma sparning, undo och `shapePreset`-data som det befintliga formvalet. Ingen Supabase-migrering krävs.
+
+---
+
+# Maplini v0.19.8 – Shape Presets + Better Flow Rhythm
+
+Den här releasen kombinerar två förbättringar i processritningen. För det första får **Snygga till** lite mer luft mellan steg och grenar så att flöden med olika stora Objekt, Aktiviteter och Beslut blir lättare att läsa. För det andra går det nu att ändra en rutas **Form** direkt under Utseende.
+
+Tillgängliga standardformer är **Typstandard**, **Rektangel**, **Rundad** och **Kapsel**. Typstandard behåller Maplinis metodikform för nodtypen, medan de andra alternativen låter användaren göra en avvikande visuell form när det behövs. Formvalet lagras tillsammans med noden och kräver ingen databasändring.
+
+---
+
+# Maplini v0.19.7 – Clearer Node Hierarchy
+
+Den här releasen gör kärnflödet lättare att läsa redan vid första ögonkastet. Objekt, Aktivitet och Beslut har nu tydligare roller i samma visuella designsystem: Objekt är kompakt och statiskt, Aktivitet är processens primära arbetskort och Beslut är ett tydligt vägval. Förändringen är medvetet återhållsam och lägger inte till nya reglage eller dekorativa teman.
+
+Ingen ny Supabase-migrering krävs.
+
+---
+
+# Maplini v0.19.6 – Cleaner Decision Flows
+
+Den här releasen fokuserar på att göra processflödet mer lättläst och professionellt utan fler reglage. Automatiska vinkelräta pilar får mjukt rundade hörn, och Ja/Nej-grenar får diskret färgkodade etiketter så att vägval kan avläsas snabbare. Själva pilarna behåller sin neutrala stil för att processkartan inte ska bli visuellt stökig.
+
+Rak routing, fri/manuell routing och befintlig Ja/Nej-logik är oförändrade. Ingen ny Supabase-migrering krävs.
+
+---
+
+# Maplini v0.19.5 – Guided Follow Process
+
+Den här releasen fokuserar på Maplinis två kärnor: ett tydligt processflöde och en enkel interaktiv genomgång. **Följ processen** visar nu aktuell aktivitet tydligare, större Ja/Nej-knappar och en enkel positionsrad. Aktiviteter utan egna frågor får automatiskt frågan **”Har du gjort detta?”**, så ett vanligt processflöde kan följas direkt utan extra konfigurering.
+
+Nej på den automatiska snabbfrågan registreras som en avvikelse men kräver inte att användaren fyller i uppföljningsformuläret direkt. Egna kontrollfrågor fortsätter däremot att använda den mer strukturerade avvikelseuppföljningen.
+
+Ingen ny Supabase-migrering krävs.
+
+---
+
+## Snyggare processflöden v0.19.4
+
+`✨ Snygga till` i toppraden är nu en direkt en-klicksfunktion. Maplini rätar upp det sammanhängande flödet, balanserar grenar, centrerar återföreningar, jämnar avstånd och snyggar till automatiska pilar utan att ändra processens logik. Den lilla pilen bredvid öppnar fortfarande manuella layoutval. Ingen ny databas- eller Supabase-migrering krävs.
+
+## Individual avvikelsestatus v0.19.1
+
+Varje avvikelse kan nu följas upp separat. En genomgång med flera avvikelser kan därför ha både öppna och hanterade åtgärder samtidigt. Genomgången räknas som helt hanterad först när alla dess avvikelser är hanterade. Statusen synkas via den befintliga `walkthrough_runs`-tabellen från v0.18.9; ingen ny SQL-migrering behövs.
+
 ## UI Regression Fix v0.13.4
 
 - Fixar regressionen där canvasens kontextverktyg (`Rak/Vinkelrät` och nodens snabbmeny) renderades som vanliga HTML-kontroller uppe till vänster trots att inget var markerat.
@@ -6,7 +158,44 @@
 - Båda toolbarerna är nu `display:none` som standard och visas endast när JavaScript sätter `.on` efter korrekt nod-/pilmarkering.
 - Ingen databas-, Supabase- eller dependencyändring.
 
-# Maplini v0.18.3
+# Maplini v0.19.0
+
+## Avvikelseöversikt v0.19.0
+
+Toppraden har nu **⚠ Avvikelser**, en samlad uppföljningsvy över genomgångar i aktuell personlig/workspace-vy. Den visar öppna, försenade och hanterade avvikelser och kan filtreras på status, ansvarig och endast försenade. Varje rad visar process, fråga/steg, förklaring, ansvarig och deadline. Från raden kan användaren öppna källprocessen eller markera hela genomgångens uppföljning som hanterad/öppen. Molndata använder tabellen `walkthrough_runs` från `supabase_schema_v0189.sql`; v0.19.0 kräver ingen ny migrering.
+
+
+## Molnsynkad genomgångshistorik v0.18.9
+
+Genomgångar sparas fortfarande lokalt först, men när användaren är inloggad synkas de även till Supabase. Historiken kan därmed följa processen mellan datorer och workspace-användare. Uppföljningsstatus på avvikelser synkas också. Installera `supabase_schema_v0189.sql` efter de tidigare workspace-/integritetsmigreringarna. Om migreringen inte är installerad fortsätter `Följ processen` att fungera lokalt och visar tydligt att molnsynk saknas.
+
+
+## Avvikelseuppföljning v0.18.8
+
+När användaren svarar **Nej** på en Kontrollfråga öppnas nu direkt en avvikelsepanel. Innan användaren får gå vidare måste avvikelsen beskrivas, en ansvarig anges och ett förfallodatum sättas. Informationen följer med in i sammanfattningen, kopierat resultat och den lokala genomgångshistoriken. Nej på en Vägvalsfråga påverkas inte och fortsätter vara ett normalt processutfall.
+
+
+## Kontrollfråga eller vägvalsfråga v0.18.7
+
+Kontrollfrågor och vägval är nu separerade. **Kontrollfråga** används när ett Nej betyder att processen inte har följts och ska registreras som avvikelse. **Vägvalsfråga** används när både Ja och Nej är normala affärsutfall; svaret styr då automatiskt en pil märkt Ja eller Nej utan att skapa en avvikelse. Detta gör att `Följ processen` kan användas både för regelefterlevnad och verkliga processförgreningar utan att blanda ihop de två.
+
+
+## Smart Ja/Nej-väg v0.18.6
+
+En kontrollfråga kan nu markeras **Styr Ja/Nej-väg**. Om steget har en unik pil märkt **Ja** och en unik pil märkt **Nej** använder `Följ processen` svaret för att välja nästa väg automatiskt. Användaren behöver alltså inte svara Ja och sedan manuellt välja Ja-grenen. Om märkningen saknas eller är tvetydig gissar Maplini inte utan faller tillbaka till ett manuellt vägval med tydlig förklaring.
+
+
+## Walkthrough history v0.18.5
+
+`Följ processen` har nu lokal historik per process. Utföraren måste ange namn eller initialer innan genomgången startar. När genomgången slutförs sparas datum/tid, utförare, antal steg, Ja/Nej och avvikelser i webbläsaren. Avvikelser kan markeras som **Hanterad** och öppnas igen. Resultatet kan kopieras från historiken. Historiken är ännu inte molnsynkad mellan datorer; det kräver ett separat backend-/behörighetslager och är avsiktligt inte smygimplementerat i denna release.
+
+
+## Följ processen v0.18.4
+
+Maplini kan nu användas efter själva kartläggningen. Lägg kontrollfrågor på ett processteg och välj **▶ Följ processen** för att gå igenom den faktiska processgrafen steg för steg. Ja/Nej-svar måste fyllas i innan användaren går vidare och Nej samlas som avvikelser i en avslutande sammanfattning. Förgrenade flöden använder befintliga pilar och piltexter för att välja nästa väg. Den första versionen sparar inte körhistorik permanent; den delen är avsiktligt separerad från kartans processdata.
+
+**Snygga till** arbetar nu endast med sammanhängande flöden och lämnar okopplade utkast på plats. Funktionen ändrar inte längre zoomnivån automatiskt. Desktop-vänsterpanelen har dessutom extra bottenutrymme för säkrare scrollning i Chrome.
+
 
 ## Process Intelligence v0.18.3
 
@@ -308,3 +497,7 @@ Direct drag removes the preselection step for moving nodes. Object-role badges a
 
 ### v0.18.3
 Page setup is now available directly over the canvas through a compact sticky control for A4/A3, portrait/landscape and automatic or 1–8 pages. Existing Export settings remain synchronized.
+
+
+## v0.19.4 – Smart + Nästa
+Bygg vidare på en markerad ruta med `+ Nästa`. Maplini försöker nu hålla samma flödesriktning, baslinje och visuella rytm automatiskt. Beslut får separerade grenar och kollisioner flyttas till parallella körlinjer utan att bryta huvudriktningen.

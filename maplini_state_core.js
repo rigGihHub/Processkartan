@@ -13,8 +13,10 @@ function normalizeNode(n,index){
     w:finiteNumber(n.w||n.width,180,60,4000),h:finiteNumber(n.h||n.height,80,36,4000),
     documentUrl:safeString(n.documentUrl||'','',4000),
     processInfo:(global.MapliniProcessInfoCore&&global.MapliniProcessInfoCore.normalize)?global.MapliniProcessInfoCore.normalize(n.processInfo):((n.processInfo&&typeof n.processInfo==='object')?clone(n.processInfo):{}),
+    walkthroughQuestions:(global.MapliniWalkthroughCore&&global.MapliniWalkthroughCore.normalizeQuestions)?global.MapliniWalkthroughCore.normalizeQuestions(n.walkthroughQuestions):(Array.isArray(n.walkthroughQuestions)?clone(n.walkthroughQuestions).slice(0,30):[]),
     objectRole:type==='object'&&['input','output','intermediate'].includes(n.objectRole)?n.objectRole:(type==='object'?'intermediate':undefined),
-    nodeStyle:['standard','3d','raised','glass','flat'].includes(n.nodeStyle)?n.nodeStyle:'standard'});
+    nodeStyle:['standard','3d','raised','glass','flat'].includes(n.nodeStyle)?n.nodeStyle:'standard',
+    shapePreset:['standard','rectangle','rounded','pill'].includes(n.shapePreset)?n.shapePreset:'standard'});
 }
 function normalizeLink(l){
   if(Array.isArray(l)){

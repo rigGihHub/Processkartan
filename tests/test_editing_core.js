@@ -48,6 +48,16 @@ assert.deepStrictEqual(nextRight,{x:400,y:100},'quick next should prefer right w
 const nextAvoid=E.nextStepPosition({x:100,y:100,width:180,height:80},{width:180,height:80},[{x:100,y:100,width:180,height:80},{x:400,y:100,width:180,height:80}],{width:1200,height:800,padding:10},120);
 assert.strictEqual(nextAvoid.y,300,'quick next should choose below when right side is occupied');
 
+
+const smartStraight=E.smartNextStepPosition({x:100,y:100,width:180,height:80},{width:180,height:80},[{x:100,y:100,width:180,height:80}],{width:1400,height:900,padding:10},{gap:110,direction:'right',grid:20});
+assert.deepStrictEqual(smartStraight,{x:400,y:100,direction:'right'},'smart next should stay aligned with the current flow');
+const smartOccupied=E.smartNextStepPosition({x:100,y:100,width:180,height:80},{width:180,height:80},[{x:100,y:100,width:180,height:80},{x:400,y:100,width:180,height:80}],{width:1400,height:900,padding:10},{gap:110,direction:'right',grid:20});
+assert.strictEqual(smartOccupied.x,400,'occupied main lane should keep forward progress instead of dropping below the source');
+assert.notStrictEqual(smartOccupied.y,100,'occupied main lane should use a parallel lane');
+const branchA=E.smartNextStepPosition({x:300,y:300,width:180,height:80},{width:180,height:80},[{x:300,y:300,width:180,height:80}],{width:1600,height:1000,padding:10},{gap:110,direction:'right',branchIndex:0,grid:20});
+const branchB=E.smartNextStepPosition({x:300,y:300,width:180,height:80},{width:180,height:80},[{x:300,y:300,width:180,height:80},{x:600,y:180,width:180,height:80}],{width:1600,height:1000,padding:10},{gap:110,direction:'right',branchIndex:1,grid:20});
+assert.ok(branchA.y<300 && branchB.y>300,'decision branches should fan out around the decision');
+
 const fit=E.fitToScreen([
   {id:'a',x:100,y:100,width:200,height:100},
   {id:'b',x:700,y:500,width:200,height:100}

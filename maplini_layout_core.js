@@ -144,6 +144,37 @@ function smartLayout(items,links,options){
     }
     mainCursor+=levelMainSize.get(r)+mainGap;
   }
+  // Center each rank on the actual flow, not merely on the old drawing's global center.
+  // This gives straight main paths, balanced Ja/Nej branches and centered merge steps.
+  const crossPos=id=>orientation==='horizontal'?out[id].y:out[id].x;
+  const crossSize=n=>orientation==='horizontal'?n.height:n.width;
+  const crossCenterOf=id=>{const n=nodeById.get(id);return crossPos(id)+crossSize(n)/2};
+  const forwardEdges=edges.filter(e=>!e.feedback);
+  const predecessors=new Map(nodes.map(n=>[n.id,[]])),successors=new Map(nodes.map(n=>[n.id,[]]));
+  forwardEdges.forEach(e=>{predecessors.get(e.to).push(e.from);successors.get(e.from).push(e.to)});
+  const crossBound=orientation==='horizontal'?boundHeight:boundWidth;
+  function shiftLevel(r,targetCenter,strength){
+    const ids=groups.get(r)||[];if(!ids.length||!Number.isFinite(targetCenter))return;
+    const first=nodeById.get(ids[0]),last=nodeById.get(ids[ids.length-1]);
+    const blockStart=crossPos(ids[0]),blockEnd=crossPos(ids[ids.length-1])+crossSize(last);
+    const currentCenter=(blockStart+blockEnd)/2;
+    let delta=(targetCenter-currentCenter)*strength;
+    delta=Math.max(padding-blockStart,Math.min(crossBound-padding-blockEnd,delta));
+    for(const id of ids){if(orientation==='horizontal')out[id].y=Math.round(out[id].y+delta);else out[id].x=Math.round(out[id].x+delta)}
+  }
+  // Forward sweep: branches are centered on their source; merge steps are centered between parents.
+  for(let li=1;li<levels.length;li++){
+    const r=levels[li],refs=[];
+    for(const id of groups.get(r)||[])for(const pred of predecessors.get(id)||[])refs.push(crossCenterOf(pred));
+    if(refs.length)shiftLevel(r,refs.reduce((a,b)=>a+b,0)/refs.length,1);
+  }
+  // Reverse sweep gently straightens long chains without disturbing established branch order.
+  for(let li=levels.length-2;li>=0;li--){
+    const r=levels[li],refs=[];
+    for(const id of groups.get(r)||[])for(const next of successors.get(id)||[])refs.push(crossCenterOf(next));
+    if(refs.length)shiftLevel(r,refs.reduce((a,b)=>a+b,0)/refs.length,.55);
+  }
+
   const laid=nodes.map(n=>({id:n.id,x:out[n.id].x,y:out[n.id].y,width:n.width,height:n.height})),newBox=boundingBox(laid);
   let dx=box.left-newBox.left,dy=box.top-newBox.top;
   if(newBox.right+dx>boundWidth-padding)dx-=newBox.right+dx-(boundWidth-padding);

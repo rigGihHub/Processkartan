@@ -21,6 +21,7 @@ CORE_REPLACEMENTS = {
     "__MAPLINI_UI_CORE__": "maplini_ui_core.js",
     "__MAPLINI_STATE_CORE__": "maplini_state_core.js",
     "__MAPLINI_PROCESS_INFO_CORE__": "maplini_process_info_core.js",
+    "__MAPLINI_WALKTHROUGH_CORE__": "maplini_walkthrough_core.js",
     "__MAPLINI_RELIABILITY_CORE__": "maplini_reliability_core.js",
     "__MAPLINI_EXPORT_CORE__": "maplini_export_core.js",
     "__MAPLINI_WORKFLOW_CORE__": "maplini_workflow_core.js",
@@ -53,13 +54,13 @@ def extract_editor_html() -> str:
     for token, filename in CORE_REPLACEMENTS.items():
         html = html.replace(token, (ROOT / filename).read_text(encoding="utf-8"))
     html = html.replace("__MAPLINI_LOGO__", "")
-    html = html.replace("__MAPLINI_VERSION__", "0.18.3")
+    html = html.replace("__MAPLINI_VERSION__", "0.19.1")
     html = html.replace("__SUPABASE_URL__", "")
     html = html.replace("__SUPABASE_ANON_KEY__", "")
     html = html.replace("__PUBLIC_APP_URL__", "https://example.invalid")
     html = html.replace("__SHARE_TOKEN__", "")
     test_hook = "let pdfView='A4P',pageCountMode='auto',canvasScale=1,canvasLogicalWidth=2400,canvasLogicalHeight=1400,processScalePercent=100,processScaleGesture=false;"
-    html = html.replace(test_hook, test_hook + "window.__mapliniTestState={link:i=>JSON.parse(JSON.stringify(links[i])),scale:()=>canvasScale,node:id=>JSON.parse(JSON.stringify(nodes.get(id)?.data||null)),nodes:()=>[...nodes.values()].map(x=>JSON.parse(JSON.stringify(x.data))),links:()=>JSON.parse(JSON.stringify(links)),clear:()=>clearCanvas(),syncFont:value=>syncFontSelect(value),syncBackground:value=>syncBackgroundTypeSelect(value),syncNodeStyle:value=>syncNodeStyleSelect(value),coachDirect:(from,to)=>{links.push(MapliniConnectorCore.create(from,to,'right',{}));coachDirectActivityLink(links.length-1);return links.length-1},addNode:(type,x,y)=>addNode(type,x,y),connect:(from,to)=>{links.push(MapliniConnectorCore.create(from,to,'right',{}));requestFullLinkRender(true);return links.length-1},linkStyle:i=>JSON.parse(JSON.stringify(linkStyle(links[i]))),polish:(ids,force=false)=>polishAutomaticConnectedLinks(ids,{forceAuto:force}),undoCount:()=>undo.length,redoCount:()=>redo.length,resetHistory:()=>resetHistory(),geomCacheSize:()=>nodeGeomCache.size,geom:(id)=>nodeGeom(id),adjacency:(id)=>linksForNode(id).slice(),fastMode:()=>fastGeometryInteraction};")
+    html = html.replace(test_hook, test_hook + "window.__mapliniTestState={link:i=>JSON.parse(JSON.stringify(links[i])),scale:()=>canvasScale,node:id=>JSON.parse(JSON.stringify(nodes.get(id)?.data||null)),nodes:()=>[...nodes.values()].map(x=>JSON.parse(JSON.stringify(x.data))),links:()=>JSON.parse(JSON.stringify(links)),clear:()=>clearCanvas(),syncFont:value=>syncFontSelect(value),syncBackground:value=>syncBackgroundTypeSelect(value),syncNodeStyle:value=>syncNodeStyleSelect(value),coachDirect:(from,to)=>{links.push(MapliniConnectorCore.create(from,to,'right',{}));coachDirectActivityLink(links.length-1);return links.length-1},addNode:(type,x,y)=>addNode(type,x,y),connect:(from,to)=>{links.push(MapliniConnectorCore.create(from,to,'right',{}));requestFullLinkRender(true);return links.length-1},linkStyle:i=>JSON.parse(JSON.stringify(linkStyle(links[i]))),setLinkLabel:(i,label)=>{setLinkStyle(i,{label:String(label||'')});drawLinks();return JSON.parse(JSON.stringify(linkStyle(links[i])))},polish:(ids,force=false)=>polishAutomaticConnectedLinks(ids,{forceAuto:force}),undoCount:()=>undo.length,redoCount:()=>redo.length,resetHistory:()=>resetHistory(),geomCacheSize:()=>nodeGeomCache.size,geom:(id)=>nodeGeom(id),adjacency:(id)=>linksForNode(id).slice(),fastMode:()=>fastGeometryInteraction,setCloudSession:(s)=>{cloudSession=s;sharedView=false;currentWorkspaceId=null;currentWorkspaceOwnerId=s?.user?.id||null;return Boolean(ownerId())},loadCloudWalkthrough:()=>loadCloudWalkthroughRuns(),saveCloudWalkthrough:r=>saveWalkthroughRunToCloud(r),updateCloudWalkthrough:r=>updateWalkthroughRunStatusInCloud(r),walkthroughRuns:()=>walkthroughRunsForCurrentProcess(),currentId:()=>currentId,setWalkthroughRuns:r=>writeWalkthroughRuns(r),openDeviationDashboard:()=>openDeviationDashboard(),closeDeviationDashboard:()=>closeDeviationDashboard(),deviationRows:()=>deviationRows(),renderDeviationDashboard:()=>renderDeviationDashboard(),updateDeviation:(runId,index,status)=>updateWalkthroughDeviationStatus(runId,index,status),autoClean:()=>autoCleanProcess(),decisionBranches:id=>addDecisionBranches(id)};")
     return html
 
 
@@ -211,6 +212,15 @@ def run() -> None:
         page.locator("#p48-analysis-close").click()
         page.wait_for_timeout(20)
 
+        # v0.19.4: a decision can create both explicit Ja/Nej branches in one action.
+        before_decision_nodes = page.locator("#p48-canvas .p48-node").count()
+        assert page.evaluate("() => window.__mapliniTestState.decisionBranches('n3')") is True
+        page.wait_for_timeout(60)
+        after_decision_nodes = page.locator("#p48-canvas .p48-node").count()
+        assert after_decision_nodes == before_decision_nodes + 2, (before_decision_nodes, after_decision_nodes)
+        decision_labels = page.evaluate("() => window.__mapliniTestState.links().filter(l => String(l[0]) === 'n3').map(l => String((l[3]||{}).label||''))")
+        assert 'Ja' in decision_labels and 'Nej' in decision_labels, decision_labels
+
         # Mobile: the permanent bar stays at four actions, while Redo/Fullscreen remain
         # available as secondary actions in the Add sheet.
         page.set_viewport_size({"width": 500, "height": 900})
@@ -228,18 +238,18 @@ def run() -> None:
         page.evaluate("() => { if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(()=>{}); }")
         page.wait_for_timeout(30)
 
-        # v0.15.1 first-time UX: an empty process gets a clear canvas start,
-        # and the primary Start action creates/selects the first node and hides the guide.
+        # Current methodology: an empty process starts with Objekt in or Aktivitet.
         page.evaluate("() => window.__mapliniTestState.clear()")
         page.wait_for_timeout(30)
         assert page.locator("#p48-empty-state").is_visible()
-        assert page.locator("#p48-empty-start").is_visible()
+        assert page.locator("#p48-empty-object").is_visible()
         assert page.locator("#p48-empty-activity").is_visible()
-        page.locator("#p48-empty-start").click()
+        page.locator("#p48-empty-object").click()
         page.wait_for_timeout(50)
         assert page.locator("#p48-canvas .p48-node").count() == 1
         first_node = page.locator("#p48-canvas .p48-node").first
-        assert "start" in (first_node.get_attribute("class") or "")
+        assert "object" in (first_node.get_attribute("class") or "")
+        assert page.evaluate("() => window.__mapliniTestState.nodes()[0].objectRole") == "input"
         assert not page.locator("#p48-empty-state").is_visible()
 
         # v0.15.7 typography cleanup: keep seven focused choices but preserve
@@ -247,7 +257,7 @@ def run() -> None:
         assert page.locator("#p48-font option").count() == 7
         page.evaluate("() => window.__mapliniTestState.syncFont('Caveat')")
         assert page.locator('#p48-font option[value="Caveat"]').count() == 1
-        assert page.locator('#p48-font option[value="Caveat"]').inner_text().startswith("Tidigare typsnitt:")
+        assert (page.locator('#p48-font option[value="Caveat"]').text_content() or "").startswith("Tidigare typsnitt:")
         assert page.locator("#p48-font").input_value() == "Caveat"
         page.evaluate("() => window.__mapliniTestState.syncFont('Inter')")
         assert page.locator("#p48-font option").count() == 7
