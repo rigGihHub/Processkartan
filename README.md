@@ -1,4 +1,131 @@
-# Maplini v0.20.9 – Walkthrough Transition Polish
+## Senaste release: v0.20.34 – Large Process Performance
+
+Maplini har nu en reproducerbar prestandabaslinje för stora processkartor. Connector-routing begränsar dyr korsningsanalys på mycket stora kartor men behåller hinderundvikande, och persist-flödet gör mindre duplicerat arbete. Resultatet är snabbare öppning av stora kartor utan ändring av processdata eller molnmodell.
+
+## Senaste release: v0.20.33 – Mobile Read & Follow
+
+På mobil prioriterar Maplini nu **läsa och följa** framför full redigering. Processen öppnas i en ren mobil Läsvy med direktknappar för Följ processen och Anpassa. Användare med redigeringsrätt kan fortfarande gå till redigeringsläget via ✎. Stegdetaljer och Följ-processen använder större touchvänliga bottom sheets så att canvasen förblir begriplig även på liten skärm.
+
+## Senaste release: v0.20.32 – Read / Presentation Mode
+
+Maplini har nu en ren **Läsvy** för personer som ska förstå en process utan att redigera den. Redigeringspanelen och muterande verktyg döljs, canvasen får hela fokusytan och ett klick på ett steg visar befintlig processinformation som beskrivning, ansvar, system, instruktion, tid, KPI, risk, kontroll samt input/output.
+
+Läsvyn ändrar ingen processdata och är helt reversibel via **Redigera** eller Escape. **Följ processen**, zoom, Anpassa och Översikt finns kvar så att läsaren kan orientera sig och vid behov gå vidare till den interaktiva genomgången. Ingen Supabase-migrering krävs.
+
+---
+
+## Senaste release: v0.20.31 – Follow Process Through Subprocesses
+
+**Följ processen** kan nu fortsätta genom länkade delprocesser. När genomgången når en Delprocess går Maplini in i den underliggande kartan, följer dess steg och återvänder sedan till rätt fortsättning i huvudprocessen. Flera möjliga startpunkter kräver ett tydligt val; Maplini gissar inte.
+
+Genomgången fortsätter att sparas som en sammanhängande körning på huvudprocessen, samtidigt som varje historiksteg bär sin processkontext. Ingen ny databasstruktur eller BPMN-hierarki behövs.
+
+---
+
+## Senaste release: v0.20.30 – Linked Subprocess Navigation
+
+Maplini kan nu använda en **Delprocess** som en riktig navigerbar nivå i processkartan. När en delprocess markeras visas **Öppna delprocess**. Första gången skapas en egen fokuserad processkarta och därefter återanvänds samma länk. En enkel breadcrumb visar vägen tillbaka till huvudprocessen.
+
+Lösningen är medvetet lättviktig: inga BPMN-gateways, ingen separat hierarkiadministration och ingen ny Supabase-tabell. Duplicerade delprocessrutor är dessutom olänkade som standard så att en kopia inte av misstag delar samma underprocess.
+
+---
+
+## Senaste release: v0.20.29 – Process Overview & Navigation
+
+Maplini har nu en frivillig **Processöversikt** för större kartor. Översikten visar hela processens struktur i miniatyr, markerar den del av canvasen som är synlig och låter användaren hoppa direkt till ett steg eller ett område utan att zooma ut hela arbetsytan. Funktionen använder befintlig nodgeometri och förändrar inte processdatan.
+
+Översikten är medvetet inte en ny permanent sidopanel, swimlane-funktion eller BPMN-navigator. Den öppnas vid behov från huvudradens **Översikt** och hålls borta från mobilens redigeringsyta för att behålla enkelheten. Ingen Supabase-migrering krävs.
+
+---
+
+## Senaste release: v0.20.28 – Deviation to Improvement Loop
+
+Maplini knyter nu ihop processgenomgången med faktisk processförbättring. En öppen avvikelse kan öppnas via **Förbättra steg**, vilket tar användaren till exakt det steg där avvikelsen uppstod och håller observationen synlig medan processen justeras. Därefter kan samma avvikelse markeras som hanterad.
+
+Detta är medvetet inte ett separat ärendehanteringssystem. Maplini återanvänder befintlig genomgångshistorik och avvikelsestatus för att stärka kärnloopen **Rita → Följ → Upptäck → Förbättra**. Ingen Supabase-migrering krävs.
+
+---
+
+## v0.20.27 – Safe Sharing & Revoke
+
+Maplini visar nu tydligt när en publik läslänk är aktiv och låter användaren återkalla den på riktigt genom att rensa både delningstoken och delningsläge.
+
+## v0.20.25 – Safe Cloud Editing
+Maplini skyddar nu mot tyst överskrivning när två personer arbetar med samma molnprocess. En redan sparad process får bara uppdateras om molnversionen fortfarande är exakt den version som användaren öppnade. Om någon annan har hunnit spara stoppas molnuppdateringen och den lokala versionen behålls.
+
+Detta är en säkerhetsmekanism för redigering, inte realtidssamarbete. Ingen Supabase-migrering eller ny processdata krävs.
+
+---
+
+## v0.20.23 – Trustworthy Process Analysis
+Processkontrollen visar inte längre ett artificiellt hälsobetyg. Den redovisar i stället konkreta strukturfynd, skiljer fakta från bedömningar och förklarar vilken regel som utlöst varje fynd.
+
+# Maplini v0.20.22 – Core Workflow Simplification
+
+Den här releasen minskar konkurrensen mellan kärnuppgiften och sekundära verktyg. Huvudraden prioriterar nu processnamn, skapande, sparning, **Följ processen**, ångra/gör om, orientering, layout och export. Funktioner som främst behövs efteråt eller mer sällan ligger kvar under **Mer**.
+
+**Dela process**, **Avvikelser** och **Skala process** är alltså inte borttagna. De har flyttats till en progressivt fördjupad meny tillsammans med kvalitets- och avancerade verktyg. Detta gör den första arbetsytan lugnare utan att begränsa professionella användare.
+
+Ingen processdata, routing eller Supabase-konfiguration ändras.
+
+---
+
+# Maplini v0.20.21 – Follow Process Continuity
+
+Den här releasen putsar den visuella hierarkin i processflödet utan att lägga till nya funktioner. Automatiska huvudflöden behåller högre visuell närvaro, medan Ja/Nej-grenar och deras fortsättning tonas ned något. Färgvalet ändras inte, så användarens egna connector-färger bevaras.
+
+När exakt en ruta markeras blir dess anslutna automatiska pilar tydligare samtidigt som övriga automatiska flöden lugnas tillfälligt. Det gör det enklare att snabbt se vad som leder in i och ut ur den ruta man arbetar med. Manuellt hanterade kopplingar lämnas utanför hierarkin. Ingen routing, datamodell eller Supabase-konfiguration ändras.
+
+---
+
+# Maplini v0.20.19 – Connector Label Clarity
+
+Den här releasen förbättrar läsbarheten på piltexter. Ja/Nej och andra explicita connector-etiketter behöver inte längre ligga vid pilens geometriska mittpunkt. Maplini provar flera lägen på raka delar av kopplingen och föredrar en plats med luft till processrutor, böjar och redan placerade piltexter.
+
+Om standardläget är blockerat kan etiketten byta sida om pilen. När en markerad pils etikett flyttas följer snabbverktyget med logiken och hamnar på motsatt sida, så text, draghandtag och verktyg inte staplas. Själva pilrutten ändras inte av etikettplaceringen och ingen Supabase-migrering krävs.
+
+---
+
+# Maplini v0.20.18 – Connector Lane Separation
+
+Den här releasen gör parallella automatiska kopplingar lättare att läsa. Om en ny vinkelrät auto-pil skulle ligga ovanpå eller mycket nära en längre del av en befintlig pil väger Maplini in överlappningen och väljer hellre en närliggande separat korridor när det finns en rimlig sådan.
+
+En kort gemensam stam direkt vid samma beslut eller återförening är fortfarande tillåten. Hindrande processrutor och riktiga korsningar väger dessutom tyngre än lane-separation, så routingmotorn väljer inte onödigt långa omvägar bara för att skapa luft mellan linjer. Manuella pilar lämnas helt orörda. Ingen Supabase-migrering krävs.
+
+---
+
+# Maplini v0.20.17 – Connector Crossing Reduction
+
+Den här releasen gör automatisk routing mer medveten om andra flöden. Om två möjliga vinkelräta pilbanor båda är fria från processrutor föredrar Maplini den som ger färre riktiga korsningar mot orelaterade kopplingar. Rutkollisioner är fortfarande mycket dyrare än pilkorsningar, så appen skapar inte stora omvägar bara för att undvika en linje.
+
+Kopplingar som delar källa eller mål får fortsatt förgrenas och mötas naturligt. Manuellt redigerade pilar, fri routing och manuella fästpunkter lämnas orörda. Ingen datamodell ändras och ingen Supabase-migrering krävs.
+
+---
+
+# Maplini v0.20.16 – Smart Connector Routing
+
+Den här releasen förbättrar själva pilbanan i tätare processkartor. Automatiskt hanterade vinkelräta pilar kontrollerar nu om den normala vägen passerar genom andra processrutor. Om den gör det provar Maplini alternativa vägar runt hindret och väljer den kortaste rena rutten.
+
+Om en riktig omväg behövs lämnar pilen först källrutan med en kort rak sträcka i rätt riktning, går runt hindret och ansluter sedan naturligt till målrutan. Manuellt redigerade pilar, fria pilar och manuella fästpunkter lämnas helt orörda.
+
+Ingen datamodell ändras och ingen Supabase-migrering krävs.
+
+---
+
+# Maplini v0.20.15 – Smart Flow Continuation
+
+Den här releasen förbättrar automatisk placering av beslutets Ja/Nej-grenar. När båda grenarna skapas tillsammans planeras de som ett visuellt par: samma framåtrank, balanserade runt beslutet och med symmetrisk undanmanöver när standardläget är upptaget. Manuellt placerade objekt flyttas inte.
+
+
+Canvasens direktmanipulation är renare. När en enda ruta är markerad används den lilla **+**-kontrollen vid själva rutan som den primära vägen för att bygga vidare. Den flytande snabbmenyn duplicerar därför inte längre nästa-steg-kommandot utan fokuserar på **Form, Egenskaper, Duplicera och Ta bort**.
+
+Den direkta +‑kontrollen ligger närmare rutan och får tydligare hover/fokusrespons. Kopplingspunkterna är fortsatt tillgängliga på markerad ruta men visuellt lugnare tills användaren för musen över dem. Markeringen runt en vald ruta har också tonats ned något.
+
+Ingen datamodell ändras och ingen Supabase-migrering krävs.
+
+---
+
+# Maplini v0.20.10 – Walkthrough Transition Polish
 
 Följ processen visar nu vägval tydligare direkt i processkartan. När ett steg har märkta Ja/Nej-grenar visas diskreta etiketter vid de möjliga nästa rutorna. När användaren svarar och vägen blir entydig tonas de andra alternativen bort, medan den valda rutan och pilen förstärks innan genomgången går vidare.
 
@@ -501,3 +628,15 @@ Page setup is now available directly over the canvas through a compact sticky co
 
 ## v0.19.4 – Smart + Nästa
 Bygg vidare på en markerad ruta med `+ Nästa`. Maplini försöker nu hålla samma flödesriktning, baslinje och visuella rytm automatiskt. Beslut får separerade grenar och kollisioner flyttas till parallella körlinjer utan att bryta huvudriktningen.
+
+
+### v0.20.15 – Branch Rejoin
+Enkla Ja/Nej-grenar kan sammanföras explicit till ett gemensamt nästa steg med smart, centrerad placering utan att Maplini flyttar manuellt placerade noder.
+
+
+### v0.20.15 – Flow Collision Prevention
+Automatisk placering väger nu in befintliga kopplingslinjer för att minska överlappande och korsande flöden i större processkartor. Befintlig layout flyttas inte.
+
+
+### v0.20.27 – Safe Sharing & Revoke
+Publik processdelning visar nu aktiv status och kan återkallas direkt. Den gamla länken slutar då fungera eftersom både delningstoken och delningsläge rensas i molnet.

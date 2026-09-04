@@ -5,7 +5,7 @@ TEXT = APP.read_text(encoding='utf-8')
 
 
 def test_version_is_0208():
-    assert 'APP_VERSION = "0.20.9"' in TEXT
+    assert 'APP_VERSION = "0.20.34"' in TEXT
 
 
 def test_walkthrough_has_distinct_canvas_states():

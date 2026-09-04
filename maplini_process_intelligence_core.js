@@ -32,9 +32,25 @@ const ACTIONS={
   direct_activity:'Kontrollera vad den första aktiviteten producerar. Lägg in resultatet som ett Objekt mellan aktiviteterna om det är det som triggar nästa steg.'
 };
 function priorityLabel(severity){return severity==='error'?'Åtgärda först':severity==='warning'?'Kontrollera':'Förbättring';}
+const RULE_INFO={
+  missing_start:{kind:'fact',rule:'Ingen aktiv ruta är markerad som Start.'},
+  multiple_starts:{kind:'fact',rule:'Fler än en aktiv ruta är markerad som Start.'},
+  missing_end:{kind:'fact',rule:'Ingen aktiv ruta är markerad som Slut.'},
+  isolated:{kind:'fact',rule:'Rutan saknar både inkommande och utgående flöde.'},
+  no_incoming:{kind:'fact',rule:'Rutan saknar inkommande flöde och är inte Start.'},
+  dead_end:{kind:'fact',rule:'Rutan saknar utgående flöde och är inte Slut.'},
+  decision_branches:{kind:'fact',rule:'Beslutsrutan har färre än två utgående flöden.'},
+  merge_bottleneck:{kind:'assessment',rule:'Tre eller fler flöden möts i samma steg. Det kan vara en flaskhals, men behöver inte vara det.'},
+  fanout:{kind:'assessment',rule:'Tre eller fler flöden lämnar samma steg. Det kan göra vägvalet svårt att läsa.'},
+  loop:{kind:'assessment',rule:'Flödet innehåller en cykel. Loopen kan vara avsiktlig och måste därför bedömas av användaren.'},
+  long_chain:{kind:'assessment',rule:'En obruten sekvens överstiger den valda längdgränsen. Långa sekvenser är inte automatiskt dåliga.'},
+  direct_activity:{kind:'assessment',rule:'Två aktiviteter är direktkopplade utan mellanliggande Objekt. Det kan dölja vad som förs vidare mellan stegen.'}
+};
 function finding(code,severity,title,detail,nodeIds=[],meta={}){
-  return {code,severity,title,detail,action:ACTIONS[code]||'Kontrollera om flödet kan göras tydligare.',priority:priorityLabel(severity),nodeIds:[...new Set(nodeIds.map(String))],meta};
+  const ri=RULE_INFO[code]||{kind:'assessment',rule:'Regeln kräver mänsklig bedömning.'};
+  return {code,severity,title,detail,action:ACTIONS[code]||'Kontrollera om flödet kan göras tydligare.',priority:priorityLabel(severity),evidenceKind:ri.kind,rule:ri.rule,nodeIds:[...new Set(nodeIds.map(String))],meta};
 }
+
 function stronglyConnected(ids,outEdges){
   let index=0;const stack=[],onStack=new Set(),idx=new Map(),low=new Map(),components=[];
   function visit(v){
@@ -122,12 +138,10 @@ function analyze(nodes,links,options={}){
   }
 
   findings.sort((a,b)=>severityRank(a.severity)-severityRank(b.severity)||a.title.localeCompare(b.title,'sv'));
-  const weights={error:1.8,warning:.8,info:.25};
-  const penalty=findings.reduce((s,f)=>s+(weights[f.severity]||0),0);
-  const divisor=Math.max(3,active.length);
-  const score=Math.max(1.5,Math.min(10,10-(penalty/divisor)*2.5));
   const counts={error:0,warning:0,info:0};findings.forEach(f=>counts[f.severity]++);
-  return {score:Math.round(score*10)/10,counts,findings,nodeCount:active.length,linkCount:L.filter(l=>activeIds.has(l.from)&&activeIds.has(l.to)).length};
+  const factCount=findings.filter(f=>f.evidenceKind==='fact').length;
+  const assessmentCount=findings.length-factCount;
+  return {counts,findings,nodeCount:active.length,linkCount:L.filter(l=>activeIds.has(l.from)&&activeIds.has(l.to)).length,factCount,assessmentCount,analysisType:'structural_rules'};
 }
 
 global.MapliniProcessIntelligenceCore={analyze};

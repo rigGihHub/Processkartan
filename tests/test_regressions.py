@@ -284,7 +284,7 @@ def test_v01016_canvas_core_node_test_when_available():
 
 
 def test_v01017_ui_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert '_UI_CORE_PATH' in APP
     assert '__MAPLINI_UI_CORE__' in APP
     assert 'MapliniUiCore.selectionHint' in APP
@@ -326,7 +326,7 @@ def test_v01017_ui_core_contains_selection_hint_logic():
 
 
 def test_v01018_state_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert '_STATE_CORE_PATH' in APP
     assert '__MAPLINI_STATE_CORE__' in APP
     assert 'MapliniStateCore.normalizeProcess' in APP
@@ -356,7 +356,7 @@ def test_v01018_state_core_drops_orphan_links():
 
 
 def test_v01019_reliability_core_loaded():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert '_RELIABILITY_CORE_PATH' in APP
     assert '__MAPLINI_RELIABILITY_CORE__' in APP
 
@@ -386,7 +386,7 @@ def test_v01019_reliability_primitives():
 
 
 def test_v01020_export_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert '_EXPORT_CORE_PATH' in APP
     assert '__MAPLINI_EXPORT_CORE__' in APP
     assert 'MapliniExportCore.validateBytes' in APP
@@ -430,7 +430,7 @@ def test_v01021_connector_persistence_format_is_preserved():
     assert "nodeIds.has(l[0])&&nodeIds.has(l[1])" in STATE_CORE
 
 def test_v01021_workflow_core_loaded_and_history_centralized():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert '_WORKFLOW_CORE_PATH' in APP
     assert '__MAPLINI_WORKFLOW_CORE__' in APP
     assert 'MapliniWorkflowCore.emptyProcess' in APP
@@ -455,7 +455,7 @@ def test_v01021_workflow_core_when_node_available():
 
 
 def test_v01022_performance_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert '_PERFORMANCE_CORE_PATH' in APP
     assert '__MAPLINI_PERFORMANCE_CORE__' in APP
     assert 'MapliniPerformanceCore.signature' in APP
@@ -483,7 +483,7 @@ def test_v01022_performance_core_primitives_exist():
 
 
 def test_v01023_mobile_core_is_loaded_and_injected():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert '_MOBILE_CORE_PATH' in APP
     assert '__MAPLINI_MOBILE_CORE__' in APP
     assert 'MapliniMobileCore.clientToLocal' in APP
@@ -535,7 +535,7 @@ def test_v01023_mobile_core_primitives():
 
 
 def test_v01024_selection_core_loaded_and_used():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert '_SELECTION_CORE_PATH' in APP
     assert '__MAPLINI_SELECTION_CORE__' in APP
     assert 'MapliniSelectionCore.deleteAction' in APP
@@ -563,7 +563,7 @@ def test_v01024_escape_and_undo_redo_refresh_context():
 
 
 def test_v01025_desktop_guard_is_present_without_mobile_selector_regression():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     assert "/* v0.10.25 desktop regression guard */" in html
     assert "grid-template-columns:220px minmax(0,1fr)!important" in html
@@ -579,7 +579,7 @@ def test_v01025_dead_outer_canvas_css_removed():
 
 
 def test_v01026_sync_core_is_loaded_and_used():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert '_SYNC_CORE_PATH' in APP
     assert '__MAPLINI_SYNC_CORE__' in APP
     assert 'MapliniSyncCore.contentChanged' in APP
@@ -605,10 +605,11 @@ def test_v01026_cloud_merge_is_conflict_aware():
     assert "merged.preservedLocalIds.length" in chunk
 
 def test_v01026_cloud_save_uses_stable_snapshot():
-    chunk=APP[APP.index("async function saveCurrentToCloud"):APP.index("async function loadCloudProcesses")]
+    chunk=APP[APP.index("async function guardedProcessCloudWrite"):APP.index("async function loadCloudProcesses")]
     assert "const st=clone(processes[currentId]||state())" in chunk
     assert "name:st.name,data:st" in chunk
     assert "cloudUpdatedAt:updatedAt" in chunk
+    assert "updated_at=eq." in chunk
     assert "return {localOk,cloudOk:true,updatedAt}" in chunk
 
 def test_v01026_signout_removes_unmodified_cloud_copies():
@@ -619,7 +620,7 @@ def test_v01026_signout_removes_unmodified_cloud_copies():
 
 
 def test_v01027_session_core_loaded_and_used():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert '_SESSION_CORE_PATH' in APP
     assert '__MAPLINI_SESSION_CORE__' in APP
     assert 'MapliniSessionCore.chooseWorkspace' in APP
@@ -662,7 +663,7 @@ def test_v01027_session_core_primitives():
 
 
 def test_v01028_rc_core_loaded_and_used():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert '_RC_CORE_PATH' in APP
     assert '__MAPLINI_RC_CORE__' in APP
     assert 'MapliniRcCore.captureScopeState' in APP
@@ -699,7 +700,7 @@ def test_v01028_rc_core_primitives():
 
 
 def test_v01029_flow_core_loaded_and_used():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert '_FLOW_CORE_PATH' in APP
     assert '__MAPLINI_FLOW_CORE__' in APP
     assert 'MapliniFlowCore.sharedProcess' in APP
@@ -740,7 +741,7 @@ def test_v01029_flow_core_primitives():
 
 
 def test_v01030_access_core_loaded_and_used():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert '_ACCESS_CORE_PATH' in APP
     assert '__MAPLINI_ACCESS_CORE__' in APP
     assert "function canEdit(){return MapliniAccessCore.canEdit" in APP
@@ -785,7 +786,7 @@ def test_v01030_access_core_role_rules():
 
 
 def test_v01031_privacy_core_loaded_and_used():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert '_PRIVACY_CORE_PATH' in APP
     assert '__MAPLINI_PRIVACY_CORE__' in APP
     assert "MapliniPrivacyCore.shouldPersistLocally" in APP
@@ -793,7 +794,7 @@ def test_v01031_privacy_core_loaded_and_used():
 def test_v01031_shared_view_persist_is_ephemeral():
     chunk=APP[APP.index("function persist(show=false,refreshList=false)"):APP.index("let lastUndoAt")]
     assert "if(sharedView)" in chunk
-    shared=chunk[chunk.index("if(sharedView)"):chunk.index("if(MapliniSyncCore.contentChanged")]
+    shared=chunk[chunk.index("if(sharedView)"):chunk.index("const changed=MapliniSyncCore.contentChanged")]
     assert "saveLocal(" not in shared
     assert "return st" in shared
 
@@ -827,7 +828,7 @@ def test_v01031_privacy_core_rules():
 
 
 def test_v01032_save_local_has_privacy_guard():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     chunk=APP[APP.index("function saveLocal(immediate=false)"):APP.index("function loadLocal()")]
     assert "if(!MapliniPrivacyCore.shouldPersistLocally({sharedView}))return true" in chunk
 
@@ -864,7 +865,7 @@ def test_v01032_direct_google_export_reports_runtime_error():
 
 
 def test_v01033_process_logo_is_selectable_and_draggable():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert ".p48-process-logo.selected" in APP
     assert "processLogo.addEventListener('pointerdown'" in APP
     chunk=APP[APP.index("processLogo.addEventListener('pointerdown'"):APP.index("logoSize.addEventListener")]
@@ -884,7 +885,7 @@ def test_v01033_process_logo_position_persists():
 
 
 def test_v01034_document_node_palette_and_state():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'data-type="document"' in APP
     assert "document:'Dokument'" in APP
     assert ".p48-node.document" in APP
@@ -927,7 +928,7 @@ def test_v01035_scroll_has_bottom_clearance():
 
 
 def test_v01036_selected_connector_can_be_dragged():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "function startSelectedLinkDrag(index,e)" in APP
     assert "if(canEdit()){\n      startSelectedLinkDrag(hit,e);" in APP
     assert "startSelectedLinkDrag(hit,e)" in APP
@@ -952,7 +953,7 @@ def test_v01036_scaled_interactions_use_logical_canvas_coordinates():
 
 def test_v01037_background_library_controls():
     html=_template()
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     # v0.19.1 keeps a focused picker while preserving rendering support for legacy types.
     for value in ('dots','grid','solid','image','watermark'):
         assert f'value="{value}"' in html
@@ -1005,7 +1006,7 @@ def test_node_secondary_text_inherits_typography():
     assert "item.docOpen.style.fontFamily=s.fontFamily" in text
 
 def test_v01040_dropdown_menus_close_on_outside_click():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'function closeOpenMenus(exceptTarget=null)' in APP
     assert "details.p48-canvas-menu[open]" in APP
     assert "details.p48-sheets-menu[open]" in APP
@@ -1041,7 +1042,7 @@ def test_v01040_export_knows_visual_styles():
 
 
 def test_v01041_document_link_is_edited_inline_on_canvas():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "function openDocumentInlineEditor(item)" in APP
     assert "p48-doc-inline-editor" in APP
     render = APP[APP.index("function renderDocumentLink(item){"):APP.index("function state(){")]
@@ -1078,12 +1079,12 @@ def test_v01042_connector_visual_polish_contract():
 
 
 def test_v01043_smart_connector_routing_controls_and_geometry():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     assert 'id="p48-link-routing"' in html
     assert 'id="p48-link-anchor-mode"' in html
     assert "function linkSides(link,A,B)" in html
-    assert "function linkGeometry(link,A,B)" in html
+    assert "function linkGeometry(link,A,B,{avoidConnectorCrossings=true,routingObstacles=null,routingSegments=null}={})" in html
     connector=(ROOT/'maplini_connector_core.js').read_text(encoding='utf-8')
     assert "routing:'orthogonal'" in connector
     assert "anchorMode:'auto'" in connector
@@ -1093,7 +1094,7 @@ def test_v01043_smart_connector_routing_controls_and_geometry():
 
 def test_v01044_connector_labels_and_decision_defaults():
     assert 'id="p48-link-label"' in APP
-    assert 'function linkLabelElement(st,points,selected=false)' in APP
+    assert 'function linkLabelElement(st,points,selected=false,occupiedLabels=[])' in APP
     assert 'function decisionAutoLabel(sourceId)' in APP
     assert "{label:autoLabel}" in APP
     assert "setLinkStyle(selectedLinkIndex,{label:value})" in APP
@@ -1104,7 +1105,7 @@ def test_v01044_connector_labels_and_decision_defaults():
 
 def test_v01045_insert_step_on_link_is_wired():
     text = APP
-    assert 'APP_VERSION = "0.20.9"' in text
+    assert 'APP_VERSION = "0.20.34"' in text
     assert 'id="p48-insert-link-step"' in text
     assert "function insertStepOnSelectedLink(type='process')" in text
     assert 'MapliniConnectorCore.splitLink(links,index,id)' in text
@@ -1130,7 +1131,7 @@ def test_v01046_insert_step_menu_closes_outside():
 
 
 def test_v0110_faster_editing_copy_paste_duplicate():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'maplini_editing_core.js' in APP
     assert '__MAPLINI_EDITING_CORE__' in APP
     assert 'id="p48-duplicate-selection"' in APP
@@ -1145,7 +1146,7 @@ def test_v0110_faster_editing_copy_paste_duplicate():
 
 
 def test_v0111_multi_select_group_move_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "const groupIds=(selectedIds.size>1&&selectedIds.has(el.dataset.id))?[...selectedIds]:null;" in APP
     assert 'MapliniEditingCore.groupMoveDelta(startItems' in APP
     assert 'MapliniEditingCore.movedInternalVias(links,activeIds,0,0)' in APP
@@ -1155,7 +1156,7 @@ def test_v0111_multi_select_group_move_contract():
 
 
 def test_v0112_quick_next_step_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "className='p48-next-step-wrap'" in APP
     assert "function addNextStepFromNode(sourceId,type='process')" in APP
     assert 'MapliniEditingCore.smartNextStepPosition' in APP
@@ -1165,7 +1166,7 @@ def test_v0112_quick_next_step_contract():
 
 
 def test_v0193_smart_next_build_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'function nextStepFlowDirection(sourceId)' in APP
     assert 'MapliniEditingCore.smartNextStepPosition' in APP
     assert "branchIndex:source.data.type==='decision'?outgoingCount:null" in APP
@@ -1173,7 +1174,7 @@ def test_v0193_smart_next_build_contract():
 
 
 def test_v0113_fit_screen_and_arrange_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'id="p48-fit-screen"' in APP
     assert 'id="p48-arrange-menu"' not in APP
     assert 'MapliniEditingCore.fitToScreen' in APP
@@ -1184,7 +1185,7 @@ def test_v0113_fit_screen_and_arrange_contract():
 
 
 def test_v0115_link_quick_routing_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'id="p48-link-quick"' in APP
     assert 'data-link-routing="straight"' in APP
     assert 'data-link-routing="orthogonal"' in APP
@@ -1196,7 +1197,7 @@ def test_v0115_link_quick_routing_contract():
 
 def test_v0116_multi_select_formatting_contract():
     html = _template()
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert '.p48-format[data-context="multi"] .p48-single-node-only{display:none!important}' in html
     assert 'function selectedNodeItems()' in APP
     assert 'function sharedStyleValue(items,key)' in APP
@@ -1213,7 +1214,7 @@ def test_v0116_multi_select_formatting_contract():
 
 
 def test_v0117_contextual_node_toolbar_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'id="p48-node-quick"' in APP
     assert 'id="p48-node-quick-next"' in APP
     assert 'id="p48-node-quick-format"' in APP
@@ -1234,7 +1235,7 @@ def test_v0117_contextual_node_toolbar_contract():
 
 
 def test_v0120_smart_layout_integration():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert '_LAYOUT_CORE_PATH' in APP
     assert '__MAPLINI_LAYOUT_CORE__' in APP
     assert 'id="p48-smart-layout-menu"' in APP
@@ -1273,7 +1274,7 @@ def test_v0132_mobile_context_sheet_and_fullscreen_contract():
 
 
 def test_v0133_contextual_toolbars_are_hidden_and_styled_inside_editor_iframe():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     # The editor is rendered by components.html in its own iframe. These rules must
     # therefore exist in the raw editor HTML stylesheet, not only in st.markdown CSS.
     raw_html_start = APP.index('html = r"""')
@@ -1301,7 +1302,7 @@ def test_v0141_connector_drag_horizontal_pages_and_zoom_contract():
 
 
 def test_v0143_ui_simplification_and_scale_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'id="p48-arrange-menu"' not in APP
     assert 'id="p48-node-quick-arrange"' in APP
     assert 'id="p48-scale-menu"' in APP
@@ -1324,7 +1325,7 @@ def test_v0143_compact_account_and_logo_contract():
 
 
 def test_v0144_connector_drag_single_gesture_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "function startSelectedLinkDrag(index,e)" in APP
     assert "if(selectedLinkIndex!==index)selectLink(index)" in APP
     assert "startSelectedLinkDrag(index,e);" in APP
@@ -1333,7 +1334,7 @@ def test_v0144_connector_drag_single_gesture_contract():
 
 
 def test_v0145_stability_cleanup_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "width:canvasLogicalWidth,height:canvasLogicalHeight" in APP
     assert "const maxToolbarX=Math.max(120,canvasLogicalWidth-80)" in APP
     assert "function closeTransientMenus(except=null)" in APP
@@ -1349,7 +1350,7 @@ def test_v0145_stability_cleanup_contract():
 
 
 def test_v0146_free_connector_and_visual_polish_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert '<option value="free">Fri</option>' in APP
     assert 'data-link-routing="free"' in APP
     assert "MapliniConnectorCore.setFreeOffset(links,index,baseFreeDx+dx,baseFreeDy+dy)" in APP
@@ -1386,7 +1387,7 @@ def test_v0147_google_sheet_document_link_column_contract():
 
 
 def test_v0148_simplified_command_surface_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'id="p48-export-menu"' in APP
     assert 'id="p48-more-menu"' in APP
     assert '>Exportera ▾<' in APP
@@ -1406,7 +1407,7 @@ def test_v0148_simplified_command_surface_contract():
 
 
 def test_v0149_nested_menus_and_mobile_secondary_actions_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "const isAncestor=Boolean(except&&menu!==except&&menu.contains&&menu.contains(except));" in APP
     assert "if(menu&&menu!==except&&!isAncestor&&menu.open)menu.open=false;" in APP
     assert 'id="p48-mobile-sheet-redo"' in APP
@@ -1419,7 +1420,7 @@ def test_v0149_nested_menus_and_mobile_secondary_actions_contract():
 
 
 def test_v0150_process_check_is_actionable_not_feature_creep():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'Vad behöver förbättras – och vad gör du åt det?' in APP
     assert 'BÖRJA HÄR' in APP
     assert '>Åtgärda</div>' in APP
@@ -1430,13 +1431,13 @@ def test_v0150_process_check_is_actionable_not_feature_creep():
 
 
 def test_v0151_first_time_empty_canvas_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'id="p48-empty-state"' in APP
-    assert 'id="p48-empty-object"' in APP
-    assert 'id="p48-empty-activity"' in APP
-    assert 'Vad startar processen?' in APP
+    assert 'id="p48-empty-object"' not in APP
+    assert 'id="p48-empty-activity"' not in APP
+    assert 'Vad startar processen?' not in APP
     assert 'function refreshEmptyState()' in APP
-    assert 'emptyState.hidden=sharedView||nodes.size>0;' in APP
+    assert 'emptyState.hidden=true;' in APP
     assert "if(emptyObject)emptyObject.addEventListener('click',()=>addFirstStep('object','input'))" in APP
     assert "if(emptyActivity)emptyActivity.addEventListener('click',()=>addFirstStep('process'))" in APP
     assert "requestAnimationFrame(()=>beginInlineEdit(item.el))" in APP
@@ -1444,7 +1445,7 @@ def test_v0151_first_time_empty_canvas_contract():
 
 
 def test_v0152_new_process_dialog_replaces_browser_prompt():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'id="p48-new-process-dialog"' in APP
     assert 'id="p48-new-process-backdrop"' in APP
     assert 'id="p48-new-process-name"' in APP
@@ -1461,7 +1462,7 @@ def test_v0152_new_process_dialog_replaces_browser_prompt():
 
 
 def test_v0153_connector_labels_and_delete_visibility_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'function linkLabelPlacement(points,offset=22)' in APP
     assert "const width=Math.min(300,Math.max(42,value.length*7.8+22)),height=26;" in APP
     assert "if(deleteNodeBtn)deleteNodeBtn.hidden=!(context==='node'&&selectedIds.size===1&&selectedId!=null);" in APP
@@ -1475,8 +1476,8 @@ def test_v0153_connector_labels_and_delete_visibility_contract():
 
 
 def test_v0154_selected_connector_affordances_do_not_stack():
-    assert 'APP_VERSION = "0.20.9"' in APP
-    assert 'function linkQuickPlacement(points,st)' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
+    assert 'function linkQuickPlacement(points,st,labelPos=null)' in APP
     assert "return linkLabelPlacement(points,hasLabel?-42:-32);" in APP
     assert 'function updateSelectedLinkUi(points,st)' in APP
     assert "linkQuick.style.left=qp.x+'px';linkQuick.style.top=qp.y+'px';" in APP
@@ -1485,7 +1486,7 @@ def test_v0154_selected_connector_affordances_do_not_stack():
 
 
 def test_v0155_connector_formatting_panel_is_self_contained():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'id="p48-link-width"' in APP
     assert 'id="p48-format-title"' in APP and 'Pil / koppling</div>' not in APP
     assert 'Inställningarna gäller bara den markerade pilen.' in APP
@@ -1501,7 +1502,7 @@ def test_v0155_connector_formatting_panel_is_self_contained():
 
 
 def test_v0156_context_panel_titles_match_selection():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'id="p48-format-title"' in APP
     assert "formatTitle.textContent=context==='link'?'Pil'" in APP
     assert "context==='multi'?'Flera rutor'" in APP
@@ -1513,7 +1514,7 @@ def test_v0156_context_panel_titles_match_selection():
 
 
 def test_v0157_typography_cleanup_preserves_legacy_fonts():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html = _template()
     font_start = html.index('<select id="p48-font">')
     font_end = html.index('</select>', font_start)
@@ -1530,7 +1531,7 @@ def test_v0157_typography_cleanup_preserves_legacy_fonts():
 
 
 def test_v0158_canvas_background_cleanup_preserves_legacy_types():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html = _template()
     start = html.index('<select id="p48-bg-type">')
     end = html.index('</select>', start)
@@ -1548,7 +1549,7 @@ def test_v0158_canvas_background_cleanup_preserves_legacy_types():
 
 
 def test_v0159_node_style_cleanup_preserves_legacy_styles():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html = _template()
     start = html.index('<select id="p48-node-style">')
     end = html.index('</select>', start)
@@ -1570,7 +1571,7 @@ def test_v0159_node_style_cleanup_preserves_legacy_styles():
 
 
 def test_v01510_zoom_scales_entire_canvas_and_ctrl_multiselect():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     # The zoom CSS must be inside the embedded editor template, not only parent Streamlit CSS.
     html = _template()
     assert '#p48-canvas{' in html
@@ -1589,7 +1590,7 @@ def test_v01510_zoom_scales_entire_canvas_and_ctrl_multiselect():
 
 
 def test_v01511_first_view_a4_portrait_and_runtime_banner_policy():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html = _template()
     # Empty-state styling must exist inside iframe template.
     assert '.p48-empty-state{' in html
@@ -1612,7 +1613,7 @@ def test_v01511_first_view_a4_portrait_and_runtime_banner_policy():
 
 
 def test_v0160_object_activity_object_method_is_core_model():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     assert 'Bygg processen' in html
     assert 'Objekt → Aktivitet → Objekt' in html
@@ -1630,7 +1631,7 @@ def test_v0160_object_activity_object_method_is_core_model():
 
 
 def test_v0161_dependency_coach_flags_direct_activity_links():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'data-insert-type="object">▪ Objekt / resultat</button>' in APP
     assert "const allowed=new Set(['object','process','decision','document','end']);" in APP
     assert 'function coachDirectActivityLink(index)' in APP
@@ -1644,26 +1645,21 @@ def test_v0161_dependency_coach_flags_direct_activity_links():
     assert "linkIndex:l.index" in core
 
 
-def test_v0162_scale_process_is_top_level_and_stays_open():
-    assert 'APP_VERSION = "0.20.9"' in APP
+def test_v0162_scale_process_remains_available_after_progressive_disclosure():
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     soup=BeautifulSoup(html,"html.parser")
     scale=soup.select_one("#p48-scale-menu")
     assert scale is not None
-    assert "p48-scale-menu-top" in scale.get("class",[])
-    # Scale must be a top-level toolbar sibling, not buried inside More.
-    assert scale.find_parent(id="p48-more-menu") is None
-    assert scale.find_previous("details", id="p48-smart-layout-menu") is not None
-    assert scale.find_next("details", id="p48-export-menu") is not None
+    assert "p48-scale-menu" in scale.get("class",[])
+    assert scale.find_parent(id="p48-more-menu") is not None
     assert "Skala hela processen" in scale.get_text(" ",strip=True)
-    # v0.19.1 replaces +/- with a persistent slider that keeps the menu open.
     assert 'id="p48-process-scale"' in APP
     assert "processScaleSlider.addEventListener('input'" in APP
     assert "if(scaleMenu)scaleMenu.open=true" in APP
 
-
 def test_v0163_canvas_pan_scale_slider_and_real_node_dimensions():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     soup=BeautifulSoup(html,"html.parser")
     slider=soup.select_one("#p48-process-scale")
@@ -1690,7 +1686,7 @@ def test_v0163_canvas_pan_scale_slider_and_real_node_dimensions():
 
 
 def test_v0164_blank_canvas_click_clears_selection_without_breaking_pan():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "const wasClick=!desktopPanMoved;" in APP
     assert "if(wasClick&&!selectionMode){" in APP
     assert "clearSelection();clearLinkSelection();finishTempArrow();" in APP
@@ -1699,7 +1695,7 @@ def test_v0164_blank_canvas_click_clears_selection_without_breaking_pan():
 
 
 def test_v0165_magnetic_alignment_and_properties_label():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     soup=BeautifulSoup(html,"html.parser")
     quick=soup.select_one("#p48-node-quick-format")
@@ -1719,7 +1715,7 @@ def test_v0165_magnetic_alignment_and_properties_label():
 
 
 def test_v0166_clear_entire_canvas_requires_confirmation_and_is_undoable():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     soup=BeautifulSoup(html,"html.parser")
     btn=soup.select_one("#p48-clear-canvas")
@@ -1735,7 +1731,7 @@ def test_v0166_clear_entire_canvas_requires_confirmation_and_is_undoable():
 
 
 def test_v0167_smart_connector_polish_prefers_straight_axis_and_preserves_manual_routes():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "function polishAutomaticConnectedLinks(movedIds,{forceAuto=false}={})" in APP
     assert "if(!forceAuto&&(st.routing==='free'||st.anchorMode!=='auto'||(!st.autoManaged&&!legacyAuto)))continue;" in APP
     assert "const routing=(alignedH||alignedV)?'straight':'orthogonal';" in APP
@@ -1746,7 +1742,7 @@ def test_v0167_smart_connector_polish_prefers_straight_axis_and_preserves_manual
 
 
 def test_v0168_object_roles_are_semantic_hints_not_separate_types():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     soup=BeautifulSoup(html,"html.parser")
     object_items=soup.select('.p48-method-palette [data-type="object"]')
@@ -1765,7 +1761,7 @@ def test_v0168_object_roles_are_semantic_hints_not_separate_types():
 
 
 def test_v0169_fast_next_step_flow_uses_recommended_type_and_keeps_alternatives():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     soup=BeautifulSoup(html,"html.parser")
     assert soup.select_one("#p48-node-quick-next") is not None
@@ -1781,7 +1777,7 @@ def test_v0169_fast_next_step_flow_uses_recommended_type_and_keeps_alternatives(
 
 
 def test_v0170_process_flow_assistant_direct_activity_fix_and_override():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     soup=BeautifulSoup(html,"html.parser")
     assert soup.select_one("#p48-flow-coach") is not None
@@ -1798,7 +1794,7 @@ def test_v0170_process_flow_assistant_direct_activity_fix_and_override():
 
 
 def test_v0171_auto_clean_process_chooses_direction_and_preserves_logic():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     soup=BeautifulSoup(html,"html.parser")
     btn=soup.select_one("#p48-auto-clean")
@@ -1813,7 +1809,7 @@ def test_v0171_auto_clean_process_chooses_direction_and_preserves_logic():
 
 
 def test_v0172_atomic_undo_for_destructive_and_layout_operations():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "function recordUndoSnapshot(snapshot,force=false)" in APP
     assert "function runAtomicUndoOperation(operation)" in APP
     assert "function beginUndoGesture()" in APP
@@ -1827,7 +1823,7 @@ def test_v0172_atomic_undo_for_destructive_and_layout_operations():
 
 
 def test_v0173_canvas_performance_uses_local_geometry_cache_and_link_adjacency():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "const nodeGeomRevision=new Map();" in APP
     assert "nodeGeomRevision.set(key,(nodeGeomRevision.get(key)||0)+1);" in APP
     assert "if(cached&&cached.rev===rev)return cached;" in APP
@@ -1843,7 +1839,7 @@ def test_v0173_canvas_performance_uses_local_geometry_cache_and_link_adjacency()
 
 
 def test_v0174_build_flow_ux_polish_recommends_and_keeps_next_node_visible():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     soup=BeautifulSoup(html,"html.parser")
     assert soup.select_one("#p48-node-quick-flow") is not None
@@ -1858,7 +1854,7 @@ def test_v0174_build_flow_ux_polish_recommends_and_keeps_next_node_visible():
 
 
 def test_v0180_process_information_is_structured_and_backward_compatible():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     soup=BeautifulSoup(html,"html.parser")
     assert soup.select_one("#p48-process-info") is not None
@@ -1871,7 +1867,7 @@ def test_v0180_process_information_is_structured_and_backward_compatible():
 
 
 def test_v0181_process_info_panel_prioritizes_essentials_and_reuses_role_system_values():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     soup=BeautifulSoup(html,"html.parser")
     assert soup.select_one("#p48-process-info-more") is not None
@@ -1887,7 +1883,7 @@ def test_v0181_process_info_panel_prioritizes_essentials_and_reuses_role_system_
 
 
 def test_v0182_objects_have_no_canvas_type_badge_and_label_can_start_drag():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "role.className='p48-object-role'" not in APP
     assert "role.textContent=d.objectRole" not in APP
     assert "el.dataset.objectRole=d.objectRole" in APP
@@ -1896,7 +1892,7 @@ def test_v0182_objects_have_no_canvas_type_badge_and_label_can_start_drag():
 
 
 def test_v0183_quick_page_settings_are_visible_and_synced():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     soup=BeautifulSoup(html,"html.parser")
     assert soup.select_one("#p48-page-quick") is not None
@@ -1910,7 +1906,7 @@ def test_v0183_quick_page_settings_are_visible_and_synced():
 
 
 def test_v0184_walkthrough_and_sidebar_scroll_and_safe_auto_clean():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     soup=BeautifulSoup(html,"html.parser")
     assert soup.select_one("#p48-walkthrough-launch") is not None
@@ -1928,7 +1924,7 @@ def test_v0184_walkthrough_and_sidebar_scroll_and_safe_auto_clean():
 
 
 def test_v0185_walkthrough_history_and_followup():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     soup=BeautifulSoup(html,"html.parser")
     assert soup.select_one("#p48-walkthrough-history-list") is not None
@@ -1943,7 +1939,7 @@ def test_v0185_walkthrough_history_and_followup():
 
 
 def test_v0186_smart_yes_no_routing():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     soup=BeautifulSoup(html,"html.parser")
     assert "Vägvalsfråga" in html
@@ -1956,7 +1952,7 @@ def test_v0186_smart_yes_no_routing():
 
 
 def test_v0187_control_vs_route_question_semantics():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     soup=BeautifulSoup(html,"html.parser")
     assert "Kontrollfråga" in html
@@ -1969,7 +1965,7 @@ def test_v0187_control_vs_route_question_semantics():
 
 
 def test_v0188_deviation_followup_fields():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     soup=BeautifulSoup(html,"html.parser")
     assert "Vad har avvikit? *" in APP
@@ -1984,7 +1980,7 @@ def test_v0188_deviation_followup_fields():
 
 
 def test_v0189_cloud_walkthrough_sync_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     soup=BeautifulSoup(html,"html.parser")
     assert soup.select_one("#p48-walkthrough-cloud-state") is not None
@@ -2006,7 +2002,7 @@ def test_v0189_supabase_walkthrough_migration_exists():
 
 
 def test_v0190_deviation_dashboard_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     html=_template()
     soup=BeautifulSoup(html,"html.parser")
     assert soup.select_one("#p48-deviation-panel") is not None
@@ -2022,7 +2018,7 @@ def test_v0190_deviation_dashboard_contract():
 
 
 def test_v0191_individual_deviation_status_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "function deviationStatusFor(run,deviation)" in APP
     assert "function updateWalkthroughDeviationStatus(runId,deviationIndex,status)" in APP
     assert "deviationIndex:i" in APP
@@ -2033,7 +2029,7 @@ def test_v0191_individual_deviation_status_contract():
 
 
 def test_v0192_visual_flow_polish_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'id="p48-auto-clean-top"' in APP
     assert "autoCleanTopBtn.addEventListener('click',()=>autoCleanProcess())" in APP
     assert "mainGap:132,crossGap:64" in APP
@@ -2049,12 +2045,14 @@ def test_v0194_smart_decision_pair_is_wired():
     assert "pair.textContent='Ja + Nej'" in APP
     assert "addDecisionBranchNode(source,'Ja',0,direction)" in APP
     assert "addDecisionBranchNode(source,'Nej',1,direction)" in APP
-    assert "{label}" in APP[APP.index('function addDecisionBranchNode'):APP.index("function addNextStepFromNode")]
+    branch_chunk=APP[APP.index('function positionDecisionBranchNode'):APP.index("function addNextStepFromNode")]
+    assert "{label}" in branch_chunk
+    assert "positionDecisionBranchNode(source,el,label,pos,direction)" in branch_chunk
     assert "item.data.type==='decision')addDecisionBranches" in APP
 
 
 def test_v0195_guided_walkthrough_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'id="p48-walkthrough-trail"' in APP
     assert "function renderWalkthroughTrail(item)" in APP
     assert "Har du gjort detta?" in APP
@@ -2064,7 +2062,7 @@ def test_v0195_guided_walkthrough_contract():
 
 
 def test_v0196_connector_visual_polish_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "function roundedOrthogonalPath(points,radius=10)" in APP
     assert "effective.routing==='orthogonal'?roundedOrthogonalPath(points,10)" in APP
     assert "function branchSemantic(value)" in APP
@@ -2073,7 +2071,7 @@ def test_v0196_connector_visual_polish_contract():
 
 
 def test_v0197_node_visual_hierarchy_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "v0.19.7 – clearer visual hierarchy" in APP
     assert "border-left:5px solid #2b7b61" in APP
     assert "min-height:46px" in APP
@@ -2082,7 +2080,7 @@ def test_v0197_node_visual_hierarchy_contract():
 
 
 def test_v0198_shape_presets_and_visual_rhythm_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'id="p48-node-shape"' in APP
     assert "shapePreset" in APP
     assert "p48-shape-rectangle" in APP
@@ -2092,7 +2090,7 @@ def test_v0198_shape_presets_and_visual_rhythm_contract():
 
 
 def test_v0199_quick_shape_toolbar_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'id="p48-node-quick-shape"' in APP
     assert APP.count("data-quick-shape=") == 4
     assert "nodeQuickShapeChoices.forEach" in APP
@@ -2101,7 +2099,7 @@ def test_v0199_quick_shape_toolbar_contract():
 
 
 def test_v0200_game_feel_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "function celebrateCreatedNode(el)" in APP
     assert "p48-node-spawn" in APP
     assert "p48-step-enter" in APP
@@ -2109,7 +2107,7 @@ def test_v0200_game_feel_contract():
 
 
 def test_v0201_interaction_feel_without_rewards_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'id="p48-flow-streak"' not in APP
     assert "registerFlowBuild" not in APP
     assert "flowBuildStreak" not in APP
@@ -2122,7 +2120,7 @@ def test_v0201_interaction_feel_without_rewards_contract():
 
 
 def test_v0202_navigation_feel_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "function zoomAtClientPoint(next,clientX,clientY)" in APP
     assert "spacePanHeld" in APP
     assert "p48-space-pan-ready" in APP
@@ -2132,7 +2130,7 @@ def test_v0202_navigation_feel_contract():
 
 
 def test_v0203_canvas_build_rhythm_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "function createConnectedNodeAt(source,side,clientX,clientY)" in APP
     assert "p48-temp-create" in APP
     assert "dragDistance>70" in APP
@@ -2142,7 +2140,7 @@ def test_v0203_canvas_build_rhythm_contract():
 
 
 def test_v0204_multi_selection_formation_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'id="p48-selection-hull"' in APP
     assert "function refreshSelectionHull()" in APP
     assert 'id="p48-node-quick-arrange"' in APP
@@ -2152,7 +2150,7 @@ def test_v0204_multi_selection_formation_contract():
 
 
 def test_v0205_smart_connector_flow_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "st.autoManaged&&st.anchorMode==='auto'" in APP
     assert "const nearH=Math.abs(ay-by)<=10,nearV=Math.abs(ax-bx)<=10" in APP
     assert "autoManaged:false" in APP
@@ -2160,7 +2158,7 @@ def test_v0205_smart_connector_flow_contract():
 
 
 def test_v0206_visual_flow_rhythm_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "function flowSpacingFor(source,targetType,{branch=false}={})" in APP
     assert "gap=148;crossGap=76" in APP
     assert "crossGap=Math.max(crossGap,82)" in APP
@@ -2170,17 +2168,17 @@ def test_v0206_visual_flow_rhythm_contract():
 
 
 def test_v0207_direct_walkthrough_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "function maybeAutoAdvanceWalkthrough(item,question,answer)" in APP
     assert "question.quick&&edges.length===1" in APP
-    assert "},220);" in APP
+    assert "},360);" in APP
     assert "Ja eller Nej tar dig direkt vidare" in APP
     assert "q.quick?' quick':''" in APP
     assert "quickAdvanceTimer" in APP
 
 
 def test_v0207_focused_walkthrough_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "function maybeAutoAdvanceWalkthrough(item,question,answer)" in APP
     assert "question.kind==='route'" in APP
     assert "else if(answer==='yes'&&edges.length===1)" in APP
@@ -2190,7 +2188,7 @@ def test_v0207_focused_walkthrough_contract():
 
 
 def test_v0209_walkthrough_branch_badges_and_selected_route():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert 'data-walk-route-label' in APP
     assert 'p48-walk-chosen' in APP
     assert 'p48-walk-link-chosen' in APP
@@ -2200,3 +2198,13 @@ def test_v0209_walkthrough_visual_state_cleanup():
     assert "delete item.el.dataset.walkRouteLabel" in APP
     assert "'p48-walk-chosen'" in APP
     assert "'p48-walk-link-chosen'" in APP
+
+
+def test_v02012_smart_branch_pair_layout_contract():
+    assert 'APP_VERSION = "0.20.34"' in APP
+    editing=(ROOT / "maplini_editing_core.js").read_text(encoding="utf-8")
+    assert "function smartDecisionBranchPositions" in editing
+    assert "smartDecisionBranchPositions" in APP
+    assert "function addDecisionBranchPair(source,direction)" in APP
+    assert "created.push(...addDecisionBranchPair(source,direction))" in APP
+    assert "Ja- och Nej-grenar skapade symmetriskt" in APP

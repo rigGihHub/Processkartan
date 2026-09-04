@@ -1,5 +1,214 @@
 # Changelog
 
+## v0.20.34 – Large Process Performance
+- Added a repeatable real-Chromium benchmark for 100, 250, 500 and 1,000-node process maps.
+- Reduced connector-routing work on large maps by reusing routing obstacles and rendered connector segments during full renders.
+- Added local routing envelopes so unrelated distant nodes/lines are not scored for every connector.
+- For maps above 400 connectors, Maplini keeps obstacle avoidance but skips the quadratic connector-crossing score; this is a deliberate graceful-degradation policy for responsiveness.
+- Removed a duplicate process-content comparison from every persist cycle.
+- Added `PERFORMANCE_BASELINE_v0.20.34.json` with measured browser timings.
+- No process schema, Supabase, RLS or cloud-data changes.
+
+# v0.20.33 — MOBILE READ & FOLLOW
+
+- Mobil öppnar nu processen i **Läsvy som standard** när processdata finns, med ett tydligt val att gå till redigering för användare som har rättighet att ändra.
+- Ny kompakt mobil läsrad visar processnamn och ger direktåtkomst till **Följ**, **Anpassa** och **Redigera**.
+- Mobil Läsvy döljer redigeringskrom och den befintliga mobilredigeringsraden, men behåller canvas, delprocessnavigation och interaktiv steginfo.
+- Stegdetaljer visas som en större touchvänlig bottom sheet med bättre typografi och säkra ytor för moderna telefoner.
+- **Följ processen** är omgjord till en mobil bottom sheet som lämnar en del av canvasen synlig, med större svarsknappar, nästa-val och touchmål.
+- Om Följ startas från mobil redigering går Maplini tillfälligt in i läsläge och återställer redigeringen när genomgången stängs. Startas Följ från Läsvy stannar användaren kvar i Läsvy efteråt.
+- Ingen ny processdata, Supabase-migrering, RLS-ändring eller dependency.
+
+# v0.20.32 — READ / PRESENTATION MODE
+
+- Ny frivillig **Läsvy** i huvudraden.
+- Döljer sidopanel, spar-/undo-/layout-/export-/adminverktyg och canvasens redigeringshandtag.
+- Canvasen får full bredd och förblir navigerbar.
+- Klick på ett steg öppnar en ren läspanel med befintlig processinformation: beskrivning, ansvar, system, instruktion, tid, KPI, risk, kontroll, input och output.
+- Läsvyn använder samma åtkomstskydd som read-only-läget och kan lämnas med **Redigera** eller Escape.
+- Följ processen, zoom, Anpassa och Översikt är fortsatt tillgängliga.
+- Ingen databas-, RLS-, OAuth-, secret- eller dependencyändring.
+
+## v0.20.31 – Follow Process Through Subprocesses
+- **Följ processen** går nu automatiskt in i en länkad delprocess när genomgången når dess Delprocess-ruta.
+- När delprocessen är klar återgår genomgången till exakt nästa steg i överordnad process. Nästlade delprocesser kan avvecklas nivå för nivå på samma sätt.
+- Delprocesser med flera startpunkter kräver ett uttryckligt startval i stället för att Maplini gissar.
+- Tomma delprocesser hanteras säkert och återgår till föregående process utan att genomgången fastnar.
+- Genomgångens visuella metadata visar aktuell processväg när användaren befinner sig i en delprocess.
+- Historikposter lagrar process-ID/processnamn per steg, medan den färdiga genomgången fortsatt hör till den huvudprocess där den startades.
+- Om en genomgång stängs mitt i en delprocess återgår redigeraren till huvudprocessen.
+- Ingen Supabase-migrering, ny tabell eller BPMN-semantik.
+
+## v0.20.30 – Linked Subprocess Navigation
+- A **Delprocess** node can now open a dedicated child process map.
+- First open creates and links the child process; later opens reuse the same child process ID.
+- Child processes keep lightweight `parentProcessId` / `parentNodeId` metadata for breadcrumb navigation.
+- Breadcrumbs let users move back through nested process levels without a separate hierarchy panel.
+- Returning to a parent highlights the subprocess node that leads to the child.
+- Duplicating/pasting a subprocess intentionally removes `childProcessId` to avoid accidental shared child maps.
+- No Supabase migration, new table, BPMN hierarchy or public-share behavior change.
+
+## v0.20.29 – Process Overview & Navigation
+- Added an opt-in **Översikt** for larger process maps without introducing swimlanes or BPMN complexity.
+- The overview mirrors existing node geometry and shows the currently visible canvas area.
+- Clicking a miniature node selects that exact process step and centers the main canvas on it.
+- Clicking empty space in the overview pans the main canvas to that area.
+- The overview refreshes after node/process changes, selection changes, scrolling and zooming.
+- It is intentionally hidden from the mobile editor surface.
+- No process schema, Supabase, routing or walkthrough semantics changed.
+
+## v0.20.28 – Deviation to Improvement Loop
+- Open deviations now use **Förbättra steg** as the primary action instead of a generic process jump.
+- The action opens the correct process, selects the exact originating node and keeps the observed deviation visible in a compact improvement context.
+- From that context the user can open the node properties directly, change the process, and then mark the original deviation as handled.
+- The existing walkthrough/deviation status model is reused; no parallel issue tracker or new persisted schema is introduced.
+- Improvement context is cleared when another process is restored so stale deviations cannot follow the user to the wrong map.
+- No Supabase migration, RLS change or process schema change.
+
+## v0.20.27 – Safe Sharing & Revoke
+- Visar tydligt när aktuell process har en aktiv publik läslänk.
+- Dela-knappen markerar aktiv delning och återanvänder befintlig aktiv länk i stället för att skapa onödiga nya token.
+- Ny **Återkalla länk** med uttrycklig bekräftelse.
+- Återkallning rensar både `share_token` och `share_mode`, vilket gör den gamla publika länken obrukbar.
+- Ingen Supabase-migrering eller RLS/schemaändring.
+
+## v0.20.26 – Conflict Resolution
+
+- Molnkonflikter kan nu lösas utan att någon version tyst försvinner.
+- Visar en konkret jämförelse av lokala och molnlagrade steg/kopplingar.
+- Tre uttryckliga val: behåll lokal version som separat kopia, läs in molnversionen eller ersätt molnversionen efter bekräftelse.
+- Tvingad ersättning är fortfarande versionsskyddad; om molnet ändrats igen stoppas skrivningen och jämförelsen laddas om.
+- Ingen automatisk merge, ingen schemaändring och ingen Supabase-migrering.
+
+# Changelog
+
+## v0.20.25 – Safe Cloud Editing
+- Replaced blind process upsert with optimistic concurrency protection.
+- Existing cloud processes are updated only when their `updated_at` still matches the version the user opened.
+- A zero-row conditional update is treated as a cloud conflict and never retried as an overwrite.
+- Processes without a known cloud base first check whether the ID already exists remotely; an existing row blocks the save instead of overwriting it.
+- Insert races returning HTTP 409 are converted into the same safe cloud-conflict state.
+- On conflict, the local process remains saved and the account area shows a persistent `Molnkonflikt` status.
+- No Supabase migration or process-data schema change.
+
+## v0.20.23 – Trustworthy Process Analysis
+- Removed the synthetic `Processhälsa X/10` score and its heuristic weighting formula.
+- Reframed analysis as a transparent rule-based structural check.
+- Every finding now states the rule that triggered it.
+- Findings are explicitly labelled as `Strukturfakta` or `Bedömning`.
+- Added a visible limitation statement: structural checks do not prove that a real-world process is efficient or correct.
+- No Supabase migration or process-data schema change.
+
+## v0.20.22 – Core Workflow Simplification
+- Förenklar huvudraden utan att ta bort professionell funktionalitet.
+- **Följ processen** är nu den tydligaste primära åtgärden efter att processen ritats.
+- **Dela**, **Avvikelser** och **Skala process** har flyttats från huvudraden till **Mer** eftersom de används senare eller mer sällan i arbetsflödet.
+- **Mer** grupperar nu sekundära verktyg som Dela & uppföljning, Kvalitet och Avancerade verktyg.
+- Export och Ny process har tonats ned visuellt så huvudraden bättre stödjer kärnflödet Rita → Förstå → Följ.
+- Alla tidigare funktioner och DOM-ID:n finns kvar; ingen data-, routing- eller Supabase-migrering krävs.
+
+## v0.20.21 – Follow Process Continuity
+- Smooths the answer → chosen route → next step transition in Follow Process.
+- Briefly emphasizes the resolved connector and destination before advancing.
+- Prevents double input during the short automatic transition.
+- Respects reduced-motion preferences and leaves manual routing/data unchanged.
+
+# Changelog
+
+## v0.20.20 – Flow Readability Polish
+- Automatiskt hanterade huvudflöden och beslutets sidogrenar får nu en diskret visuell hierarki utan att användarens connector-färger skrivs över.
+- Ja/Nej-grenar och deras fortsättning tonas ned något när inget är markerat, medan huvudflödet behåller högre visuell närvaro.
+- När exakt en ruta markeras förstärks dess anslutna automatiska flöde och övriga automatiska pilar tonas tillfälligt ned för snabbare visuell orientering.
+- Manuellt hanterade kopplingar omfattas inte av den automatiska hierarkin.
+- Full och inkrementell connector-rendering använder samma läsbarhetsklassning.
+- Ingen ändring av routing, färgval, datamodell eller Supabase.
+
+## v0.20.19 – Connector Label Clarity
+- Piltexter som Ja/Nej och egna etiketter placeras nu på den renaste delen av kopplingen i stället för alltid vid geometrisk mittpunkt.
+- Etikettmotorn provar flera lägen längs raka segment och kan byta sida för att undvika processrutor.
+- Redan placerade piltexter vägs in så nya etiketter i samma vy inte i onödan läggs ovanpå varandra.
+- Placering nära böjar och korta trånga segment får extra kostnad, medan längre lugna segment föredras.
+- Snabbverktyget för markerad pil placeras nu motsatt etikettens faktiska position även när etiketten har flyttats av hinderlogiken.
+- Ingen ändring av manuell routing, datamodell eller Supabase.
+
+## v0.20.18 – Connector Lane Separation
+- Automatiskt hanterade vinkelräta pilar väger nu även in längre parallell överlappning med andra kopplingar.
+- När två auto-pilar annars skulle ligga ovanpå eller nästan ovanpå varandra föredrar Maplini en närliggande separat korridor.
+- En kort gemensam stam vid samma källa eller mål tillåts fortfarande så beslut kan förgrenas och återföreningar kan mötas naturligt.
+- Rutkollisioner och riktiga pilkorsningar har fortsatt högre prioritet än lane-separation; appen skapar därför inte stora omvägar bara för kosmetisk separation.
+- Manuella pilar, fria pilar och manuella fästpunkter påverkas inte.
+- Ingen datamodell- eller Supabase-ändring.
+
+## v0.20.17 – Connector Crossing Reduction
+- Automatiskt hanterade vinkelräta pilar väger nu in befintliga kopplingslinjer när en ren rutt väljs.
+- Riktiga korsningar mellan orelaterade flöden får en tydlig kostnad, medan rutkollisioner fortfarande väger klart tyngst.
+- Maplini provar alternativa korridorer runt befintliga linjer men undviker oproportionerligt långa omvägar.
+- Kopplingar som delar källa eller mål får fortfarande mötas och förgrenas naturligt utan falsk korsningskostnad.
+- Manuella pilar, fria pilar och manuella fästpunkter påverkas inte.
+- Ingen datamodell- eller Supabase-ändring.
+
+## v0.20.16 – Smart Connector Routing
+- Automatiskt hanterade vinkelräta pilar väger nu in andra processrutor när själva pilbanan räknas ut.
+- Om den vanliga korta vägen går genom en ruta provar Maplini alternativa korridorer ovanför, under eller runt hindret.
+- Omvägar får en liten utgång från käll- och målrutans fästpunkter så pilen lämnar rutan i naturlig riktning innan den svänger.
+- Routingmotorn föredrar fortfarande den kortaste rena vägen och lägger bara till extra svängar när ett hinder motiverar det.
+- Manuell pilform, manuella fästpunkter och fri routing ändras aldrig av den smarta hinder-routingens logik.
+- Ingen datamodell- eller Supabase-ändring.
+
+## v0.20.15 – Flow Collision Prevention
+- Nya automatiskt placerade steg tar nu hänsyn till befintliga kopplingslinjer, inte bara processrutor.
+- Placering får en stark konfliktkostnad när en ny ruta skulle hamna ovanpå/nära en befintlig pil eller när den preliminära nya kopplingen skulle korsa ett befintligt flöde.
+- Gäller även beslutsparet, fortsättning i gren-filer och sammanföring av Ja/Nej.
+- Kopplingar som sitter direkt i källrutan undantas från hinderanalysen för att undvika falska konflikter vid naturliga anslutningspunkter.
+- Befintliga eller manuellt placerade rutor flyttas aldrig av funktionen.
+- Ingen datamodell- eller Supabase-ändring.
+
+## 0.20.14 – Branch Rejoin
+- Ett terminalt steg i en enkel Ja/Nej-gren kan nu välja **Sammanför Ja + Nej** från sin direkta + meny.
+- Maplini hittar den andra grenens terminala steg och skapar ett gemensamt nästa steg med två inkommande kopplingar.
+- Den gemensamma noden placeras mitt mellan grenarnas visuella filer och framför den gren som kommit längst.
+- Om standardplatsen är blockerad flyttas återföreningen i första hand längre fram, inte sidledes mot någon gren.
+- Funktionen är avsiktligt explicit och aktiveras bara för enkla, entydiga Ja/Nej-flöden; befintliga manuellt placerade noder flyttas aldrig.
+- Ingen datamodell- eller Supabase-migrering.
+
+## v0.20.13 – Smart Flow Continuation
+
+- Fortsatta steg efter en Ja/Nej-gren försöker nu hålla samma visuella fil som den gren de tillhör.
+- Maplini följer en entydig kedja bakåt till närmaste beslut och använder grenens position som lane-ankare.
+- Om den naturliga platsen är blockerad söker Maplini först längre fram i samma fil innan flödet tillåts driva i sidled.
+- Detta minskar att parallella Ja/Nej-flöden glider ihop eller skapar onödiga korsningar efter flera automatiskt skapade steg.
+- Manuellt placerade steg och drag-and-drop påverkas inte.
+- Ingen Supabase-migrering krävs.
+
+## v0.20.12 – Smart Branch Layout
+
+- När ett beslut skapar både Ja- och Nej-gren planeras grenarna nu som ett sammanhållet par i stället för två oberoende placeringar.
+- Ja/Nej hamnar på samma framåtrank och balanseras runt beslutets mittlinje.
+- Om standardläget är upptaget söker Maplini efter ett större symmetriskt grenavstånd eller flyttar hela paret framåt, vilket minskar sneda grenar och korsande pilar.
+- Ja behåller övre/vänstra gren och Nej nedre/högra gren även när layouten behöver anpassas.
+- En ensam saknad gren använder fortsatt befintlig smart placering.
+- Manuellt flyttade rutor påverkas inte; logiken används bara när nya beslutgrenar skapas.
+- Ingen Supabase-migrering krävs.
+
+## v0.20.11 – Direct Manipulation Polish
+
+- Tar bort dubbleringen av **+ Nästa** i snabbmenyn när exakt en ruta är markerad; bygg vidare direkt från +‑kontrollen vid rutan.
+- Snabbmenyn för en ruta fokuserar nu på Form, Egenskaper, Duplicera och Ta bort.
+- +‑kontrollen ligger närmare rutan, är något mindre och får tydlig men diskret hover-/tangentbordsfokus.
+- Kopplingspunkter på vald ruta är lugnare i viloläge och förstärks först vid hover.
+- Markeringsram/skugga är subtilare så processobjektet behåller visuell prioritet.
+- Mobilens större touchytor bevaras.
+- Ingen Supabase-migrering krävs.
+
+## v0.20.10 – Canvas UI Cleanup
+
+- Removed the empty-canvas onboarding card.
+- Centered the Maplini tagline beneath the logo.
+- Made the contextual node toolbar substantially more compact.
+- No Supabase migration required.
+
+# Changelog
+
 ## v0.20.9 – Walkthrough Transition Polish
 - Ja/Nej-vägval läses nu direkt på canvasen genom små grenetiketter vid möjliga nästa rutor när pilarna har vägvalsetiketter.
 - När ett svar entydigt väljer en gren tonas övriga alternativ bort och vald nästa ruta får en tydligare men kortvarigt lugn fokusmarkering.

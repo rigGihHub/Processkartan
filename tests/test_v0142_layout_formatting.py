@@ -2,7 +2,7 @@ from pathlib import Path
 APP = (Path(__file__).resolve().parents[1] / "app.py").read_text(encoding="utf-8")
 
 def test_v0142_contract():
-    assert 'APP_VERSION = "0.20.9"' in APP
+    assert 'APP_VERSION = "0.20.34"' in APP
     assert "syncDesktopViewportHeight" in APP
     assert "--p48-desktop-body-h" in APP
     assert "components.html(html, height=920, scrolling=False)" in APP

@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.20.9"
+APP_VERSION = "0.20.34"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -275,6 +275,8 @@ header[data-testid="stHeader"]{height:2rem}
 .p48-node-quick-flow{display:inline-flex;align-items:center;min-height:30px;padding:0 8px;border:1px solid #d7e3dd;border-radius:8px;background:#f4faf7;color:#426658;font:750 9px/1.2 Inter,system-ui;white-space:nowrap}
 .p48-next-step-choice.recommended{grid-column:1/-1;background:#f1f8f5;border-color:#a9cbbd;color:#245d4b;font-weight:800}
 .p48-next-step-choice.decision-pair{grid-column:1/-1;background:#eef6fd;border-color:#9dbbd5;color:#245b86;font-weight:850;text-align:center}
+.p48-next-step-choice.branch-rejoin{grid-column:1/-1;background:#f5f7fb;border-color:#b8c7d8;color:#334e68;font-weight:800;text-align:center}
+.p48-next-step-choice.branch-rejoin:hover{background:#edf2f8;border-color:#91a8c0}
 .p48-next-step-choice.recommended::after{content:"Rekommenderas";float:right;margin-left:8px;color:#618074;font:700 8px/1.2 Inter,system-ui;text-transform:uppercase;letter-spacing:.04em}
 @media(max-width:700px){.p48-node-quick-flow{display:none!important}}
 
@@ -290,6 +292,15 @@ header[data-testid="stHeader"]{height:2rem}
 .p48-link-visible.p48-auto-live{stroke-linecap:round;stroke-linejoin:round}
 
 .p48-link-visible.p48-auto-live{transition:stroke-width .12s ease,opacity .12s ease}
+
+/* v0.20.20: flow readability hierarchy without changing user colors */
+#p48-links .p48-link-visible.p48-flow-main{opacity:.96}
+#p48-links .p48-link-visible.p48-flow-branch{opacity:.84}
+#p48-links g:hover .p48-link-visible.p48-flow-main,
+#p48-links g:hover .p48-link-visible.p48-flow-branch{opacity:1}
+#p48-links .p48-link-visible.p48-flow-context-muted{opacity:.36!important}
+#p48-links .p48-link-visible.p48-flow-context-active{opacity:1!important;filter:drop-shadow(0 1px 2px rgba(46,91,119,.14))}
+#p48-links .p48-link-selected .p48-link-visible{opacity:1!important}
 .p48-node.selected~*{} /* keep selector block stable for embedded CSS extraction */
 
 .p48-link-selected .p48-link-label rect{filter:drop-shadow(0 2px 4px rgba(31,52,70,.18))}
@@ -489,6 +500,29 @@ header[data-testid="stHeader"]{height:2rem}
 #p48-canvas{width:2400px!important;height:1400px!important;transform:scale(var(--p48-canvas-scale,1));transform-origin:0 0}
 .p48-link-handle{width:18px;height:18px;z-index:80;touch-action:none;pointer-events:auto}
 .p48-link-hit-segment.p48-selected-link-hit{cursor:move!important}
+
+/* v0.20.21 – Follow Process continuity */
+.p48-node.p48-walk-departing{opacity:.72!important;outline-color:rgba(44,140,101,.20)!important;box-shadow:0 0 0 6px rgba(44,140,101,.05)!important;transition:opacity .24s ease,box-shadow .24s ease,outline-color .24s ease}
+.p48-node.p48-walk-arriving{opacity:1!important;outline:4px solid rgba(44,140,101,.32)!important;outline-offset:6px!important;box-shadow:0 0 0 11px rgba(44,140,101,.08),0 10px 26px rgba(31,88,67,.13)!important;transition:box-shadow .24s ease,outline-color .24s ease,transform .24s ease}
+#p48-links .p48-walk-link-transition .p48-link-visible{opacity:1!important;stroke-width:4.2px!important;filter:drop-shadow(0 2px 4px rgba(31,111,85,.24));transition:opacity .18s ease,stroke-width .18s ease}
+.p48-walkthrough-panel.p48-walk-transitioning .p48-walkthrough-answer{pointer-events:none}
+@media(prefers-reduced-motion:reduce){.p48-node.p48-walk-departing,.p48-node.p48-walk-arriving,#p48-links .p48-walk-link-transition .p48-link-visible{transition:none!important}}
+
+/* v0.20.22 – core workflow simplification: secondary tools stay available but leave the primary action row. */
+.p48-more-section-title{margin-top:3px;padding-top:4px;border-top:1px solid #e7edf2;color:#60707d;font-size:10px;letter-spacing:.06em;text-transform:uppercase}
+.p48-more-popover>.p48-more-section-title:first-child{margin-top:0;padding-top:0;border-top:0}
+.p48-sharebox-more{width:100%;box-sizing:border-box;gap:6px;align-items:center}
+.p48-sharebox-more input{width:auto;min-width:0;flex:1}
+.p48-top-simplified #p48-walkthrough-launch.primary{box-shadow:0 2px 8px rgba(31,111,85,.14)}
+
+/* v0.20.24 – role & responsibility clarity */
+.p48-node-role{position:absolute;left:50%;bottom:-22px;transform:translateX(-50%);max-width:calc(100% + 40px);padding:3px 7px;border:1px solid #d4dfda;border-radius:999px;background:rgba(255,255,255,.96);box-shadow:0 2px 7px rgba(31,52,70,.07);color:#52675e;font:750 8.5px/1.15 Inter,system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;z-index:7}
+.p48-node-role::before{content:"Ansvar: ";font-weight:600;color:#7a8982}
+.p48-node.decision .p48-node-role{bottom:3px;max-width:150px}
+.p48-node.p48-walk-active .p48-node-role,.p48-node.p48-walk-next .p48-node-role{opacity:.92}
+@media(max-width:700px){.p48-node-role{font-size:9px;padding:4px 7px;bottom:-24px}}
+
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -624,6 +658,35 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-node-quick[data-mode="single"] [data-multi-only],.p48-node-quick[data-mode="multi"] [data-single-only]{display:none!important}
 @media(max-width:700px),(pointer:coarse){.p48-node-quick{gap:5px;padding:5px;transform:translate(-50%,calc(-100% - 16px)) scale(var(--p48-toolbar-inverse-scale,1));max-width:calc(100vw - 24px)}.p48-node-quick button,.p48-node-quick summary,.p48-node-quick .p48-quick-color-label{min-height:38px;padding:8px 10px;font-size:11px}.p48-node-quick-arrange-pop{width:236px}.p48-link-quick{gap:5px;padding:5px;transform:translate(-50%,-50%)}.p48-link-quick button{min-height:36px;padding:7px 10px;font-size:11px}}
 
+/* v0.20.10 – Canvas UI Cleanup */
+.p48-node-quick{gap:1px!important;padding:2px 3px!important;border-radius:8px!important;box-shadow:0 4px 12px rgba(31,52,70,.13)!important;transform:translate(-50%,calc(-100% - 8px)) scale(var(--p48-toolbar-inverse-scale,1))!important}
+.p48-node-quick button,.p48-node-quick summary,.p48-node-quick .p48-quick-color-label{min-height:25px!important;padding:4px 6px!important;border-radius:5px!important;font-size:9px!important;gap:3px!important}
+.p48-node-quick-flow{font-size:9px!important;padding:0 4px!important;max-width:130px;overflow:hidden;text-overflow:ellipsis}
+
+/* v0.20.11 – Direct Manipulation Polish
+   Keep creation on the node itself. The floating toolbar should edit the selection, not duplicate the primary flow action. */
+.p48-node-quick[data-mode="single"] #p48-node-quick-flow,
+.p48-node-quick[data-mode="single"] #p48-node-quick-next,
+.p48-node-quick[data-mode="single"] #p48-node-quick-next-more{display:none!important}
+.p48-node-quick[data-mode="single"]{padding:2px!important;gap:0!important;border-color:#d6e0e8!important;background:rgba(255,255,255,.985)!important}
+.p48-node-quick[data-mode="single"] button,
+.p48-node-quick[data-mode="single"] summary{padding:4px 7px!important;font-weight:720!important;color:#44586a!important}
+.p48-node-quick[data-mode="single"] button+button,
+.p48-node-quick[data-mode="single"] details+button{margin-left:1px}
+.p48-next-step-wrap{left:calc(100% + 7px)!important;gap:4px!important}
+.p48-next-step-btn{width:26px!important;height:26px!important;font-size:17px!important;border-color:#a9bfce!important;color:#1f6f55!important;box-shadow:0 2px 7px rgba(31,52,70,.10)!important;transition:transform .12s ease,background .12s ease,border-color .12s ease,box-shadow .12s ease}
+.p48-next-step-btn:hover,.p48-next-step-btn:focus-visible{transform:scale(1.08);background:#f2faf6!important;border-color:#74a38f!important;box-shadow:0 4px 10px rgba(31,111,85,.14)!important;outline:none}
+.p48-next-step-menu{left:32px!important;box-shadow:0 8px 20px rgba(31,52,70,.14)!important}
+.p48-node.selected .p48-handle{opacity:.82!important;transition:opacity .12s ease,transform .12s ease!important}
+.p48-node.selected .p48-handle:hover{opacity:1!important;transform:scale(1.22)}
+.p48-node.selected{outline-width:1.5px!important;outline-offset:2px!important;box-shadow:0 0 0 1px rgba(44,123,229,.08),0 5px 14px rgba(31,52,70,.08)!important}
+@media(max-width:700px),(pointer:coarse){
+  .p48-node-quick[data-mode="single"]{gap:3px!important;padding:4px!important}
+  .p48-node-quick[data-mode="single"] button,.p48-node-quick[data-mode="single"] summary{min-height:38px!important;padding:8px 10px!important;font-size:11px!important}
+  .p48-next-step-btn{width:38px!important;height:38px!important;font-size:22px!important}
+  .p48-next-step-wrap{left:calc(100% + 6px)!important}
+  .p48-next-step-menu{left:44px!important}
+}
 /* v0.10.15 contextual sidebar */
 .p48-format[data-context="none"] #p48-controls{display:none}
 .p48-format[data-context="node"] .p48-link-format,.p48-format[data-context="multi"] .p48-link-format{display:none!important}
@@ -985,7 +1048,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-analysis-title{font:800 15px/1.2 Inter,system-ui,sans-serif;color:#20364f}.p48-analysis-sub{font:500 10px/1.35 Inter,system-ui,sans-serif;color:#6b7986;margin-top:3px}
 .p48-analysis-close{border:1px solid #d7dfe6;background:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:18px;color:#526373}
 .p48-analysis-summary{display:grid;grid-template-columns:92px 1fr;gap:12px;padding:12px 14px;background:#f7fafc;border-bottom:1px solid #e2e8ee}
-.p48-analysis-score{display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #d4e1dc;border-radius:12px;background:#fff;padding:9px}.p48-analysis-score strong{font:800 24px/1 Inter,system-ui;color:#176c52}.p48-analysis-score span{font:700 9px/1.2 Inter,system-ui;color:#6c7a87;margin-top:4px}
+.p48-analysis-score{display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #d4e1dc;border-radius:12px;background:#fff;padding:9px}.p48-analysis-score strong{font:800 18px/1 Inter,system-ui;color:#20364f}.p48-analysis-score span{font:700 8px/1.2 Inter,system-ui;color:#6c7a87;margin-top:5px;text-align:center}.p48-analysis-trust{padding:9px 14px;background:#fff;border-bottom:1px solid #e2e8ee;font:500 9px/1.45 Inter,system-ui;color:#61717e}.p48-analysis-trust strong{color:#344a5d}.p48-analysis-basis{margin-top:6px;padding-top:6px;border-top:1px solid #edf1f4;font:500 9px/1.4 Inter,system-ui;color:#60717e}.p48-analysis-basis b{font-weight:800;color:#42586a}
 .p48-analysis-counts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;align-content:center}.p48-analysis-count{border-radius:9px;padding:7px 5px;text-align:center;font:700 10px Inter,system-ui;background:#fff;border:1px solid #e0e6eb}.p48-analysis-count strong{display:block;font-size:15px;margin-bottom:2px}.p48-analysis-count.error strong{color:#b42318}.p48-analysis-count.warning strong{color:#b25e09}.p48-analysis-count.info strong{color:#2c67a0}
 .p48-analysis-next{margin:10px 10px 0;padding:11px 12px;border:1px solid #b9d8cc;border-radius:11px;background:#f2faf6;display:grid;gap:4px}
 .p48-analysis-next[hidden]{display:none!important}.p48-analysis-next-label{font:800 9px/1 Inter,system-ui;color:#28715c;letter-spacing:.08em}.p48-analysis-next strong{font:800 12px/1.3 Inter,system-ui;color:#20364f}.p48-analysis-next>span:not(.p48-analysis-next-label){font:500 10px/1.4 Inter,system-ui;color:#536574}.p48-analysis-next button{justify-self:start;margin-top:4px}
@@ -993,10 +1056,10 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 @media(max-width:700px),(pointer:coarse){.p48-analysis-panel{top:72px;right:8px;left:8px;bottom:82px;width:auto;border-radius:14px}.p48-analysis-close{min-width:44px;min-height:44px}.p48-analysis-item{min-height:54px;padding:11px 12px}.p48-analysis-summary{grid-template-columns:82px 1fr}}
 #pk48 *{box-sizing:border-box}
 .p48-brand{height:94px;background:#fff;border-bottom:1px solid #e1e7ed;display:flex;align-items:center;padding:8px 18px}
-.p48-brand-inner{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px}
+.p48-brand-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:315px}
 .p48-logo-crop{height:52px;width:315px;overflow:hidden;display:flex;align-items:flex-start}
 .p48-logo-crop img{width:315px!important;height:auto!important;max-width:none!important;display:block;transform:translateY(-1px)}
-.p48-tagline{font:800 13px/1.1 Inter,system-ui,sans-serif;letter-spacing:2.2px;color:#20364f;margin-left:83px;white-space:nowrap}
+.p48-tagline{font:800 13px/1.1 Inter,system-ui,sans-serif;letter-spacing:2.2px;color:#20364f;margin-left:0;text-align:center;width:100%;white-space:nowrap}
 .p48-resize{position:absolute;width:13px;height:13px;background:#fff;border:2px solid #2c7be5;border-radius:3px;z-index:10;display:none}
 .p48-node.selected .p48-resize{display:block}
 .p48-resize.se{right:-7px;bottom:-7px;cursor:nwse-resize}.p48-resize.sw{left:-7px;bottom:-7px;cursor:nesw-resize}
@@ -1034,6 +1097,13 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-new-process-actions button{min-height:40px;border:1px solid #c7d2dc;border-radius:9px;background:#fff;color:#304659;padding:8px 13px;font:750 12px Inter,system-ui;cursor:pointer}
 .p48-new-process-actions button.primary{background:#1f6f55;border-color:#1f6f55;color:#fff}
 @media(max-width:700px),(pointer:coarse){.p48-new-process-dialog{top:auto;bottom:18px;transform:translateX(-50%);padding:19px}.p48-new-process-actions{display:grid;grid-template-columns:1fr 1fr}.p48-new-process-actions button{min-height:46px}}
+/* v0.20.26 conflict resolution: safe choices, no silent merge */
+.p48-conflict-backdrop[hidden],.p48-conflict-dialog[hidden]{display:none!important}
+.p48-conflict-backdrop{position:fixed;inset:0;z-index:9910;background:rgba(28,43,56,.32);backdrop-filter:blur(1px)}
+.p48-conflict-dialog{position:fixed;z-index:9911;left:50%;top:50%;transform:translate(-50%,-50%);width:min(520px,calc(100vw - 28px));padding:22px;border:1px solid #d7c8aa;border-radius:16px;background:#fff;box-shadow:0 22px 60px rgba(27,45,61,.27);color:#22384b}
+.p48-conflict-summary{margin:12px 0;padding:10px 11px;border-radius:9px;background:#fff8e8;border:1px solid #ead9aa;font:600 11px/1.5 Inter,system-ui;color:#66552c}
+.p48-conflict-actions{display:grid;gap:7px;margin-top:14px}.p48-conflict-actions button{min-height:42px;text-align:left;border:1px solid #c7d2dc;border-radius:9px;background:#fff;color:#304659;padding:8px 11px;font:750 12px Inter,system-ui;cursor:pointer}.p48-conflict-actions button.primary{background:#1f6f55;border-color:#1f6f55;color:#fff}.p48-conflict-actions button.danger{border-color:#dfb3ad;color:#8f3028;background:#fff7f5}.p48-conflict-cancel{margin-top:9px;width:100%;min-height:38px;border:0;background:transparent;color:#607080;font:700 11px Inter,system-ui;cursor:pointer}
+@media(max-width:700px),(pointer:coarse){.p48-conflict-dialog{top:auto;bottom:18px;transform:translateX(-50%);padding:18px}.p48-conflict-actions button{min-height:48px}}
 
 .p48-recovery-banner{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:9999;max-width:min(620px,calc(100vw - 24px));display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #a9c8df;border-radius:11px;background:#f7fbff;box-shadow:0 8px 26px rgba(32,54,72,.18);font:600 12px system-ui;color:#30465a}
 .p48-recovery-banner[hidden]{display:none}.p48-recovery-banner .p48-recovery-actions{display:flex;gap:6px;margin-left:auto}.p48-recovery-banner button{border:1px solid #adc5d8;border-radius:7px;background:#fff;padding:6px 9px;font:700 11px system-ui;cursor:pointer}.p48-recovery-banner button.primary{background:#e7f3fc;border-color:#77a9ce;color:#175f95}
@@ -1059,6 +1129,10 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-cloud-badge.off{background:#f4f4f4;color:#777}
 .p48-sharebox{display:none;border:1px solid #cfdbe6;background:#f8fbfe;border-radius:9px;padding:7px}
 .p48-sharebox input{width:260px;border:1px solid #cfd7df;border-radius:7px;padding:6px;font-size:11px}
+.p48-share-status{font-size:11px;font-weight:700;color:#506273;display:none;flex:0 0 100%}
+.p48-share-status.active{display:block;color:#236b52}
+.p48-share-revoke{display:none!important}
+.p48-share-revoke.active{display:inline-flex!important}
 .p48-small{font-size:10.5px;color:#6b7885;line-height:1.35}.p48-title{font-size:12px;font-weight:800;margin-bottom:8px}.p48-sub{font-size:11px;color:#6c7784;line-height:1.45;margin-bottom:9px}
 .p48-list{display:grid;gap:6px}
 .p48-proc-row{display:grid;grid-template-columns:minmax(0,1fr) 34px;gap:5px;align-items:stretch}
@@ -1421,6 +1495,19 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-deviation-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}.p48-deviation-summary-card{border:1px solid #dbe5e0;border-radius:10px;padding:9px;background:#fafcfb;text-align:center}.p48-deviation-summary-card strong{display:block;font:850 20px/1 Inter,system-ui;color:#36574a}.p48-deviation-summary-card span{display:block;margin-top:4px;font:800 7px/1 Inter,system-ui;letter-spacing:.08em;color:#77877f}.p48-deviation-summary-card.overdue{background:#fff3f0;border-color:#e9c1b9}.p48-deviation-summary-card.overdue strong{color:#a24b3e}
 .p48-deviation-filters{display:grid;grid-template-columns:130px 1fr;gap:8px;align-items:end;margin-bottom:12px}.p48-deviation-filters label{display:grid;gap:4px;font:750 8.5px/1.2 Inter,system-ui;color:#61736b}.p48-deviation-filters select,.p48-deviation-filters input[type=search]{min-height:34px;border:1px solid #ccd8d2;border-radius:8px;background:#fff;padding:6px 8px;font:600 10px Inter,system-ui;color:#344a41}.p48-deviation-overdue-filter{grid-column:1/-1!important;display:flex!important;align-items:center;gap:6px!important}.p48-deviation-overdue-filter input{margin:0}
 .p48-deviation-list{display:grid;gap:8px}.p48-deviation-empty{padding:18px;border:1px dashed #d3ded8;border-radius:10px;text-align:center;color:#76867e;font:600 10px/1.45 Inter,system-ui}.p48-deviation-item{border:1px solid #dce5e0;border-left:4px solid #cc8a73;border-radius:10px;padding:10px;background:#fff}.p48-deviation-item.overdue{border-left-color:#b74d40;background:#fff9f7}.p48-deviation-item.resolved{border-left-color:#78938a;background:#f7f9f8;opacity:.9}.p48-deviation-item-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.p48-deviation-item-process{font:850 11px/1.3 Inter,system-ui;color:#2e483e}.p48-deviation-item-date{font:650 8px/1.3 Inter,system-ui;color:#85928c;text-align:right}.p48-deviation-item-question{margin-top:5px;font:750 10px/1.4 Inter,system-ui;color:#654940}.p48-deviation-item-explanation{margin-top:5px;font:500 9.5px/1.45 Inter,system-ui;color:#5f6f68}.p48-deviation-item-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:7px}.p48-deviation-chip{padding:4px 6px;border-radius:999px;background:#eef3f0;color:#52675e;font:750 8px/1 Inter,system-ui}.p48-deviation-chip.overdue{background:#fde7e2;color:#9d453a}.p48-deviation-item-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.p48-deviation-item-actions button{min-height:29px;border:1px solid #cad8d1;border-radius:7px;background:#fff;padding:5px 8px;font:750 9px Inter,system-ui;color:#3f5c50;cursor:pointer}.p48-deviation-item-actions button.resolve{border-color:#afd1c1;color:#266149}
+/* v0.20.28 – deviation to improvement loop */
+.p48-deviation-item-actions button.improve{border-color:#9fcbbb;background:#eef8f3;color:#1f674d;font-weight:850}
+.p48-improvement-context{position:fixed;z-index:10010;top:76px;left:50%;transform:translateX(-50%);width:min(680px,calc(100vw - 32px));box-sizing:border-box;border:1px solid #a9cdbf;border-left:4px solid #2f7b60;border-radius:12px;background:rgba(250,255,252,.98);box-shadow:0 12px 36px rgba(28,67,52,.16);padding:10px 12px;display:grid;grid-template-columns:1fr auto;gap:8px 12px;align-items:center}
+.p48-improvement-context[hidden]{display:none!important}
+.p48-improvement-context-kicker{font:850 8px/1.2 Inter,system-ui;letter-spacing:.1em;color:#31735a;text-transform:uppercase}
+.p48-improvement-context-title{font:850 12px/1.3 Inter,system-ui;color:#244c3d;margin-top:2px}
+.p48-improvement-context-text{font:600 9.5px/1.4 Inter,system-ui;color:#5a7067;margin-top:3px}
+.p48-improvement-context-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.p48-improvement-context-actions button{min-height:31px;border:1px solid #bfd5cb;border-radius:8px;background:#fff;padding:6px 9px;font:800 9px Inter,system-ui;color:#315b4b;cursor:pointer}
+.p48-improvement-context-actions button.resolve{background:#2f7559;border-color:#2f7559;color:#fff}
+.p48-improvement-context-actions button.close{border:0;background:transparent;color:#71827b;font-size:16px;padding:3px 6px}
+@media(max-width:700px){.p48-improvement-context{top:58px;grid-template-columns:1fr}.p48-improvement-context-actions{justify-content:flex-start}}
+
 @media(max-width:700px){.p48-deviation-panel{top:8px;right:8px;bottom:8px;width:calc(100vw - 16px)}.p48-deviation-filters{grid-template-columns:1fr}.p48-deviation-overdue-filter{grid-column:1!important}}
 .p48-walkthrough-saved-note{margin-top:10px;padding:8px;border-radius:8px;background:#f0f7f3;color:#476257;font:650 9px/1.4 Inter,system-ui}
 /* v0.20.8 – visual walkthrough position on the canvas */
@@ -1439,6 +1526,46 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-walkthrough-backdrop{background:rgba(20,35,50,.06)!important;backdrop-filter:none!important}
 @media(prefers-reduced-motion:reduce){.p48-node.p48-walk-past,.p48-node.p48-walk-next,.p48-node.p48-walk-chosen{transition:none!important}}
 @media(max-width:700px){.p48-walkthrough-panel{top:8px;right:8px;bottom:8px;width:calc(100vw - 16px)}.p48-walkthrough-summary-actions{grid-template-columns:1fr}}
+
+/* v0.20.29 – lightweight process overview/navigation */
+.p48-overview{position:fixed;right:18px;bottom:34px;z-index:78;width:268px;padding:10px;border:1px solid #cbd8e2;border-radius:13px;background:rgba(255,255,255,.98);box-shadow:0 12px 30px rgba(31,52,70,.17);backdrop-filter:blur(6px)}
+.p48-overview[hidden]{display:none!important}
+.p48-overview-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
+.p48-overview-title{font:800 11px/1.2 Inter,system-ui;color:#334d5d;letter-spacing:.01em}
+.p48-overview-meta{font:650 9px/1.2 Inter,system-ui;color:#718390;margin-left:auto}
+.p48-overview-close{width:25px;height:25px;border:0;border-radius:7px;background:transparent;color:#647886;font:800 17px/1 system-ui;cursor:pointer}
+.p48-overview-close:hover{background:#eef4f7}
+.p48-overview-stage{position:relative;width:100%;height:150px;overflow:hidden;border:1px solid #d7e1e8;border-radius:9px;background:#f7fafb;cursor:crosshair;touch-action:none}
+.p48-overview-node{position:absolute;min-width:3px;min-height:3px;border:0;border-radius:2px;background:#aebdc7;opacity:.9;padding:0;cursor:pointer}
+.p48-overview-node.decision{transform:rotate(45deg);border-radius:1px}
+.p48-overview-node.start,.p48-overview-node.end{background:#7e9b8f}
+.p48-overview-node.object{background:#9aaebc}
+.p48-overview-node.selected{background:#2f7e63;box-shadow:0 0 0 1px rgba(47,126,99,.25)}
+.p48-overview-viewport{position:absolute;border:1.5px solid #2f7e63;border-radius:4px;background:rgba(47,126,99,.07);pointer-events:none;box-sizing:border-box}
+.p48-overview-hint{margin-top:6px;font:600 9px/1.3 Inter,system-ui;color:#7a8b96}
+@media(max-width:700px){#p48-overview-toggle,.p48-overview{display:none!important}}
+
+/* v0.20.30 – linked subprocess hierarchy */
+.p48-breadcrumbs{display:none;align-items:center;gap:6px;padding:7px 12px;border-bottom:1px solid #e2e8ed;background:#f9fbfc;color:#617482;font:650 10px/1.2 Inter,system-ui;white-space:nowrap;overflow:auto}
+.p48-breadcrumbs.on{display:flex}
+.p48-breadcrumbs button{border:0;background:transparent;color:#315f78;padding:3px 5px;border-radius:5px;font:750 10px/1.2 Inter,system-ui;cursor:pointer}
+.p48-breadcrumbs button:hover{background:#eaf2f6}
+.p48-breadcrumb-sep{color:#9aa8b1}
+.p48-subprocess-open{border-color:#c8d9d0!important;background:#f2f9f5!important;color:#28624c!important}
+.p48-node.subprocess.p48-subprocess-linked::after{content:'↳';position:absolute;right:8px;bottom:5px;color:#6e5a92;font:800 12px/1 Inter,system-ui;opacity:.75}
+@media(max-width:700px){.p48-breadcrumbs{padding:7px 9px;font-size:10px}.p48-breadcrumbs button{font-size:10px}}
+/* v0.20.32 – clean read/presentation mode */
+.p48-mobile-reader-bar{display:none}
+.p48-readmode-toggle.active{background:#234f3f!important;border-color:#234f3f!important;color:#fff!important}
+#pk48.p48-read-mode .p48-side{display:none!important}
+#pk48.p48-read-mode .p48-body{grid-template-columns:1fr!important}
+#pk48.p48-read-mode .p48-smart-layout-split,#pk48.p48-read-mode .p48-export-menu,#pk48.p48-read-mode .p48-more-menu,#pk48.p48-read-mode #p48-new,#pk48.p48-read-mode #p48-save,#pk48.p48-read-mode #p48-undo,#pk48.p48-read-mode #p48-redo,#pk48.p48-read-mode #p48-mobile-tools{display:none!important}
+#pk48.p48-read-mode .p48-node-quick,#pk48.p48-read-mode .p48-next-step-wrap,#pk48.p48-read-mode .p48-link-quick,#pk48.p48-read-mode .p48-selection-hull{display:none!important}
+#pk48.p48-read-mode .p48-node{cursor:pointer!important}
+.p48-read-panel{position:fixed;right:18px;top:112px;z-index:89;width:min(340px,calc(100vw - 36px));max-height:calc(100vh - 150px);overflow:auto;border:1px solid #d4dfda;border-radius:14px;background:rgba(255,255,255,.985);box-shadow:0 16px 42px rgba(31,52,70,.17);padding:14px}
+.p48-read-panel[hidden]{display:none!important}.p48-read-panel-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.p48-read-panel-kicker{font:850 8px/1.2 Inter,system-ui;letter-spacing:.12em;text-transform:uppercase;color:#6a7f75}.p48-read-panel-title{margin-top:3px;font:850 17px/1.25 Inter,system-ui;color:#243d33}.p48-read-panel-close{border:0;background:#f2f6f4;border-radius:8px;width:30px;height:30px;color:#61736b;font:800 18px/1 system-ui;cursor:pointer}.p48-read-panel-grid{display:grid;gap:8px;margin-top:12px}.p48-read-field{border-top:1px solid #e4ebe7;padding-top:8px}.p48-read-field:first-child{border-top:0;padding-top:0}.p48-read-label{font:800 8px/1.2 Inter,system-ui;letter-spacing:.08em;text-transform:uppercase;color:#7b8a83}.p48-read-value{margin-top:3px;font:600 11px/1.5 Inter,system-ui;color:#384e45;white-space:pre-wrap}.p48-read-empty{margin-top:10px;color:#819087;font:600 10px/1.45 Inter,system-ui}.p48-read-hint{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:87;padding:7px 11px;border:1px solid #d4dfda;border-radius:999px;background:rgba(255,255,255,.96);box-shadow:0 5px 18px rgba(31,52,70,.10);font:700 9px/1.2 Inter,system-ui;color:#5a7066;pointer-events:none}.p48-read-hint[hidden]{display:none!important}
+@media(max-width:700px){.p48-read-panel{top:auto;right:8px;left:8px;bottom:max(8px,env(safe-area-inset-bottom));width:auto;max-height:62dvh;border-radius:18px;padding:18px 16px 20px}.p48-read-panel::before{content:"";display:block;width:42px;height:4px;border-radius:999px;background:#d8e2dd;margin:-7px auto 11px}.p48-read-panel-title{font-size:20px}.p48-read-label{font-size:9px}.p48-read-value{font-size:14px;line-height:1.55}.p48-read-panel-close{width:44px;height:44px;font-size:22px}.p48-read-hint{bottom:max(74px,calc(62px + env(safe-area-inset-bottom)));font-size:10px}.p48-mobile-reader-bar{display:none;position:fixed;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));top:max(8px,env(safe-area-inset-top));z-index:210;align-items:center;gap:6px;padding:7px;border:1px solid #cbd9d3;border-radius:14px;background:rgba(255,255,255,.97);box-shadow:0 8px 28px rgba(24,42,58,.18);backdrop-filter:blur(8px)}#pk48.p48-read-mode .p48-mobile-reader-bar{display:flex}#pk48.p48-read-mode .p48-brand,#pk48.p48-read-mode .p48-top,#pk48.p48-read-mode .p48-mobile-bar{display:none!important}#pk48.p48-read-mode .p48-breadcrumbs{padding-top:64px}.p48-mobile-reader-title{min-width:0;flex:1 1 auto;padding:2px 5px}.p48-mobile-reader-kicker{display:block;font:850 7px/1 Inter,system-ui;letter-spacing:.12em;color:#5c7b6f}.p48-mobile-reader-name{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px;font:800 12px/1.2 Inter,system-ui;color:#294238}.p48-mobile-reader-bar button{flex:0 0 auto;min-width:44px;min-height:44px;border:0;border-radius:10px;background:#eef5f1;color:#275d49;font:800 11px system-ui;padding:6px 8px}.p48-mobile-reader-bar button.primary{background:#1f6f55;color:#fff}.p48-mobile-reader-bar button[hidden]{display:none!important}#pk48.p48-read-mode .p48-scroll{scroll-padding-top:76px}.p48-walkthrough-panel{top:auto!important;right:8px!important;left:8px!important;bottom:max(8px,env(safe-area-inset-bottom))!important;width:auto!important;height:min(68dvh,680px);border-radius:20px 20px 16px 16px!important}.p48-walkthrough-backdrop{background:rgba(20,35,50,.08)!important;backdrop-filter:none!important}.p48-walkthrough-head{padding:11px 13px}.p48-walkthrough-close{width:44px;height:44px}.p48-walkthrough-start,.p48-walkthrough-run,.p48-walkthrough-summary{padding:13px 14px 18px;padding-bottom:max(18px,env(safe-area-inset-bottom))}.p48-walkthrough-step-card{padding:15px}.p48-walkthrough-step-title{font-size:22px}.p48-walkthrough-step-description{font-size:14px}.p48-walkthrough-step-meta span{font-size:10px}.p48-walkthrough-question-text{font-size:17px}.p48-walkthrough-answer{min-height:60px;font-size:17px}.p48-walkthrough-main-btn{min-height:52px;font-size:14px}.p48-walkthrough-next-choice{min-height:52px;font-size:13px}.p48-walkthrough-trail{overflow-x:auto;scrollbar-width:none}.p48-walkthrough-trail::-webkit-scrollbar{display:none}}
+
 </style>
 
 <div class="p48-brand">
@@ -1451,13 +1578,11 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 <div class="p48-top p48-top-simplified">
   <strong>Process</strong>
   <input id="p48-name" class="p48-name" value="Exempel – upphandlingsprocess" aria-label="Processnamn">
-  <button type="button" class="p48-btn primary" id="p48-new" title="Skapa ny process">+ Ny process</button>
+  <button type="button" class="p48-btn" id="p48-new" title="Skapa ny process">+ Ny process</button>
   <button type="button" class="p48-btn p48-mobile-tools-btn" id="p48-mobile-tools" aria-expanded="false" aria-controls="p48-side">☰ Verktyg</button>
   <button type="button" class="p48-btn" id="p48-save" title="Spara process">Spara</button>
-  <button type="button" class="p48-btn" id="p48-share" title="Dela aktuell process">Dela</button>
-  <div class="p48-sharebox" id="p48-sharebox"><input id="p48-share-url" readonly><button type="button" class="p48-mini" id="p48-copy-share">Kopiera länk</button></div>
-  <button type="button" class="p48-btn p48-walkthrough-launch" id="p48-walkthrough-launch" title="Gå igenom processen steg för steg">▶ Följ processen</button>
-  <button type="button" class="p48-btn p48-deviation-launch" id="p48-deviation-launch" title="Visa avvikelser från processgenomgångar">⚠ Avvikelser</button>
+  <button type="button" class="p48-btn primary p48-walkthrough-launch" id="p48-walkthrough-launch" title="Gå igenom processen steg för steg">▶ Följ processen</button>
+  <button type="button" class="p48-btn p48-readmode-toggle" id="p48-readmode-toggle" title="Visa processen utan redigeringsverktyg" aria-pressed="false">◉ Läsvy</button>
   <button type="button" class="p48-btn p48-icon-action" id="p48-undo" title="Ångra (Ctrl/Cmd+Z)" aria-label="Ångra">↶</button>
   <button type="button" class="p48-btn p48-icon-action" id="p48-redo" title="Gör om (Ctrl/Cmd+Shift+Z eller Ctrl/Cmd+Y)" aria-label="Gör om">↷</button>
   <div class="p48-zoom-controls" role="group" aria-label="Storlek på canvasinnehåll">
@@ -1465,6 +1590,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
     <button type="button" class="p48-btn p48-zoom-value" id="p48-zoom-reset" title="Återställ till 100%">100%</button>
     <button type="button" class="p48-btn" id="p48-zoom-in" aria-label="Zooma in" title="Zooma in">+</button>
     <button type="button" class="p48-btn" id="p48-fit-screen" title="Anpassa hela processen till fönstret">⊡ Anpassa</button>
+    <button type="button" class="p48-btn" id="p48-overview-toggle" title="Öppna en klickbar översikt av processen" aria-expanded="false">▦ Översikt</button>
   </div>
   <div class="p48-smart-layout-split">
     <button type="button" class="p48-btn p48-auto-clean-top" id="p48-auto-clean-top" title="Snygga till hela det sammanhängande processflödet med ett klick">✨ Snygga till</button>
@@ -1484,20 +1610,8 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
     </details>
   </div>
 
-  <details class="p48-scale-menu p48-scale-menu-top" id="p48-scale-menu">
-    <summary class="p48-btn" title="Ändra storlek på hela processen">↔ Skala process ▾</summary>
-    <div class="p48-scale-popover">
-      <div class="p48-pop-title">Skala hela processen</div>
-      <label class="p48-scale-slider-label" for="p48-process-scale">Storlek <strong id="p48-process-scale-value">100 %</strong></label>
-      <input id="p48-process-scale" class="p48-process-scale-slider" type="range" min="50" max="150" step="5" value="100" aria-label="Skala hela processen">
-      <div class="p48-scale-slider-marks" aria-hidden="true"><span>50 %</span><span>100 %</span><span>150 %</span></div>
-      <button type="button" class="p48-mini p48-scale-fit" id="p48-scale-fit-page">Passa till vald sida</button>
-      <div class="p48-muted">Reglaget ändrar rutor, text, avstånd och hela processens innehåll proportionellt.</div>
-    </div>
-  </details>
-
   <details class="p48-export-menu" id="p48-export-menu">
-    <summary class="p48-btn primary" title="Exportera processen">Exportera ▾</summary>
+    <summary class="p48-btn" title="Exportera processen">Exportera ▾</summary>
     <div class="p48-export-popover">
       <div class="p48-pop-title">Exportera</div>
       <div class="p48-export-actions">
@@ -1530,13 +1644,31 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   <details class="p48-more-menu" id="p48-more-menu">
     <summary class="p48-btn" title="Fler verktyg">••• Mer</summary>
     <div class="p48-more-popover">
+      <div class="p48-pop-title p48-more-section-title">Dela & uppföljning</div>
+      <button type="button" class="p48-btn p48-more-wide" id="p48-share" title="Dela aktuell process">Dela process</button>
+      <div class="p48-sharebox p48-sharebox-more" id="p48-sharebox"><div class="p48-share-status" id="p48-share-status">● Publik läslänk aktiv</div><input id="p48-share-url" readonly><button type="button" class="p48-mini" id="p48-copy-share">Kopiera länk</button><button type="button" class="p48-mini danger p48-share-revoke" id="p48-revoke-share">Återkalla länk</button></div>
+      <button type="button" class="p48-btn p48-more-wide p48-deviation-launch" id="p48-deviation-launch" title="Visa avvikelser från processgenomgångar">⚠ Avvikelser</button>
+      <div class="p48-pop-title p48-more-section-title">Kvalitet</div>
       <button type="button" class="p48-btn p48-more-wide" id="p48-analyze" title="Kontrollera processens struktur">🔍 Analysera process</button>
+      <div class="p48-pop-title p48-more-section-title">Avancerade verktyg</div>
       <button type="button" class="p48-btn p48-more-wide" id="p48-select-tool" aria-pressed="false" title="Markera flera objekt eller kopplingar">Markera område</button>
       <div class="p48-more-selection-actions">
         <button type="button" class="p48-btn" id="p48-duplicate-selection" disabled title="Duplicera markerade rutor (Ctrl/Cmd+D)">Duplicera</button>
         <button type="button" class="p48-btn danger" id="p48-delete-selection" disabled title="Ta bort markerat (Delete/Backspace)">Ta bort</button>
       </div>
       <button type="button" class="p48-btn p48-more-wide danger" id="p48-clear-canvas" title="Ta bort alla rutor och kopplingar från canvasen">Rensa hela canvasen</button>
+  <details class="p48-scale-menu" id="p48-scale-menu">
+    <summary class="p48-btn" title="Ändra storlek på hela processen">↔ Skala process ▾</summary>
+    <div class="p48-scale-popover">
+      <div class="p48-pop-title">Skala hela processen</div>
+      <label class="p48-scale-slider-label" for="p48-process-scale">Storlek <strong id="p48-process-scale-value">100 %</strong></label>
+      <input id="p48-process-scale" class="p48-process-scale-slider" type="range" min="50" max="150" step="5" value="100" aria-label="Skala hela processen">
+      <div class="p48-scale-slider-marks" aria-hidden="true"><span>50 %</span><span>100 %</span><span>150 %</span></div>
+      <button type="button" class="p48-mini p48-scale-fit" id="p48-scale-fit-page">Passa till vald sida</button>
+      <div class="p48-muted">Reglaget ändrar rutor, text, avstånd och hela processens innehåll proportionellt.</div>
+    </div>
+  </details>
+
       <details class="p48-canvas-menu">
   <summary class="p48-btn">Processyta ▾</summary>
   <div class="p48-canvas-popover">
@@ -1650,9 +1782,24 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   </div>
 </section>
 
+<div id="p48-conflict-backdrop" class="p48-conflict-backdrop" hidden></div>
+<section id="p48-conflict-dialog" class="p48-conflict-dialog" role="dialog" aria-modal="true" aria-labelledby="p48-conflict-title" hidden>
+  <div class="p48-new-process-kicker">MOLNKONFLIKT</div>
+  <div id="p48-conflict-title" class="p48-new-process-title">Processen har ändrats på två ställen</div>
+  <div class="p48-new-process-sub">Ingenting har skrivits över. Välj vilken version du vill fortsätta med.</div>
+  <div id="p48-conflict-summary" class="p48-conflict-summary"></div>
+  <div class="p48-conflict-actions">
+    <button type="button" class="primary" id="p48-conflict-copy">Behåll min version som en kopia</button>
+    <button type="button" id="p48-conflict-cloud">Läs in versionen från molnet</button>
+    <button type="button" class="danger" id="p48-conflict-force">Ersätt molnversionen med min version…</button>
+  </div>
+  <button type="button" id="p48-conflict-cancel" class="p48-conflict-cancel">Stäng – bestäm senare</button>
+</section>
+
 <section id="p48-analysis-panel" class="p48-analysis-panel" aria-label="Processkontroll" hidden>
   <div class="p48-analysis-head"><div><div class="p48-analysis-title">Processkontroll</div><div class="p48-analysis-sub">Vad behöver förbättras – och vad gör du åt det?</div></div><button type="button" id="p48-analysis-close" class="p48-analysis-close" aria-label="Stäng analys">×</button></div>
-  <div class="p48-analysis-summary"><div class="p48-analysis-score"><strong id="p48-analysis-score">–</strong><span>PROCESSHÄLSA</span></div><div class="p48-analysis-counts"><div class="p48-analysis-count error"><strong id="p48-analysis-errors">0</strong>Åtgärda</div><div class="p48-analysis-count warning"><strong id="p48-analysis-warnings">0</strong>Kontrollera</div><div class="p48-analysis-count info"><strong id="p48-analysis-info">0</strong>Förbättra</div></div></div>
+  <div class="p48-analysis-summary"><div class="p48-analysis-score"><strong id="p48-analysis-score">–</strong><span>STRUKTURFYND</span></div><div class="p48-analysis-counts"><div class="p48-analysis-count error"><strong id="p48-analysis-errors">0</strong>Åtgärda</div><div class="p48-analysis-count warning"><strong id="p48-analysis-warnings">0</strong>Kontrollera</div><div class="p48-analysis-count info"><strong id="p48-analysis-info">0</strong>Förbättra</div></div></div>
+  <div class="p48-analysis-trust"><strong>Regelbaserad strukturkontroll.</strong> Maplini kontrollerar hur kartan är uppbyggd – inte om verksamhetsprocessen i verkligheten är effektiv eller korrekt. Bedömningar är markerade separat.</div>
   <div id="p48-analysis-next" class="p48-analysis-next" hidden>
     <span class="p48-analysis-next-label">BÖRJA HÄR</span>
     <strong id="p48-analysis-next-title"></strong>
@@ -1732,6 +1879,21 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   <div id="p48-deviation-list" class="p48-deviation-list"></div>
 </section>
 
+
+<section id="p48-read-panel" class="p48-read-panel" hidden aria-live="polite">
+  <div class="p48-read-panel-head"><div><div class="p48-read-panel-kicker" id="p48-read-panel-kicker">Steg</div><div class="p48-read-panel-title" id="p48-read-panel-title"></div></div><button type="button" class="p48-read-panel-close" id="p48-read-panel-close" aria-label="Stäng">×</button></div>
+  <div id="p48-read-panel-grid" class="p48-read-panel-grid"></div>
+  <div id="p48-read-panel-empty" class="p48-read-empty" hidden>Det här steget har ännu ingen ytterligare beskrivning.</div>
+</section>
+<div id="p48-read-hint" class="p48-read-hint" hidden>Klicka på ett steg för att läsa mer · Esc lämnar läsvyn</div>
+
+<div id="p48-mobile-reader-bar" class="p48-mobile-reader-bar" aria-label="Mobil läsvy">
+  <div class="p48-mobile-reader-title"><span class="p48-mobile-reader-kicker">LÄSVY</span><strong id="p48-mobile-reader-name" class="p48-mobile-reader-name">Process</strong></div>
+  <button type="button" class="primary" id="p48-mobile-reader-follow" title="Följ processen steg för steg">▶ Följ</button>
+  <button type="button" id="p48-mobile-reader-fit" title="Anpassa hela processen">⊡</button>
+  <button type="button" id="p48-mobile-reader-edit" title="Öppna redigeringsläget">✎</button>
+</div>
+<nav id="p48-breadcrumbs" class="p48-breadcrumbs" aria-label="Delprocessnavigation"></nav>
 <div class="p48-body">
   <aside class="p48-side" id="p48-side">
     <details class="p48-account p48-account-unified p48-account-collapsible" id="p48-account-panel">
@@ -1986,18 +2148,12 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
         <div class="p48-page-quick-hint">Sidgränserna visar hur processen delas vid export.</div>
       </div>
     </details>
-    <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><div id="p48-empty-state" class="p48-empty-state" hidden>
-      <div class="p48-empty-card">
-        <div class="p48-empty-kicker">NY PROCESS</div>
-        <div class="p48-empty-title">Vad startar processen?</div>
-        <div class="p48-empty-copy">Börja med det som triggar processen. Bygg sedan <strong>Objekt → Aktivitet → Objekt</strong>.</div>
-        <div class="p48-empty-actions">
-          <button type="button" class="primary" id="p48-empty-object">▪ Lägg till Objekt in</button>
-          <button type="button" id="p48-empty-activity">▭ Börja med Aktivitet</button>
-        </div>
-        <div class="p48-empty-tip">Tips: ett objekts resultat kan bli input till nästa aktivitet. <strong>＋ Nästa</strong> föreslår rätt typ.</div>
-      </div>
-    </div><div id="p48-canvas-watermark" class="p48-canvas-watermark" aria-hidden="true"></div><img id="p48-process-logo" class="p48-process-logo" alt="Processlogotype"><div id="p48-link-hit-layer" class="p48-link-hit-layer"></div><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-link-quick" class="p48-link-quick" role="toolbar" aria-label="Snabbval för pil"><button type="button" data-link-routing="straight" title="Gör pilen rak">— Rak</button><button type="button" data-link-routing="orthogonal" title="Gör pilen vinkelrät">⌜ Vinkelrät</button><button type="button" data-link-routing="free" title="Flytta pilens bana fritt">↝ Fri</button></div><div id="p48-node-quick" class="p48-node-quick" role="toolbar" aria-label="Snabbval för markerade rutor" data-mode="single"><span id="p48-node-quick-flow" class="p48-node-quick-flow" data-single-only></span><button type="button" id="p48-node-quick-next" data-single-only title="Lägg till rekommenderat nästa steg">＋ Nästa</button><button type="button" id="p48-node-quick-next-more" data-single-only title="Välj en annan typ av nästa steg" aria-label="Välj annan typ av nästa steg">▾</button><details id="p48-node-quick-shape" class="p48-node-quick-shape" title="Byt form på markerad ruta"><summary aria-label="Byt form"><span id="p48-node-quick-shape-icon" class="p48-shape-icon standard"></span> Form</summary><div class="p48-node-quick-shape-pop"><button type="button" data-quick-shape="standard" title="Typstandard" aria-label="Typstandard"><span class="p48-shape-icon standard"></span></button><button type="button" data-quick-shape="rectangle" title="Rektangel" aria-label="Rektangel"><span class="p48-shape-icon rectangle"></span></button><button type="button" data-quick-shape="rounded" title="Rundad" aria-label="Rundad"><span class="p48-shape-icon rounded"></span></button><button type="button" data-quick-shape="pill" title="Kapsel" aria-label="Kapsel"><span class="p48-shape-icon pill"></span></button></div></details><details id="p48-node-quick-arrange" data-multi-only><summary title="Ordna markerade rutor">Ordna</summary><div class="p48-node-quick-arrange-pop"><button type="button" data-node-quick-align="top">Överkant</button><button type="button" data-node-quick-align="left">Vänster</button><button type="button" data-node-quick-distribute="horizontal">Jämnt →</button><button type="button" data-node-quick-distribute="vertical">Jämnt ↓</button><button type="button" class="wide" data-node-quick-layout="horizontal">Snygga till markerade →</button><button type="button" class="wide" data-node-quick-layout="vertical">Snygga till markerade ↓</button></div></details><button type="button" id="p48-node-quick-format" title="Öppna egenskaper för markerad ruta">Egenskaper</button><label class="p48-quick-color-label" data-multi-only title="Ändra bakgrundsfärg för markerade"><input type="color" id="p48-node-quick-color" value="#ffffff"> Färg</label><button type="button" id="p48-node-quick-duplicate" title="Duplicera markerade">Duplicera</button><button type="button" id="p48-node-quick-delete" class="danger" title="Ta bort markerade">Ta bort</button></div><div id="p48-selection-hull" class="p48-selection-hull" hidden></div><div id="p48-print-frame" class="p48-print-frame"></div>
+    <aside id="p48-overview" class="p48-overview" hidden aria-label="Processöversikt">
+      <div class="p48-overview-head"><span class="p48-overview-title">Processöversikt</span><span id="p48-overview-meta" class="p48-overview-meta"></span><button type="button" id="p48-overview-close" class="p48-overview-close" aria-label="Stäng översikt">×</button></div>
+      <div id="p48-overview-stage" class="p48-overview-stage" title="Klicka för att flytta vyn"><div id="p48-overview-viewport" class="p48-overview-viewport"></div></div>
+      <div class="p48-overview-hint">Klicka på ett steg för att hoppa dit, eller klicka i översikten för att flytta vyn.</div>
+    </aside>
+    <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><div id="p48-empty-state" class="p48-empty-state" hidden aria-hidden="true"></div><div id="p48-canvas-watermark" class="p48-canvas-watermark" aria-hidden="true"></div><img id="p48-process-logo" class="p48-process-logo" alt="Processlogotype"><div id="p48-link-hit-layer" class="p48-link-hit-layer"></div><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-link-quick" class="p48-link-quick" role="toolbar" aria-label="Snabbval för pil"><button type="button" data-link-routing="straight" title="Gör pilen rak">— Rak</button><button type="button" data-link-routing="orthogonal" title="Gör pilen vinkelrät">⌜ Vinkelrät</button><button type="button" data-link-routing="free" title="Flytta pilens bana fritt">↝ Fri</button></div><div id="p48-node-quick" class="p48-node-quick" role="toolbar" aria-label="Snabbval för markerade rutor" data-mode="single"><span id="p48-node-quick-flow" class="p48-node-quick-flow" data-single-only></span><button type="button" id="p48-node-quick-next" data-single-only title="Lägg till rekommenderat nästa steg">＋ Nästa</button><button type="button" id="p48-node-quick-next-more" data-single-only title="Välj en annan typ av nästa steg" aria-label="Välj annan typ av nästa steg">▾</button><details id="p48-node-quick-shape" class="p48-node-quick-shape" title="Byt form på markerad ruta"><summary aria-label="Byt form"><span id="p48-node-quick-shape-icon" class="p48-shape-icon standard"></span> Form</summary><div class="p48-node-quick-shape-pop"><button type="button" data-quick-shape="standard" title="Typstandard" aria-label="Typstandard"><span class="p48-shape-icon standard"></span></button><button type="button" data-quick-shape="rectangle" title="Rektangel" aria-label="Rektangel"><span class="p48-shape-icon rectangle"></span></button><button type="button" data-quick-shape="rounded" title="Rundad" aria-label="Rundad"><span class="p48-shape-icon rounded"></span></button><button type="button" data-quick-shape="pill" title="Kapsel" aria-label="Kapsel"><span class="p48-shape-icon pill"></span></button></div></details><details id="p48-node-quick-arrange" data-multi-only><summary title="Ordna markerade rutor">Ordna</summary><div class="p48-node-quick-arrange-pop"><button type="button" data-node-quick-align="top">Överkant</button><button type="button" data-node-quick-align="left">Vänster</button><button type="button" data-node-quick-distribute="horizontal">Jämnt →</button><button type="button" data-node-quick-distribute="vertical">Jämnt ↓</button><button type="button" class="wide" data-node-quick-layout="horizontal">Snygga till markerade →</button><button type="button" class="wide" data-node-quick-layout="vertical">Snygga till markerade ↓</button></div></details><button type="button" id="p48-node-quick-subprocess" class="p48-subprocess-open" data-single-only hidden title="Öppna eller skapa karta för delprocessen">↳ Öppna delprocess</button><button type="button" id="p48-node-quick-format" title="Öppna egenskaper för markerad ruta">Egenskaper</button><label class="p48-quick-color-label" data-multi-only title="Ändra bakgrundsfärg för markerade"><input type="color" id="p48-node-quick-color" value="#ffffff"> Färg</label><button type="button" id="p48-node-quick-duplicate" title="Duplicera markerade">Duplicera</button><button type="button" id="p48-node-quick-delete" class="danger" title="Ta bort markerade">Ta bort</button></div><div id="p48-selection-hull" class="p48-selection-hull" hidden></div><div id="p48-print-frame" class="p48-print-frame"></div>
       <div id="p48-snap-guide-x" class="p48-snap-guide p48-snap-guide-x" hidden></div><div id="p48-snap-guide-y" class="p48-snap-guide p48-snap-guide-y" hidden></div>
       <div id="p48-marquee" class="p48-marquee"></div>
       <svg id="p48-svg" viewBox="0 0 2400 1400">
@@ -2007,6 +2163,18 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
       </svg>
     </div>
   </div>
+  <aside id="p48-improvement-context" class="p48-improvement-context" aria-live="polite" hidden>
+    <div>
+      <div class="p48-improvement-context-kicker">AVVIKELSE ATT FÖRBÄTTRA</div>
+      <div id="p48-improvement-context-title" class="p48-improvement-context-title"></div>
+      <div id="p48-improvement-context-text" class="p48-improvement-context-text"></div>
+    </div>
+    <div class="p48-improvement-context-actions">
+      <button type="button" id="p48-improvement-properties">Öppna egenskaper</button>
+      <button type="button" id="p48-improvement-resolve" class="resolve">Markera hanterad</button>
+      <button type="button" id="p48-improvement-close" class="close" aria-label="Stäng förbättringskontext">×</button>
+    </div>
+  </aside>
   <div class="p48-scroll-bottom-spacer" aria-hidden="true"></div>
   <div id="p48-hnav" class="p48-hnav" aria-label="Horisontell navigering">
     <div id="p48-hnav-inner" class="p48-hnav-inner"></div>
@@ -2094,6 +2262,8 @@ function clearRuntimeError(){if(runtimeErrorEl){runtimeErrorEl.hidden=true;runti
 window.addEventListener('error',e=>reportRuntimeError(e.error||e.message,'window.error',false));
 window.addEventListener('unhandledrejection',e=>reportRuntimeError(e.reason,'unhandledrejection',false));
 const canvas=root.querySelector('#p48-canvas'),scroll=root.querySelector('#p48-scroll'),emptyState=root.querySelector('#p48-empty-state'),emptyObject=root.querySelector('#p48-empty-object'),emptyActivity=root.querySelector('#p48-empty-activity'),linkLayer=root.querySelector('#p48-links'),temp=root.querySelector('#p48-temp'),snapGuideX=root.querySelector('#p48-snap-guide-x'),snapGuideY=root.querySelector('#p48-snap-guide-y');
+const overviewToggle=root.querySelector('#p48-overview-toggle'),overviewPanel=root.querySelector('#p48-overview'),overviewClose=root.querySelector('#p48-overview-close'),overviewStage=root.querySelector('#p48-overview-stage'),overviewViewport=root.querySelector('#p48-overview-viewport'),overviewMeta=root.querySelector('#p48-overview-meta');
+const breadcrumbs=root.querySelector('#p48-breadcrumbs');
 const mobileToolsBtn=root.querySelector('#p48-mobile-tools'),mobileBackdrop=root.querySelector('#p48-mobile-backdrop'),sidePanel=root.querySelector('#p48-side');
 const mobileBar=root.querySelector('#p48-mobile-bar'),mobileAdd=root.querySelector('#p48-mobile-add'),mobileUndo=root.querySelector('#p48-mobile-undo'),mobileRedo=root.querySelector('#p48-mobile-redo'),mobileFit=root.querySelector('#p48-mobile-fit'),mobileFullscreen=root.querySelector('#p48-mobile-fullscreen'),mobileMore=root.querySelector('#p48-mobile-more'),mobileNext=root.querySelector('#p48-mobile-next'),mobileFormat=root.querySelector('#p48-mobile-format'),mobileDuplicate=root.querySelector('#p48-mobile-duplicate'),mobileContext=root.querySelector('#p48-mobile-context'),mobileDelete=root.querySelector('#p48-mobile-delete');
 const mobileSheet=root.querySelector('#p48-mobile-sheet'),mobileSheetBackdrop=root.querySelector('#p48-mobile-sheet-backdrop'),mobileSheetClose=root.querySelector('#p48-mobile-sheet-close'),mobileSheetTitle=root.querySelector('#p48-mobile-sheet-title'),mobileAddSheet=root.querySelector('#p48-mobile-add-sheet'),mobileSheetRedo=root.querySelector('#p48-mobile-sheet-redo'),mobileSheetFullscreen=root.querySelector('#p48-mobile-sheet-fullscreen'),mobileContextSheet=root.querySelector('#p48-mobile-context-sheet'),mobileOpenTools=root.querySelector('#p48-mobile-open-tools'),mobileSheetTools=root.querySelector('#p48-mobile-sheet-tools'),mobileSheetCopy=root.querySelector('#p48-mobile-sheet-copy'),mobileSheetFormat=root.querySelector('#p48-mobile-sheet-format'),mobileSheetLayoutH=root.querySelector('#p48-mobile-sheet-layout-h'),mobileSheetLayoutV=root.querySelector('#p48-mobile-sheet-layout-v'),mobileSheetDelete=root.querySelector('#p48-mobile-sheet-delete');
@@ -2101,6 +2271,7 @@ const linkHitLayer=root.querySelector('#p48-link-hit-layer');
 const hnav=root.querySelector('#p48-hnav'),hnavInner=root.querySelector('#p48-hnav-inner');
 const nameInput=root.querySelector('#p48-name'),status=root.querySelector('#p48-status'),processBox=root.querySelector('#p48-processes');
 const newProcessDialog=root.querySelector('#p48-new-process-dialog'),newProcessBackdrop=root.querySelector('#p48-new-process-backdrop'),newProcessName=root.querySelector('#p48-new-process-name'),newProcessCreate=root.querySelector('#p48-new-process-create'),newProcessCancel=root.querySelector('#p48-new-process-cancel'),newProcessError=root.querySelector('#p48-new-process-error');
+const conflictDialog=root.querySelector('#p48-conflict-dialog'),conflictBackdrop=root.querySelector('#p48-conflict-backdrop'),conflictSummary=root.querySelector('#p48-conflict-summary'),conflictCopy=root.querySelector('#p48-conflict-copy'),conflictCloud=root.querySelector('#p48-conflict-cloud'),conflictForce=root.querySelector('#p48-conflict-force'),conflictCancel=root.querySelector('#p48-conflict-cancel');
 const saveState=root.querySelector('#p48-save-state'),recoveryBanner=root.querySelector('#p48-recovery-banner'),recoveryRestore=root.querySelector('#p48-recovery-restore'),recoveryIgnore=root.querySelector('#p48-recovery-ignore');
 const analyzeBtn=root.querySelector('#p48-analyze'),analysisPanel=root.querySelector('#p48-analysis-panel'),analysisClose=root.querySelector('#p48-analysis-close'),analysisScore=root.querySelector('#p48-analysis-score'),analysisErrors=root.querySelector('#p48-analysis-errors'),analysisWarnings=root.querySelector('#p48-analysis-warnings'),analysisInfo=root.querySelector('#p48-analysis-info'),analysisNext=root.querySelector('#p48-analysis-next'),analysisNextTitle=root.querySelector('#p48-analysis-next-title'),analysisNextAction=root.querySelector('#p48-analysis-next-action'),analysisNextShow=root.querySelector('#p48-analysis-next-show'),analysisList=root.querySelector('#p48-analysis-list');
 const controls=root.querySelector('#p48-controls'),formatPanel=root.querySelector('#p48-format-panel'),formatTitle=root.querySelector('#p48-format-title'),formatHint=root.querySelector('#p48-format-hint'),font=root.querySelector('#p48-font'),size=root.querySelector('#p48-size'),textColor=root.querySelector('#p48-textcolor'),bgColor=root.querySelector('#p48-bgcolor');
@@ -2121,7 +2292,7 @@ const printFrame=root.querySelector('#p48-print-frame');
 const pdfViewSelect=root.querySelector('#p48-pdf-view'),pageCountSelect=root.querySelector('#p48-page-count'),pageQuick=root.querySelector('#p48-page-quick'),pageQuickSummary=root.querySelector('#p48-page-quick-summary'),pageFormatQuick=root.querySelector('#p48-page-format-quick'),pageCountQuick=root.querySelector('#p48-page-count-quick');
 const workspaceSelect=root.querySelector('#p48-workspace-select'),workspaceName=root.querySelector('#p48-workspace-name'),createWorkspaceBtn=root.querySelector('#p48-create-workspace'),roleBadge=root.querySelector('#p48-role');
 const authError=root.querySelector('#p48-auth-error');
-const shareBtn=root.querySelector('#p48-share'),shareBox=root.querySelector('#p48-sharebox'),shareUrlInput=root.querySelector('#p48-share-url'),copyShareBtn=root.querySelector('#p48-copy-share');
+const shareBtn=root.querySelector('#p48-share'),shareBox=root.querySelector('#p48-sharebox'),shareUrlInput=root.querySelector('#p48-share-url'),copyShareBtn=root.querySelector('#p48-copy-share'),shareStatus=root.querySelector('#p48-share-status'),revokeShareBtn=root.querySelector('#p48-revoke-share');
 const marquee=root.querySelector('#p48-marquee');
 const selectToolBtn=root.querySelector('#p48-select-tool');
 const deleteSelectionBtn=root.querySelector('#p48-delete-selection'),duplicateSelectionBtn=root.querySelector('#p48-duplicate-selection'),clearCanvasBtn=root.querySelector('#p48-clear-canvas');
@@ -2134,7 +2305,10 @@ const inputsBox=root.querySelector('#p48-inputs'),outputsBox=root.querySelector(
 const processInfoPanel=root.querySelector('#p48-process-info'),processInfoProgress=root.querySelector('#p48-process-info-progress'),processInfoMore=root.querySelector('#p48-process-info-more'),processInfoMoreCount=root.querySelector('#p48-process-info-more-count'),roleSuggestions=root.querySelector('#p48-role-suggestions'),systemSuggestions=root.querySelector('#p48-system-suggestions');
 const checkQuestionsPanel=root.querySelector('#p48-check-questions'),checkQuestionCount=root.querySelector('#p48-check-question-count'),checkQuestionList=root.querySelector('#p48-check-question-list'),addCheckQuestionBtn=root.querySelector('#p48-add-check-question');
 const deviationLaunch=root.querySelector('#p48-deviation-launch'),deviationBackdrop=root.querySelector('#p48-deviation-backdrop'),deviationPanel=root.querySelector('#p48-deviation-panel'),deviationClose=root.querySelector('#p48-deviation-close'),deviationCloudState=root.querySelector('#p48-deviation-cloud-state'),deviationOpenCount=root.querySelector('#p48-deviation-open-count'),deviationOverdueCount=root.querySelector('#p48-deviation-overdue-count'),deviationResolvedCount=root.querySelector('#p48-deviation-resolved-count'),deviationStatus=root.querySelector('#p48-deviation-status'),deviationOwner=root.querySelector('#p48-deviation-owner'),deviationOverdueOnly=root.querySelector('#p48-deviation-overdue-only'),deviationList=root.querySelector('#p48-deviation-list');
+const improvementContext=root.querySelector('#p48-improvement-context'),improvementTitle=root.querySelector('#p48-improvement-context-title'),improvementText=root.querySelector('#p48-improvement-context-text'),improvementProperties=root.querySelector('#p48-improvement-properties'),improvementResolve=root.querySelector('#p48-improvement-resolve'),improvementClose=root.querySelector('#p48-improvement-close');
 const walkthroughLaunch=root.querySelector('#p48-walkthrough-launch'),walkthroughBackdrop=root.querySelector('#p48-walkthrough-backdrop'),walkthroughPanel=root.querySelector('#p48-walkthrough-panel'),walkthroughClose=root.querySelector('#p48-walkthrough-close'),walkthroughStart=root.querySelector('#p48-walkthrough-start'),walkthroughRun=root.querySelector('#p48-walkthrough-run'),walkthroughSummary=root.querySelector('#p48-walkthrough-summary'),walkthroughPerson=root.querySelector('#p48-walkthrough-person'),walkthroughStartChoice=root.querySelector('#p48-walkthrough-start-choice'),walkthroughStartBtn=root.querySelector('#p48-walkthrough-start-btn'),walkthroughHistoryCount=root.querySelector('#p48-walkthrough-history-count'),walkthroughCloudState=root.querySelector('#p48-walkthrough-cloud-state'),walkthroughHistoryList=root.querySelector('#p48-walkthrough-history-list'),walkthroughStepCount=root.querySelector('#p48-walkthrough-step-count'),walkthroughTrail=root.querySelector('#p48-walkthrough-trail'),walkthroughDeviationCount=root.querySelector('#p48-walkthrough-deviation-count'),walkthroughStepType=root.querySelector('#p48-walkthrough-step-type'),walkthroughStepTitle=root.querySelector('#p48-walkthrough-step-title'),walkthroughStepDescription=root.querySelector('#p48-walkthrough-step-description'),walkthroughStepMeta=root.querySelector('#p48-walkthrough-step-meta'),walkthroughQuestions=root.querySelector('#p48-walkthrough-questions'),walkthroughNextChoices=root.querySelector('#p48-walkthrough-next-choices'),walkthroughNext=root.querySelector('#p48-walkthrough-next'),walkthroughFinish=root.querySelector('#p48-walkthrough-finish'),walkthroughValidation=root.querySelector('#p48-walkthrough-validation'),walkthroughSummaryStatus=root.querySelector('#p48-walkthrough-summary-status'),walkthroughSummaryStats=root.querySelector('#p48-walkthrough-summary-stats'),walkthroughSummaryList=root.querySelector('#p48-walkthrough-summary-list'),walkthroughSavedNote=root.querySelector('#p48-walkthrough-saved-note'),walkthroughCopy=root.querySelector('#p48-walkthrough-copy'),walkthroughRestart=root.querySelector('#p48-walkthrough-restart');
+const readModeToggle=root.querySelector('#p48-readmode-toggle'),readPanel=root.querySelector('#p48-read-panel'),readPanelKicker=root.querySelector('#p48-read-panel-kicker'),readPanelTitle=root.querySelector('#p48-read-panel-title'),readPanelGrid=root.querySelector('#p48-read-panel-grid'),readPanelEmpty=root.querySelector('#p48-read-panel-empty'),readPanelClose=root.querySelector('#p48-read-panel-close'),readHint=root.querySelector('#p48-read-hint');
+const mobileReaderBar=root.querySelector('#p48-mobile-reader-bar'),mobileReaderName=root.querySelector('#p48-mobile-reader-name'),mobileReaderFollow=root.querySelector('#p48-mobile-reader-follow'),mobileReaderFit=root.querySelector('#p48-mobile-reader-fit'),mobileReaderEdit=root.querySelector('#p48-mobile-reader-edit');
 const processInfoFields={
   description:root.querySelector('#p48-info-description'),
   responsibleRole:root.querySelector('#p48-info-role'),
@@ -2148,7 +2322,7 @@ const processInfoFields={
 const borderColor=root.querySelector('#p48-bordercolor'),borderWidth=root.querySelector('#p48-borderwidth');
 const linkFormat=root.querySelector('#p48-link-format'),linkColor=root.querySelector('#p48-link-color'),linkWidth=root.querySelector('#p48-link-width'),linkEnd=root.querySelector('#p48-link-end'),linkDash=root.querySelector('#p48-link-dash'),linkRouting=root.querySelector('#p48-link-routing'),linkAnchorMode=root.querySelector('#p48-link-anchor-mode'),linkLabel=root.querySelector('#p48-link-label'),flowCoach=root.querySelector('#p48-flow-coach'),flowCoachInsert=root.querySelector('#p48-flow-coach-insert'),flowCoachKeep=root.querySelector('#p48-flow-coach-keep'),insertLinkStepBtn=root.querySelector('#p48-insert-link-step'),insertLinkStepWrap=root.querySelector('#p48-insert-step-wrap'),insertLinkStepMenu=root.querySelector('#p48-insert-step-menu'),insertLinkStepChoices=[...root.querySelectorAll('.p48-insert-step-choice')],deleteLinkBtn=root.querySelector('#p48-delete-link'),linkHandle=root.querySelector('#p48-link-handle'),linkQuick=root.querySelector('#p48-link-quick'),linkQuickRouting=[...root.querySelectorAll('[data-link-routing]')];
 const addInputBtn=root.querySelector('#p48-add-input'),addOutputBtn=root.querySelector('#p48-add-output'),deleteNodeBtn=root.querySelector('#p48-delete-node');
-const selectionHull=root.querySelector('#p48-selection-hull'),nodeQuick=root.querySelector('#p48-node-quick'),nodeQuickFlow=root.querySelector('#p48-node-quick-flow'),nodeQuickNext=root.querySelector('#p48-node-quick-next'),nodeQuickNextMore=root.querySelector('#p48-node-quick-next-more'),nodeQuickShape=root.querySelector('#p48-node-quick-shape'),nodeQuickShapeIcon=root.querySelector('#p48-node-quick-shape-icon'),nodeQuickShapeChoices=[...root.querySelectorAll('[data-quick-shape]')],nodeQuickFormat=root.querySelector('#p48-node-quick-format'),nodeQuickColor=root.querySelector('#p48-node-quick-color'),nodeQuickDuplicate=root.querySelector('#p48-node-quick-duplicate'),nodeQuickArrange=root.querySelector('#p48-node-quick-arrange'),nodeQuickDelete=root.querySelector('#p48-node-quick-delete'),nodeQuickAlign=[...root.querySelectorAll('[data-node-quick-align]')],nodeQuickDistribute=[...root.querySelectorAll('[data-node-quick-distribute]')],nodeQuickLayout=[...root.querySelectorAll('[data-node-quick-layout]')];
+const selectionHull=root.querySelector('#p48-selection-hull'),nodeQuick=root.querySelector('#p48-node-quick'),nodeQuickFlow=root.querySelector('#p48-node-quick-flow'),nodeQuickNext=root.querySelector('#p48-node-quick-next'),nodeQuickNextMore=root.querySelector('#p48-node-quick-next-more'),nodeQuickSubprocess=root.querySelector('#p48-node-quick-subprocess'),nodeQuickShape=root.querySelector('#p48-node-quick-shape'),nodeQuickShapeIcon=root.querySelector('#p48-node-quick-shape-icon'),nodeQuickShapeChoices=[...root.querySelectorAll('[data-quick-shape]')],nodeQuickFormat=root.querySelector('#p48-node-quick-format'),nodeQuickColor=root.querySelector('#p48-node-quick-color'),nodeQuickDuplicate=root.querySelector('#p48-node-quick-duplicate'),nodeQuickArrange=root.querySelector('#p48-node-quick-arrange'),nodeQuickDelete=root.querySelector('#p48-node-quick-delete'),nodeQuickAlign=[...root.querySelectorAll('[data-node-quick-align]')],nodeQuickDistribute=[...root.querySelectorAll('[data-node-quick-distribute]')],nodeQuickLayout=[...root.querySelectorAll('[data-node-quick-layout]')];
 
 let nodes=new Map(),links=[],selectedId=null,selectedIds=new Set(),selectionMode=false,seq=8,undo=[],redo=[],currentId='proc-1',processes={};
 let editingClipboard=null,clipboardPasteOffset=28;
@@ -2165,6 +2339,8 @@ let cloudLoadedProcessScopes=new Map();
 let currentWorkspaceId=null,currentWorkspaceOwnerId=null,currentRole='owner',printPreview=false;
 let pdfView='A4P',pageCountMode='auto',canvasScale=1,canvasLogicalWidth=2400,canvasLogicalHeight=1400,processScalePercent=100,processScaleGesture=false;
 let walkthroughState=null;
+let activeImprovementDeviation=null;
+let readMode=false,mobileConsumptionInitialized=false,mobileWalkthroughForcedRead=false;
 
 
 function clampCanvasScale(value){return Math.max(0.25,Math.min(1.5,Math.round(Number(value)*100)/100))}
@@ -2197,9 +2373,69 @@ function applyCanvasScale(next,keepCenter=true){
   }
   scheduleHorizontalNavSync();
   refreshMobileBar();
+  scheduleOverviewRefresh();
   return value;
 }
 function screenDeltaToCanvas(dx,dy){return{dx:dx/canvasScale,dy:dy/canvasScale}}
+
+let overviewRaf=0,overviewBounds=null;
+function processOverviewBounds(){
+  const rects=selectedNodeRects();
+  if(!rects.length)return null;
+  const pad=80;
+  const minX=Math.max(0,Math.min(...rects.map(r=>r.x))-pad),minY=Math.max(0,Math.min(...rects.map(r=>r.y))-pad);
+  const maxX=Math.min(canvasLogicalWidth,Math.max(...rects.map(r=>r.x+r.width))+pad),maxY=Math.min(canvasLogicalHeight,Math.max(...rects.map(r=>r.y+r.height))+pad);
+  return{x:minX,y:minY,width:Math.max(1,maxX-minX),height:Math.max(1,maxY-minY)};
+}
+function overviewTransform(bounds){
+  if(!overviewStage||!bounds)return null;
+  const w=Math.max(1,overviewStage.clientWidth),h=Math.max(1,overviewStage.clientHeight),margin=8;
+  const scale=Math.min((w-margin*2)/bounds.width,(h-margin*2)/bounds.height);
+  const drawW=bounds.width*scale,drawH=bounds.height*scale;
+  return{scale,ox:(w-drawW)/2-bounds.x*scale,oy:(h-drawH)/2-bounds.y*scale};
+}
+function updateOverviewViewport(){
+  if(!overviewPanel||overviewPanel.hidden||!overviewViewport||!overviewBounds)return;
+  const tr=overviewTransform(overviewBounds);if(!tr)return;
+  const logicalLeft=scroll.scrollLeft/canvasScale,logicalTop=scroll.scrollTop/canvasScale;
+  const logicalW=scroll.clientWidth/canvasScale,logicalH=scroll.clientHeight/canvasScale;
+  overviewViewport.style.left=(tr.ox+logicalLeft*tr.scale)+'px';
+  overviewViewport.style.top=(tr.oy+logicalTop*tr.scale)+'px';
+  overviewViewport.style.width=Math.max(6,logicalW*tr.scale)+'px';
+  overviewViewport.style.height=Math.max(6,logicalH*tr.scale)+'px';
+}
+function renderProcessOverview(){
+  if(!overviewPanel||overviewPanel.hidden||!overviewStage)return false;
+  overviewStage.querySelectorAll('.p48-overview-node').forEach(el=>el.remove());
+  overviewBounds=processOverviewBounds();
+  if(overviewMeta)overviewMeta.textContent=`${nodes.size} ${nodes.size===1?'steg':'steg'}`;
+  if(!overviewBounds){if(overviewViewport)overviewViewport.hidden=true;return false}
+  if(overviewViewport)overviewViewport.hidden=false;
+  const tr=overviewTransform(overviewBounds);if(!tr)return false;
+  for(const item of nodes.values()){
+    const d=item.data||{},w=item.el.offsetWidth||Number(d.width)||180,h=item.el.offsetHeight||Number(d.height)||76;
+    const b=document.createElement('button');b.type='button';b.className='p48-overview-node '+String(d.type||'process');b.dataset.overviewNodeId=d.id;b.title=d.text||'Steg';
+    if(selectedIds.has(d.id))b.classList.add('selected');
+    b.style.left=(tr.ox+(Number(d.x)||0)*tr.scale)+'px';b.style.top=(tr.oy+(Number(d.y)||0)*tr.scale)+'px';
+    b.style.width=Math.max(4,w*tr.scale)+'px';b.style.height=Math.max(4,h*tr.scale)+'px';
+    b.addEventListener('click',e=>{e.stopPropagation();const node=nodes.get(d.id);if(!node)return;select(node.el);centerOverviewOnLogical((Number(d.x)||0)+w/2,(Number(d.y)||0)+h/2)});
+    overviewStage.insertBefore(b,overviewViewport);
+  }
+  updateOverviewViewport();return true;
+}
+function scheduleOverviewRefresh(){
+  if(!overviewPanel||overviewPanel.hidden||overviewRaf)return;
+  overviewRaf=requestAnimationFrame(()=>{overviewRaf=0;renderProcessOverview()});
+}
+function centerOverviewOnLogical(x,y){
+  scroll.scrollLeft=Math.max(0,x*canvasScale-scroll.clientWidth/2);scroll.scrollTop=Math.max(0,y*canvasScale-scroll.clientHeight/2);
+  if(hnav)hnav.scrollLeft=scroll.scrollLeft;scheduleHorizontalNavSync();updateOverviewViewport();
+}
+function setProcessOverview(open){
+  if(!overviewPanel||!overviewToggle)return false;
+  const show=Boolean(open);overviewPanel.hidden=!show;overviewToggle.setAttribute('aria-expanded',show?'true':'false');overviewToggle.classList.toggle('active',show);
+  if(show)requestAnimationFrame(renderProcessOverview);return show;
+}
 
 function zoomAtClientPoint(next,clientX,clientY){
   if(!scroll)return applyCanvasScale(next,true);
@@ -2240,6 +2476,7 @@ if(hnav){
   });
 }
 scroll.addEventListener('scroll',()=>{
+  updateOverviewViewport();
   if(!hnav||syncingH)return;
   syncingH=true;
   hnav.scrollLeft=scroll.scrollLeft;
@@ -2454,20 +2691,94 @@ function signOut(){
   msg(plan.preservedModifiedIds.length?'Utloggad · lokalt ändrade processer behölls':'Utloggad');
 }
 function ownerId(){return cloudSession?.user?.id||null}
+function cloudConflictError(message='Processen har ändrats i molnet sedan du öppnade den. Sparningen stoppades för att skydda den andra versionen.'){
+  const err=new Error(message);err.code='CLOUD_CONFLICT';return err;
+}
+function isCloudConflict(err){return Boolean(err&&err.code==='CLOUD_CONFLICT')}
+let pendingCloudConflict=null;
+async function fetchCloudProcess(processId){
+  const rows=await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(processId)+'&select=id,name,data,updated_at&limit=1');
+  const row=rows?.[0];if(!row)return null;
+  const data=MapliniStateCore.normalizeProcess(Object.assign({},row.data||{},{id:row.id,name:row.name||row.data?.name||'Namnlös process',cloudUpdatedAt:row.updated_at}),row.id);
+  data.cloudUpdatedAt=row.updated_at;return{row,data};
+}
+function conflictVersionSummary(local,cloud){
+  const ln=Array.isArray(local?.nodes)?local.nodes.length:0,cn=Array.isArray(cloud?.nodes)?cloud.nodes.length:0;
+  const ll=Array.isArray(local?.links)?local.links.length:0,cl=Array.isArray(cloud?.links)?cloud.links.length:0;
+  return `Din lokala version: ${ln} steg, ${ll} kopplingar. Molnversionen: ${cn} steg, ${cl} kopplingar. Maplini slår inte ihop versionerna automatiskt.`;
+}
+function setConflictDialog(open){
+  if(!conflictDialog||!conflictBackdrop)return false;
+  conflictDialog.hidden=!open;conflictBackdrop.hidden=!open;
+  if(open)requestAnimationFrame(()=>conflictCopy?.focus());return true;
+}
+async function openCloudConflictResolution(){
+  const local=clone(processes[currentId]||state());
+  try{
+    const cloud=await fetchCloudProcess(currentId);
+    if(!cloud){msg('Molnversionen finns inte längre · din lokala version är kvar');return false}
+    pendingCloudConflict={processId:currentId,local,cloud:cloud.data,cloudUpdatedAt:cloud.row.updated_at};
+    conflictSummary.textContent=conflictVersionSummary(local,cloud.data);setConflictDialog(true);return true;
+  }catch(e){console.error(e);msg('Kunde inte läsa molnversionen · din lokala version är kvar');return false}
+}
+function keepConflictLocalCopy(){
+  const c=pendingCloudConflict;if(!c)return false;
+  const copy=clone(c.local),newId=uid();copy.id=newId;copy.name=(copy.name||'Namnlös process')+' – lokal kopia';delete copy.cloudUpdatedAt;copy.localModifiedAt=Date.now();
+  processes[newId]=copy;currentId=newId;resetHistory();restore(copy);saveLocal(true);renderProcesses(true);pendingCloudConflict=null;setConflictDialog(false);msg('Din version sparades som en separat lokal kopia');return true;
+}
+function loadConflictCloudVersion(){
+  const c=pendingCloudConflict;if(!c)return false;
+  processes[c.processId]=clone(c.cloud);currentId=c.processId;resetHistory();restore(processes[currentId]);saveLocal(true);renderProcesses(true);pendingCloudConflict=null;setConflictDialog(false);msg('Molnversionen är inläst');return true;
+}
+async function forceConflictCloudVersion(){
+  const c=pendingCloudConflict;if(!c)return false;
+  if(!confirm('Ersätta molnversionen? Den nuvarande molnversionen kommer att skrivas över. Din lokala version används i stället.'))return false;
+  const st=clone(c.local),updatedAt=new Date().toISOString(),canonicalOwnerId=currentWorkspaceId?currentWorkspaceOwnerId:ownerId();
+  const payload={owner_id:canonicalOwnerId,workspace_id:currentWorkspaceId,name:st.name,data:st,updated_at:updatedAt};
+  const rows=await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(c.processId)+'&updated_at=eq.'+encodeURIComponent(c.cloudUpdatedAt)+'&select=updated_at',{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify(payload)});
+  if(!Array.isArray(rows)||rows.length!==1){await openCloudConflictResolution();msg('Molnversionen ändrades igen · kontrollera de nya versionerna');return false}
+  st.cloudUpdatedAt=updatedAt;processes[c.processId]=st;currentId=c.processId;cloudLoadedProcessIds.add(c.processId);cloudLoadedProcessScopes.set(c.processId,MapliniSessionCore.scopeKey(currentWorkspaceId));saveLocal(true);pendingCloudConflict=null;setConflictDialog(false);msg('Molnversionen ersattes efter din bekräftelse');return true;
+}
+async function currentCloudVersion(processId){
+  const rows=await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(processId)+'&select=updated_at&limit=1');
+  return rows?.[0]?.updated_at||null;
+}
+async function guardedProcessCloudWrite(st,canonicalOwnerId){
+  const updatedAt=new Date().toISOString();
+  const payload={id:currentId,owner_id:canonicalOwnerId,workspace_id:currentWorkspaceId,name:st.name,data:st,updated_at:updatedAt};
+  const expected=st.cloudUpdatedAt||null;
+  if(expected){
+    const rows=await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(currentId)+'&updated_at=eq.'+encodeURIComponent(expected)+'&select=updated_at',{
+      method:'PATCH',
+      headers:{Prefer:'return=representation'},
+      body:JSON.stringify(payload)
+    });
+    if(!Array.isArray(rows)||rows.length!==1)throw cloudConflictError();
+    return updatedAt;
+  }
+  const existing=await currentCloudVersion(currentId);
+  if(existing)throw cloudConflictError('Processen finns redan i molnet men Maplini saknar en säker basversion. Sparningen stoppades för att undvika överskrivning.');
+  try{
+    await sb('/rest/v1/processes',{
+      method:'POST',
+      headers:{Prefer:'return=minimal'},
+      body:JSON.stringify(payload)
+    });
+  }catch(e){
+    if(e?.status===409)throw cloudConflictError();
+    throw e;
+  }
+  return updatedAt;
+}
 async function saveCurrentToCloud(){
   if(!requireEdit())throw new Error('Endast visning');
   if(!ownerId())throw new Error('Logga in först');
   persist(false,false);
   const localOk=saveLocal(true);
   const st=clone(processes[currentId]||state());
-  const updatedAt=new Date().toISOString();
   const canonicalOwnerId=currentWorkspaceId?currentWorkspaceOwnerId:ownerId();
   if(currentWorkspaceId&&!canonicalOwnerId)throw new Error('Workspace-ägaren kunde inte verifieras. Ladda om workspace och försök igen.');
-  await sb('/rest/v1/processes?on_conflict=id',{
-    method:'POST',
-    headers:{Prefer:'resolution=merge-duplicates,return=minimal'},
-    body:JSON.stringify({id:currentId,owner_id:canonicalOwnerId,workspace_id:currentWorkspaceId,name:st.name,data:st,updated_at:updatedAt})
-  });
+  const updatedAt=await guardedProcessCloudWrite(st,canonicalOwnerId);
   processes[currentId]=Object.assign({},st,{cloudUpdatedAt:updatedAt});
   cloudLoadedProcessIds.add(currentId);
   cloudLoadedProcessScopes.set(currentId,MapliniSessionCore.scopeKey(currentWorkspaceId));
@@ -2515,7 +2826,32 @@ async function loadCloudProcesses(){
   }
 }
 function shareToken(){return crypto?.randomUUID?crypto.randomUUID().replace(/-/g,''):Math.random().toString(36).slice(2)+Date.now().toString(36)}
-async function shareCurrent(){try{await saveCurrentToCloud();const rows=await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(currentId)+'&select=share_token');const token=rows?.[0]?.share_token||shareToken();await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(currentId),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({share_token:token,share_mode:'view'})});shareUrlInput.value=PUBLIC_APP_URL.replace(/\/$/,'')+'?share='+token;shareBox.style.display='block';msg('Delningslänk skapad')}catch(e){console.error(e);reportRuntimeError(e,'share-current');msg('Delning misslyckades')}}
+function setShareState(token,mode){
+  const active=Boolean(token&&mode==='view');
+  if(shareStatus)shareStatus.classList.toggle('active',active);
+  if(revokeShareBtn)revokeShareBtn.classList.toggle('active',active);
+  if(shareBtn){shareBtn.textContent=active?'Dela process · aktiv länk':'Dela process';shareBtn.title=active?'Publik läslänk är aktiv för aktuell process':'Dela aktuell process'}
+  if(shareUrlInput)shareUrlInput.value=active?PUBLIC_APP_URL.replace(/\/$/,'')+'?share='+token:'';
+  return active;
+}
+async function refreshShareState(showBox=false){
+  if(!CLOUD_ENABLED||!ownerId()||sharedView||!currentId){setShareState('',null);return false}
+  try{
+    const rows=await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(currentId)+'&select=share_token,share_mode');
+    const row=rows?.[0]||{};const active=setShareState(row.share_token,row.share_mode);
+    if(showBox&&shareBox)shareBox.style.display='flex';
+    return active;
+  }catch(e){reportRuntimeError(e,'share-state');setShareState('',null);return false}
+}
+async function shareCurrent(){try{await saveCurrentToCloud();const rows=await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(currentId)+'&select=share_token,share_mode');const existing=rows?.[0]||{};const token=(existing.share_mode==='view'&&existing.share_token)?existing.share_token:shareToken();await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(currentId),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({share_token:token,share_mode:'view'})});setShareState(token,'view');shareBox.style.display='flex';msg(existing.share_mode==='view'&&existing.share_token?'Delningslänken är redan aktiv':'Delningslänk skapad')}catch(e){console.error(e);reportRuntimeError(e,'share-current');msg('Delning misslyckades')}}
+async function revokeCurrentShare(){
+  if(!CLOUD_ENABLED||!ownerId()||sharedView||!currentId)return false;
+  if(!confirm('Återkalla den publika länken? Den gamla länken slutar fungera direkt.'))return false;
+  try{
+    await sb('/rest/v1/processes?id=eq.'+encodeURIComponent(currentId),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({share_token:null,share_mode:null})});
+    setShareState('',null);if(shareBox)shareBox.style.display='flex';msg('Delningslänken är återkallad');return true;
+  }catch(e){console.error(e);reportRuntimeError(e,'share-revoke');msg('Kunde inte återkalla delningslänken');return false}
+}
 async function loadShared(token){
   if(!CLOUD_ENABLED||!token)return false;
   try{
@@ -2553,7 +2889,7 @@ async function deleteCloud(id){
 }
 
 
-function canEdit(){return MapliniAccessCore.canEdit({sharedView,currentRole})}
+function canEdit(){return MapliniAccessCore.canEdit({sharedView,currentRole})&&!readMode}
 function requireEdit(show=true){
   if(canEdit())return true;
   if(show)msg('Endast visning');
@@ -2833,6 +3169,15 @@ function styleOf(d){
   const shapePreset=allowedShapes.has(d.shapePreset)?d.shapePreset:'standard';
   return{fontFamily:d.fontFamily||'Inter',fontSize:Number(d.fontSize||13),textColor:d.textColor||'#17202a',bgColor:d.bgColor||defBg(d.type),fontWeight:d.fontWeight||'700',fontStyle:d.fontStyle||'normal',textDecoration:d.textDecoration||'none',textAlign:d.textAlign||'center',borderColor:d.borderColor||'#637387',borderWidth:Number(d.borderWidth||2),nodeStyle,shapePreset}
 }
+function refreshNodeResponsibility(item){
+  if(!item||!item.roleBadge)return;
+  const eligible=['process','subprocess','decision'].includes(String(item.data?.type||''));
+  const role=eligible?String(ensureProcessInfo(item).responsibleRole||'').trim():'';
+  item.roleBadge.textContent=role;
+  item.roleBadge.title=role?`Ansvar: ${role}`:'';
+  item.roleBadge.hidden=!role;
+  item.el.classList.toggle('p48-has-role',Boolean(role));
+}
 function applyStyle(item){
   const s=styleOf(item.data);Object.assign(item.data,s);
   item.el.classList.remove('p48-style-3d','p48-style-raised','p48-style-glass','p48-style-flat','p48-shape-rectangle','p48-shape-rounded','p48-shape-pill');
@@ -2846,6 +3191,7 @@ function applyStyle(item){
   else if(s.nodeStyle==='glass')visualBg=`linear-gradient(135deg,rgba(255,255,255,.88) 0%,rgba(255,255,255,.30) 48%,rgba(180,215,230,.32) 100%),${s.bgColor}`;
   item.el.style.background=visualBg;item.el.style.setProperty('--decision-bg',visualBg);
   if(item.data.type==='decision'){item.el.style.setProperty('--decision-border',s.borderColor);item.el.style.setProperty('--decision-border-width',s.borderWidth+'px')}else{item.el.style.borderColor=s.borderColor;item.el.style.borderWidth=s.borderWidth+'px'}
+  refreshNodeResponsibility(item);
 }
 function safeDocumentUrl(value){
   const raw=String(value||'').trim();
@@ -2959,6 +3305,8 @@ function state(){
     processLogoWidth,
     processLogoX,
     processLogoY,
+    parentProcessId:meta.parentProcessId||null,
+    parentNodeId:meta.parentNodeId||null,
     localModifiedAt:Number(meta.localModifiedAt||0),
     cloudUpdatedAt:meta.cloudUpdatedAt||null
   },currentId);
@@ -3080,11 +3428,13 @@ function persist(show=false,refreshList=false){
     // Public shared links are ephemeral: never copy their process payload into localStorage.
     processes[currentId]=st;
     scheduleHorizontalNavSync();
+    scheduleOverviewRefresh();
     return st;
   }
-  if(MapliniSyncCore.contentChanged(previous,st))st.localModifiedAt=Date.now();
+  const changed=MapliniSyncCore.contentChanged(previous,st);
+  if(changed)st.localModifiedAt=Date.now();
   processes[currentId]=st;
-  if(MapliniSyncCore.contentChanged(previous,st))stageRecoverySnapshot();
+  if(changed)stageRecoverySnapshot();
   saveLocal(false);
   const currentName=st.name||'';
   if(refreshList||currentName!==lastProcessListName){
@@ -3093,6 +3443,8 @@ function persist(show=false,refreshList=false){
   }
   if(show)msg('Sparad');
   scheduleHorizontalNavSync();
+  scheduleOverviewRefresh();
+  if(breadcrumbs&&breadcrumbs.classList.contains('on'))renderBreadcrumbs();
   return st;
 }
 let lastUndoAt=0,lastUndoSnapshot='',historyTransactionDepth=0,undoGestureSnapshot=null;
@@ -3132,7 +3484,7 @@ function endUndoGesture(){
 }
 function refreshEmptyState(){
   if(!emptyState)return;
-  emptyState.hidden=sharedView||nodes.size>0;
+  emptyState.hidden=true;
 }
 function addFirstStep(type,objectRole=null){
   if(!requireEdit())return false;
@@ -3143,7 +3495,7 @@ function addFirstStep(type,objectRole=null){
   if(item)requestAnimationFrame(()=>beginInlineEdit(item.el));
   return true;
 }
-function clearCanvas(){hideSnapGuides();for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();selectedLinkIndex=null;selectedLinkIndices.clear();linkLayer.innerHTML='';clearLinkHitLayer();linkDomByIndex.clear();finishTempArrow();setFormatEnabled(false);refreshControls();refreshLinkControls();updateSelectionUi();refreshEmptyState()}
+function clearCanvas(){hideSnapGuides();for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();selectedLinkIndex=null;selectedLinkIndices.clear();linkLayer.innerHTML='';clearLinkHitLayer();linkDomByIndex.clear();finishTempArrow();setFormatEnabled(false);refreshControls();refreshLinkControls();updateSelectionUi();refreshEmptyState();scheduleOverviewRefresh()}
 function clearEntireCanvas(){
   if(!requireEdit())return false;
   if(nodes.size===0&&links.length===0){msg('Canvasen är redan tom');return false}
@@ -3153,6 +3505,7 @@ function clearEntireCanvas(){
   return changed;
 }
 function restore(s){
+  closeImprovementContext();
   let raw;
   try{raw=typeof s==='string'?JSON.parse(s):clone(s)}
   catch(e){reportRuntimeError(e,'restore-parse');return false}
@@ -3189,8 +3542,60 @@ function restore(s){
   (d.nodes||[]).forEach(makeNode);
   links=MapliniConnectorCore.normalizeLinks(d.links||[]);
   seq=Math.max(0,...[...nodes.keys()].map(id=>parseInt(String(id).replace(/\D/g,''),10)||0));
-  requestFullLinkRender(true);refreshEmptyState();clearRuntimeError();
+  requestFullLinkRender(true);refreshEmptyState();clearRuntimeError();scheduleOverviewRefresh();
   return true;
+}
+function parentLinkForProcess(processId){
+  const p=processes[processId];
+  if(!p)return null;
+  const parentId=String(p.parentProcessId||'');
+  const parentNodeId=String(p.parentNodeId||'');
+  if(parentId&&parentNodeId&&processes[parentId])return{parentId,parentNodeId};
+  for(const candidate of Object.values(processes)){
+    const hit=(candidate.nodes||[]).find(n=>n.type==='subprocess'&&String(n.childProcessId||'')===String(processId));
+    if(hit)return{parentId:candidate.id,parentNodeId:hit.id};
+  }
+  return null;
+}
+function breadcrumbChain(processId){
+  const chain=[];let id=String(processId||''),guard=0;const seen=new Set();
+  while(id&&processes[id]&&!seen.has(id)&&guard<12){
+    seen.add(id);chain.unshift({id,name:processes[id].name||'Namnlös process'});
+    const parent=parentLinkForProcess(id);id=parent?parent.parentId:'';guard++;
+  }
+  return chain;
+}
+function renderBreadcrumbs(){
+  if(!breadcrumbs)return;
+  breadcrumbs.innerHTML='';
+  const chain=breadcrumbChain(currentId);
+  const show=chain.length>1;breadcrumbs.classList.toggle('on',show);
+  if(!show)return;
+  chain.forEach((entry,index)=>{
+    if(index){const sep=document.createElement('span');sep.className='p48-breadcrumb-sep';sep.textContent='›';breadcrumbs.appendChild(sep)}
+    if(index===chain.length-1){const current=document.createElement('span');current.textContent=entry.name;current.setAttribute('aria-current','page');breadcrumbs.appendChild(current);return}
+    const b=document.createElement('button');b.type='button';b.textContent=entry.name;b.title=`Tillbaka till ${entry.name}`;
+    b.addEventListener('click',()=>{persist();openProcess(entry.id);const child=chain[index+1];const parent=processes[entry.id];const node=(parent?.nodes||[]).find(n=>n.type==='subprocess'&&String(n.childProcessId||'')===String(child.id));if(node)requestAnimationFrame(()=>{const item=nodes.get(node.id);if(item){select(item.el);ensureNodeVisible(item.el)}})});
+    breadcrumbs.appendChild(b);
+  });
+}
+function openLinkedSubprocess(item){
+  if(!item||item.data?.type!=='subprocess')return false;
+  persist();
+  let childId=String(item.data.childProcessId||'');
+  if(childId&&!processes[childId])childId='';
+  if(!childId){
+    if(!requireEdit())return false;
+    pushUndo(true);childId=uid();item.data.childProcessId=childId;item.el.classList.add('p48-subprocess-linked');
+    const childName=String(item.data.text||'Delprocess').trim()||'Delprocess';
+    const child=MapliniWorkflowCore.emptyProcess(childId,childName);
+    child.parentProcessId=currentId;child.parentNodeId=item.data.id;child.localModifiedAt=Date.now();processes[childId]=MapliniStateCore.normalizeProcess(child,childId);
+    persist();saveLocal(true);renderProcesses(true);
+  }else{
+    const child=processes[childId];
+    if(!child.parentProcessId){child.parentProcessId=currentId;child.parentNodeId=item.data.id;saveLocal(false)}
+  }
+  openProcess(childId);return true;
 }
 function openProcess(id){
   if(!processes[id])return;
@@ -3201,7 +3606,7 @@ function openProcess(id){
     if(previousId&&previous){currentId=previousId;processes[previousId]=previous;restore(previous)}
     msg('Processen kunde inte öppnas');return;
   }
-  saveLocal(false);renderProcesses();refreshControls();refreshLinkControls();updateSelectionUi();msg('Process öppnad');scroll.scrollTop=0;scroll.scrollLeft=0;requestAnimationFrame(alignEditorTop)
+  saveLocal(false);renderProcesses();refreshControls();refreshLinkControls();updateSelectionUi();refreshShareState(false);renderBreadcrumbs();msg('Process öppnad');scroll.scrollTop=0;scroll.scrollLeft=0;requestAnimationFrame(alignEditorTop)
 }
 function setNewProcessDialog(open){
   if(!newProcessDialog||!newProcessBackdrop)return false;
@@ -3372,7 +3777,47 @@ function roundedOrthogonalPath(points,radius=10){
   }
   const last=clean[clean.length-1];d+=` L ${last[0]} ${last[1]}`;return d;
 }
-function linkGeometry(link,A,B){
+function automaticRoutingObstacles(excludeIds){
+  const excluded=new Set((excludeIds||[]).map(String)),out=[];
+  for(const item of nodes.values()){
+    if(!item||!item.el||excluded.has(String(item.data?.id)))continue;
+    const el=item.el;
+    out.push({id:String(item.data?.id||''),left:el.offsetLeft,top:el.offsetTop,right:el.offsetLeft+el.offsetWidth,bottom:el.offsetTop+el.offsetHeight});
+  }
+  return out;
+}
+const lastKnownLinkPoints=new Map();
+function automaticRoutingSegments(excludeLink){
+  const segments=[];
+  for(let oi=0;oi<links.length;oi++){
+    const other=links[oi];
+    if(!Array.isArray(other)||other===excludeLink)continue;
+    const A=nodes.get(String(other[0]))?.el,B=nodes.get(String(other[1]))?.el;if(!A||!B)continue;
+    /* Use the last rendered route when available. On the very first render, fall back to
+       the connector's cheap base geometry instead of recursively calculating smart routes. */
+    let pts=lastKnownLinkPoints.get(oi);
+    if(!Array.isArray(pts)||pts.length<2){
+      const st=linkStyle(other),sides=linkSides(other,A,B),a=anchor(A,sides.source),b=anchor(B,sides.target);
+      pts=MapliniConnectorCore.routePoints(a[0],a[1],b[0],b[1],sides.source,sides.target,st);
+    }
+    for(let i=1;i<pts.length;i++){
+      const a=pts[i-1],b=pts[i];
+      if(Array.isArray(a)&&Array.isArray(b))segments.push({x1:a[0],y1:a[1],x2:b[0],y2:b[1],sourceId:String(other[0]),targetId:String(other[1])});
+    }
+  }
+  return segments;
+}
+function routingEnvelopeFilter(items,a,b,margin=260){
+  if(!Array.isArray(items)||!items.length)return [];
+  const left=Math.min(a[0],b[0])-margin,right=Math.max(a[0],b[0])+margin,top=Math.min(a[1],b[1])-margin,bottom=Math.max(a[1],b[1])+margin;
+  return items.filter(item=>{
+    if(!item)return false;
+    if(Number.isFinite(Number(item.left)))return !(Number(item.right)<left||Number(item.left)>right||Number(item.bottom)<top||Number(item.top)>bottom);
+    const x1=Number(item.x1)||0,x2=Number(item.x2)||0,y1=Number(item.y1)||0,y2=Number(item.y2)||0;
+    return !(Math.max(x1,x2)<left||Math.min(x1,x2)>right||Math.max(y1,y2)<top||Math.min(y1,y2)>bottom);
+  });
+}
+function linkGeometry(link,A,B,{avoidConnectorCrossings=true,routingObstacles=null,routingSegments=null}={}){
   const st=linkStyle(link),sides=linkSides(link,A,B),a=anchor(A,sides.source),b=anchor(B,sides.target);
   let effective=st;
   if(st.autoManaged&&st.anchorMode==='auto'&&st.routing!=='free'){
@@ -3381,7 +3826,19 @@ function linkGeometry(link,A,B){
     const routing=(nearH||nearV)?'straight':'orthogonal';
     if(routing!==st.routing)effective=Object.assign({},st,{routing,viaX:null,viaY:null});
   }
-  const points=MapliniConnectorCore.routePoints(a[0],a[1],b[0],b[1],sides.source,sides.target,effective);
+  let points=MapliniConnectorCore.routePoints(a[0],a[1],b[0],b[1],sides.source,sides.target,effective);
+  if(effective.routing==='orthogonal'&&effective.autoManaged&&effective.anchorMode==='auto'){
+    /* Crossing-aware routing is valuable on normal maps but grows quadratically on
+       very large maps. Keep obstacle avoidance, while dropping only cross-link scoring
+       above the large-map threshold so opening/editing remains responsive. */
+    const useCrossingAvoidance=Boolean(avoidConnectorCrossings)&&links.length<=400;
+    const rawSegments=useCrossingAvoidance?(Array.isArray(routingSegments)?routingSegments:automaticRoutingSegments(link)):[];
+    const crossingSegments=useCrossingAvoidance?routingEnvelopeFilter(rawSegments,a,b):[];
+    const rawObstacles=Array.isArray(routingObstacles)?routingObstacles:automaticRoutingObstacles([link[0],link[1]]);
+    const excluded=new Set([String(link[0]),String(link[1])]);
+    const routeObstacles=routingEnvelopeFilter(rawObstacles.filter(o=>!o?.id||!excluded.has(String(o.id))),a,b);
+    points=MapliniConnectorCore.smartOrthogonalRoute(a[0],a[1],b[0],b[1],sides.source,sides.target,effective,routeObstacles,18,crossingSegments,{sourceId:String(link[0]),targetId:String(link[1])});
+  }
   const d=effective.routing==='orthogonal'?roundedOrthogonalPath(points,10):MapliniConnectorCore.pathData(points);
   return{st:effective,sides,points,d};
 }
@@ -3444,6 +3901,11 @@ function refreshNodeQuickToolbar(){
     const source=!multi&&isNextStepSource(items[0]);
     nodeQuickNextMore.disabled=!source;nodeQuickNextMore.hidden=!source;
   }
+  if(nodeQuickSubprocess){
+    const sub=!multi&&items[0]?.data?.type==='subprocess';
+    nodeQuickSubprocess.hidden=!sub;nodeQuickSubprocess.disabled=!sub;
+    if(sub)nodeQuickSubprocess.textContent=items[0].data.childProcessId?'↳ Öppna delprocess':'↳ Skapa delprocess';
+  }
 }
 function focusFormattingPanel(){
   if(isMobileLayout())setMobileTools(true);
@@ -3466,9 +3928,12 @@ function refreshMobileBar(){
 function refreshSelectedFlowEmphasis(){
   const active=selectedIds.size===1?[...selectedIds][0]:(selectedId||null);
   for(const [index,entry] of linkDomByIndex.entries()){
-    const link=links[index],on=Boolean(active&&link&&(String(link[0])===String(active)||String(link[1])===String(active))&&linkStyle(link).autoManaged);
+    const link=links[index],auto=Boolean(link&&linkStyle(link).autoManaged);
+    const on=Boolean(active&&auto&&(String(link[0])===String(active)||String(link[1])===String(active)));
     if(entry?.visible){
-      entry.visible.style.opacity=on?'1':'';
+      entry.visible.classList.toggle('p48-flow-context-active',on);
+      entry.visible.classList.toggle('p48-flow-context-muted',Boolean(active&&auto&&!on));
+      entry.visible.style.opacity='';
       entry.visible.style.strokeWidth=on?String((Number(linkStyle(link).width)||2)+.45):'';
     }
   }
@@ -3535,7 +4000,7 @@ function pasteEditingClipboard({announce=true}={}){
   pushUndo();
   const result=MapliniEditingCore.instantiate(editingClipboard,()=>{seq++;return 'n'+seq},clipboardPasteOffset);
   if(!result.nodes.length)return false;
-  for(const d of result.nodes)makeNode(d);
+  for(const d of result.nodes){if(d.type==='subprocess')delete d.childProcessId;makeNode(d);}
   links=MapliniConnectorCore.normalizeLinks(links.concat(result.links));
   const newIds=result.nodes.map(n=>n.id);
   selectedIds=new Set(newIds);selectedId=newIds.length===1?newIds[0]:null;
@@ -3592,11 +4057,39 @@ function finishTempArrow(){
   temp.setAttribute('d','');
 }
 
+function readTypeLabel(type){return ({start:'Start',end:'Slut',process:'Aktivitet',decision:'Beslut',document:'Dokument',object:'Objekt',subprocess:'Delprocess'})[type]||'Steg'}
+function renderReadPanel(item){
+  if(!readMode||!readPanel)return;
+  if(!item){readPanel.hidden=true;return}
+  const info=ensureProcessInfo(item), fields=[
+    ['Beskrivning',info.description],['Ansvar',info.responsibleRole],['System',info.system],['Instruktion',info.instruction],['Tid',info.duration],['KPI',info.kpi],['Risk',info.risk],['Kontroll',info.control],
+    ['Input',Array.isArray(item.data.inputs)?item.data.inputs.join(', '):''],['Output',Array.isArray(item.data.outputs)?item.data.outputs.join(', '):'']
+  ];
+  readPanelKicker.textContent=readTypeLabel(item.data.type);readPanelTitle.textContent=item.data.text||'Namnlöst steg';readPanelGrid.innerHTML='';let shown=0;
+  for(const [label,value] of fields){if(!String(value||'').trim())continue;shown++;const wrap=document.createElement('div');wrap.className='p48-read-field';const l=document.createElement('div');l.className='p48-read-label';l.textContent=label;const v=document.createElement('div');v.className='p48-read-value';v.textContent=String(value);wrap.append(l,v);readPanelGrid.appendChild(wrap)}
+  readPanelEmpty.hidden=shown>0;readPanel.hidden=false;
+}
+function refreshMobileReaderBar(){
+  if(mobileReaderName)mobileReaderName.textContent=String(nameInput?.value||processes[String(currentId||'')]?.name||'Process').trim()||'Process';
+  if(mobileReaderEdit)mobileReaderEdit.hidden=!MapliniAccessCore.canEdit({sharedView,currentRole});
+}
+function setReadMode(on){return setReadModeWithOptions(on)}
+function setReadModeWithOptions(on,{silent=false}={}){
+  readMode=Boolean(on);root.classList.toggle('p48-read-mode',readMode);if(readModeToggle){readModeToggle.classList.toggle('active',readMode);readModeToggle.setAttribute('aria-pressed',readMode?'true':'false');readModeToggle.textContent=readMode?'✎ Redigera':'◉ Läsvy'}if(readHint)readHint.hidden=!readMode;
+  if(!readMode&&readPanel)readPanel.hidden=true;refreshMobileReaderBar();applyRoleUi();refreshControls();updateSelectionUi();if(readMode&&selectedId)renderReadPanel(nodes.get(selectedId));if(!silent)msg(readMode?'Läsvy – tryck på ett steg för detaljer':'Redigeringsläge');
+}
+function activateMobileConsumptionDefault(){
+  if(mobileConsumptionInitialized||!isMobileLayout()||!nodes.size)return false;
+  mobileConsumptionInitialized=true;setReadModeWithOptions(true,{silent:true});
+  msg(MapliniAccessCore.canEdit({sharedView,currentRole})?'Mobil läsvy – Följ processen eller tryck ✎ för att redigera':'Mobil läsvy');
+  requestAnimationFrame(()=>fitProcessToScreen());return true;
+}
 function select(el){
   const hadLinks=(selectedLinkIndex!=null||selectedLinkIndices.size>0);
   selectedLinkIndex=null;selectedLinkIndices.clear();refreshLinkControls();
   selectedIds.clear();selectedId=el.dataset.id;selectedIds.add(selectedId);
-  refreshControls();updateSelectionUi();
+  refreshControls();updateSelectionUi();scheduleOverviewRefresh();
+  if(readMode)renderReadPanel(nodes.get(selectedId));
   if(hadLinks)requestFullLinkRender(true);
 }
 function toggleNodeSelection(el){
@@ -3687,7 +4180,7 @@ function saveProcessInfoField(key,value){
   const before=JSON.stringify(ensureProcessInfo(item));
   const next=MapliniProcessInfoCore.normalize(Object.assign({},item.data.processInfo,{[key]:String(value||'')}));
   if(before===JSON.stringify(next))return false;
-  pushUndo(true);item.data.processInfo=next;persist();renderProcessInfoEditor(item);
+  pushUndo(true);item.data.processInfo=next;refreshNodeResponsibility(item);invalidateNodeGeom(item.data.id);markNodeLinksDirty(item.data.id);drawLinks();persist();renderProcessInfoEditor(item);
   msg('Processinformation sparad');return true;
 }
 function ensureWalkthroughQuestions(item){
@@ -3946,6 +4439,7 @@ if(d.type==='object'){
   el.dataset.objectRole=d.objectRole;
 }
 const label=document.createElement('span');label.className='p48-label';label.textContent=d.text;label.contentEditable='false';label.spellcheck=true;el.appendChild(label);
+const roleBadge=document.createElement('span');roleBadge.className='p48-node-role';roleBadge.hidden=true;el.appendChild(roleBadge);
 const handles={};for(const side of ['right','left','top','bottom']){const h=document.createElement('span');h.className='p48-handle '+side;h.dataset.side=side;el.appendChild(h);handles[side]=h}
 const resizeHandles={};for(const corner of ['se','sw','ne','nw']){const rh=document.createElement('span');rh.className='p48-resize '+corner;rh.dataset.corner=corner;el.appendChild(rh);resizeHandles[corner]=rh}
 const nextWrap=document.createElement('div');nextWrap.className='p48-next-step-wrap';
@@ -3955,6 +4449,8 @@ if(d.type==='decision'){
   const pair=document.createElement('button');pair.type='button';pair.className='p48-next-step-choice decision-pair';pair.dataset.decisionPair='true';pair.textContent='Ja + Nej';pair.title='Skapa båda beslutets grenar';
   nextMenu.appendChild(pair);
 }
+const rejoinChoice=document.createElement('button');rejoinChoice.type='button';rejoinChoice.className='p48-next-step-choice branch-rejoin';rejoinChoice.dataset.branchRejoin='true';rejoinChoice.textContent='↘ Sammanför Ja + Nej';rejoinChoice.hidden=true;
+nextMenu.appendChild(rejoinChoice);
 const nextChoices=d.type==='process'
   ? [['object','▪ Objekt / resultat'],['decision','◇ Beslut'],['document','📄 Dokument'],['end','■ Slut']]
   : d.type==='object'
@@ -3966,10 +4462,10 @@ for(const [type,caption] of nextChoices){
   nextMenu.appendChild(b);
 }
 nextWrap.append(nextBtn,nextMenu);el.appendChild(nextWrap);
-canvas.appendChild(el);nodes.set(d.id,{el,data:d,label,handles,resizeHandles,io:null,docOpen:null,docInlineEditor:null,docInlineInput:null,nextWrap,nextBtn,nextMenu});refreshEmptyState();applyStyle(nodes.get(d.id));renderNodeIO(nodes.get(d.id));renderDocumentLink(nodes.get(d.id));
+canvas.appendChild(el);nodes.set(d.id,{el,data:d,label,roleBadge,handles,resizeHandles,io:null,docOpen:null,docInlineEditor:null,docInlineInput:null,nextWrap,nextBtn,nextMenu,rejoinChoice});el.classList.toggle('p48-subprocess-linked',d.type==='subprocess'&&Boolean(d.childProcessId));refreshEmptyState();applyStyle(nodes.get(d.id));renderNodeIO(nodes.get(d.id));renderDocumentLink(nodes.get(d.id));
 nextBtn.addEventListener('pointerdown',e=>{e.stopPropagation();e.preventDefault()});
-nextBtn.addEventListener('click',e=>{e.stopPropagation();e.preventDefault();if(!canEdit())return;closeNodeNextMenus(nextWrap);nextMenu.hidden=!nextMenu.hidden;nextBtn.setAttribute('aria-expanded',nextMenu.hidden?'false':'true')});
-nextMenu.querySelectorAll('.p48-next-step-choice').forEach(b=>{b.addEventListener('pointerdown',e=>{e.stopPropagation()});b.addEventListener('click',e=>{e.stopPropagation();e.preventDefault();if(b.dataset.decisionPair==='true')addDecisionBranches(d.id);else addNextStepFromNode(d.id,b.dataset.nextType)})});
+nextBtn.addEventListener('click',e=>{e.stopPropagation();e.preventDefault();if(!canEdit())return;closeNodeNextMenus(nextWrap);refreshNodeRejoinChoice(d.id);nextMenu.hidden=!nextMenu.hidden;nextBtn.setAttribute('aria-expanded',nextMenu.hidden?'false':'true')});
+nextMenu.querySelectorAll('.p48-next-step-choice').forEach(b=>{b.addEventListener('pointerdown',e=>{e.stopPropagation()});b.addEventListener('click',e=>{e.stopPropagation();e.preventDefault();if(b.dataset.decisionPair==='true')addDecisionBranches(d.id);else if(b.dataset.branchRejoin==='true')addBranchRejoin(d.id);else addNextStepFromNode(d.id,b.dataset.nextType)})});
 for(const h of Object.values(handles)){
   h.style.width=connectorPointSize+'px';
   h.style.height=connectorPointSize+'px';
@@ -4184,6 +4680,110 @@ function nextStepFlowDirection(sourceId){
   return dy>=0?'down':'up';
 }
 function nextStepConnectorSide(direction){return direction==='down'?'bottom':(direction==='up'?'top':(direction==='left'?'left':'right'))}
+function branchContinuationLane(sourceId){
+  let currentId=String(sourceId||''),guard=0;
+  while(currentId&&guard++<24){
+    const incoming=links.filter(link=>String(link&&link[1])===currentId);
+    if(incoming.length!==1)return null;
+    const link=incoming[0],parentId=String(link[0]||''),parent=nodes.get(parentId),child=nodes.get(currentId);
+    if(!parent||!child)return null;
+    if(parent.data.type==='decision'){
+      const label=String(linkStyle(link).label||'').trim().toLocaleLowerCase('sv-SE');
+      if(!['ja','yes','nej','no'].includes(label))return null;
+      const direction=nextStepFlowDirection(currentId);
+      const horizontal=direction==='right'||direction==='left';
+      const laneCenter=horizontal?(child.el.offsetTop+child.el.offsetHeight/2):(child.el.offsetLeft+child.el.offsetWidth/2);
+      return{decisionId:parentId,label,direction,laneCenter};
+    }
+    currentId=parentId;
+  }
+  return null;
+}
+
+function flowReadabilityRole(link){
+  if(!Array.isArray(link))return'none';
+  const st=linkStyle(link);
+  if(!st.autoManaged)return'manual';
+  if(branchSemantic(st.label))return'branch';
+  return branchContinuationLane(String(link[0]||''))?'branch':'main';
+}
+function applyFlowReadabilityClass(path,link){
+  if(!path||!path.classList)return;
+  path.classList.remove('p48-flow-main','p48-flow-branch');
+  const role=flowReadabilityRole(link);
+  if(role==='main')path.classList.add('p48-flow-main');
+  else if(role==='branch')path.classList.add('p48-flow-branch');
+}
+
+function normalizedBranchLabel(value){
+  const label=String(value||'').trim().toLocaleLowerCase('sv-SE');
+  if(['ja','yes'].includes(label))return'yes';
+  if(['nej','no'].includes(label))return'no';
+  return'';
+}
+function traceSimpleBranchTip(decisionId,semantic){
+  const wanted=semantic==='yes'?'yes':(semantic==='no'?'no':'');if(!wanted)return null;
+  const startEdges=links.filter(link=>String(link&&link[0])===String(decisionId)&&normalizedBranchLabel(linkStyle(link).label)===wanted);
+  if(startEdges.length!==1)return null;
+  let currentId=String(startEdges[0][1]||''),guard=0;const seen=new Set([String(decisionId)]);
+  while(currentId&&guard++<32){
+    if(seen.has(currentId))return null;seen.add(currentId);
+    const current=nodes.get(currentId);if(!current)return null;
+    const outgoing=links.filter(link=>String(link&&link[0])===currentId);
+    if(!outgoing.length)return currentId;
+    if(outgoing.length!==1||current.data.type==='decision')return null;
+    currentId=String(outgoing[0][1]||'');
+  }
+  return null;
+}
+function branchRejoinContext(sourceId){
+  const source=nodes.get(String(sourceId||''));if(!source||source.data.type==='decision')return null;
+  const lane=branchContinuationLane(sourceId);if(!lane)return null;
+  const semantic=normalizedBranchLabel(lane.label);if(!semantic)return null;
+  const ownTip=traceSimpleBranchTip(lane.decisionId,semantic);
+  if(String(ownTip||'')!==String(sourceId||''))return null;
+  const siblingSemantic=semantic==='yes'?'no':'yes';
+  const siblingTip=traceSimpleBranchTip(lane.decisionId,siblingSemantic);
+  if(!siblingTip||String(siblingTip)===String(ownTip))return null;
+  const sibling=nodes.get(String(siblingTip));if(!sibling||sibling.data.type==='decision')return null;
+  const siblingOutgoing=links.filter(link=>String(link&&link[0])===String(siblingTip));
+  if(siblingOutgoing.length)return null;
+  return{decisionId:lane.decisionId,sourceId:String(sourceId),siblingTipId:String(siblingTip),semantic,siblingSemantic,direction:lane.direction||nextStepFlowDirection(sourceId)};
+}
+function refreshNodeRejoinChoice(sourceId){
+  const item=nodes.get(String(sourceId||''));if(!item||!item.rejoinChoice)return;
+  const context=branchRejoinContext(sourceId);
+  item.rejoinChoice.hidden=!context;
+  item.rejoinChoice.disabled=!context||!canEdit();
+  if(context){
+    item.rejoinChoice.textContent='↘ Sammanför Ja + Nej';
+    item.rejoinChoice.title='Skapa ett gemensamt nästa steg för båda grenarna';
+  }
+}
+function addBranchRejoin(sourceId){
+  if(!requireEdit())return false;
+  const context=branchRejoinContext(sourceId);if(!context){msg('Grenarna kan inte sammanföras automatiskt här');return false}
+  const source=nodes.get(context.sourceId),sibling=nodes.get(context.siblingTipId);if(!source||!sibling)return false;
+  const sourcePreferred=preferredNextType(source),siblingPreferred=preferredNextType(sibling);
+  const allowed=new Set(['object','process','decision','document','end']);
+  const type=allowed.has(sourcePreferred)&&sourcePreferred===siblingPreferred?sourcePreferred:'process';
+  pushUndo(true);seq++;const id='n'+seq;
+  const nextObjectRole=type==='object'?'output':null;
+  const el=makeNode({id,type,text:nodeText(type),x:0,y:0,objectRole:nextObjectRole,processInfo:MapliniProcessInfoCore.normalize({})});
+  const rectOf=item=>({x:item.el.offsetLeft,y:item.el.offsetTop,width:item.el.offsetWidth,height:item.el.offsetHeight});
+  const existing=[...nodes.values()].filter(x=>x.data.id!==id).map(rectOf);
+  const spacing=flowSpacingFor(source,type,{});
+  const pos=MapliniEditingCore.smartBranchRejoinPosition(rectOf(source),rectOf(sibling),{width:el.offsetWidth,height:el.offsetHeight},existing,MapliniCanvasCore.DEFAULT_BOUNDS,{...spacing,direction:context.direction,grid:20,linkSegments:existingFlowSegments([context.sourceId,context.siblingTipId])});
+  el.style.left=pos.x+'px';el.style.top=pos.y+'px';sync(el);
+  const side=nextStepConnectorSide(pos.direction||context.direction);
+  links.push(MapliniConnectorCore.create(context.sourceId,id,side,{}));
+  links.push(MapliniConnectorCore.create(context.siblingTipId,id,side,{}));
+  polishAutomaticConnectedLinks([context.sourceId,context.siblingTipId,id],{forceAuto:true});
+  celebrateCreatedNode(el);closeNodeNextMenus();select(el);requestFullLinkRender(true);persist();refreshControls();refreshLinkControls();updateSelectionUi();
+  msg('Ja- och Nej-grenen är sammanförda i ett gemensamt steg');
+  requestAnimationFrame(()=>{ensureNodeVisible(el);beginInlineEdit(el)});
+  return true;
+}
 
 function celebrateCreatedNode(el){
   if(!el)return;
@@ -4191,6 +4791,20 @@ function celebrateCreatedNode(el){
   void el.offsetWidth;
   el.classList.add('p48-spawn');
   setTimeout(()=>el.classList.remove('p48-spawn'),300);
+}
+
+function existingFlowSegments(excludeNodeIds=[]){
+  const excluded=new Set((excludeNodeIds||[]).map(String)),segments=[];
+  links.forEach(link=>{
+    if(!Array.isArray(link)||excluded.has(String(link[0]))||excluded.has(String(link[1])))return;
+    const A=nodes.get(String(link[0]))?.el,B=nodes.get(String(link[1]))?.el;if(!A||!B)return;
+    const points=linkGeometry(link,A,B).points;
+    for(let i=1;i<points.length;i++){
+      const a=points[i-1],b=points[i];
+      if(Array.isArray(a)&&Array.isArray(b))segments.push({x1:a[0],y1:a[1],x2:b[0],y2:b[1]});
+    }
+  });
+  return segments;
 }
 
 function flowSpacingFor(source,targetType,{branch=false}={}){
@@ -4204,16 +4818,33 @@ function flowSpacingFor(source,targetType,{branch=false}={}){
   if(branch){gap=Math.max(gap,148);crossGap=Math.max(crossGap,82);}
   return{gap,crossGap};
 }
+function positionDecisionBranchNode(source,el,label,pos,direction){
+  el.style.left=pos.x+'px';el.style.top=pos.y+'px';sync(el);
+  links.push(MapliniConnectorCore.create(source.data.id,el.dataset.id,nextStepConnectorSide(pos.direction||direction),{label}));
+  celebrateCreatedNode(el);
+  return el;
+}
 function addDecisionBranchNode(source,label,branchIndex,direction){
   seq++;const id='n'+seq;
   const el=makeNode({id,type:'process',text:nodeText('process'),x:0,y:0,processInfo:MapliniProcessInfoCore.normalize({})});
   const sourceRect={x:source.el.offsetLeft,y:source.el.offsetTop,width:source.el.offsetWidth,height:source.el.offsetHeight};
   const existing=[...nodes.values()].filter(x=>x.data.id!==id).map(x=>({x:x.el.offsetLeft,y:x.el.offsetTop,width:x.el.offsetWidth,height:x.el.offsetHeight}));
-  const pos=MapliniEditingCore.smartNextStepPosition(sourceRect,{width:el.offsetWidth,height:el.offsetHeight},existing,MapliniCanvasCore.DEFAULT_BOUNDS,{...flowSpacingFor(source,'process',{branch:true}),direction,branchIndex,grid:20});
-  el.style.left=pos.x+'px';el.style.top=pos.y+'px';sync(el);
-  links.push(MapliniConnectorCore.create(source.data.id,id,nextStepConnectorSide(pos.direction||direction),{label}));
-  celebrateCreatedNode(el);
-  return el;
+  const pos=MapliniEditingCore.smartNextStepPosition(sourceRect,{width:el.offsetWidth,height:el.offsetHeight},existing,MapliniCanvasCore.DEFAULT_BOUNDS,{...flowSpacingFor(source,'process',{branch:true}),direction,branchIndex,grid:20,linkSegments:existingFlowSegments([source.data.id])});
+  return positionDecisionBranchNode(source,el,label,pos,direction);
+}
+function addDecisionBranchPair(source,direction){
+  seq++;const yesId='n'+seq;
+  const yesEl=makeNode({id:yesId,type:'process',text:nodeText('process'),x:0,y:0,processInfo:MapliniProcessInfoCore.normalize({})});
+  seq++;const noId='n'+seq;
+  const noEl=makeNode({id:noId,type:'process',text:nodeText('process'),x:0,y:0,processInfo:MapliniProcessInfoCore.normalize({})});
+  const sourceRect={x:source.el.offsetLeft,y:source.el.offsetTop,width:source.el.offsetWidth,height:source.el.offsetHeight};
+  const excluded=new Set([yesId,noId]);
+  const existing=[...nodes.values()].filter(x=>!excluded.has(x.data.id)).map(x=>({x:x.el.offsetLeft,y:x.el.offsetTop,width:x.el.offsetWidth,height:x.el.offsetHeight}));
+  const targetSize={width:Math.max(yesEl.offsetWidth,noEl.offsetWidth),height:Math.max(yesEl.offsetHeight,noEl.offsetHeight)};
+  const pair=MapliniEditingCore.smartDecisionBranchPositions(sourceRect,targetSize,existing,MapliniCanvasCore.DEFAULT_BOUNDS,{...flowSpacingFor(source,'process',{branch:true}),direction,grid:20,linkSegments:existingFlowSegments([source.data.id])});
+  positionDecisionBranchNode(source,yesEl,'Ja',pair.yes,direction);
+  positionDecisionBranchNode(source,noEl,'Nej',pair.no,direction);
+  return[yesEl,noEl];
 }
 function addDecisionBranches(sourceId){
   if(!requireEdit())return false;
@@ -4226,13 +4857,16 @@ function addDecisionBranches(sourceId){
   if(hasJa&&hasNej){msg('Beslutet har redan Ja- och Nej-grenar');return false}
   pushUndo(true);
   const direction=nextStepFlowDirection(sourceId),created=[];
-  if(!hasJa)created.push(addDecisionBranchNode(source,'Ja',0,direction));
-  if(!hasNej)created.push(addDecisionBranchNode(source,'Nej',1,direction));
+  if(!hasJa&&!hasNej)created.push(...addDecisionBranchPair(source,direction));
+  else{
+    if(!hasJa)created.push(addDecisionBranchNode(source,'Ja',0,direction));
+    if(!hasNej)created.push(addDecisionBranchNode(source,'Nej',1,direction));
+  }
   polishAutomaticConnectedLinks([sourceId,...created.map(el=>el.dataset.id)],{forceAuto:true});
   closeNodeNextMenus();
   if(created.length)select(created[0]);
   requestFullLinkRender(true);persist();refreshControls();refreshLinkControls();updateSelectionUi();
-  msg(created.length===2?'Ja- och Nej-grenar skapade':'Den saknade beslutsgrenen skapades');
+  msg(created.length===2?'Ja- och Nej-grenar skapade symmetriskt':'Den saknade beslutsgrenen skapades');
   if(created.length)requestAnimationFrame(()=>{created.forEach(ensureNodeVisible);beginInlineEdit(created[0])});
   return Boolean(created.length);
 }
@@ -4249,7 +4883,11 @@ function addNextStepFromNode(sourceId,type='process'){
   const existing=[...nodes.values()].filter(x=>x.data.id!==id).map(x=>({x:x.el.offsetLeft,y:x.el.offsetTop,width:x.el.offsetWidth,height:x.el.offsetHeight}));
   const direction=nextStepFlowDirection(sourceId);
   const outgoingCount=links.filter(link=>String(link&&link[0])===String(sourceId)).length;
-  const pos=MapliniEditingCore.smartNextStepPosition(sourceRect,{width:el.offsetWidth,height:el.offsetHeight},existing,MapliniCanvasCore.DEFAULT_BOUNDS,{...flowSpacingFor(source,type,{branch:source.data.type==='decision'}),direction,branchIndex:source.data.type==='decision'?outgoingCount:null,grid:20});
+  const lane=source.data.type==='decision'?null:branchContinuationLane(sourceId);
+  const spacing=flowSpacingFor(source,type,{branch:source.data.type==='decision'});
+  const pos=lane
+    ? MapliniEditingCore.smartFlowContinuationPosition(sourceRect,{width:el.offsetWidth,height:el.offsetHeight},existing,MapliniCanvasCore.DEFAULT_BOUNDS,{...spacing,direction:lane.direction||direction,laneCenter:lane.laneCenter,grid:20,linkSegments:existingFlowSegments([sourceId])})
+    : MapliniEditingCore.smartNextStepPosition(sourceRect,{width:el.offsetWidth,height:el.offsetHeight},existing,MapliniCanvasCore.DEFAULT_BOUNDS,{...spacing,direction,branchIndex:source.data.type==='decision'?outgoingCount:null,grid:20,linkSegments:existingFlowSegments([sourceId])});
   el.style.left=pos.x+'px';el.style.top=pos.y+'px';sync(el);
   const autoLabel=decisionAutoLabel(sourceId);links.push(MapliniConnectorCore.create(sourceId,id,nextStepConnectorSide(pos.direction||direction),{label:autoLabel}));
   polishAutomaticConnectedLinks([sourceId,id],{forceAuto:true});
@@ -4443,17 +5081,28 @@ function linkLabelPlacement(points,offset=22){
   else if(nx<0){nx=-nx;ny=-ny}
   return {x:x+nx*offset,y:y+ny*offset};
 }
-function linkQuickPlacement(points,st){
-  // Keep the routing toolbar on the opposite side of the connector from its text label.
-  // This prevents the three selected-link affordances (text, handle, toolbar) from stacking.
+function linkQuickPlacement(points,st,labelPos=null){
+  // Keep the routing toolbar opposite the label's ACTUAL position. Smart label placement
+  // may flip text around an obstacle, so a fixed side assumption is no longer sufficient.
+  const mp=MapliniConnectorCore.midpoint(points);if(!mp)return null;
+  if(labelPos){
+    const dx=labelPos.x-mp.x,dy=labelPos.y-mp.y,len=Math.max(1,Math.hypot(dx,dy));
+    return{x:mp.x-dx/len*42,y:mp.y-dy/len*42};
+  }
   const hasLabel=Boolean(String(st&&st.label||'').trim());
   return linkLabelPlacement(points,hasLabel?-42:-32);
+}
+function selectedRenderedLabelPosition(){
+  const entry=selectedLinkIndex!=null?linkDomByIndex.get(selectedLinkIndex):null;
+  const rect=entry&&entry.label?entry.label.querySelector('rect'):null;if(!rect)return null;
+  const x=Number(rect.getAttribute('x')),y=Number(rect.getAttribute('y')),w=Number(rect.getAttribute('width')),h=Number(rect.getAttribute('height'));
+  return [x,y,w,h].every(Number.isFinite)?{x:x+w/2,y:y+h/2}:null;
 }
 function updateSelectedLinkUi(points,st){
   const mp=MapliniConnectorCore.midpoint(points);if(!mp)return;
   linkHandle.style.left=mp.x+'px';linkHandle.style.top=mp.y+'px';linkHandle.classList.add('on');
   if(linkQuick){
-    const qp=linkQuickPlacement(points,st)||mp;
+    const qp=linkQuickPlacement(points,st,selectedRenderedLabelPosition())||mp;
     linkQuick.style.left=qp.x+'px';linkQuick.style.top=qp.y+'px';
     linkQuick.classList.toggle('on',canEdit());
   }
@@ -4464,17 +5113,19 @@ function branchSemantic(value){
   if(normalized==='nej'||normalized==='no')return 'no';
   return '';
 }
-function linkLabelElement(st,points,selected=false){
+function linkLabelElement(st,points,selected=false,occupiedLabels=[]){
   const value=String(st&&st.label||'').trim();
   if(!value)return null;
-  const pos=linkLabelPlacement(points);if(!pos)return null;
+  const width=Math.min(300,Math.max(42,value.length*7.8+22)),height=26;
+  const smart=MapliniConnectorCore.smartLabelPlacement(points,width,height,automaticRoutingObstacles([]),occupiedLabels,{offset:22,clearance:8});
+  const pos=smart||linkLabelPlacement(points);if(!pos)return null;
   const ns='http://www.w3.org/2000/svg',g=document.createElementNS(ns,'g');
   const semantic=branchSemantic(value);g.setAttribute('class','p48-link-label'+(semantic?` branch-${semantic}`:''));g.style.pointerEvents='none';
-  const width=Math.min(300,Math.max(42,value.length*7.8+22)),height=26;
   const rect=document.createElementNS(ns,'rect');
   rect.setAttribute('x',pos.x-width/2);rect.setAttribute('y',pos.y-height/2);rect.setAttribute('width',width);rect.setAttribute('height',height);rect.setAttribute('rx','7');
   if(selected){rect.setAttribute('stroke','#5b92cb');rect.setAttribute('stroke-width','1.5')}
   const text=document.createElementNS(ns,'text');text.setAttribute('x',pos.x);text.setAttribute('y',pos.y+.5);text.textContent=value;
+  g._mapliniLabelRect={left:pos.x-width/2,right:pos.x+width/2,top:pos.y-height/2,bottom:pos.y+height/2};
   g.append(rect,text);return g;
 }
 function decisionAutoLabel(sourceId){
@@ -4569,15 +5220,23 @@ function addHtmlLinkHitSegment(index,x1,y1,x2,y2){
 function renderAllLinksNow(){
   rebuildLinkAdjacency();
   linkLayer.innerHTML='';clearLinkHitLayer();
+  const placedLabelRects=[];
+  const fullRoutingObstacles=automaticRoutingObstacles([]);
+  const renderedRoutingSegments=[];
   links.forEach((link,index)=>{
     const [a,b,side]=link;
     const A=nodes.get(a)?.el,B=nodes.get(b)?.el;
     if(!A||!B)return;
 
-    const geom=linkGeometry(link,A,B),st=geom.st,points=geom.points,d=geom.d;
-    for(let pi=1;pi<points.length;pi++)addHtmlLinkHitSegment(index,points[pi-1][0],points[pi-1][1],points[pi][0],points[pi][1]);
+    const geom=linkGeometry(link,A,B,{routingObstacles:fullRoutingObstacles,routingSegments:renderedRoutingSegments}),st=geom.st,points=geom.points,d=geom.d;
+    lastKnownLinkPoints.set(index,points.map(p=>[p[0],p[1]]));
+    for(let pi=1;pi<points.length;pi++){
+      renderedRoutingSegments.push({x1:points[pi-1][0],y1:points[pi-1][1],x2:points[pi][0],y2:points[pi][1],sourceId:String(a),targetId:String(b)});
+      addHtmlLinkHitSegment(index,points[pi-1][0],points[pi-1][1],points[pi][0],points[pi][1]);
+    }
 
     const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.dataset.linkIndex=String(index);
     const branchKind=branchSemantic(st.label);
     const groupClasses=[];if(branchKind)groupClasses.push(`p48-branch-${branchKind}`);if(selectedLinkIndex===index||selectedLinkIndices.has(index))groupClasses.push('p48-link-selected');
     if(groupClasses.length)g.setAttribute('class',groupClasses.join(' '));
@@ -4591,6 +5250,8 @@ function renderAllLinksNow(){
 
     const v=document.createElementNS('http://www.w3.org/2000/svg','path');
     v.setAttribute('class','p48-link-visible');
+    v.classList.toggle('p48-auto-live',Boolean(st.autoManaged));
+    applyFlowReadabilityClass(v,link);
     v.setAttribute('d',d);
     v.setAttribute('stroke',st.color);
     v.setAttribute('stroke-width',st.width);
@@ -4634,8 +5295,8 @@ function renderAllLinksNow(){
       mk.style.pointerEvents='none';
       g.appendChild(mk);
     }
-    const labelEl=linkLabelElement(st,points,selectedLinkIndex===index);
-    if(labelEl)g.appendChild(labelEl);
+    const labelEl=linkLabelElement(st,points,selectedLinkIndex===index,placedLabelRects);
+    if(labelEl){g.appendChild(labelEl);if(labelEl._mapliniLabelRect)placedLabelRects.push(labelEl._mapliniLabelRect);}
 
     // hit path last = topmost click target
     g.appendChild(hit);
@@ -4688,6 +5349,16 @@ function markNodeLinksDirty(id){
   for(const i of linksForNode(id))dirtyLinks.add(i);
 }
 
+function renderedLinkLabelRects(excludeIndex){
+  const out=[];
+  for(const [idx,entry] of linkDomByIndex.entries()){
+    if(idx===excludeIndex||!entry||!entry.label)continue;
+    const rect=entry.label.querySelector('rect');if(!rect)continue;
+    const x=Number(rect.getAttribute('x')),y=Number(rect.getAttribute('y')),w=Number(rect.getAttribute('width')),h=Number(rect.getAttribute('height'));
+    if([x,y,w,h].every(Number.isFinite))out.push({left:x,right:x+w,top:y,bottom:y+h});
+  }
+  return out;
+}
 function redrawSingleLink(index){
   // Small-path update; if DOM entry isn't available, fall back to full render.
   const entry=linkDomByIndex.get(index);
@@ -4697,8 +5368,10 @@ function redrawSingleLink(index){
   const A=nodes.get(a)?.el,B=nodes.get(b)?.el;
   if(!A||!B){fullLinkRenderNeeded=true;return}
   const geom=linkGeometry(link,A,B),st=geom.st,points=geom.points,d=geom.d;
+  lastKnownLinkPoints.set(index,points.map(p=>[p[0],p[1]]));
   entry.visible.setAttribute('d',d);
   entry.visible.classList.toggle('p48-auto-live',Boolean(st.autoManaged));
+  applyFlowReadabilityClass(entry.visible,link);
   entry.hit.setAttribute('d',d);
   if(entry.halo)entry.halo.setAttribute('d',d);
 
@@ -4724,7 +5397,7 @@ function redrawSingleLink(index){
     entry.marker=mk;
   }else entry.marker=null;
   if(entry.label&&entry.label.parentNode)entry.label.parentNode.removeChild(entry.label);
-  const labelEl=linkLabelElement(st,points,selectedLinkIndex===index);
+  const labelEl=linkLabelElement(st,points,selectedLinkIndex===index,renderedLinkLabelRects(index));
   if(labelEl)entry.group.insertBefore(labelEl,entry.hit);
   entry.label=labelEl||null;
 
@@ -5267,7 +5940,7 @@ function renderDeviationDashboard(){
     const status=document.createElement('span');status.className='p48-deviation-chip';status.textContent=row.status==='resolved'?'Hanterad':'Öppen';meta.appendChild(status);
     if(row.cloud){const cloud=document.createElement('span');cloud.className='p48-deviation-chip';cloud.textContent='Moln';meta.appendChild(cloud)}
     const actions=document.createElement('div');actions.className='p48-deviation-item-actions';
-    const processBtn=document.createElement('button');processBtn.type='button';processBtn.textContent='Visa i process';processBtn.disabled=!processes[row.processId];processBtn.addEventListener('click',()=>openDeviationProcess(row));actions.appendChild(processBtn);
+    const processBtn=document.createElement('button');processBtn.type='button';processBtn.className=row.status==='open'?'improve':'';processBtn.textContent=row.status==='open'?'Förbättra steg':'Visa i process';processBtn.disabled=!processes[row.processId];processBtn.addEventListener('click',()=>row.status==='open'?startDeviationImprovement(row):openDeviationProcess(row));actions.appendChild(processBtn);
     const resolve=document.createElement('button');resolve.type='button';resolve.className='resolve';resolve.textContent=row.status==='resolved'?'Öppna avvikelse igen':'Markera avvikelse hanterad';resolve.addEventListener('click',()=>{updateWalkthroughDeviationStatus(row.runId,row.deviationIndex,row.status==='resolved'?'open':'resolved');renderDeviationDashboard()});actions.appendChild(resolve);
     item.append(top,question,explanation,meta,actions);deviationList.appendChild(item);
   });
@@ -5278,7 +5951,30 @@ function openDeviationProcess(row){
   if(row.nodeId&&nodes.has(String(row.nodeId))){const item=nodes.get(String(row.nodeId));if(item){select(item.el);requestAnimationFrame(()=>ensureNodeVisible(item.el))}}
   msg('Avvikelsens process öppnad');return true;
 }
+function closeImprovementContext(){
+  activeImprovementDeviation=null;if(improvementContext)improvementContext.hidden=true;
+}
+function renderImprovementContext(row){
+  activeImprovementDeviation=row||null;if(!improvementContext||!row)return false;
+  if(improvementTitle)improvementTitle.textContent=`${row.nodeText||'Steg'} · ${row.question||'Avvikelse'}`;
+  if(improvementText)improvementText.textContent=row.explanation?`Observerat i genomgången: ${row.explanation}`:'Avvikelsen hör till det markerade steget. Justera processens arbetssätt, kontroll eller beskrivning innan du markerar den som hanterad.';
+  if(improvementResolve)improvementResolve.disabled=row.status==='resolved';
+  improvementContext.hidden=false;return true;
+}
+function startDeviationImprovement(row){
+  if(!row||!openDeviationProcess(row))return false;
+  renderImprovementContext(row);
+  if(row.nodeId&&nodes.has(String(row.nodeId)))requestAnimationFrame(()=>{const item=nodes.get(String(row.nodeId));if(item){select(item.el);ensureNodeVisible(item.el)}});
+  msg('Avvikelsen är kopplad till det markerade steget');return true;
+}
+function resolveActiveImprovement(){
+  const row=activeImprovementDeviation;if(!row)return false;
+  const ok=updateWalkthroughDeviationStatus(row.runId,row.deviationIndex,'resolved');
+  if(ok){closeImprovementContext();msg('Avvikelsen markerades som hanterad efter förbättring');}
+  return ok;
+}
 function openDeviationDashboard(){
+  closeImprovementContext();
   if(!deviationPanel)return false;deviationPanel.hidden=false;if(deviationBackdrop)deviationBackdrop.hidden=false;
   if(deviationStatus)deviationStatus.value='open';if(deviationOwner)deviationOwner.value='';if(deviationOverdueOnly)deviationOverdueOnly.checked=false;
   renderDeviationDashboard();
@@ -5377,9 +6073,9 @@ function saveCompletedWalkthroughRun(){
   const result=MapliniWalkthroughCore.summarize(walkthroughState.history||[]);
   const record={
     id:'run-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8),
-    processId:String(currentId||''),
+    processId:String(walkthroughState.rootProcessId||currentId||''),
     workspaceId:currentWorkspaceId||null,
-    processName:String(nameInput.value.trim()||'Namnlös process').slice(0,300),
+    processName:String(walkthroughState.rootProcessName||nameInput.value.trim()||'Namnlös process').slice(0,300),
     person:String(walkthroughState.person||'').slice(0,120),
     startedAt:Number(walkthroughState.startedAt)||Date.now(),
     completedAt:Date.now(),
@@ -5387,8 +6083,9 @@ function saveCompletedWalkthroughRun(){
     result:{steps:result.steps,answered:result.answered,yes:result.yes,no:result.no,routeYes:result.routeYes,routeNo:result.routeNo,controlYes:result.controlYes,controlNo:result.controlNo,passed:result.passed,deviations:result.deviations},
     history:JSON.parse(JSON.stringify(walkthroughState.history||[]))
   };
-  const other=readWalkthroughRuns().filter(r=>String(r.processId||'')!==String(currentId||''));
-  const current=[record,...walkthroughRunsForCurrentProcess()].slice(0,50);
+  const runProcessId=String(record.processId||'');
+  const other=readWalkthroughRuns().filter(r=>String(r.processId||'')!==runProcessId);
+  const current=[record,...readWalkthroughRuns().filter(r=>String(r.processId||'')===runProcessId).sort((a,b)=>(Number(b.completedAt)||0)-(Number(a.completedAt)||0))].slice(0,50);
   if(!writeWalkthroughRuns([...current,...other]))return null;
   walkthroughState.savedRunId=record.id;renderWalkthroughHistory();
   void saveWalkthroughRunToCloud(record).then(ok=>{
@@ -5400,15 +6097,18 @@ function saveCompletedWalkthroughRun(){
 }
 function closeWalkthrough(){
   if(walkthroughState?.quickAdvanceTimer)window.clearTimeout(walkthroughState.quickAdvanceTimer);
+  const rootId=String(walkthroughState?.rootProcessId||'');
   clearWalkthroughHighlight();walkthroughState=null;
+  if(rootId&&rootId!==String(currentId||'')&&processes[rootId]){persist();openProcess(rootId)}
   if(walkthroughPanel)walkthroughPanel.hidden=true;
   if(walkthroughBackdrop)walkthroughBackdrop.hidden=true;
   if(walkthroughValidation)walkthroughValidation.hidden=true;
+  if(mobileWalkthroughForcedRead){mobileWalkthroughForcedRead=false;setReadModeWithOptions(false,{silent:true})}
 }
 function renderWalkthroughStart(){
   if(!walkthroughStartChoice)return;
   const data=walkthroughNodeData(),starts=MapliniWalkthroughCore.startNodeIds(data,links);
-  walkthroughState={history:[],currentId:null,currentAnswers:{},currentDeviationDetails:{},person:'',startedAt:null,startIds:starts,savedRunId:null};
+  walkthroughState={history:[],currentId:null,currentAnswers:{},currentDeviationDetails:{},person:'',startedAt:null,startIds:starts,savedRunId:null,rootProcessId:String(currentId||''),rootProcessName:String(nameInput.value.trim()||'Namnlös process').slice(0,300),processStack:[],pendingSubprocessStarts:null};
   walkthroughStartChoice.innerHTML='';
   if(!starts.length){
     const empty=document.createElement('div');empty.className='p48-walkthrough-validation';empty.textContent='Processen saknar rutor att gå igenom.';walkthroughStartChoice.appendChild(empty);
@@ -5432,6 +6132,7 @@ function renderWalkthroughStart(){
 }
 function openWalkthrough(){
   if(nodes.size===0){msg('Lägg till minst ett steg innan processen kan följas');return false}
+  if(isMobileLayout()&&!readMode){mobileWalkthroughForcedRead=true;setReadModeWithOptions(true,{silent:true})}
   if(walkthroughPanel)walkthroughPanel.hidden=false;
   if(walkthroughBackdrop)walkthroughBackdrop.hidden=false;
   if(walkthroughStart)walkthroughStart.hidden=false;
@@ -5456,7 +6157,7 @@ function beginWalkthrough(){
   if(!person){setWalkthroughValidation('Ange namn eller initialer så att genomgången kan följas upp.');walkthroughPerson?.focus();return}
   setWalkthroughValidation('');
   walkthroughState.person=person;
-  walkthroughState.startedAt=Date.now();walkthroughState.currentId=id;walkthroughState.currentAnswers={};walkthroughState.currentDeviationDetails={};walkthroughState.history=[];walkthroughState.savedRunId=null;
+  walkthroughState.startedAt=Date.now();walkthroughState.rootProcessId=String(currentId||'');walkthroughState.rootProcessName=String(nameInput.value.trim()||'Namnlös process').slice(0,300);walkthroughState.processStack=[];walkthroughState.pendingSubprocessStarts=null;walkthroughState.currentId=id;walkthroughState.currentAnswers={};walkthroughState.currentDeviationDetails={};walkthroughState.history=[];walkthroughState.savedRunId=null;
   if(walkthroughStart)walkthroughStart.hidden=true;if(walkthroughRun)walkthroughRun.hidden=false;if(walkthroughSummary)walkthroughSummary.hidden=true;
   renderWalkthroughStep();
 }
@@ -5489,7 +6190,62 @@ function updateWalkthroughProgress(){
   const deviations=walkthroughDeviationTotal();
   if(walkthroughDeviationCount)walkthroughDeviationCount.textContent=deviations?`${deviations} ${deviations===1?'avvikelse':'avvikelser'}`:'';
 }
+function walkthroughProcessStartIds(processId){
+  const p=processes[String(processId||'')];if(!p)return[];
+  const nodeData=(Array.isArray(p.nodes)?p.nodes:[]).map(n=>n&&typeof n==='object'?n:{});
+  const processLinks=MapliniConnectorCore.normalizeLinks(p.links||[]);
+  return MapliniWalkthroughCore.startNodeIds(nodeData,processLinks);
+}
+function walkthroughProcessPath(){
+  if(!walkthroughState)return[];
+  const ids=[String(walkthroughState.rootProcessId||'')];
+  for(const frame of walkthroughState.processStack||[])ids.push(String(frame.childProcessId||''));
+  return ids.filter(Boolean).map(id=>String(processes[id]?.name||'Namnlös process'));
+}
+function renderPendingSubprocessStart(){
+  const pending=walkthroughState?.pendingSubprocessStarts;if(!pending)return false;
+  clearWalkthroughHighlight();setWalkthroughValidation('');
+  if(walkthroughStepType)walkthroughStepType.textContent='DELPROCESS · VÄLJ START';
+  if(walkthroughStepTitle)walkthroughStepTitle.textContent=String(processes[currentId]?.name||'Delprocess');
+  if(walkthroughStepDescription){walkthroughStepDescription.textContent='Den här delprocessen har flera startpunkter. Välj var genomgången ska börja.';walkthroughStepDescription.hidden=false}
+  if(walkthroughStepMeta){walkthroughStepMeta.innerHTML='';const chip=document.createElement('span');chip.textContent=walkthroughProcessPath().join(' › ');walkthroughStepMeta.appendChild(chip)}
+  if(walkthroughQuestions){walkthroughQuestions.innerHTML='';const note=document.createElement('div');note.className='p48-walkthrough-no-questions';note.textContent='Välj startpunkt nedan.';walkthroughQuestions.appendChild(note)}
+  if(walkthroughNext)walkthroughNext.hidden=true;if(walkthroughFinish)walkthroughFinish.hidden=true;
+  if(walkthroughNextChoices){
+    walkthroughNextChoices.innerHTML='';walkthroughNextChoices.hidden=false;
+    pending.startIds.forEach(id=>{
+      const target=nodes.get(String(id)),btn=document.createElement('button');btn.type='button';btn.className='p48-walkthrough-next-choice';
+      const main=document.createElement('span');main.textContent=target?.data?.text||typeLabel(target?.data?.type)||'Start';
+      const small=document.createElement('small');small.textContent=typeLabel(target?.data?.type);btn.append(main,small);
+      btn.addEventListener('click',()=>{walkthroughState.pendingSubprocessStarts=null;walkthroughState.currentId=String(id);walkthroughState.currentAnswers={};walkthroughState.currentDeviationDetails={};renderWalkthroughStep()});
+      walkthroughNextChoices.appendChild(btn);
+    });
+  }
+  updateWalkthroughProgress();return true;
+}
+function returnFromWalkthroughSubprocess(){
+  if(!walkthroughState)return false;
+  const stack=walkthroughState.processStack||[];
+  if(!stack.length){showWalkthroughSummary();return true}
+  const frame=stack.pop();walkthroughState.pendingSubprocessStarts=null;
+  persist();openProcess(frame.parentProcessId);
+  if(frame.returnNextId){walkthroughState.currentId=String(frame.returnNextId);walkthroughState.currentAnswers={};walkthroughState.currentDeviationDetails={};renderWalkthroughStep();return true}
+  walkthroughState.currentId=null;
+  return returnFromWalkthroughSubprocess();
+}
+function enterWalkthroughSubprocess(item,returnNextId){
+  if(!walkthroughState||!item||item.data?.type!=='subprocess')return false;
+  const childId=String(item.data.childProcessId||'');if(!childId||!processes[childId])return false;
+  const starts=walkthroughProcessStartIds(childId);
+  walkthroughState.processStack=Array.isArray(walkthroughState.processStack)?walkthroughState.processStack:[];
+  walkthroughState.processStack.push({parentProcessId:String(currentId||''),parentNodeId:String(item.data.id||''),returnNextId:returnNextId==null?null:String(returnNextId),childProcessId:childId});
+  persist();openProcess(childId);walkthroughState.currentAnswers={};walkthroughState.currentDeviationDetails={};
+  if(!starts.length){msg('Delprocessen saknar steg – fortsätter i föregående process');return returnFromWalkthroughSubprocess()}
+  if(starts.length>1){walkthroughState.currentId=null;walkthroughState.pendingSubprocessStarts={startIds:starts};return renderPendingSubprocessStart()}
+  walkthroughState.pendingSubprocessStarts=null;walkthroughState.currentId=String(starts[0]);renderWalkthroughStep();return true;
+}
 function renderWalkthroughStep(){
+  if(walkthroughState?.pendingSubprocessStarts)return renderPendingSubprocessStart();
   if(!walkthroughState?.currentId)return;
   const item=nodes.get(String(walkthroughState.currentId));
   if(!item){showWalkthroughSummary();return}
@@ -5502,6 +6258,7 @@ function renderWalkthroughStep(){
   if(walkthroughStepDescription){walkthroughStepDescription.textContent=info.description||'';walkthroughStepDescription.hidden=!info.description}
   if(walkthroughStepMeta){
     walkthroughStepMeta.innerHTML='';
+    const path=walkthroughProcessPath();if(path.length>1){const chip=document.createElement('span');chip.textContent=path.join(' › ');walkthroughStepMeta.appendChild(chip)}
     const meta=[['Ansvar',info.responsibleRole],['System',info.system],['Tid',info.duration]];
     meta.forEach(([label,value])=>{if(!value)return;const chip=document.createElement('span');chip.textContent=`${label}: ${value}`;walkthroughStepMeta.appendChild(chip)});
   }
@@ -5583,13 +6340,27 @@ function maybeAutoAdvanceWalkthrough(item,question,answer){
     targetId=edges[0].to;
   }
   if(!targetId)return false;
+  prepareWalkthroughTransition(item.data.id,targetId);
   window.clearTimeout(walkthroughState.quickAdvanceTimer);
   walkthroughState.quickAdvanceTimer=window.setTimeout(()=>{
     if(!walkthroughState||String(walkthroughState.currentId)!==String(item.data.id))return;
     if(walkthroughState.currentAnswers?.[question.id]!==answer)return;
     commitWalkthroughStep(targetId);
-  },220);
+  },360);
   return true;
+}
+function clearWalkthroughTransition(){
+  document.querySelectorAll('.p48-walk-departing,.p48-walk-arriving').forEach(el=>el.classList.remove('p48-walk-departing','p48-walk-arriving'));
+  document.querySelectorAll('#p48-links .p48-walk-link-transition').forEach(el=>el.classList.remove('p48-walk-link-transition'));
+  walkthroughPanel?.classList.remove('p48-walk-transitioning');
+}
+function prepareWalkthroughTransition(fromId,toId){
+  clearWalkthroughTransition();
+  const from=nodes.get(String(fromId)),to=nodes.get(String(toId));
+  from?.el?.classList.add('p48-walk-departing');to?.el?.classList.add('p48-walk-arriving');
+  const linkIndex=links.findIndex(l=>String(l.from)===String(fromId)&&String(l.to)===String(toId));
+  if(linkIndex>=0)document.querySelector(`#p48-links [data-link-index="${linkIndex}"]`)?.classList.add('p48-walk-link-transition');
+  walkthroughPanel?.classList.add('p48-walk-transitioning');
 }
 function walkthroughRoutingMessage(route){
   if(!route||route.mode==='manual'&&route.reason==='no-route-question')return '';
@@ -5683,6 +6454,7 @@ function walkthroughDeviationDetailsAreComplete(item){
   return true;
 }
 function commitWalkthroughStep(nextId){
+  clearWalkthroughTransition();
   if(walkthroughState?.quickAdvanceTimer){window.clearTimeout(walkthroughState.quickAdvanceTimer);walkthroughState.quickAdvanceTimer=null}
   if(!walkthroughState?.currentId)return false;
   const item=nodes.get(String(walkthroughState.currentId));if(!item)return false;
@@ -5693,9 +6465,12 @@ function commitWalkthroughStep(nextId){
     const d=walkthroughState.currentDeviationDetails?.[q.id]||{};
     return {id:q.id,question:q.text,kind:q.kind||'control',route:q.kind==='route'||q.route===true,quick:Boolean(q.quick),answer:walkthroughState.currentAnswers[q.id]||'',explanation:d.explanation||'',owner:d.owner||'',dueDate:d.dueDate||''};
   });
-  walkthroughState.history.push({nodeId:item.data.id,nodeText:item.data.text||'',nodeType:item.data.type,answers});
+  walkthroughState.history.push({processId:String(currentId||''),processName:String(nameInput.value.trim()||'Namnlös process'),nodeId:item.data.id,nodeText:item.data.text||'',nodeType:item.data.type,answers});
   if(walkthroughState.history.length>=200){msg('Genomgången stoppades efter 200 steg för att undvika en oändlig loop');showWalkthroughSummary();return true}
-  if(!nextId){showWalkthroughSummary();return true}
+  if(item.data.type==='subprocess'&&String(item.data.childProcessId||'')&&processes[String(item.data.childProcessId||'')]){
+    return enterWalkthroughSubprocess(item,nextId);
+  }
+  if(!nextId){if((walkthroughState.processStack||[]).length)return returnFromWalkthroughSubprocess();showWalkthroughSummary();return true}
   walkthroughState.currentId=String(nextId);walkthroughState.currentAnswers={};walkthroughState.currentDeviationDetails={};renderWalkthroughStep();return true;
 }
 function showWalkthroughSummary(){
@@ -6380,7 +7155,7 @@ canvas.addEventListener('click',e=>{
     if(!selectionMode){clearSelection();clearLinkSelection();finishTempArrow();}
   }
 });
-nameInput.addEventListener('change',()=>{if(!requireEdit())return;persist(false,true);msg('Namn sparat')});
+nameInput.addEventListener('change',()=>{if(!requireEdit())return;persist(false,true);refreshMobileReaderBar();msg('Namn sparat')});
 root.querySelector('#p48-new').addEventListener('click',newProcess);
 if(newProcessCreate)newProcessCreate.addEventListener('click',createNewProcessFromDialog);
 if(newProcessCancel)newProcessCancel.addEventListener('click',()=>setNewProcessDialog(false));
@@ -6398,7 +7173,12 @@ root.querySelector('#p48-save').addEventListener('click',async()=>{
     }catch(e){
       console.error(e);reportRuntimeError(e,'cloud-save');
       const localOk=saveLocal(true);
-      msg(localOk?'Sparad lokalt · molnsynk misslyckades':'Sparning misslyckades lokalt och i molnet');
+      if(isCloudConflict(e)){
+        cloudBadge.className='p48-cloud-badge off';cloudBadge.textContent='Molnkonflikt';
+        cloudHelp.textContent='Sparningen stoppades. Din version finns kvar lokalt; molnversionen har ändrats av någon annan.';
+        msg('Molnkonflikt · inget skrevs över');
+        await openCloudConflictResolution();
+      }else msg(localOk?'Sparad lokalt · molnsynk misslyckades':'Sparning misslyckades lokalt och i molnet');
     }
     return;
   }
@@ -6406,6 +7186,11 @@ root.querySelector('#p48-save').addEventListener('click',async()=>{
   const localOk=saveLocal(true);
   msg(localOk?'Sparad lokalt':'Lokal sparning misslyckades');
 });
+if(conflictCopy)conflictCopy.addEventListener('click',keepConflictLocalCopy);
+if(conflictCloud)conflictCloud.addEventListener('click',loadConflictCloudVersion);
+if(conflictForce)conflictForce.addEventListener('click',async()=>{try{await forceConflictCloudVersion()}catch(e){console.error(e);msg('Kunde inte ersätta molnversionen · inget skrevs över')}});
+if(conflictCancel)conflictCancel.addEventListener('click',()=>setConflictDialog(false));
+if(conflictBackdrop)conflictBackdrop.addEventListener('click',()=>setConflictDialog(false));
 function closeOpenMenus(exceptTarget=null){
   root.querySelectorAll('details.p48-canvas-menu[open],details.p48-sheets-menu[open]').forEach(menu=>{
     if(!exceptTarget||!menu.contains(exceptTarget))menu.open=false;
@@ -6422,13 +7207,22 @@ root.querySelectorAll('details.p48-canvas-menu,details.p48-sheets-menu').forEach
   root.querySelectorAll('details.p48-canvas-menu[open],details.p48-sheets-menu[open]').forEach(other=>{if(other!==menu)other.open=false;});
 }));
 
-shareBtn.addEventListener('click',shareCurrent);copyShareBtn.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(shareUrlInput.value);msg('Länk kopierad')}catch(e){try{shareUrlInput.select();const ok=document.execCommand('copy');if(!ok)throw new Error('copy command failed');msg('Länk kopierad')}catch(copyErr){reportRuntimeError(copyErr,'share-copy');msg('Kunde inte kopiera länken')}}});
+shareBtn.addEventListener('click',shareCurrent);if(revokeShareBtn)revokeShareBtn.addEventListener('click',revokeCurrentShare);copyShareBtn.addEventListener('click',async()=>{try{await navigator.clipboard.writeText(shareUrlInput.value);msg('Länk kopierad')}catch(e){try{shareUrlInput.select();const ok=document.execCommand('copy');if(!ok)throw new Error('copy command failed');msg('Länk kopierad')}catch(copyErr){reportRuntimeError(copyErr,'share-copy');msg('Kunde inte kopiera länken')}}});
 if(deviationLaunch)deviationLaunch.addEventListener('click',openDeviationDashboard);
 if(deviationClose)deviationClose.addEventListener('click',closeDeviationDashboard);
 if(deviationBackdrop)deviationBackdrop.addEventListener('click',closeDeviationDashboard);
 if(deviationStatus)deviationStatus.addEventListener('change',renderDeviationDashboard);
 if(deviationOwner)deviationOwner.addEventListener('input',renderDeviationDashboard);
 if(deviationOverdueOnly)deviationOverdueOnly.addEventListener('change',renderDeviationDashboard);
+if(improvementProperties)improvementProperties.addEventListener('click',()=>{if(activeImprovementDeviation?.nodeId&&nodes.has(String(activeImprovementDeviation.nodeId))){const item=nodes.get(String(activeImprovementDeviation.nodeId));select(item.el)}focusFormattingPanel()});
+if(improvementResolve)improvementResolve.addEventListener('click',resolveActiveImprovement);
+if(improvementClose)improvementClose.addEventListener('click',closeImprovementContext);
+if(readModeToggle)readModeToggle.addEventListener('click',()=>setReadMode(!readMode));
+if(mobileReaderFollow)mobileReaderFollow.addEventListener('click',openWalkthrough);
+if(mobileReaderFit)mobileReaderFit.addEventListener('click',fitProcessToScreen);
+if(mobileReaderEdit)mobileReaderEdit.addEventListener('click',()=>{mobileConsumptionInitialized=true;setReadMode(false)});
+if(readPanelClose)readPanelClose.addEventListener('click',()=>{readPanel.hidden=true});
+document.addEventListener('keydown',e=>{if(readMode&&e.key==='Escape'){e.preventDefault();setReadMode(false)}});
 if(walkthroughLaunch)walkthroughLaunch.addEventListener('click',openWalkthrough);
 if(walkthroughClose)walkthroughClose.addEventListener('click',closeWalkthrough);
 if(walkthroughBackdrop)walkthroughBackdrop.addEventListener('click',closeWalkthrough);
@@ -6933,7 +7727,7 @@ function focusAnalysisNodes(ids){
 }
 function renderProcessAnalysis(result){
   if(!analysisPanel||!analysisList)return;analysisPanel.hidden=false;
-  if(analysisScore)analysisScore.textContent=(Number(result.score)||0).toFixed(1)+'/10';
+  if(analysisScore)analysisScore.textContent=String((result.findings||[]).length);
   if(analysisErrors)analysisErrors.textContent=String(result.counts.error||0);
   if(analysisWarnings)analysisWarnings.textContent=String(result.counts.warning||0);
   if(analysisInfo)analysisInfo.textContent=String(result.counts.info||0);
@@ -6966,11 +7760,15 @@ function renderProcessAnalysis(result){
     const title=document.createElement('div');title.className='p48-analysis-item-title';title.textContent=f.title;
     head.append(badge,title);
     const detail=document.createElement('div');detail.className='p48-analysis-item-detail';detail.textContent=f.detail;
+    const basis=document.createElement('div');basis.className='p48-analysis-basis';
+    const kind=f.evidenceKind==='fact'?'Strukturfakta':'Bedömning';
+    const basisLabel=document.createElement('b');basisLabel.textContent=kind+':';
+    basis.append(basisLabel,document.createTextNode(' '+String(f.rule||'Regeln kräver mänsklig bedömning.')));
     const fix=document.createElement('div');fix.className='p48-analysis-item-fix';
     const fixLabel=document.createElement('strong');fixLabel.textContent='Gör så här:';
     const fixText=document.createElement('span');fixText.textContent=f.action||'Kontrollera flödet.';
     fix.append(fixLabel,fixText);
-    item.append(head,detail,fix);
+    item.append(head,detail,basis,fix);
     if(f.nodeIds.length){
       const action=document.createElement('button');action.type='button';action.className='p48-analysis-item-action';
       action.textContent=f.nodeIds.length===1?'Visa berörd ruta →':`Visa ${f.nodeIds.length} berörda rutor →`;
@@ -7163,6 +7961,14 @@ if(scroll)scroll.addEventListener('pointerdown',e=>{
   if(e.target===scroll||e.target===canvas||e.target.classList?.contains('p48-print-page'))closeTransientMenus();
 },{capture:true});
 if(fitScreenBtn)fitScreenBtn.addEventListener('click',fitProcessToScreen);
+if(overviewToggle)overviewToggle.addEventListener('click',()=>setProcessOverview(overviewPanel&&overviewPanel.hidden));
+if(overviewClose)overviewClose.addEventListener('click',()=>setProcessOverview(false));
+if(overviewStage)overviewStage.addEventListener('click',e=>{
+  if(e.target.closest('.p48-overview-node')||!overviewBounds)return;
+  const rect=overviewStage.getBoundingClientRect(),tr=overviewTransform(overviewBounds);if(!tr)return;
+  const x=(e.clientX-rect.left-tr.ox)/tr.scale,y=(e.clientY-rect.top-tr.oy)/tr.scale;
+  centerOverviewOnLogical(x,y);
+});
 function applyProcessScaleSlider(next){
   const target=Math.max(50,Math.min(150,Number(next)||100));
   if(processScaleValue)processScaleValue.textContent=Math.round(target)+' %';
@@ -7201,6 +8007,7 @@ if(nodeQuickNextMore)nodeQuickNextMore.addEventListener('click',e=>{
   const item=selectedId&&selectedIds.size===1?nodes.get(selectedId):null;
   if(item&&isNextStepSource(item)&&item.nextBtn)item.nextBtn.click();
 });
+if(nodeQuickSubprocess)nodeQuickSubprocess.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();const item=selectedId&&selectedIds.size===1?nodes.get(selectedId):null;if(item)openLinkedSubprocess(item)});
 if(nodeQuickFormat)nodeQuickFormat.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();focusFormattingPanel()});
 if(nodeQuickColor)nodeQuickColor.addEventListener('change',e=>{e.stopPropagation();updateStyle({bgColor:String(nodeQuickColor.value||'#ffffff')})});
 if(nodeQuickDuplicate)nodeQuickDuplicate.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();duplicateSelectedNodes();refreshNodeQuickToolbar()});
@@ -7215,6 +8022,7 @@ zoomOutBtn.addEventListener('click',()=>applyCanvasScale(MapliniCanvasCore.zoomS
 zoomInBtn.addEventListener('click',()=>applyCanvasScale(MapliniCanvasCore.zoomStep(canvasScale,'in')));
 zoomResetBtn.addEventListener('click',()=>applyCanvasScale(1));
 applyCanvasScale(1,false);
+renderBreadcrumbs();
 
 
 function showPendingRecovery(){if(!pendingRecoveryStore||!recoveryBanner)return;recoveryBanner.hidden=false}
@@ -7252,6 +8060,7 @@ const SHARE_TOKEN="__SHARE_TOKEN__";
   nameInput.value=fallback.name;
 }
 renderProcesses();refreshControls();updateSelectionUi();updateAccountUi();setSaveState('saved');showPendingRecovery();msg('Klar');
+ if(isMobileLayout())activateMobileConsumptionDefault();
  applyProcessStyle();
  renderPrintPages();
  if(ownerId()){
@@ -7277,6 +8086,8 @@ function syncResponsiveLayout(){
     canvas.classList.toggle('p48-selection-mode',selectionMode);
   }
   if(scroll){scroll.style.visibility='visible';scroll.style.pointerEvents='auto';}
+  refreshMobileReaderBar();
+  if(mobile&&!mobileConsumptionInitialized&&nodes.size)setTimeout(activateMobileConsumptionDefault,0);
   invalidateNodeGeom();
   requestFullLinkRender();
   scheduleHorizontalNavSync();

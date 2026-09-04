@@ -9,7 +9,11 @@ let r=P.analyze([
 assert(r.findings.some(f=>f.code==='missing_end'));
 assert(r.findings.some(f=>f.code==='decision_branches'));
 assert(r.findings.some(f=>f.code==='dead_end'&&f.nodeIds.includes('a')));
-assert(r.score<10);
+assert(!Object.prototype.hasOwnProperty.call(r,'score'));
+assert.equal(r.analysisType,'structural_rules');
+assert(r.factCount>=1);
+assert(r.findings.every(f=>['fact','assessment'].includes(f.evidenceKind)));
+assert(r.findings.every(f=>typeof f.rule==='string'&&f.rule.length>10));
 
 r=P.analyze([
  {id:'s',type:'start',text:'Start'},
@@ -19,7 +23,8 @@ r=P.analyze([
  {id:'e',type:'end',text:'Slut'}
 ],[['s','d'],['d','a'],['d','b'],['a','e'],['b','e']]);
 assert(!r.findings.some(f=>['missing_start','missing_end','decision_branches','dead_end','isolated'].includes(f.code)));
-assert(r.score>=9);
+assert(!Object.prototype.hasOwnProperty.call(r,'score'));
+assert.equal(r.counts.error,0);
 
 r=P.analyze([
  {id:'s',type:'start',text:'Start'}, {id:'a',type:'process',text:'A'},

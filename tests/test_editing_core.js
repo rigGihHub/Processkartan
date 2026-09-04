@@ -58,6 +58,46 @@ const branchA=E.smartNextStepPosition({x:300,y:300,width:180,height:80},{width:1
 const branchB=E.smartNextStepPosition({x:300,y:300,width:180,height:80},{width:180,height:80},[{x:300,y:300,width:180,height:80},{x:600,y:180,width:180,height:80}],{width:1600,height:1000,padding:10},{gap:110,direction:'right',branchIndex:1,grid:20});
 assert.ok(branchA.y<300 && branchB.y>300,'decision branches should fan out around the decision');
 
+const pair=E.smartDecisionBranchPositions(
+  {x:300,y:300,width:180,height:120},
+  {width:180,height:80},
+  [{x:300,y:300,width:180,height:120}],
+  {width:1600,height:1000,padding:10},
+  {gap:148,crossGap:82,direction:'right',grid:20}
+);
+assert.strictEqual(pair.yes.x,pair.no.x,'paired branches should share the same forward rank');
+assert.ok(pair.yes.y<pair.no.y,'Ja should be placed above Nej in a horizontal flow');
+const sourceCenter=300+120/2;
+const pairCenter=((pair.yes.y+40)+(pair.no.y+40))/2;
+assert.ok(Math.abs(pairCenter-sourceCenter)<=20,'paired branches should remain visually centered around the decision');
+const blockedPair=E.smartDecisionBranchPositions(
+  {x:300,y:300,width:180,height:120},
+  {width:180,height:80},
+  [{x:300,y:300,width:180,height:120},{x:640,y:220,width:180,height:80}],
+  {width:1800,height:1100,padding:10},
+  {gap:148,crossGap:82,direction:'right',grid:20}
+);
+assert.ok(blockedPair.yes.y<blockedPair.no.y,'blocked pair should preserve branch semantics instead of swapping Ja/Nej');
+assert.ok(Math.abs(((blockedPair.yes.y+40)+(blockedPair.no.y+40))/2-sourceCenter)<=40,'blocked pair should expand symmetrically when possible');
+
+const continuation=E.smartFlowContinuationPosition(
+  {x:640,y:180,width:180,height:80},
+  {width:180,height:80},
+  [{x:640,y:180,width:180,height:80}],
+  {width:1800,height:1100,padding:10},
+  {gap:124,crossGap:64,direction:'right',laneCenter:220,grid:20}
+);
+assert.strictEqual(continuation.y,180,'branch continuation should preserve its visual lane when clear');
+const continuationBlocked=E.smartFlowContinuationPosition(
+  {x:640,y:180,width:180,height:80},
+  {width:180,height:80},
+  [{x:640,y:180,width:180,height:80},{x:940,y:180,width:180,height:80}],
+  {width:1800,height:1100,padding:10},
+  {gap:124,crossGap:64,direction:'right',laneCenter:220,grid:20,forwardStep:80}
+);
+assert.strictEqual(continuationBlocked.y,180,'blocked branch lane should move farther forward before drifting toward another lane');
+assert.ok(continuationBlocked.x>940,'blocked branch lane should search farther forward');
+
 const fit=E.fitToScreen([
   {id:'a',x:100,y:100,width:200,height:100},
   {id:'b',x:700,y:500,width:200,height:100}
@@ -81,4 +121,36 @@ const distributed=E.distributeNodes([
 assert.deepStrictEqual(distributed.a.x,100);
 assert.deepStrictEqual(distributed.c.x,800);
 assert.deepStrictEqual(distributed.b.x,400,'distribution should create equal edge-to-edge gaps');
+
+const rejoinBounds={width:1800,height:1100,padding:10};
+const rejoin=E.smartBranchRejoinPosition(
+  {x:300,y:220,width:180,height:76},
+  {x:300,y:500,width:180,height:76},
+  {width:180,height:76},[],rejoinBounds,{direction:'right',gap:140,grid:20}
+);
+assert.equal(rejoin.x,620,'rejoin sits ahead of the furthest branch tips');
+assert.equal(rejoin.y,360,'rejoin is centered between branch lanes');
+const blockedRejoin=E.smartBranchRejoinPosition(
+  {x:300,y:220,width:180,height:76},
+  {x:300,y:500,width:180,height:76},
+  {width:180,height:76},[{x:620,y:360,width:180,height:76}],rejoinBounds,{direction:'right',gap:140,grid:20,forwardStep:80}
+);
+assert.equal(blockedRejoin.y,360,'blocked rejoin keeps the shared center lane');
+assert.ok(blockedRejoin.x>620,'blocked rejoin moves forward before drifting sideways');
 console.log('layout editing helpers ok');
+
+
+const flowObstacle=[{x1:520,y1:20,x2:520,y2:260}];
+const collisionAware=E.smartNextStepPosition(
+  {x:100,y:100,width:180,height:80},
+  {width:180,height:80},
+  [{x:100,y:100,width:180,height:80}],
+  {width:1600,height:1000,padding:10},
+  {gap:110,direction:'right',grid:20,linkSegments:flowObstacle}
+);
+assert.notStrictEqual(collisionAware.y,100,'smart next should leave the main lane when an existing connector blocks that placement');
+const flowPenalty=E.flowSegmentCollisionPenalty(
+  {x:400,y:100},{width:180,height:80},{x:100,y:100,width:180,height:80},flowObstacle,24
+);
+assert.ok(flowPenalty>0,'candidate overlapping or crossing an existing connector should receive a collision penalty');
+console.log('flow collision prevention ok');

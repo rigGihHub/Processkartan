@@ -87,3 +87,70 @@ C.setStyle(labelLinks,0,{label:'Ja'});
 assert.strictEqual(labelLinks[0][3].label,'Ja');
 assert.strictEqual(labelLinks[1][3].label,'Avslag');
 console.log('independent connector labels ok');
+
+// v0.20.16: auto-managed orthogonal routes can detour around blocking nodes.
+{
+  const obstacles=[{left:40,right:60,top:0,bottom:80}];
+  const smart=C.smartOrthogonalRoute(0,10,100,70,'right','left',{routing:'orthogonal'},obstacles,10);
+  assert.strictEqual(C.routeScore(smart,obstacles,10)<100000,true);
+  assert.notDeepStrictEqual(smart,[[0,10],[50,10],[50,70],[100,70]]);
+}
+console.log('smart orthogonal obstacle routing ok');
+
+// v0.20.17: smart auto-routes prefer a clean corridor over crossing an unrelated connector.
+{
+  const existing=[{x1:20,y1:40,x2:80,y2:40,sourceId:'c',targetId:'d'}];
+  const base=C.routePoints(0,10,100,70,'right','left',{routing:'orthogonal'});
+  assert.strictEqual(C.routeCrossingCount(base,existing,{sourceId:'a',targetId:'b'})>0,true);
+  const smart=C.smartOrthogonalRoute(0,10,100,70,'right','left',{routing:'orthogonal'},[],10,existing,{sourceId:'a',targetId:'b'});
+  assert.strictEqual(C.routeCrossingCount(smart,existing,{sourceId:'a',targetId:'b'}),0);
+  assert.notDeepStrictEqual(smart,base);
+}
+console.log('smart connector crossing reduction ok');
+
+// Shared source/target fan-out is intentionally not treated as an avoidable crossing.
+{
+  const shared=[{x1:0,y1:10,x2:60,y2:50,sourceId:'a',targetId:'c'}];
+  const candidate=[[0,10],[50,10],[50,70],[100,70]];
+  assert.strictEqual(C.routeCrossingCount(candidate,shared,{sourceId:'a',targetId:'b'}),0);
+}
+console.log('shared endpoint crossing exemption ok');
+
+// v0.20.19: long parallel overlap should be separated, while a short shared trunk is allowed.
+{
+  const existing=[{x1:20,y1:10,x2:80,y2:10,sourceId:'shared',targetId:'old'}];
+  const sameLane=[[0,10],[100,10]];
+  const separated=[[0,10],[20,10],[20,38],[80,38],[80,70],[100,70]];
+  const overlap=C.routeParallelOverlap(sameLane,existing,{sourceId:'new',targetId:'target'});
+  assert.ok(overlap>=50,'unrelated parallel overlap should be measured');
+  assert.ok(C.routeScore(separated,[],10,existing,{sourceId:'new',targetId:'target'})<C.routeScore(sameLane,[],10,existing,{sourceId:'new',targetId:'target'}),'clean parallel lane should score better than long overlap');
+  const shortShared=C.routeParallelOverlap([[0,10],[24,10],[24,50]], [{x1:0,y1:10,x2:24,y2:10,sourceId:'shared',targetId:'old'}], {sourceId:'shared',targetId:'new'});
+  assert.strictEqual(shortShared,0,'short shared trunk at a common endpoint should remain allowed');
+}
+console.log('connector lane separation ok');
+
+// v0.20.19 integration: smart routing chooses a nearby lane instead of sitting on an existing one.
+{
+  const existing=[{x1:50,y1:10,x2:50,y2:50,sourceId:'old-a',targetId:'old-b'}];
+  const smart=C.smartOrthogonalRoute(0,0,100,60,'right','left',{routing:'orthogonal'},[],10,existing,{sourceId:'new-a',targetId:'new-b'});
+  const overlap=C.routeParallelOverlap(smart,existing,{sourceId:'new-a',targetId:'new-b'});
+  assert.strictEqual(overlap,0,'smart route should choose a separated corridor when the natural lane is already occupied');
+}
+console.log('smart connector lane selection ok');
+
+// v0.20.19: connector labels prefer clean straight segments away from nodes and other labels.
+{
+  const points=[[0,50],[80,50],[80,150],[200,150]];
+  const blockedAbove={left:36,right:86,top:12,bottom:42};
+  const placed=C.smartLabelPlacement(points,54,26,[blockedAbove],[],{offset:22,clearance:8});
+  assert.ok(placed,'label placement should exist');
+  assert.strictEqual(C.rectsIntersect(placed.box,blockedAbove),false,'label should avoid blocking node');
+}
+{
+  const points=[[0,50],[200,50]];
+  const occupied=[{left:73,right:127,top:12,bottom:38}];
+  const placed=C.smartLabelPlacement(points,54,26,[],occupied,{offset:22,clearance:8});
+  assert.ok(placed,'label placement should exist with occupied label');
+  assert.strictEqual(C.rectsIntersect(placed.box,occupied[0]),false,'label should avoid another connector label when a clean alternative exists');
+}
+console.log('smart connector label clarity ok');

@@ -90,6 +90,31 @@ def run() -> None:
         page.wait_for_selector("#p48-canvas .p48-node")
         page.wait_for_selector("#p48-link-hit-layer .p48-link-hit-segment")
 
+        # v0.20.29: opt-in process overview mirrors the existing nodes and supports jump navigation.
+        page.locator("#p48-overview-toggle").click()
+        page.wait_for_timeout(40)
+        assert page.locator("#p48-overview").is_visible()
+        assert page.locator("#p48-overview-stage .p48-overview-node").count() == page.locator("#p48-canvas .p48-node").count()
+        page.locator("#p48-overview-stage .p48-overview-node").first.click()
+        page.wait_for_timeout(20)
+        assert page.locator("#p48-overview-viewport").is_visible()
+        page.locator("#p48-overview-close").click()
+        assert not page.locator("#p48-overview").is_visible()
+
+        # v0.20.34: read mode removes editing chrome while keeping the process interactive.
+        page.locator("#p48-readmode-toggle").click()
+        page.wait_for_timeout(30)
+        assert "p48-read-mode" in (page.locator("#pk48").get_attribute("class") or "")
+        assert not page.locator("#p48-side").is_visible()
+        page.locator("#p48-canvas .p48-node").first.click()
+        page.wait_for_timeout(20)
+        assert page.locator("#p48-read-panel").is_visible()
+        assert page.locator("#p48-read-panel-title").inner_text().strip()
+        page.keyboard.press("Escape")
+        page.wait_for_timeout(20)
+        assert "p48-read-mode" not in (page.locator("#pk48").get_attribute("class") or "")
+        assert page.locator("#p48-side").is_visible()
+
         hit = page.locator("#p48-link-hit-layer .p48-link-hit-segment").first
         box = hit.bounding_box()
         assert box, "Connector hit target has no browser box"
@@ -187,6 +212,9 @@ def run() -> None:
         assert page.locator("#p48-export-menu .p48-sheets-menu").evaluate("(el) => el.open")
 
         page.locator("#p48-more-menu > summary").click()
+        # Native <details> toggle events are queued by Chromium; allow the menu-closing
+        # handler one short turn before asserting unrelated menus have closed.
+        page.wait_for_timeout(20)
         assert page.locator("#p48-more-menu").evaluate("(el) => el.open")
         assert not page.locator("#p48-export-menu").evaluate("(el) => el.open"), "Unrelated Export menu stayed open"
         page.locator("#p48-more-menu > .p48-more-popover > .p48-canvas-menu > summary").click()
@@ -220,6 +248,16 @@ def run() -> None:
         assert after_decision_nodes == before_decision_nodes + 2, (before_decision_nodes, after_decision_nodes)
         decision_labels = page.evaluate("() => window.__mapliniTestState.links().filter(l => String(l[0]) === 'n3').map(l => String((l[3]||{}).label||''))")
         assert 'Ja' in decision_labels and 'Nej' in decision_labels, decision_labels
+        branch_geometry = page.evaluate("""() => {
+          const links=window.__mapliniTestState.links().filter(l => String(l[0]) === 'n3');
+          const nodes=window.__mapliniTestState.nodes();
+          const byId=Object.fromEntries(nodes.map(n => [String(n.id),n]));
+          const out={};
+          links.forEach(l => { const label=String((l[3]||{}).label||''); if(label==='Ja'||label==='Nej')out[label]=byId[String(l[1])]; });
+          return out;
+        }""")
+        assert branch_geometry['Ja']['x'] == branch_geometry['Nej']['x'], branch_geometry
+        assert branch_geometry['Ja']['y'] < branch_geometry['Nej']['y'], branch_geometry
 
         # Mobile: the permanent bar stays at four actions, while Redo/Fullscreen remain
         # available as secondary actions in the Add sheet.
@@ -238,19 +276,13 @@ def run() -> None:
         page.evaluate("() => { if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(()=>{}); }")
         page.wait_for_timeout(30)
 
-        # Current methodology: an empty process starts with Objekt in or Aktivitet.
+        # v0.20.10: an empty process opens directly on the canvas without an onboarding card.
         page.evaluate("() => window.__mapliniTestState.clear()")
         page.wait_for_timeout(30)
-        assert page.locator("#p48-empty-state").is_visible()
-        assert page.locator("#p48-empty-object").is_visible()
-        assert page.locator("#p48-empty-activity").is_visible()
-        page.locator("#p48-empty-object").click()
-        page.wait_for_timeout(50)
-        assert page.locator("#p48-canvas .p48-node").count() == 1
-        first_node = page.locator("#p48-canvas .p48-node").first
-        assert "object" in (first_node.get_attribute("class") or "")
-        assert page.evaluate("() => window.__mapliniTestState.nodes()[0].objectRole") == "input"
         assert not page.locator("#p48-empty-state").is_visible()
+        assert page.locator("#p48-empty-object").count() == 0
+        assert page.locator("#p48-empty-activity").count() == 0
+        assert page.locator("#p48-canvas .p48-node").count() == 0
 
         # v0.15.7 typography cleanup: keep seven focused choices but preserve
         # a legacy font from an older saved process when it is encountered.
@@ -277,17 +309,15 @@ def run() -> None:
         # v0.16.0 process method: Object and Activity are first-class building blocks.
         assert page.locator('[data-type="object"]').count() >= 2
         page.evaluate("() => window.__mapliniTestState.clear()")
-        page.locator("#p48-empty-object").click()
+        page.locator('[data-type="object"][data-object-role="input"]').first.evaluate('(el) => el.click()')
         assert page.locator("#p48-canvas .p48-node.object").count() == 1
         assert page.locator("#p48-canvas .p48-node.object").first.is_visible()
 
-        # v0.15.11 first view: empty process guidance is a styled card and A4 portrait is default.
+        # v0.20.10 first view: empty canvas stays clean; A4 portrait remains default.
         assert page.locator("#p48-pdf-view").input_value() == "A4P"
         page.evaluate("() => window.__mapliniTestState.clear()")
-        assert page.locator("#p48-empty-state").is_visible()
-        assert page.locator("#p48-empty-state .p48-empty-card").is_visible()
-        empty_display = page.locator("#p48-empty-state").evaluate("(el) => getComputedStyle(el).display")
-        assert empty_display == "grid"
+        assert not page.locator("#p48-empty-state").is_visible()
+        assert page.locator("#p48-empty-state .p48-empty-card").count() == 0
 
         # v0.15.10: zoom must scale the actual embedded canvas, so child nodes/text
         # visually scale with the canvas rather than only changing scroll dimensions.
@@ -328,7 +358,7 @@ def run() -> None:
         page.wait_for_timeout(40)
         assert not page.locator("#p48-new-process-dialog").is_visible()
         assert page.locator("#p48-name").input_value() == "Browser smoke process"
-        assert page.locator("#p48-empty-state").is_visible()
+        assert not page.locator("#p48-empty-state").is_visible()
         page.locator("#p48-new").click()
         page.wait_for_timeout(20)
         page.locator("#p48-new-process-name").press("Escape")
