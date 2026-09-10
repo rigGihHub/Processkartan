@@ -2,7 +2,7 @@ from pathlib import Path
 APP=(Path(__file__).resolve().parents[1]/'app.py').read_text(encoding='utf-8')
 
 def test_version_and_mobile_reader_controls():
-    assert 'APP_VERSION = "0.20.34"' in APP
+    assert 'APP_VERSION = "0.20.71"' in APP
     for ident in ['p48-mobile-reader-bar','p48-mobile-reader-name','p48-mobile-reader-follow','p48-mobile-reader-fit','p48-mobile-reader-edit']:
         assert f'id="{ident}"' in APP
 

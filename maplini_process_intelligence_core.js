@@ -3,7 +3,8 @@
 
 function normNodes(nodes){
   return (Array.isArray(nodes)?nodes:[]).filter(n=>n&&n.id!=null).map(n=>({
-    id:String(n.id),type:String(n.type||'process'),text:String(n.text||'').trim()
+    id:String(n.id),type:String(n.type||'process'),text:String(n.text||'').trim(),
+    responsibleRole:String((n.processInfo&&n.processInfo.responsibleRole)||'').trim()
   }));
 }
 function normLinks(links,ids){
@@ -29,7 +30,14 @@ const ACTIONS={
   fanout:'Kontrollera att varje utgående gren behövs och märk gärna alternativen så att vägvalet blir tydligt.',
   loop:'Kontrollera att återkopplingen är avsiktlig och ange vad som gör att processen lämnar loopen.',
   long_chain:'Se om flera steg kan slås ihop, grupperas eller beskrivas enklare utan att tappa viktig information.',
-  direct_activity:'Kontrollera vad den första aktiviteten producerar. Lägg in resultatet som ett Objekt mellan aktiviteterna om det är det som triggar nästa steg.'
+  direct_activity:'Kontrollera vad den första aktiviteten producerar. Lägg in resultatet som ett Objekt mellan aktiviteterna om det är det som triggar nästa steg.',
+  decision_yes_no:'Märk den saknade vägen tydligt, till exempel Ja och Nej, så att vägvalet blir entydigt.',
+  decision_unlabeled:'Märk utgående vägar så att användaren direkt förstår vilket val som leder vart.',
+  responsibility_missing:'Fyll i Ansvar på de berörda arbetsstegen om processen ska användas för ansvarsfördelning eller Följ processen.',
+  responsibility_absent:'Lägg till Ansvar på de viktigaste arbetsstegen om det är relevant för processen.',
+  unreachable:'Koppla de berörda rutorna till ett flöde som går att nå från Start, eller ta bort dem om de inte hör till processen.',
+  start_incoming:'Kontrollera varför något leder in i Start. Flytta kopplingen eller välj en annan startpunkt.',
+  end_outgoing:'Kontrollera varför processen fortsätter efter Slut. Flytta kopplingen eller ändra ruttypen.'
 };
 function priorityLabel(severity){return severity==='error'?'Åtgärda först':severity==='warning'?'Kontrollera':'Förbättring';}
 const RULE_INFO={
@@ -44,7 +52,14 @@ const RULE_INFO={
   fanout:{kind:'assessment',rule:'Tre eller fler flöden lämnar samma steg. Det kan göra vägvalet svårt att läsa.'},
   loop:{kind:'assessment',rule:'Flödet innehåller en cykel. Loopen kan vara avsiktlig och måste därför bedömas av användaren.'},
   long_chain:{kind:'assessment',rule:'En obruten sekvens överstiger den valda längdgränsen. Långa sekvenser är inte automatiskt dåliga.'},
-  direct_activity:{kind:'assessment',rule:'Två aktiviteter är direktkopplade utan mellanliggande Objekt. Det kan dölja vad som förs vidare mellan stegen.'}
+  direct_activity:{kind:'assessment',rule:'Två aktiviteter är direktkopplade utan mellanliggande Objekt. Det kan dölja vad som förs vidare mellan stegen.'},
+  decision_yes_no:{kind:'fact',rule:'Beslutet har en Ja- eller Nej-märkt väg men saknar den andra.'},
+  decision_unlabeled:{kind:'fact',rule:'Beslutet har minst två utgående vägar och ingen av dem har en etikett.'},
+  responsibility_missing:{kind:'fact',rule:'Minst ett arbetssteg har Ansvar angivet, men de markerade arbetsstegen saknar Ansvar.'},
+  responsibility_absent:{kind:'fact',rule:'Ingen av processens arbetssteg har Ansvar angivet.'},
+  unreachable:{kind:'fact',rule:'Rutan kan inte nås genom att följa kopplingar från någon Start-ruta.'},
+  start_incoming:{kind:'fact',rule:'En Start-ruta har minst ett inkommande flöde.'},
+  end_outgoing:{kind:'fact',rule:'En Slut-ruta har minst ett utgående flöde.'}
 };
 function finding(code,severity,title,detail,nodeIds=[],meta={}){
   const ri=RULE_INFO[code]||{kind:'assessment',rule:'Regeln kräver mänsklig bedömning.'};
@@ -117,9 +132,34 @@ function analyze(nodes,links,options={}){
     }
     if(n.type!=='start'&&inc.length===0)findings.push(finding('no_incoming','warning',`Saknar inkommande flöde: ${n.text||'Namnlös ruta'}`,'Kontrollera var detta steg ska börja från.',[n.id]));
     if(n.type!=='end'&&out.length===0)findings.push(finding('dead_end','error',`Död ände: ${n.text||'Namnlös ruta'}`,'Steget saknar utgående flöde och är inte markerat som Slut.',[n.id]));
+    if(n.type==='start'&&inc.length>0)findings.push(finding('start_incoming','warning',`Flöde leder in i Start: ${n.text||'Start'}`,`${inc.length} inkommande flöde${inc.length===1?'':'n'} leder in i startpunkten.`,[n.id]));
+    if(n.type==='end'&&out.length>0)findings.push(finding('end_outgoing','warning',`Flöde fortsätter efter Slut: ${n.text||'Slut'}`,`${out.length} utgående flöde${out.length===1?'':'n'} lämnar slutpunkten.`,[n.id]));
     if(n.type==='decision'&&out.length<2)findings.push(finding('decision_branches','error',`Beslut saknar gren: ${n.text||'Beslut'}`,'Ett beslut bör normalt ha minst två utgående alternativ.',[n.id]));
+    if(n.type==='decision'&&out.length>=2){
+      const outgoing=L.filter(l=>l.from===n.id);
+      const labels=outgoing.map(l=>String(l.label||'').trim().toLocaleLowerCase('sv'));
+      const yes=labels.some(x=>['ja','yes','j'].includes(x)),no=labels.some(x=>['nej','no','n'].includes(x));
+      if(yes!==no)findings.push(finding('decision_yes_no','warning',`Beslut saknar ${yes?'Nej':'Ja'}-väg: ${n.text||'Beslut'}`,`Beslutet har en tydlig ${yes?'Ja':'Nej'}-väg men ingen motsvarande ${yes?'Nej':'Ja'}-märkt väg.`,[n.id],{linkIndexes:outgoing.map(l=>l.index)}));
+      else if(labels.every(x=>!x))findings.push(finding('decision_unlabeled','info',`Beslutets vägar saknar etiketter: ${n.text||'Beslut'}`,'Det finns flera utgående vägar, men ingen är märkt med vad valet betyder.',[n.id],{linkIndexes:outgoing.map(l=>l.index)}));
+    }
     if(inc.length>=3)findings.push(finding('merge_bottleneck','info',`Många flöden möts: ${n.text||'Namnlös ruta'}`,`${inc.length} inkommande flöden. Kontrollera om steget riskerar att bli en flaskhals.`,[n.id],{count:inc.length}));
     if(out.length>=3)findings.push(finding('fanout','info',`Många grenar: ${n.text||'Namnlös ruta'}`,`${out.length} utgående flöden. Kontrollera att grenarna är tydliga och nödvändiga.`,[n.id],{count:out.length}));
+  }
+
+  // Reachability catches connected-looking islands that still cannot be reached from Start.
+  if(starts.length){
+    const reachable=new Set(),queue=starts.map(n=>n.id);
+    while(queue.length){const id=queue.shift();if(reachable.has(id))continue;reachable.add(id);for(const next of outMap.get(id)||[])if(activeIds.has(next)&&!reachable.has(next))queue.push(next)}
+    const unreachable=active.filter(n=>!reachable.has(n.id));
+    if(unreachable.length)findings.push(finding('unreachable','warning',`${unreachable.length} ${unreachable.length===1?'ruta går':'rutor går'} inte att nå från Start`,'De markerade rutorna kan inte nås genom att följa processens kopplingar från en startpunkt.',unreachable.map(n=>n.id),{count:unreachable.length}));
+  }
+
+  // Responsibility coverage uses existing metadata and remains advisory.
+  const responsibilityEligible=active.filter(n=>['process','subprocess','decision'].includes(n.type));
+  if(responsibilityEligible.length>=2){
+    const withRole=responsibilityEligible.filter(n=>n.responsibleRole),missingRole=responsibilityEligible.filter(n=>!n.responsibleRole);
+    if(withRole.length&&missingRole.length)findings.push(finding('responsibility_missing','info',`${missingRole.length} steg saknar ansvarig`,'Ansvar används i processen, men är inte ifyllt på alla relevanta arbetssteg.',missingRole.map(n=>n.id),{count:missingRole.length}));
+    else if(!withRole.length)findings.push(finding('responsibility_absent','info','Ansvar är inte angivet','Inget arbetssteg har en ansvarig roll angiven. Det kan vara helt avsiktligt om processen inte behöver visa ansvar.',responsibilityEligible.map(n=>n.id),{count:responsibilityEligible.length}));
   }
 
   const outEdges=new Map([...activeIds].map(id=>[id,(outMap.get(id)||[]).filter(x=>activeIds.has(x))]));

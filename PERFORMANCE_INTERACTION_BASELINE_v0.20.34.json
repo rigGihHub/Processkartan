@@ -1,0 +1,42 @@
+[
+  {
+    "nodes": 100,
+    "links": 96,
+    "snap_200_ms": 37.9,
+    "drag_60_frames_ms": 17.7,
+    "select_100_ms": 84.7,
+    "zoom_100_ms": 1.1,
+    "overview_viewport_100_ms": 15.2,
+    "persist_10_ms": 30.1
+  },
+  {
+    "nodes": 250,
+    "links": 240,
+    "snap_200_ms": 77.8,
+    "drag_60_frames_ms": 37.1,
+    "select_100_ms": 146.7,
+    "zoom_100_ms": 0.8,
+    "overview_viewport_100_ms": 24.7,
+    "persist_10_ms": 79
+  },
+  {
+    "nodes": 500,
+    "links": 480,
+    "snap_200_ms": 178.8,
+    "drag_60_frames_ms": 50.6,
+    "select_100_ms": 249.5,
+    "zoom_100_ms": 1,
+    "overview_viewport_100_ms": 53.1,
+    "persist_10_ms": 130.2
+  },
+  {
+    "nodes": 1000,
+    "links": 960,
+    "snap_200_ms": 353.2,
+    "drag_60_frames_ms": 87.5,
+    "select_100_ms": 509.3,
+    "zoom_100_ms": 0.9,
+    "overview_viewport_100_ms": 95.9,
+    "persist_10_ms": 303.9
+  }
+]

@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.20.34"
+APP_VERSION = "0.20.71"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -24,6 +24,10 @@ _STATE_CORE_PATH = Path(__file__).resolve().parent / "maplini_state_core.js"
 _STATE_CORE_JS = _STATE_CORE_PATH.read_text(encoding="utf-8") if _STATE_CORE_PATH.exists() else ""
 _PROCESS_INFO_CORE_PATH = Path(__file__).resolve().parent / "maplini_process_info_core.js"
 _PROCESS_INFO_CORE_JS = _PROCESS_INFO_CORE_PATH.read_text(encoding="utf-8") if _PROCESS_INFO_CORE_PATH.exists() else ""
+_STEP_UNDERSTANDING_CORE_PATH = Path(__file__).resolve().parent / "maplini_step_understanding_core.js"
+_STEP_UNDERSTANDING_CORE_JS = _STEP_UNDERSTANDING_CORE_PATH.read_text(encoding="utf-8") if _STEP_UNDERSTANDING_CORE_PATH.exists() else ""
+_EMPTY_STEP_SUGGESTIONS_CORE_PATH = Path(__file__).resolve().parent / "maplini_empty_step_suggestions_core.js"
+_EMPTY_STEP_SUGGESTIONS_CORE_JS = _EMPTY_STEP_SUGGESTIONS_CORE_PATH.read_text(encoding="utf-8") if _EMPTY_STEP_SUGGESTIONS_CORE_PATH.exists() else ""
 _WALKTHROUGH_CORE_PATH = Path(__file__).resolve().parent / "maplini_walkthrough_core.js"
 _WALKTHROUGH_CORE_JS = _WALKTHROUGH_CORE_PATH.read_text(encoding="utf-8") if _WALKTHROUGH_CORE_PATH.exists() else ""
 _RELIABILITY_CORE_PATH = Path(__file__).resolve().parent / "maplini_reliability_core.js"
@@ -58,6 +62,20 @@ _AUTOSAVE_CORE_PATH = Path(__file__).resolve().parent / "maplini_autosave_core.j
 _AUTOSAVE_CORE_JS = _AUTOSAVE_CORE_PATH.read_text(encoding="utf-8") if _AUTOSAVE_CORE_PATH.exists() else ""
 _PROCESS_INTELLIGENCE_CORE_PATH = Path(__file__).resolve().parent / "maplini_process_intelligence_core.js"
 _PROCESS_INTELLIGENCE_CORE_JS = _PROCESS_INTELLIGENCE_CORE_PATH.read_text(encoding="utf-8") if _PROCESS_INTELLIGENCE_CORE_PATH.exists() else ""
+_VERSION_HISTORY_CORE_PATH = Path(__file__).resolve().parent / "maplini_version_history_core.js"
+_VERSION_HISTORY_CORE_JS = _VERSION_HISTORY_CORE_PATH.read_text(encoding="utf-8") if _VERSION_HISTORY_CORE_PATH.exists() else ""
+_DOCUMENT_INTERPRETATION_CORE_PATH = Path(__file__).resolve().parent / "maplini_document_interpretation_core.js"
+_DOCUMENT_INTERPRETATION_CORE_JS = _DOCUMENT_INTERPRETATION_CORE_PATH.read_text(encoding="utf-8") if _DOCUMENT_INTERPRETATION_CORE_PATH.exists() else ""
+_ANY_SOURCE_CORE_PATH = Path(__file__).resolve().parent / "maplini_any_source_core.js"
+_ANY_SOURCE_CORE_JS = _ANY_SOURCE_CORE_PATH.read_text(encoding="utf-8") if _ANY_SOURCE_CORE_PATH.exists() else ""
+_SOURCE_CHANGE_CORE_PATH = Path(__file__).resolve().parent / "maplini_source_change_core.js"
+_SOURCE_CHANGE_CORE_JS = _SOURCE_CHANGE_CORE_PATH.read_text(encoding="utf-8") if _SOURCE_CHANGE_CORE_PATH.exists() else ""
+_SOURCE_SUPPORT_CORE_PATH = Path(__file__).resolve().parent / "maplini_source_support_core.js"
+_SOURCE_SUPPORT_CORE_JS = _SOURCE_SUPPORT_CORE_PATH.read_text(encoding="utf-8") if _SOURCE_SUPPORT_CORE_PATH.exists() else ""
+_NAVIGATION_CORE_PATH = Path(__file__).resolve().parent / "maplini_navigation_core.js"
+_NAVIGATION_CORE_JS = _NAVIGATION_CORE_PATH.read_text(encoding="utf-8") if _NAVIGATION_CORE_PATH.exists() else ""
+_PERFORMANCE_CORE_PATH = Path(__file__).resolve().parent / "maplini_performance_core.js"
+_PERFORMANCE_CORE_JS = _PERFORMANCE_CORE_PATH.read_text(encoding="utf-8") if _PERFORMANCE_CORE_PATH.exists() else ""
 
 
 st.markdown("""
@@ -194,9 +212,9 @@ header[data-testid="stHeader"]{height:2rem}
 /* v0.14.8 – simplified command surface */
 .p48-top-simplified{gap:7px}
 .p48-top-simplified .p48-icon-action{width:36px;padding-left:0;padding-right:0;font-size:17px}
-.p48-export-menu,.p48-more-menu{position:relative}
-.p48-export-menu>summary,.p48-more-menu>summary{list-style:none}
-.p48-export-menu>summary::-webkit-details-marker,.p48-more-menu>summary::-webkit-details-marker{display:none}
+.p48-export-menu,.p48-more-menu,.p48-view-menu{position:relative}
+.p48-export-menu>summary,.p48-more-menu>summary,.p48-view-menu>summary{list-style:none}
+.p48-export-menu>summary::-webkit-details-marker,.p48-more-menu>summary::-webkit-details-marker,.p48-view-menu>summary::-webkit-details-marker{display:none}
 .p48-export-popover,.p48-more-popover{position:absolute;top:calc(100% + 7px);right:0;z-index:190;background:#fff;border:1px solid #cbd7e3;border-radius:12px;box-shadow:0 12px 30px rgba(31,52,70,.18);padding:10px}
 .p48-export-popover{width:270px;display:grid;gap:8px}
 .p48-export-actions{display:grid;grid-template-columns:1fr 1fr;gap:7px}
@@ -468,12 +486,15 @@ header[data-testid="stHeader"]{height:2rem}
 .p48-zoom-controls{display:inline-flex;align-items:center;gap:3px}
 .p48-zoom-controls .p48-btn{min-width:38px;padding-left:8px;padding-right:8px}
 .p48-zoom-controls .p48-zoom-value{min-width:58px;font-variant-numeric:tabular-nums}
+ .p48-view-popover{position:absolute;top:calc(100% + 7px);right:0;z-index:230;width:238px;padding:10px;background:#fff;border:1px solid #ccd6df;border-radius:10px;box-shadow:0 10px 30px rgba(30,45,60,.18)}
+.p48-view-popover .p48-view-row{display:flex;gap:5px;align-items:center}.p48-view-popover .p48-view-row+.p48-view-row{margin-top:7px}.p48-view-popover .p48-view-row .p48-btn{flex:1 1 auto;min-width:0}.p48-view-popover .p48-view-wide{width:100%;margin-top:7px;text-align:left}.p48-view-popover .p48-pop-title{margin-bottom:6px}
 .p48-arrange-menu,.p48-smart-layout-menu{position:relative}.p48-arrange-menu>summary,.p48-smart-layout-menu>summary{list-style:none}.p48-arrange-menu>summary::-webkit-details-marker,.p48-smart-layout-menu>summary::-webkit-details-marker{display:none}
 .p48-arrange-popover,.p48-smart-layout-popover{position:absolute;top:calc(100% + 7px);left:0;z-index:230;width:250px;padding:10px;background:#fff;border:1px solid #ccd6df;border-radius:10px;box-shadow:0 10px 30px rgba(30,45,60,.18)}
 .p48-smart-layout-popover{width:230px}.p48-smart-layout-popover .p48-mini{width:100%;min-height:34px;margin-top:5px;text-align:left}.p48-smart-layout-popover .p48-mini:disabled{opacity:.42;cursor:not-allowed}.p48-smart-layout-popover #p48-auto-clean{min-height:40px;background:#1f6f55;color:#fff;border-color:#1f6f55;font-weight:800}
 .p48-smart-layout-popover #p48-auto-clean:hover{filter:brightness(.98)}
 .p48-smart-layout-split{display:inline-flex;align-items:stretch}.p48-smart-layout-split>.p48-auto-clean-top{border-radius:8px 0 0 8px;border-right:0;font-weight:800}.p48-smart-layout-split>.p48-smart-layout-menu>summary{height:100%;min-width:31px;padding:0 8px;border-radius:0 8px 8px 0}.p48-smart-layout-split>.p48-smart-layout-menu{display:block}
 .p48-auto-clean-hint{margin:6px 2px 1px;font-size:9px;line-height:1.35}
+.p48-clean-preview-bar{position:absolute;z-index:90;left:50%;top:78px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;max-width:min(720px,calc(100% - 32px));padding:10px 12px;border:1px solid #b8d7c8;border-radius:14px;background:rgba(249,253,251,.98);box-shadow:0 12px 34px rgba(28,65,52,.18);font-size:12px;color:#24483b}.p48-clean-preview-bar[hidden]{display:none}.p48-clean-preview-copy{min-width:0;flex:1}.p48-clean-preview-copy strong{display:block;font-size:12px}.p48-clean-preview-copy span{display:block;margin-top:2px;color:#64766f}.p48-clean-preview-actions{display:flex;gap:6px;flex:0 0 auto}.p48-clean-preview-actions button{min-height:34px;border-radius:9px}.p48-clean-preview #p48-canvas{pointer-events:none}.p48-clean-preview .p48-node{transition:left .18s ease,top .18s ease}@media(max-width:700px){.p48-clean-preview-bar{top:64px;left:10px;right:10px;transform:none;max-width:none;flex-wrap:wrap}.p48-clean-preview-actions{width:100%}.p48-clean-preview-actions button{flex:1}}
 .p48-process-info{margin:0 0 10px;padding:10px;border:1px solid #dbe7e1;border-radius:11px;background:#f8fbf9}
 .p48-process-info-head{display:flex;justify-content:space-between;gap:8px;align-items:flex-start;margin-bottom:8px}
 .p48-process-info-progress{flex:0 0 auto;padding:3px 6px;border-radius:999px;background:#e6f1ec;color:#315f4e;font:800 9px/1 Inter,system-ui}
@@ -489,6 +510,18 @@ header[data-testid="stHeader"]{height:2rem}
 .p48-process-info-more>summary span{font-weight:600;color:#718079}
 .p48-process-info-foot{margin-top:8px;padding-top:7px;border-top:1px solid #e5ece8;font:500 9px/1.4 Inter,system-ui;color:#77847e}
 @media(max-width:700px){.p48-process-info-grid{grid-template-columns:1fr}}
+.p48-step-understanding{margin:0 0 10px;padding:10px;border:1px solid #cfe1d8;border-radius:11px;background:#f5faf7}
+.p48-step-understanding-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px}
+.p48-step-understanding-head strong{font:800 11px/1.2 Inter,system-ui;color:#284c3f}
+.p48-step-understanding-head span{font:700 9px/1 Inter,system-ui;color:#698078}
+.p48-step-understanding-list{display:grid;gap:5px}
+.p48-step-understanding-row{display:grid;grid-template-columns:76px minmax(0,1fr);gap:7px;align-items:start;font:600 10px/1.35 Inter,system-ui;color:#33423d}
+.p48-step-understanding-row b{color:#6a7b75;font-weight:800}
+.p48-step-understanding-row span{min-width:0;overflow-wrap:anywhere}
+.p48-step-understanding-row.missing span{color:#8b9893;font-weight:500}
+.p48-step-understanding-next{padding-top:5px;margin-top:1px;border-top:1px solid #dce9e2}
+.p48-empty-step-suggestions{margin-top:8px;padding-top:8px;border-top:1px solid #dce9e2;display:grid;gap:6px}.p48-empty-step-suggestions[hidden]{display:none}.p48-empty-step-suggestions-head{font:800 9px/1.3 Inter,system-ui;color:#6a7b75}.p48-empty-step-suggestion{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;align-items:center;padding:7px 8px;border:1px solid #d8e7df;border-radius:8px;background:#fff}.p48-empty-step-suggestion strong{font:750 10px/1.3 Inter,system-ui;color:#284c3f}.p48-empty-step-suggestion small{display:block;margin-top:2px;font:500 8px/1.3 Inter,system-ui;color:#7b8984}.p48-empty-step-suggestion button{border:1px solid #bcd6c9;background:#f6fbf8;border-radius:7px;padding:5px 7px;font:750 9px/1 Inter,system-ui;color:#28634f;cursor:pointer}.p48-empty-step-suggestion button:hover{background:#edf7f1}
+@media(max-width:700px){.p48-step-understanding-row{grid-template-columns:68px minmax(0,1fr)}}
 .p48-visual-details{margin:0 0 9px;border:1px solid #e0e6eb;border-radius:9px;padding:0 8px 8px;background:#fff}
 .p48-visual-details>summary{cursor:pointer;padding:8px 0;font-size:10px;font-weight:800;color:#52606d}
 
@@ -515,6 +548,33 @@ header[data-testid="stHeader"]{height:2rem}
 .p48-sharebox-more input{width:auto;min-width:0;flex:1}
 .p48-top-simplified #p48-walkthrough-launch.primary{box-shadow:0 2px 8px rgba(31,111,85,.14)}
 
+
+
+
+
+/* v0.20.53 – any source → process */
+.p48-source-kind-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.p48-source-card{border:1px solid #dce5e0;border-radius:12px;background:#fbfdfc;padding:10px;display:grid;gap:7px}.p48-source-card strong{font:850 11px Inter,system-ui;color:#355a49}.p48-source-card span{font:550 8px/1.4 Inter,system-ui;color:#718078}.p48-source-card textarea,.p48-source-card input{width:100%;box-sizing:border-box;border:1px solid #cfdad4;border-radius:8px;background:#fff;color:#2f453b;padding:8px;font:600 10px/1.35 Inter,system-ui}.p48-source-card textarea{min-height:88px;resize:vertical}.p48-source-card button,.p48-source-url-row button{min-height:34px;border:1px solid #9fbead;border-radius:8px;background:#edf6f1;color:#245f48;padding:6px 9px;font:800 9px Inter,system-ui;cursor:pointer}.p48-source-url-row{display:flex;gap:6px}.p48-source-url-row input{min-width:0;flex:1}.p48-source-classification{display:inline-flex;align-items:center;gap:5px;padding:4px 7px;border-radius:999px;background:#eef5f1;color:#315f4d;font:800 8px Inter,system-ui}@media(max-width:700px),(pointer:coarse){.p48-source-kind-grid{grid-template-columns:1fr}.p48-source-card button,.p48-source-url-row button{min-height:42px}.p48-source-url-row{flex-direction:column}.p48-source-card textarea{min-height:120px}}
+/* v0.20.56 – compact multi-source support / disagreement summary */
+.p48-source-support{margin-top:8px;padding:8px 9px;border-radius:9px;background:#eef6f2;border:1px solid #d1e4da;color:#315b49;font:750 9px/1.4 Inter,system-ui}.p48-source-support.warn{background:#fff8ed;border-color:#ead6ad;color:#74531f}.p48-source-support strong{font-weight:850}.p48-source-disagreements{display:grid;gap:6px;margin-top:7px}.p48-source-disagreement{padding:7px 8px;border-radius:8px;background:#fff;border:1px solid #eadfc8;color:#6e5932;font:600 8px/1.4 Inter,system-ui}.p48-source-disagreement strong{display:block;color:#6a4a17;font-size:9px;margin-bottom:2px}.p48-source-disagreement small{display:block;margin-top:3px;color:#8a795f;font:550 8px/1.35 Inter,system-ui}
+/* v0.20.52 – source traceability for document-created process steps */
+.p48-source-trace{margin:0 0 10px;padding:10px;border:1px solid #d7e3ec;border-radius:11px;background:#f7fbfe}.p48-source-trace[hidden]{display:none!important}.p48-source-trace-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.p48-source-trace-head .p48-title{color:#315a78}.p48-source-trace-count{padding:3px 6px;border-radius:999px;background:#e8f2f8;color:#315a78;font:800 9px/1 Inter,system-ui}.p48-source-trace-list{display:grid;gap:7px;margin-top:8px}.p48-source-trace-item{border:1px solid #dce8ef;border-radius:9px;background:#fff;padding:8px}.p48-source-trace-name{font:800 9px/1.3 Inter,system-ui;color:#385e78}.p48-source-trace-evidence{margin-top:4px;font:550 9px/1.45 Inter,system-ui;color:#596a76;white-space:pre-wrap}.p48-source-change{margin-top:8px;padding-top:8px;border-top:1px solid #e1eaf0;display:grid;gap:7px}.p48-source-change button{min-height:32px;border:1px solid #b8cbd7;border-radius:8px;background:#fff;color:#315a78;font:800 9px Inter,system-ui;cursor:pointer}.p48-source-change-results{display:grid;gap:6px}.p48-source-change-item{padding:7px;border-radius:8px;background:#fff;border:1px solid #dde8ef;font:600 8px/1.4 Inter,system-ui;color:#536976}.p48-source-change-item strong{display:block;color:#315a78;font-size:9px;margin-bottom:2px}.p48-source-change-note{font:550 8px/1.35 Inter,system-ui;color:#738795}.p48-source-trace-note{margin-top:7px;padding-top:7px;border-top:1px solid #e1eaf0;font:550 8px/1.4 Inter,system-ui;color:#788994}.p48-source-trace-badge{display:inline-block;margin-right:5px;padding:2px 5px;border-radius:999px;background:#edf5fa;color:#42677f;font:800 8px/1.2 Inter,system-ui}
+/* v0.20.51 – resolve document conflicts before drawing */
+.p48-doc-conflicts{margin-top:10px;border:1px solid #e7c993;border-radius:12px;background:#fffaf0;padding:10px;display:grid;gap:8px}.p48-doc-conflicts[hidden]{display:none!important}.p48-doc-conflict-head{display:flex;align-items:center;justify-content:space-between;gap:8px}.p48-doc-conflict-head strong{font:850 11px Inter,system-ui;color:#674719}.p48-doc-conflict-head span{font:700 8px Inter,system-ui;color:#8b6b38}.p48-doc-conflict-card{border:1px solid #ead6b2;border-radius:10px;background:#fff;padding:9px}.p48-doc-conflict-title{font:800 10px/1.4 Inter,system-ui;color:#513b1c}.p48-doc-conflict-sources{margin-top:4px;font:600 8px/1.35 Inter,system-ui;color:#8a795f}.p48-doc-conflict-options{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.p48-doc-conflict-options button{min-height:30px;border:1px solid #d9c6a7;border-radius:8px;background:#fff;color:#604d2d;padding:5px 8px;font:750 9px Inter,system-ui;cursor:pointer}.p48-doc-conflict-options button.active{background:#edf6f1;border-color:#7da993;color:#245f48}.p48-doc-conflict-custom{display:flex;gap:6px;margin-top:7px}.p48-doc-conflict-custom input{min-width:0;flex:1;border:1px solid #d9c6a7;border-radius:8px;padding:7px 8px;font:650 9px Inter,system-ui}.p48-doc-conflict-custom button{border:1px solid #c8d8d0;border-radius:8px;background:#f4f8f6;color:#315f4d;padding:6px 8px;font:800 9px Inter,system-ui}.p48-doc-conflict-resolved{border-color:#bcd5c8;background:#f8fcfa}.p48-doc-conflict-resolved .p48-doc-conflict-title{color:#315b49}@media(max-width:700px),(pointer:coarse){.p48-doc-conflict-options button,.p48-doc-conflict-custom button{min-height:42px}.p48-doc-conflict-custom input{min-height:42px;font-size:11px}}
+
+/* v0.20.50 – multi-document synthesis */
+.p48-doc-row.conflict{border-color:#e8c78f;background:#fffaf1}.p48-doc-row.conflict .p48-doc-meta{background:#fff0d8;color:#83571c}
+/* v0.20.48 – structured document interpretation */
+.p48-doc-insights{margin-top:10px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}.p48-doc-insight{border:1px solid #dce6e1;border-radius:9px;background:#fbfdfc;padding:7px;text-align:center}.p48-doc-insight strong{display:block;color:#2f5d4a;font:850 13px Inter,system-ui}.p48-doc-insight span{display:block;margin-top:2px;color:#77857e;font:650 8px Inter,system-ui}.p48-doc-structured{margin-top:10px;display:grid;gap:7px;max-height:280px;overflow:auto}.p48-doc-structured[hidden]{display:none!important}.p48-doc-row{border:1px solid #dce5e0;border-radius:10px;padding:9px;background:#fff}.p48-doc-row-top{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}.p48-doc-row-text{font:750 10px/1.35 Inter,system-ui;color:#324a40}.p48-doc-row-badge{white-space:nowrap;padding:3px 6px;border-radius:999px;background:#eef5f1;color:#3e6c59;font:750 8px Inter,system-ui}.p48-doc-row-badge.review{background:#fff6e8;color:#8a5a17}.p48-doc-row-meta{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}.p48-doc-meta{padding:3px 6px;border-radius:6px;background:#f4f7f5;color:#5d6f67;font:650 8px Inter,system-ui}.p48-doc-source{margin-top:6px;color:#87928d;font:550 8px/1.35 Inter,system-ui}.p48-doc-mode{display:flex;gap:6px;margin-top:10px}.p48-doc-mode button{border:1px solid #ccd9d2;background:#fff;border-radius:8px;min-height:30px;padding:5px 9px;color:#4b6258;font:750 9px Inter,system-ui;cursor:pointer}.p48-doc-mode button.active{background:#edf6f1;border-color:#94b9a8;color:#245f48}@media(max-width:700px),(pointer:coarse){.p48-doc-insights{grid-template-columns:repeat(3,minmax(0,1fr))}.p48-doc-structured{max-height:330px}.p48-doc-mode button{min-height:42px}}
+
+/* v0.20.47 – document to process proposal */
+.p48-export-preview-btn{width:100%;margin-top:8px;justify-content:center}.p48-export-preview-backdrop{position:fixed;z-index:9950;inset:0;background:rgba(25,38,48,.38);border:0}.p48-export-preview-backdrop[hidden],.p48-export-preview-dialog[hidden]{display:none!important}.p48-export-preview-dialog{position:fixed;z-index:9951;left:50%;top:50%;transform:translate(-50%,-50%);width:min(920px,calc(100vw - 28px));max-height:calc(100vh - 36px);overflow:auto;background:#fff;border:1px solid #cbd7d0;border-radius:16px;box-shadow:0 22px 70px rgba(31,52,70,.3);padding:18px}.p48-export-preview-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}.p48-export-preview-title{font:850 18px/1.2 Inter,system-ui;color:#274238}.p48-export-preview-sub{margin-top:5px;font:600 10px/1.45 Inter,system-ui;color:#6d7d76}.p48-export-preview-close{border:0;background:#f0f5f2;border-radius:9px;width:36px;height:36px;font:850 20px system-ui;cursor:pointer}.p48-export-preview-summary{margin-top:12px;padding:10px 12px;border-radius:10px;background:#f4f7f5;color:#40584e;font:700 10px/1.45 Inter,system-ui}.p48-export-preview-warning{margin-top:9px;padding:9px 11px;border:1px solid #e6cf9b;border-radius:9px;background:#fff8e8;color:#6d5520;font:650 10px/1.45 Inter,system-ui}.p48-export-preview-pages{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:14px}.p48-export-preview-page{border:1px solid #d3ddd7;border-radius:11px;background:#f7f9f8;padding:9px}.p48-export-preview-page strong{display:block;margin-bottom:7px;color:#40584e;font:800 10px Inter,system-ui}.p48-export-preview-page canvas{display:block;width:100%;height:auto;background:#fff;border:1px solid #d9dfdc;box-shadow:0 2px 8px rgba(31,52,70,.08)}.p48-export-preview-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}@media(max-width:700px),(pointer:coarse){.p48-export-preview-dialog{top:12px;bottom:12px;transform:translateX(-50%);max-height:none;padding:14px}.p48-export-preview-pages{grid-template-columns:1fr}.p48-export-preview-actions{display:grid;grid-template-columns:1fr 1fr}.p48-export-preview-actions button{min-height:44px}}
+.p48-doc-dialog{position:fixed;z-index:260;left:50%;top:50%;transform:translate(-50%,-50%);width:min(680px,calc(100vw - 28px));max-height:min(760px,calc(100vh - 36px));overflow:auto;background:#fff;border:1px solid #cbd7d0;border-radius:16px;box-shadow:0 22px 60px rgba(31,52,70,.28);padding:16px}.p48-doc-dialog[hidden]{display:none!important}.p48-doc-backdrop{position:fixed;z-index:259;inset:0;background:rgba(25,38,48,.34);border:0}.p48-doc-backdrop[hidden]{display:none!important}.p48-doc-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.p48-doc-title{font:850 17px/1.2 Inter,system-ui;color:#274238}.p48-doc-sub{margin-top:4px;font:600 10px/1.45 Inter,system-ui;color:#6d7d76}.p48-doc-close{border:0;background:#f0f5f2;border-radius:9px;width:34px;height:34px;font:850 20px system-ui;cursor:pointer}.p48-doc-drop{display:block;margin-top:14px;border:1.5px dashed #b8ccc1;border-radius:12px;padding:16px;background:#f8fbf9;text-align:center;cursor:pointer}.p48-doc-drop strong{display:block;color:#315849;font:800 12px Inter,system-ui}.p48-doc-drop span{display:block;margin-top:5px;color:#718078;font:600 9px/1.45 Inter,system-ui}.p48-doc-file{display:none}.p48-doc-status{margin-top:10px;padding:9px 10px;border-radius:9px;background:#f4f7f5;color:#52675e;font:650 9px/1.45 Inter,system-ui}.p48-doc-review{margin-top:12px}.p48-doc-review label{display:block;margin-bottom:6px;color:#3f554c;font:800 10px Inter,system-ui}.p48-doc-review textarea{box-sizing:border-box;width:100%;min-height:210px;resize:vertical;border:1px solid #ccd8d2;border-radius:10px;padding:10px;font:600 11px/1.5 Inter,system-ui;color:#30443b}.p48-doc-note{margin-top:8px;color:#728078;font:600 9px/1.45 Inter,system-ui}.p48-doc-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.p48-doc-actions button{min-height:36px}.p48-doc-chip{display:inline-block;margin-right:5px;padding:3px 6px;border-radius:999px;background:#edf5f1;color:#3f6b59;font:750 8px Inter,system-ui}@media(max-width:700px),(pointer:coarse){.p48-doc-dialog{top:12px;bottom:12px;transform:translateX(-50%);max-height:none}.p48-doc-close,.p48-doc-actions button{min-height:44px}.p48-doc-review textarea{min-height:260px}}
+
+/* v0.20.42 – lightweight version history */
+.p48-version-panel{position:fixed;z-index:242;top:118px;right:18px;bottom:22px;width:min(400px,calc(100vw - 36px));display:flex;flex-direction:column;background:#fff;border:1px solid #cfd9e2;border-radius:14px;box-shadow:0 14px 38px rgba(31,52,70,.22);overflow:hidden}
+.p48-version-panel[hidden]{display:none!important}.p48-version-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px 15px 12px;border-bottom:1px solid #e2e9e5}.p48-version-title{font:850 16px/1.2 Inter,system-ui;color:#274238}.p48-version-sub{margin-top:4px;font:600 10px/1.45 Inter,system-ui;color:#6d7d76}.p48-version-close{border:0;background:#f0f5f2;border-radius:9px;width:34px;height:34px;color:#5f7169;font:850 20px/1 system-ui;cursor:pointer}.p48-version-actions{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 15px;border-bottom:1px solid #edf1ef;background:#fbfcfc}.p48-version-status{font:650 9px/1.35 Inter,system-ui;color:#718079}.p48-version-list{display:grid;gap:8px;overflow:auto;padding:12px 15px 16px}.p48-version-empty{padding:14px;border:1px dashed #d6e0db;border-radius:10px;color:#74847c;font:600 10px/1.5 Inter,system-ui;background:#fbfdfc}.p48-version-card{border:1px solid #dbe4df;border-radius:11px;padding:11px 12px;background:#fff}.p48-version-card:first-child{border-color:#bcd4c8;background:#f8fcfa}.p48-version-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.p48-version-name{font:800 11px/1.3 Inter,system-ui;color:#30483e}.p48-version-date{font:650 9px/1.3 Inter,system-ui;color:#829087;text-align:right;white-space:nowrap}.p48-version-meta{margin-top:5px;font:600 9px/1.4 Inter,system-ui;color:#718078}.p48-version-diff{margin-top:7px;padding-top:7px;border-top:1px solid #edf1ef;font:700 9px/1.4 Inter,system-ui;color:#4e655b}.p48-version-restore{margin-top:9px;min-height:31px;border:1px solid #bfd3c9;border-radius:8px;background:#f2f8f5;color:#2d654f;padding:6px 9px;font:800 9px Inter,system-ui;cursor:pointer}.p48-version-note{padding:0 15px 12px;color:#7a8881;font:550 9px/1.45 Inter,system-ui}
+@media(max-width:700px),(pointer:coarse){.p48-version-panel{top:72px;right:8px;left:8px;bottom:82px;width:auto}.p48-version-close{min-width:44px;min-height:44px}.p48-version-card{padding:12px}.p48-version-restore{min-height:44px;font-size:11px}}
+
 /* v0.20.24 – role & responsibility clarity */
 .p48-node-role{position:absolute;left:50%;bottom:-22px;transform:translateX(-50%);max-width:calc(100% + 40px);padding:3px 7px;border:1px solid #d4dfda;border-radius:999px;background:rgba(255,255,255,.96);box-shadow:0 2px 7px rgba(31,52,70,.07);color:#52675e;font:750 8.5px/1.15 Inter,system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none;z-index:7}
 .p48-node-role::before{content:"Ansvar: ";font-weight:600;color:#7a8982}
@@ -522,6 +582,28 @@ header[data-testid="stHeader"]{height:2rem}
 .p48-node.p48-walk-active .p48-node-role,.p48-node.p48-walk-next .p48-node-role{opacity:.92}
 @media(max-width:700px){.p48-node-role{font-size:9px;padding:4px 7px;bottom:-24px}}
 
+
+
+/* v0.20.59: novice-first walkthrough guidance */
+.p48-walkthrough-optional{font-weight:600;color:#789087;font-size:10px}
+.p48-walkthrough-coming{display:flex;align-items:baseline;gap:8px;margin-top:11px;padding-top:10px;border-top:1px solid #dce9e3;color:#36574b}
+.p48-walkthrough-coming span{flex:0 0 auto;font:850 8px/1 Inter,system-ui;letter-spacing:.12em;color:#6c877d}
+.p48-walkthrough-coming strong{font:750 12px/1.35 Inter,system-ui;color:#315347}
+
+/* v0.20.62 – hitta i stora processkartor */
+.p48-find-menu{position:relative}
+.p48-find-popover{position:absolute;z-index:160;top:calc(100% + 7px);left:0;width:min(360px,calc(100vw - 24px));padding:10px;border:1px solid #cfdbe3;border-radius:12px;background:#fff;box-shadow:0 12px 30px rgba(31,52,70,.18)}
+.p48-find-input{width:100%;box-sizing:border-box;min-height:38px;border:1px solid #bccbd6;border-radius:8px;padding:8px 10px;font:600 12px Inter,system-ui;color:#2c4050}
+.p48-find-input:focus{outline:2px solid rgba(31,111,85,.14);border-color:#57927c}
+.p48-find-meta{margin:7px 2px 5px;font:650 9px/1.3 Inter,system-ui;color:#71818c}
+.p48-find-results{display:grid;gap:5px;max-height:280px;overflow:auto}
+.p48-find-result{width:100%;text-align:left;border:1px solid #dde6eb;border-radius:8px;background:#fff;padding:8px 9px;cursor:pointer;color:#304758}
+.p48-find-result:hover,.p48-find-result.active{background:#eef7f3;border-color:#b7d4c7}
+.p48-find-result strong{display:block;font:780 10px/1.3 Inter,system-ui;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p48-find-result span{display:block;margin-top:3px;font:550 8px/1.35 Inter,system-ui;color:#74838d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p48-find-empty{padding:10px 4px;color:#7c8991;font:600 10px/1.4 Inter,system-ui}
+.p48-node.p48-find-hit{box-shadow:0 0 0 4px rgba(31,111,85,.18),0 4px 16px rgba(31,111,85,.12)!important}
+@media(max-width:700px),(pointer:coarse){.p48-find-popover{position:fixed;left:8px;right:8px;top:62px;width:auto}.p48-find-input{min-height:46px;font-size:16px}.p48-find-result{min-height:48px;padding:10px}}
 
 </style>
 """, unsafe_allow_html=True)
@@ -621,6 +703,23 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   .p48-empty-actions{grid-template-columns:1fr}
   .p48-empty-actions button{min-height:46px}
 }
+/* v0.20.44 – first process flow: type the first step, then continue with Tab. */
+.p48-empty-first-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:stretch}
+.p48-empty-first-row input{min-width:0;height:44px;box-sizing:border-box;border:1px solid #b9c8d5;border-radius:9px;background:#fff;color:#243d33;padding:0 12px;font:650 12px Inter,system-ui;outline:none}
+.p48-empty-first-row input:focus{border-color:#4f8c76;box-shadow:0 0 0 3px rgba(31,111,85,.12)}
+.p48-empty-first-row button{min-width:88px;border:1px solid #1f6f55;border-radius:9px;background:#1f6f55;color:#fff;padding:0 14px;font:800 12px Inter,system-ui;cursor:pointer}
+.p48-empty-alt{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;margin-top:11px;color:#7a8881;font:600 10px/1.3 Inter,system-ui}
+.p48-empty-alt button{border:0;background:#f1f6f3;color:#3d6455;border-radius:999px;padding:6px 9px;font:750 10px Inter,system-ui;cursor:pointer}
+.p48-empty-alt button:hover{background:#e7f1ec}
+.p48-empty-import{margin-top:10px;border:1px dashed #b8c9d5;background:#f8fbfd;color:#3f6073;border-radius:10px;padding:8px 11px;font:750 11px Inter,system-ui;cursor:pointer}
+.p48-empty-import:hover{background:#eef6fa}
+.p48-batch-dialog{position:fixed;inset:50% auto auto 50%;transform:translate(-50%,-50%);z-index:330;width:min(620px,calc(100vw - 28px));background:#fff;border:1px solid #cbd8e2;border-radius:16px;box-shadow:0 24px 70px rgba(25,45,62,.28);padding:18px}
+.p48-batch-dialog[hidden],.p48-batch-backdrop[hidden]{display:none!important}
+.p48-batch-backdrop{position:fixed;inset:0;z-index:329;background:rgba(21,34,44,.34)}
+.p48-batch-head{display:flex;align-items:start;justify-content:space-between;gap:12px;margin-bottom:10px}.p48-batch-title{font:800 18px/1.2 Inter,system-ui;color:#263a49}.p48-batch-sub{margin-top:4px;color:#657783;font:500 12px/1.45 Inter,system-ui}.p48-batch-close{border:0;background:transparent;font-size:22px;cursor:pointer;color:#657783}
+.p48-batch-dialog textarea{width:100%;min-height:220px;resize:vertical;box-sizing:border-box;border:1px solid #bccbd6;border-radius:10px;padding:12px;font:500 14px/1.5 Inter,system-ui;color:#263a49}.p48-batch-dialog textarea:focus{outline:2px solid rgba(48,121,92,.18);border-color:#5d917c}.p48-batch-hint{margin-top:8px;color:#6c7b86;font:500 11px/1.45 Inter,system-ui}.p48-batch-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.p48-batch-actions button{min-height:38px}
+@media(max-width:700px),(pointer:coarse){.p48-batch-dialog{padding:15px;top:48%}.p48-batch-dialog textarea{min-height:240px;font-size:16px}.p48-batch-actions{display:grid;grid-template-columns:1fr 1fr}.p48-batch-actions button{min-height:44px}}
+@media(max-width:700px),(pointer:coarse){.p48-empty-first-row{grid-template-columns:1fr}.p48-empty-first-row input,.p48-empty-first-row button{min-height:46px}.p48-empty-alt{margin-top:12px}}
 
 /* v0.15.10 real canvas zoom — this MUST live inside the editor iframe.
    Scaling the canvas itself makes nodes, text, connectors, labels, logos and print guides
@@ -665,9 +764,12 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 
 /* v0.20.11 – Direct Manipulation Polish
    Keep creation on the node itself. The floating toolbar should edit the selection, not duplicate the primary flow action. */
-.p48-node-quick[data-mode="single"] #p48-node-quick-flow,
-.p48-node-quick[data-mode="single"] #p48-node-quick-next,
-.p48-node-quick[data-mode="single"] #p48-node-quick-next-more{display:none!important}
+.p48-node-quick[data-mode="single"] #p48-node-quick-flow{display:none!important}
+.p48-node-quick[data-mode="single"] #p48-node-quick-next{display:inline-flex!important;background:#eaf6f0!important;border-color:#9fc9b6!important;color:#1f6f55!important;font-weight:820!important;padding-left:9px!important;padding-right:9px!important}
+.p48-node-quick[data-mode="single"] #p48-node-quick-next:hover{background:#dff1e8!important;border-color:#72aa91!important}
+.p48-node-quick[data-mode="single"] #p48-node-quick-next-more{display:inline-flex!important;min-width:24px!important;padding-left:5px!important;padding-right:5px!important;color:#376655!important}
+.p48-node-quick[data-mode="single"] #p48-node-quick-next[hidden],
+.p48-node-quick[data-mode="single"] #p48-node-quick-next-more[hidden]{display:none!important}
 .p48-node-quick[data-mode="single"]{padding:2px!important;gap:0!important;border-color:#d6e0e8!important;background:rgba(255,255,255,.985)!important}
 .p48-node-quick[data-mode="single"] button,
 .p48-node-quick[data-mode="single"] summary{padding:4px 7px!important;font-weight:720!important;color:#44586a!important}
@@ -1000,6 +1102,11 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 
 /* v0.9.3 performance hints */
 .p48-node{contain:layout style;will-change:transform,left,top}
+/* v0.20.64: large maps shed decorative paint cost, while preserving selection and semantics. */
+#pk48.p48-large-map .p48-node{box-shadow:none;will-change:auto}
+#pk48.p48-large-map .p48-node:not(.selected):not(.p48-find-focus){transition:none!important}
+#pk48.p48-large-map #p48-canvas{background-image:none}
+#pk48.p48-large-map .p48-handle{box-shadow:none!important}
 #p48-links{shape-rendering:geometricPrecision}
 .p48-link-hit-segment{will-change:transform}
 
@@ -1046,7 +1153,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-analysis-panel[hidden]{display:none!important}
 .p48-analysis-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px 14px 10px;border-bottom:1px solid #e2e8ee}
 .p48-analysis-title{font:800 15px/1.2 Inter,system-ui,sans-serif;color:#20364f}.p48-analysis-sub{font:500 10px/1.35 Inter,system-ui,sans-serif;color:#6b7986;margin-top:3px}
-.p48-analysis-close{border:1px solid #d7dfe6;background:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:18px;color:#526373}
+.p48-analysis-head-actions{display:flex;align-items:center;gap:6px}.p48-analysis-close{border:1px solid #d7dfe6;background:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:18px;color:#526373}
 .p48-analysis-summary{display:grid;grid-template-columns:92px 1fr;gap:12px;padding:12px 14px;background:#f7fafc;border-bottom:1px solid #e2e8ee}
 .p48-analysis-score{display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #d4e1dc;border-radius:12px;background:#fff;padding:9px}.p48-analysis-score strong{font:800 18px/1 Inter,system-ui;color:#20364f}.p48-analysis-score span{font:700 8px/1.2 Inter,system-ui;color:#6c7a87;margin-top:5px;text-align:center}.p48-analysis-trust{padding:9px 14px;background:#fff;border-bottom:1px solid #e2e8ee;font:500 9px/1.45 Inter,system-ui;color:#61717e}.p48-analysis-trust strong{color:#344a5d}.p48-analysis-basis{margin-top:6px;padding-top:6px;border-top:1px solid #edf1f4;font:500 9px/1.4 Inter,system-ui;color:#60717e}.p48-analysis-basis b{font-weight:800;color:#42586a}
 .p48-analysis-counts{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;align-content:center}.p48-analysis-count{border-radius:9px;padding:7px 5px;text-align:center;font:700 10px Inter,system-ui;background:#fff;border:1px solid #e0e6eb}.p48-analysis-count strong{display:block;font-size:15px;margin-bottom:2px}.p48-analysis-count.error strong{color:#b42318}.p48-analysis-count.warning strong{color:#b25e09}.p48-analysis-count.info strong{color:#2c67a0}
@@ -1426,6 +1533,12 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-walkthrough-step-description{font-size:12px;line-height:1.55;margin-top:9px}
 .p48-walkthrough-step-meta{margin-top:10px}
 .p48-walkthrough-step-meta span{font-size:9px;padding:5px 7px}
+.p48-walkthrough-now{font:850 9px/1 Inter,system-ui;letter-spacing:.12em;text-transform:uppercase;color:#2f8062;margin-bottom:7px}
+.p48-walkthrough-return-note{display:flex;align-items:flex-start;gap:8px;padding:10px 12px;border:1px solid #cfe0d8;border-radius:11px;background:#f2f9f5;color:#345d4d;font:700 10px/1.4 Inter,system-ui}
+.p48-walkthrough-return-note[hidden]{display:none!important}
+.p48-walkthrough-return-note strong{font-weight:850}
+.p48-walkthrough-answer-target{display:block;margin-top:4px;font:650 10px/1.25 Inter,system-ui;opacity:.68}
+.p48-walkthrough-next-context{display:block;margin-top:3px;font:650 10px/1.25 Inter,system-ui;opacity:.75}
 .p48-walkthrough-questions{gap:11px}
 .p48-walkthrough-question{padding:15px;border-radius:13px;border-color:#d7e4de;box-shadow:0 4px 14px rgba(31,52,70,.04)}
 .p48-walkthrough-question-kind{margin-bottom:8px}
@@ -1542,7 +1655,20 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-overview-node.object{background:#9aaebc}
 .p48-overview-node.selected{background:#2f7e63;box-shadow:0 0 0 1px rgba(47,126,99,.25)}
 .p48-overview-viewport{position:absolute;border:1.5px solid #2f7e63;border-radius:4px;background:rgba(47,126,99,.07);pointer-events:none;box-sizing:border-box}
-.p48-overview-hint{margin-top:6px;font:600 9px/1.3 Inter,system-ui;color:#7a8b96}
+.p48-overview-hint{margin-top:6px;font:600 9px/1.3 Inter,system-ui;color:#7a8b96}.p48-overview-nav{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-top:7px}.p48-overview-nav button{min-width:0;min-height:30px;padding:5px 4px;border:1px solid #d5e0e6;border-radius:7px;background:#fff;color:#405865;font:750 9px/1.1 Inter,system-ui;cursor:pointer}.p48-overview-nav button:hover{background:#f0f6f3}.p48-overview-nav button:disabled{opacity:.42;cursor:default}.p48-overview-choices{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}.p48-overview-choices[hidden]{display:none!important}.p48-overview-choice{min-height:29px;padding:5px 7px;border:1px solid #bad0c6;border-radius:7px;background:#f3f8f5;color:#2d5c49;font:700 9px/1.2 Inter,system-ui;cursor:pointer;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* v0.20.37 – lightweight responsibility view: overlay, never rearranges the process */
+.p48-responsibility-bar{margin:0 12px 8px;padding:9px 12px;border:1px solid #d6e2df;border-radius:12px;background:#f8fbfa;display:flex;align-items:center;gap:14px;box-shadow:0 5px 16px rgba(28,58,50,.07)}
+.p48-responsibility-bar[hidden]{display:none!important}.p48-responsibility-bar>div:first-child{display:grid;gap:1px;min-width:180px}.p48-responsibility-bar strong{font-size:12px}.p48-responsibility-bar #p48-responsibility-summary{font-size:10px;color:#61716d}.p48-responsibility-legend{display:flex;gap:6px;flex:1;flex-wrap:wrap}.p48-role-chip{border:1px solid #cbd8d4;background:white;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:700;cursor:pointer}.p48-role-chip.active{outline:2px solid #235f50;outline-offset:1px}.p48-role-chip.unassigned{border-style:dashed;color:#6b7471}
+#pk48.p48-responsibility-mode .p48-node[data-role-view]{box-shadow:0 0 0 3px rgba(35,95,80,.16),0 8px 18px rgba(30,55,48,.10)}
+#pk48.p48-responsibility-mode .p48-node[data-role-view] .p48-node-role{display:block!important;opacity:1!important;font-weight:800}
+#pk48.p48-responsibility-mode .p48-node.p48-role-unassigned{opacity:.48;filter:saturate(.55)}
+#pk48.p48-responsibility-mode.p48-role-filtering .p48-node:not(.p48-role-focus){opacity:.18!important}
+#pk48.p48-responsibility-mode .p48-link-handoff .p48-link-visible{stroke-width:3.5!important;opacity:1!important}
+#pk48.p48-responsibility-mode .p48-link-handoff .p48-link-visible{stroke-dasharray:7 4}
+#pk48.p48-responsibility-mode.p48-role-filtering .p48-link-visible{opacity:.16!important}
+#pk48.p48-responsibility-mode.p48-role-filtering .p48-link-role-focus .p48-link-visible{opacity:1!important}
+@media(max-width:700px){.p48-responsibility-bar{margin:0 6px 6px;padding:7px 9px;gap:7px;align-items:flex-start}.p48-responsibility-bar>div:first-child{min-width:0}.p48-responsibility-legend{max-height:68px;overflow:auto}.p48-role-chip{padding:5px 8px}}
 @media(max-width:700px){#p48-overview-toggle,.p48-overview{display:none!important}}
 
 /* v0.20.30 – linked subprocess hierarchy */
@@ -1554,6 +1680,10 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-subprocess-open{border-color:#c8d9d0!important;background:#f2f9f5!important;color:#28624c!important}
 .p48-node.subprocess.p48-subprocess-linked::after{content:'↳';position:absolute;right:8px;bottom:5px;color:#6e5a92;font:800 12px/1 Inter,system-ui;opacity:.75}
 @media(max-width:700px){.p48-breadcrumbs{padding:7px 9px;font-size:10px}.p48-breadcrumbs button{font-size:10px}}
+/* v0.20.45 – understand in 30 seconds */
+.p48-process-glance{display:none;gap:8px;align-items:stretch;padding:8px 12px;border-bottom:1px solid #dce6e1;background:#f7faf8;color:#334b41}
+#pk48.p48-read-mode .p48-process-glance{display:flex}.p48-glance-item{min-width:0;flex:1 1 0;padding:7px 9px;border:1px solid #dce6e1;border-radius:9px;background:#fff}.p48-glance-label{font:800 8px/1.2 Inter,system-ui;letter-spacing:.08em;text-transform:uppercase;color:#75877f}.p48-glance-value{margin-top:3px;font:700 10px/1.35 Inter,system-ui;color:#2f473d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.p48-glance-value.muted{font-weight:600;color:#7d8b85}
+@media(max-width:700px){.p48-process-glance{overflow-x:auto;padding:6px 8px;gap:6px;scrollbar-width:none}.p48-process-glance::-webkit-scrollbar{display:none}.p48-glance-item{flex:0 0 148px;padding:6px 8px}.p48-glance-value{font-size:10px}}
 /* v0.20.32 – clean read/presentation mode */
 .p48-mobile-reader-bar{display:none}
 .p48-readmode-toggle.active{background:#234f3f!important;border-color:#234f3f!important;color:#fff!important}
@@ -1564,7 +1694,141 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 #pk48.p48-read-mode .p48-node{cursor:pointer!important}
 .p48-read-panel{position:fixed;right:18px;top:112px;z-index:89;width:min(340px,calc(100vw - 36px));max-height:calc(100vh - 150px);overflow:auto;border:1px solid #d4dfda;border-radius:14px;background:rgba(255,255,255,.985);box-shadow:0 16px 42px rgba(31,52,70,.17);padding:14px}
 .p48-read-panel[hidden]{display:none!important}.p48-read-panel-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.p48-read-panel-kicker{font:850 8px/1.2 Inter,system-ui;letter-spacing:.12em;text-transform:uppercase;color:#6a7f75}.p48-read-panel-title{margin-top:3px;font:850 17px/1.25 Inter,system-ui;color:#243d33}.p48-read-panel-close{border:0;background:#f2f6f4;border-radius:8px;width:30px;height:30px;color:#61736b;font:800 18px/1 system-ui;cursor:pointer}.p48-read-panel-grid{display:grid;gap:8px;margin-top:12px}.p48-read-field{border-top:1px solid #e4ebe7;padding-top:8px}.p48-read-field:first-child{border-top:0;padding-top:0}.p48-read-label{font:800 8px/1.2 Inter,system-ui;letter-spacing:.08em;text-transform:uppercase;color:#7b8a83}.p48-read-value{margin-top:3px;font:600 11px/1.5 Inter,system-ui;color:#384e45;white-space:pre-wrap}.p48-read-empty{margin-top:10px;color:#819087;font:600 10px/1.45 Inter,system-ui}.p48-read-hint{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:87;padding:7px 11px;border:1px solid #d4dfda;border-radius:999px;background:rgba(255,255,255,.96);box-shadow:0 5px 18px rgba(31,52,70,.10);font:700 9px/1.2 Inter,system-ui;color:#5a7066;pointer-events:none}.p48-read-hint[hidden]{display:none!important}
-@media(max-width:700px){.p48-read-panel{top:auto;right:8px;left:8px;bottom:max(8px,env(safe-area-inset-bottom));width:auto;max-height:62dvh;border-radius:18px;padding:18px 16px 20px}.p48-read-panel::before{content:"";display:block;width:42px;height:4px;border-radius:999px;background:#d8e2dd;margin:-7px auto 11px}.p48-read-panel-title{font-size:20px}.p48-read-label{font-size:9px}.p48-read-value{font-size:14px;line-height:1.55}.p48-read-panel-close{width:44px;height:44px;font-size:22px}.p48-read-hint{bottom:max(74px,calc(62px + env(safe-area-inset-bottom)));font-size:10px}.p48-mobile-reader-bar{display:none;position:fixed;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));top:max(8px,env(safe-area-inset-top));z-index:210;align-items:center;gap:6px;padding:7px;border:1px solid #cbd9d3;border-radius:14px;background:rgba(255,255,255,.97);box-shadow:0 8px 28px rgba(24,42,58,.18);backdrop-filter:blur(8px)}#pk48.p48-read-mode .p48-mobile-reader-bar{display:flex}#pk48.p48-read-mode .p48-brand,#pk48.p48-read-mode .p48-top,#pk48.p48-read-mode .p48-mobile-bar{display:none!important}#pk48.p48-read-mode .p48-breadcrumbs{padding-top:64px}.p48-mobile-reader-title{min-width:0;flex:1 1 auto;padding:2px 5px}.p48-mobile-reader-kicker{display:block;font:850 7px/1 Inter,system-ui;letter-spacing:.12em;color:#5c7b6f}.p48-mobile-reader-name{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px;font:800 12px/1.2 Inter,system-ui;color:#294238}.p48-mobile-reader-bar button{flex:0 0 auto;min-width:44px;min-height:44px;border:0;border-radius:10px;background:#eef5f1;color:#275d49;font:800 11px system-ui;padding:6px 8px}.p48-mobile-reader-bar button.primary{background:#1f6f55;color:#fff}.p48-mobile-reader-bar button[hidden]{display:none!important}#pk48.p48-read-mode .p48-scroll{scroll-padding-top:76px}.p48-walkthrough-panel{top:auto!important;right:8px!important;left:8px!important;bottom:max(8px,env(safe-area-inset-bottom))!important;width:auto!important;height:min(68dvh,680px);border-radius:20px 20px 16px 16px!important}.p48-walkthrough-backdrop{background:rgba(20,35,50,.08)!important;backdrop-filter:none!important}.p48-walkthrough-head{padding:11px 13px}.p48-walkthrough-close{width:44px;height:44px}.p48-walkthrough-start,.p48-walkthrough-run,.p48-walkthrough-summary{padding:13px 14px 18px;padding-bottom:max(18px,env(safe-area-inset-bottom))}.p48-walkthrough-step-card{padding:15px}.p48-walkthrough-step-title{font-size:22px}.p48-walkthrough-step-description{font-size:14px}.p48-walkthrough-step-meta span{font-size:10px}.p48-walkthrough-question-text{font-size:17px}.p48-walkthrough-answer{min-height:60px;font-size:17px}.p48-walkthrough-main-btn{min-height:52px;font-size:14px}.p48-walkthrough-next-choice{min-height:52px;font-size:13px}.p48-walkthrough-trail{overflow-x:auto;scrollbar-width:none}.p48-walkthrough-trail::-webkit-scrollbar{display:none}}
+@media(max-width:700px){.p48-read-panel{top:auto;right:8px;left:8px;bottom:max(8px,env(safe-area-inset-bottom));width:auto;max-height:62dvh;border-radius:18px;padding:18px 16px 20px}.p48-read-panel::before{content:"";display:block;width:42px;height:4px;border-radius:999px;background:#d8e2dd;margin:-7px auto 11px}.p48-read-panel-title{font-size:20px}.p48-read-label{font-size:9px}.p48-read-value{font-size:14px;line-height:1.55}.p48-read-panel-close{width:44px;height:44px;font-size:22px}.p48-read-hint{bottom:max(70px,calc(58px + env(safe-area-inset-bottom)));font-size:10px}.p48-mobile-reader-bar{display:none;position:fixed;left:max(8px,env(safe-area-inset-left));right:max(8px,env(safe-area-inset-right));top:max(6px,env(safe-area-inset-top));z-index:210;align-items:center;gap:5px;padding:5px 6px;border:1px solid #cbd9d3;border-radius:13px;background:rgba(255,255,255,.97);box-shadow:0 6px 22px rgba(24,42,58,.16);backdrop-filter:blur(8px)}#pk48.p48-read-mode .p48-mobile-reader-bar{display:flex}#pk48.p48-read-mode .p48-brand,#pk48.p48-read-mode .p48-top,#pk48.p48-read-mode .p48-mobile-bar{display:none!important}#pk48.p48-read-mode .p48-breadcrumbs{padding-top:56px}.p48-mobile-reader-title{min-width:0;flex:1 1 auto;padding:1px 4px}.p48-mobile-reader-kicker{display:block;font:850 7px/1 Inter,system-ui;letter-spacing:.12em;color:#5c7b6f}.p48-mobile-reader-name{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px;font:800 12px/1.18 Inter,system-ui;color:#294238}.p48-mobile-reader-bar button{flex:0 0 auto;min-width:40px;min-height:40px;border:0;border-radius:10px;background:#eef5f1;color:#275d49;font:800 11px system-ui;padding:5px 7px}.p48-mobile-reader-bar button.primary{background:#1f6f55;color:#fff}.p48-mobile-reader-bar button[hidden]{display:none!important}#pk48.p48-read-mode .p48-scroll{scroll-padding-top:64px;height:min(64dvh,540px)!important;min-height:430px!important;max-height:540px!important;padding-bottom:18px!important;background:#f4f7f5!important;scrollbar-width:thin}#pk48.p48-read-mode .p48-canvas-wrap{padding-bottom:0!important}#pk48.p48-read-mode #p48-canvas{background-color:#fff}#pk48.p48-read-mode .p48-hnav{display:none!important}.p48-walkthrough-panel{top:auto!important;right:8px!important;left:8px!important;bottom:max(8px,env(safe-area-inset-bottom))!important;width:auto!important;height:min(68dvh,680px);border-radius:20px 20px 16px 16px!important}.p48-walkthrough-backdrop{background:rgba(20,35,50,.08)!important;backdrop-filter:none!important}.p48-walkthrough-head{padding:11px 13px}.p48-walkthrough-close{width:44px;height:44px}.p48-walkthrough-start,.p48-walkthrough-run,.p48-walkthrough-summary{padding:13px 14px 18px;padding-bottom:max(18px,env(safe-area-inset-bottom))}.p48-walkthrough-step-card{padding:15px}.p48-walkthrough-now{font-size:9px}.p48-walkthrough-step-title{font-size:22px}.p48-walkthrough-answer-target{font-size:11px}.p48-walkthrough-return-note{font-size:11px;padding:10px 11px}.p48-walkthrough-step-description{font-size:14px}.p48-walkthrough-step-meta span{font-size:10px}.p48-walkthrough-question-text{font-size:17px}.p48-walkthrough-answer{min-height:60px;font-size:17px}.p48-walkthrough-main-btn{min-height:52px;font-size:14px}.p48-walkthrough-next-choice{min-height:52px;font-size:13px}.p48-walkthrough-trail{overflow-x:auto;scrollbar-width:none}.p48-walkthrough-trail::-webkit-scrollbar{display:none}}
+
+
+/* v0.20.67 – Canvas Flow Builder: expose direct next-step creation without changing the process data model. */
+/* v0.20.66 – Contextual sidebar: canvas-first, three clear work modes, secondary tools under Mer. */
+.p48-top-simplified{gap:6px!important;padding:7px 10px!important;background:rgba(255,255,255,.98)!important;border-bottom-color:#e3e9e6!important}
+.p48-top-simplified>strong{display:none}
+.p48-top-simplified .p48-name{min-width:180px;max-width:340px;font-weight:750;border-color:transparent;background:#f7f9f8}
+.p48-top-simplified .p48-name:hover,.p48-top-simplified .p48-name:focus{border-color:#cad7d1;background:#fff}
+.p48-work-modes{display:flex;align-items:center;padding:2px;border:1px solid #cfdbd5;border-radius:10px;background:#f3f7f5;box-shadow:inset 0 1px 0 rgba(255,255,255,.8)}
+.p48-work-modes .p48-mode-btn{min-height:30px;padding:5px 10px;border:0!important;border-radius:8px!important;background:transparent!important;color:#61736b!important;box-shadow:none!important;font-weight:800!important}
+.p48-work-modes .p48-mode-btn.active,.p48-work-modes #p48-readmode-toggle.active{background:#fff!important;color:#214f3e!important;box-shadow:0 1px 4px rgba(28,55,44,.12)!important}
+.p48-work-modes #p48-walkthrough-launch{color:#1f6f55!important}
+.p48-work-modes #p48-walkthrough-launch:hover{background:#eaf4ef!important}
+.p48-more-popover>.p48-view-menu,.p48-more-popover>.p48-export-menu,.p48-more-popover>.p48-smart-layout-split{position:relative;width:100%;box-sizing:border-box}
+.p48-more-popover>.p48-view-menu>summary,.p48-more-popover>.p48-export-menu>summary,.p48-more-popover>.p48-smart-layout-split>.p48-auto-clean-top{width:100%;box-sizing:border-box;text-align:left;justify-content:flex-start}
+.p48-more-popover>.p48-smart-layout-split{display:grid;grid-template-columns:1fr auto;gap:4px}
+.p48-more-popover>.p48-view-menu .p48-view-popover,.p48-more-popover>.p48-export-menu .p48-export-popover,.p48-more-popover>.p48-smart-layout-split .p48-smart-layout-popover{position:relative;top:auto;left:auto;right:auto;margin-top:6px;width:auto;min-width:0;max-width:none;box-shadow:none;border-color:#dbe3df;background:#fbfcfb}
+.p48-more-popover>.p48-export-menu .p48-export-popover{max-height:none;overflow:visible}
+.p48-secondary-tools-label{margin-top:5px;padding-top:9px;border-top:1px solid #e5ebe8}
+.p48-side{background:#fbfcfb!important;border-right-color:#e5ebe8!important}
+.p48-side .p48-section,.p48-side .p48-format{border-color:#e5ebe8!important;box-shadow:none!important}
+@media(min-width:901px){.p48-body{grid-template-columns:minmax(218px,248px) minmax(0,1fr)!important}.p48-side{padding:8px!important}.p48-palette-hint,.p48-method-flow{opacity:.82}}
+/* v0.20.66 – contextual sidebar: editing context comes before toolbox noise. */
+@media(min-width:901px){
+  .p48-side{display:flex;flex-direction:column;gap:0}
+  .p48-side>#p48-format-panel{order:30}
+  .p48-side>.p48-method-palette{order:10}
+  .p48-side>.p48-section:not(.p48-method-palette){order:20}
+  .p48-side>#p48-account-panel{order:40}
+  #pk48.p48-side-context-active .p48-side>#p48-format-panel{order:5}
+  #pk48.p48-side-context-active .p48-side>.p48-method-palette{order:20}
+  #pk48.p48-side-context-active .p48-side>.p48-section:not(.p48-method-palette){order:30}
+  #pk48.p48-side-context-active .p48-side>#p48-account-panel{order:40}
+}
+#pk48.p48-side-context-active #p48-format-panel{border-color:#cfded7;background:#fff}
+#pk48.p48-side-context-node #p48-format-panel>.p48-format-context-title{font-size:12px;letter-spacing:.01em}
+.p48-step-io-context{margin:8px 0 3px;padding:8px;border:1px solid #e2e9e5;border-radius:9px;background:#fbfcfb}
+.p48-step-io-context .p48-io-wrap{padding:0}
+.p48-step-io-context .p48-io-title{margin-top:5px}
+.p48-step-io-context .p48-io-title:first-child{margin-top:0}
+@media(max-width:1100px){.p48-top-simplified .p48-name{max-width:240px}.p48-work-modes .p48-mode-btn{padding:5px 8px}}
+@media(max-width:700px){.p48-work-modes{order:2}.p48-work-modes .p48-mode-btn{min-height:40px;padding:7px 9px}.p48-top-simplified .p48-name{min-width:120px;max-width:190px}}
+/* v0.20.68 – canvas visual hierarchy: faster scanning without changing process semantics */
+.p48-scroll{background:#f2f5f7}
+.p48-node{
+  color:#213442;
+  font-size:13px;
+  line-height:1.32;
+  transition:box-shadow .12s ease,border-color .12s ease,background-color .12s ease,opacity .12s ease;
+}
+.p48-node .p48-label{font-weight:720;letter-spacing:-.005em}
+.p48-node.process{
+  border-color:#9aa8b4;
+  border-left:4px solid #2b7b61;
+  background:#fff;
+  box-shadow:0 3px 10px rgba(31,52,70,.08);
+}
+.p48-node.process .p48-label{font-weight:780}
+.p48-node.process:hover{border-color:#7f909e;box-shadow:0 5px 14px rgba(31,52,70,.11)}
+.p48-node.start,.p48-node.end{
+  min-width:132px;
+  min-height:52px;
+  padding:11px 20px;
+  border-width:1.5px;
+  box-shadow:0 2px 7px rgba(31,52,70,.07);
+}
+.p48-node.start{background:#f1f8f4;border-color:#6da489;color:#245c48}
+.p48-node.end{background:#fff5f3;border-color:#bd7d74;color:#7f3f38}
+.p48-node.start .p48-label,.p48-node.end .p48-label{font-weight:820}
+.p48-node.decision::before{
+  background:var(--decision-bg,#fffaf2);
+  border-color:var(--decision-border,#b78935);
+  box-shadow:0 3px 10px rgba(103,78,25,.08);
+}
+.p48-node.decision .p48-label{font-size:13px;font-weight:820;line-height:1.24}
+.p48-node.object{box-shadow:0 1px 5px rgba(30,73,84,.06)}
+.p48-node.subprocess{background:#fbf9ff;border-color:#8269ad}
+.p48-node.document{background:#f6f9fc;border-color:#7193af}
+.p48-node-role{
+  border-color:#dbe4df;
+  background:rgba(255,255,255,.94);
+  box-shadow:none;
+  color:#66776f;
+  font-weight:700;
+}
+#p48-links .p48-link-visible.p48-flow-main{opacity:.9;stroke-width:2.35px}
+#p48-links .p48-link-visible.p48-flow-branch{opacity:.76;stroke-width:2px}
+.p48-link-label rect{fill:rgba(255,255,255,.97);stroke:#d2dae1;stroke-width:1;filter:none}
+.p48-link-label text{font:780 10.5px/1 Inter,system-ui,sans-serif;fill:#435666}
+.p48-link-label.branch-yes rect{fill:#f5faf7;stroke:#b8d2c5}
+.p48-link-label.branch-no rect{fill:#fff7f5;stroke:#e2c5c0}
+.p48-node.selected{
+  outline:2px solid #2c7be5!important;
+  outline-offset:4px!important;
+  box-shadow:0 0 0 5px rgba(44,123,229,.08),0 5px 14px rgba(31,52,70,.10)!important;
+}
+.p48-node.decision.selected::before{
+  border-color:#2c7be5!important;
+  box-shadow:0 0 0 5px rgba(44,123,229,.08),0 4px 12px rgba(31,52,70,.08)!important;
+}
+#pk48.p48-read-mode .p48-node:not(.selected):hover{box-shadow:0 5px 14px rgba(31,52,70,.10)}
+@media(max-width:700px),(pointer:coarse){
+  .p48-node{font-size:13.5px}
+  .p48-link-label text{font-size:11px}
+}
+
+/* v0.20.70 – read scan guide: explicit anchors, no inferred main branch */
+#pk48.p48-read-mode .p48-node.p48-read-start::after,
+#pk48.p48-read-mode .p48-node.p48-read-end::after,
+#pk48.p48-read-mode .p48-node.p48-read-decision::after{
+  position:absolute;left:50%;top:-24px;transform:translateX(-50%);z-index:12;
+  padding:4px 7px;border-radius:999px;background:#fff;border:1px solid #cbd9d3;
+  box-shadow:0 2px 8px rgba(31,52,70,.08);white-space:nowrap;pointer-events:none;
+  font:850 8px/1 Inter,system-ui;letter-spacing:.08em;color:#4f665d
+}
+#pk48.p48-read-mode .p48-node.p48-read-start::after{content:"BÖRJA HÄR";border-color:#9fc7b5;color:#226448;background:#f2faf6}
+#pk48.p48-read-mode .p48-node.p48-read-decision::after{content:"VÄGVAL";border-color:#c8d6e2;color:#3e617d;background:#f7fafc}
+#pk48.p48-read-mode .p48-node.p48-read-end::after{content:"SLUT";border-color:#d6d6d6;color:#666;background:#fafafa}
+#pk48.p48-read-mode .p48-glance-item.p48-glance-action{cursor:pointer;transition:border-color .12s ease,background .12s ease}
+#pk48.p48-read-mode .p48-glance-item.p48-glance-action:hover{border-color:#abcabc;background:#fbfefc}
+#pk48.p48-read-mode .p48-read-next{grid-column:1/-1;border-top:1px solid #e4ebe7;padding-top:9px}
+#pk48.p48-read-mode .p48-read-next .p48-read-value{font-weight:750;color:#315347}
+/* v0.20.71 – focus path in Förstå */
+#pk48.p48-read-mode.p48-read-focus-active .p48-node{opacity:.28;filter:saturate(.72);transition:opacity .14s ease,filter .14s ease,box-shadow .14s ease}
+#pk48.p48-read-mode.p48-read-focus-active .p48-node.p48-read-focus-prev,#pk48.p48-read-mode.p48-read-focus-active .p48-node.p48-read-focus-current,#pk48.p48-read-mode.p48-read-focus-active .p48-node.p48-read-focus-next{opacity:1;filter:none}
+#pk48.p48-read-mode.p48-read-focus-active .p48-node.p48-read-focus-current{box-shadow:0 0 0 3px rgba(31,111,85,.18),0 7px 20px rgba(31,52,70,.12)!important}
+#pk48.p48-read-mode.p48-read-focus-active #p48-links g{opacity:.18;transition:opacity .14s ease}
+#pk48.p48-read-mode.p48-read-focus-active #p48-links g.p48-read-focus-link{opacity:1}
+#pk48.p48-read-mode.p48-read-focus-active #p48-links g.p48-read-focus-link .p48-link-visible{stroke-width:3px!important}
+@media(prefers-reduced-motion:reduce){#pk48.p48-read-mode.p48-read-focus-active .p48-node,#pk48.p48-read-mode.p48-read-focus-active #p48-links g{transition:none}}
+@media(max-width:700px),(pointer:coarse){
+ #pk48.p48-read-mode .p48-node.p48-read-start::after,#pk48.p48-read-mode .p48-node.p48-read-end::after,#pk48.p48-read-mode .p48-node.p48-read-decision::after{top:-26px;font-size:8px;padding:5px 7px}
+}
+
 
 </style>
 
@@ -1581,17 +1845,37 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   <button type="button" class="p48-btn" id="p48-new" title="Skapa ny process">+ Ny process</button>
   <button type="button" class="p48-btn p48-mobile-tools-btn" id="p48-mobile-tools" aria-expanded="false" aria-controls="p48-side">☰ Verktyg</button>
   <button type="button" class="p48-btn" id="p48-save" title="Spara process">Spara</button>
-  <button type="button" class="p48-btn primary p48-walkthrough-launch" id="p48-walkthrough-launch" title="Gå igenom processen steg för steg">▶ Följ processen</button>
-  <button type="button" class="p48-btn p48-readmode-toggle" id="p48-readmode-toggle" title="Visa processen utan redigeringsverktyg" aria-pressed="false">◉ Läsvy</button>
+  <div class="p48-work-modes" role="group" aria-label="Arbetssätt">
+    <button type="button" class="p48-btn p48-mode-btn active" id="p48-mode-draw" aria-pressed="true" title="Rita och redigera processen">Rita</button>
+    <button type="button" class="p48-btn p48-readmode-toggle p48-mode-btn" id="p48-readmode-toggle" title="Förstå processen utan redigeringsverktyg" aria-pressed="false">Förstå</button>
+    <button type="button" class="p48-btn p48-walkthrough-launch p48-mode-btn" id="p48-walkthrough-launch" title="Gå igenom processen steg för steg">Följ</button>
+  </div>
+  <details class="p48-find-menu" id="p48-find-menu">
+    <summary class="p48-btn" title="Hitta ett steg i processen (Ctrl/Cmd+F)">⌕ Hitta</summary>
+    <div class="p48-find-popover">
+      <input id="p48-find-input" class="p48-find-input" type="search" autocomplete="off" placeholder="Sök steg, ansvar, system eller dokument…" aria-label="Sök i processen">
+      <div id="p48-find-meta" class="p48-find-meta">Skriv minst 2 tecken.</div>
+      <div id="p48-find-results" class="p48-find-results" role="listbox" aria-label="Sökresultat"></div>
+    </div>
+  </details>
   <button type="button" class="p48-btn p48-icon-action" id="p48-undo" title="Ångra (Ctrl/Cmd+Z)" aria-label="Ångra">↶</button>
   <button type="button" class="p48-btn p48-icon-action" id="p48-redo" title="Gör om (Ctrl/Cmd+Shift+Z eller Ctrl/Cmd+Y)" aria-label="Gör om">↷</button>
-  <div class="p48-zoom-controls" role="group" aria-label="Storlek på canvasinnehåll">
-    <button type="button" class="p48-btn" id="p48-zoom-out" aria-label="Zooma ut" title="Zooma ut">−</button>
-    <button type="button" class="p48-btn p48-zoom-value" id="p48-zoom-reset" title="Återställ till 100%">100%</button>
-    <button type="button" class="p48-btn" id="p48-zoom-in" aria-label="Zooma in" title="Zooma in">+</button>
-    <button type="button" class="p48-btn" id="p48-fit-screen" title="Anpassa hela processen till fönstret">⊡ Anpassa</button>
-    <button type="button" class="p48-btn" id="p48-overview-toggle" title="Öppna en klickbar översikt av processen" aria-expanded="false">▦ Översikt</button>
-  </div>
+  <details class="p48-view-menu" id="p48-view-menu">
+    <summary class="p48-btn" title="Zoom, översikt och ansvar">Visa ▾</summary>
+    <div class="p48-view-popover">
+      <div class="p48-pop-title">Visa processen</div>
+      <div class="p48-view-row p48-zoom-controls" role="group" aria-label="Storlek på canvasinnehåll">
+        <button type="button" class="p48-btn" id="p48-zoom-out" aria-label="Zooma ut" title="Zooma ut">−</button>
+        <button type="button" class="p48-btn p48-zoom-value" id="p48-zoom-reset" title="Återställ till 100%">100%</button>
+        <button type="button" class="p48-btn" id="p48-zoom-in" aria-label="Zooma in" title="Zooma in">+</button>
+      </div>
+      <div class="p48-view-row">
+        <button type="button" class="p48-btn" id="p48-fit-screen" title="Anpassa hela processen till fönstret">⊡ Anpassa</button>
+      </div>
+      <button type="button" class="p48-btn p48-view-wide" id="p48-overview-toggle" title="Öppna en klickbar översikt av processen" aria-expanded="false">▦ Översikt</button>
+      <button type="button" class="p48-btn p48-view-wide" id="p48-responsibility-toggle" title="Visa vem som ansvarar för varje steg" aria-pressed="false">👥 Ansvar</button>
+    </div>
+  </details>
   <div class="p48-smart-layout-split">
     <button type="button" class="p48-btn p48-auto-clean-top" id="p48-auto-clean-top" title="Snygga till hela det sammanhängande processflödet med ett klick">✨ Snygga till</button>
     <details class="p48-smart-layout-menu" id="p48-smart-layout-menu">
@@ -1638,18 +1922,22 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
         <option value="1">1 sida</option><option value="2">2 sidor</option><option value="3">3 sidor</option><option value="4">4 sidor</option>
         <option value="5">5 sidor</option><option value="6">6 sidor</option><option value="7">7 sidor</option><option value="8">8 sidor</option>
       </select>
+      <button type="button" class="p48-btn p48-export-preview-btn" id="p48-export-preview">Förhandsgranska sidor</button>
     </div>
   </details>
 
   <details class="p48-more-menu" id="p48-more-menu">
     <summary class="p48-btn" title="Fler verktyg">••• Mer</summary>
     <div class="p48-more-popover">
-      <div class="p48-pop-title p48-more-section-title">Dela & uppföljning</div>
+      <div class="p48-pop-title p48-more-section-title">Skapa snabbare</div>
+      <button type="button" class="p48-btn p48-more-wide" id="p48-batch-launch" title="Klistra in en lista och skapa en process">▤ Klistra in steg</button>
+      <button type="button" class="p48-btn p48-more-wide" id="p48-doc-launch" title="Analysera dokument, text eller artikel och skapa ett granskningsbart processförslag">▣ Källa → processförslag</button>
+      <div class="p48-pop-title p48-more-section-title">Dela & historik</div>
       <button type="button" class="p48-btn p48-more-wide" id="p48-share" title="Dela aktuell process">Dela process</button>
+      <button type="button" class="p48-btn p48-more-wide" id="p48-version-history-launch" title="Se och återställ sparade versioner">◷ Versionshistorik</button>
       <div class="p48-sharebox p48-sharebox-more" id="p48-sharebox"><div class="p48-share-status" id="p48-share-status">● Publik läslänk aktiv</div><input id="p48-share-url" readonly><button type="button" class="p48-mini" id="p48-copy-share">Kopiera länk</button><button type="button" class="p48-mini danger p48-share-revoke" id="p48-revoke-share">Återkalla länk</button></div>
-      <button type="button" class="p48-btn p48-more-wide p48-deviation-launch" id="p48-deviation-launch" title="Visa avvikelser från processgenomgångar">⚠ Avvikelser</button>
-      <div class="p48-pop-title p48-more-section-title">Kvalitet</div>
-      <button type="button" class="p48-btn p48-more-wide" id="p48-analyze" title="Kontrollera processens struktur">🔍 Analysera process</button>
+      <div class="p48-pop-title p48-more-section-title">Kontroll</div>
+      <button type="button" class="p48-btn p48-more-wide" id="p48-analyze" title="Kontrollera processens struktur">🔍 Processkontroll</button>
       <div class="p48-pop-title p48-more-section-title">Avancerade verktyg</div>
       <button type="button" class="p48-btn p48-more-wide" id="p48-select-tool" aria-pressed="false" title="Markera flera objekt eller kopplingar">Markera område</button>
       <div class="p48-more-selection-actions">
@@ -1753,6 +2041,8 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
       <label class="p48-hide-row"><input id="p48-logo-hide" type="checkbox">Dölj logotype</label>
     </div>
   </details>
+      <div class="p48-pop-title p48-more-section-title">Övrigt</div>
+      <button type="button" class="p48-btn p48-more-wide p48-deviation-launch" id="p48-deviation-launch" title="Visa avvikelser från processgenomgångar">⚠ Avvikelser</button>
 
     </div>
   </details>
@@ -1768,13 +2058,22 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   <div class="p48-recovery-actions"><button type="button" class="primary" id="p48-recovery-restore">Återställ</button><button type="button" id="p48-recovery-ignore">Ignorera</button></div>
 </div>
 
+<button type="button" id="p48-export-preview-backdrop" class="p48-export-preview-backdrop" hidden aria-label="Stäng exportförhandsgranskning"></button>
+<section id="p48-export-preview-dialog" class="p48-export-preview-dialog" role="dialog" aria-modal="true" aria-labelledby="p48-export-preview-title" hidden>
+  <div class="p48-export-preview-head"><div><div id="p48-export-preview-title" class="p48-export-preview-title">Så här blir exporten</div><div class="p48-export-preview-sub">Samma sidindelning används för PDF och DOCX. Kontrollera sidbrytningarna innan du laddar ner.</div></div><button type="button" id="p48-export-preview-close" class="p48-export-preview-close" aria-label="Stäng">×</button></div>
+  <div id="p48-export-preview-summary" class="p48-export-preview-summary"></div>
+  <div id="p48-export-preview-warning" class="p48-export-preview-warning" hidden></div>
+  <div id="p48-export-preview-pages" class="p48-export-preview-pages"></div>
+  <div class="p48-export-preview-actions"><button type="button" class="p48-btn" id="p48-export-preview-docx">Ladda ner DOCX</button><button type="button" class="p48-btn primary" id="p48-export-preview-pdf">Ladda ner PDF</button></div>
+</section>
+
 <div id="p48-new-process-backdrop" class="p48-new-process-backdrop" hidden></div>
 <section id="p48-new-process-dialog" class="p48-new-process-dialog" role="dialog" aria-modal="true" aria-labelledby="p48-new-process-title" hidden>
   <div class="p48-new-process-kicker">NY PROCESS</div>
   <div id="p48-new-process-title" class="p48-new-process-title">Vad ska processen heta?</div>
   <div class="p48-new-process-sub">Namnet kan ändras när som helst senare.</div>
   <label class="p48-new-process-label" for="p48-new-process-name">Processnamn</label>
-  <input id="p48-new-process-name" type="text" maxlength="120" value="Ny process" autocomplete="off" spellcheck="true">
+  <input id="p48-new-process-name" type="text" maxlength="120" value="" placeholder="Ex. Hantera kundfaktura" autocomplete="off" spellcheck="true">
   <div id="p48-new-process-error" class="p48-new-process-error" role="alert" hidden></div>
   <div class="p48-new-process-actions">
     <button type="button" id="p48-new-process-cancel">Avbryt</button>
@@ -1796,8 +2095,37 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   <button type="button" id="p48-conflict-cancel" class="p48-conflict-cancel">Stäng – bestäm senare</button>
 </section>
 
+<button type="button" id="p48-batch-backdrop" class="p48-batch-backdrop" hidden aria-label="Stäng import"></button>
+<section id="p48-batch-dialog" class="p48-batch-dialog" role="dialog" aria-modal="true" aria-labelledby="p48-batch-title" hidden>
+  <div class="p48-batch-head"><div><div id="p48-batch-title" class="p48-batch-title">Klistra in steg</div><div class="p48-batch-sub">En rad blir ett steg. Maplini ritar och kopplar processen automatiskt.</div></div><button type="button" id="p48-batch-close" class="p48-batch-close" aria-label="Stäng">×</button></div>
+  <textarea id="p48-batch-text" placeholder="Ta emot beställning
+Kontrollera kunduppgifter
+Är uppgifterna kompletta?
+Skapa order
+Skicka orderbekräftelse"></textarea>
+  <div class="p48-batch-hint">Numrering och punktlistor tas bort automatiskt. Frågor blir beslut. Du kan justera beslutens Ja/Nej-grenar efteråt.</div>
+  <div class="p48-batch-actions"><button type="button" class="p48-btn" id="p48-batch-cancel">Avbryt</button><button type="button" class="p48-btn primary" id="p48-batch-create">Skapa process</button></div>
+</section>
+<button type="button" id="p48-doc-backdrop" class="p48-doc-backdrop" hidden aria-label="Stäng dokumentimport"></button>
+<section id="p48-doc-dialog" class="p48-doc-dialog" role="dialog" aria-modal="true" aria-labelledby="p48-doc-title" hidden>
+  <div class="p48-doc-head"><div><div id="p48-doc-title" class="p48-doc-title">Källa → processförslag</div><div class="p48-doc-sub">Ge Maplini ett dokument, en artikel/nyhetslänk eller inklistrad text. Maplini föreslår ett visuellt flöde som du granskar innan något ritas.</div></div><button type="button" id="p48-doc-close" class="p48-doc-close" aria-label="Stäng">×</button></div>
+  <div class="p48-source-kind-grid">
+    <label class="p48-doc-drop" for="p48-doc-file"><strong>Välj ett eller flera dokument</strong><span>PDF · DOCX · TXT · MD · CSV · max 15 MB per fil. Filerna skickas inte till Maplinis server. Lokala filer behandlas i webbläsaren.</span></label>
+    <div class="p48-source-card"><strong>Artikel eller nyhet</strong><div class="p48-source-url-row"><input id="p48-source-url" type="url" inputmode="url" placeholder="https://…"><button type="button" id="p48-source-url-run">Hämta & analysera</button></div><span>För URL använder Maplini en extern lästjänst för att hämta sidans text. Använd bara källor du får dela med tjänsten.</span></div>
+    <div class="p48-source-card"><strong>Klistra in valfri text</strong><textarea id="p48-source-text" placeholder="Klistra in artikel, mötesanteckning, rapporttext, protokoll eller annan text…"></textarea><button type="button" id="p48-source-text-run">Analysera text</button></div>
+  </div>
+  <input id="p48-doc-file" class="p48-doc-file" type="file" multiple accept=".pdf,.docx,.txt,.md,.csv,text/plain,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+  <div id="p48-doc-status" class="p48-doc-status">Välj källa ovan.</div>
+  <div id="p48-doc-insights" class="p48-doc-insights" hidden></div>
+  <div id="p48-doc-mode" class="p48-doc-mode" hidden><button type="button" id="p48-doc-mode-structured" class="active">Strukturerat förslag</button><button type="button" id="p48-doc-mode-text">Redigera som lista</button></div>
+  <section id="p48-doc-conflicts" class="p48-doc-conflicts" hidden aria-label="Konflikter att lösa"></section>
+  <div id="p48-doc-structured" class="p48-doc-structured" hidden></div>
+  <div id="p48-doc-review" class="p48-doc-review" hidden><label for="p48-doc-steps">Granska processförslaget</label><textarea id="p48-doc-steps" spellcheck="true"></textarea><div class="p48-doc-note"><span class="p48-doc-chip">FÖRSLAG</span>Dokument → processförslag ingår nu i Källa → processförslag. Maplini kan tolka källan som arbetsprocess, besluts-/ärendeflöde, händelseförlopp eller allmänt flöde. För arbetsprocesser föreslås även ansvar, system och input/output. Allt markeras som förslag och ska kontrolleras mot källdokumenten. För andra källor ska förslaget kontrolleras mot originalkällan.</div></div>
+  <div class="p48-doc-actions"><button type="button" class="p48-btn" id="p48-doc-cancel">Avbryt</button><button type="button" class="p48-btn primary" id="p48-doc-create" disabled>Rita processförslag</button></div>
+</section>
+
 <section id="p48-analysis-panel" class="p48-analysis-panel" aria-label="Processkontroll" hidden>
-  <div class="p48-analysis-head"><div><div class="p48-analysis-title">Processkontroll</div><div class="p48-analysis-sub">Vad behöver förbättras – och vad gör du åt det?</div></div><button type="button" id="p48-analysis-close" class="p48-analysis-close" aria-label="Stäng analys">×</button></div>
+  <div class="p48-analysis-head"><div><div class="p48-analysis-title">Processkontroll</div><div class="p48-analysis-sub">Vad behöver förbättras – och vad gör du åt det? Konkreta saker att kontrollera – utan hittepåbetyg.</div></div><div class="p48-analysis-head-actions"><button type="button" id="p48-analysis-rerun" class="p48-mini" title="Kontrollera processen igen">↻ Igen</button><button type="button" id="p48-analysis-close" class="p48-analysis-close" aria-label="Stäng analys">×</button></div></div>
   <div class="p48-analysis-summary"><div class="p48-analysis-score"><strong id="p48-analysis-score">–</strong><span>STRUKTURFYND</span></div><div class="p48-analysis-counts"><div class="p48-analysis-count error"><strong id="p48-analysis-errors">0</strong>Åtgärda</div><div class="p48-analysis-count warning"><strong id="p48-analysis-warnings">0</strong>Kontrollera</div><div class="p48-analysis-count info"><strong id="p48-analysis-info">0</strong>Förbättra</div></div></div>
   <div class="p48-analysis-trust"><strong>Regelbaserad strukturkontroll.</strong> Maplini kontrollerar hur kartan är uppbyggd – inte om verksamhetsprocessen i verkligheten är effektiv eller korrekt. Bedömningar är markerade separat.</div>
   <div id="p48-analysis-next" class="p48-analysis-next" hidden>
@@ -1807,6 +2135,14 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
     <button type="button" id="p48-analysis-next-show" class="p48-mini">Visa på canvasen →</button>
   </div>
   <div id="p48-analysis-list" class="p48-analysis-list"></div>
+</section>
+
+
+<section id="p48-version-panel" class="p48-version-panel" aria-label="Versionshistorik" hidden>
+  <div class="p48-version-head"><div><div class="p48-version-title">Versionshistorik</div><div class="p48-version-sub">Sparade kontrollpunkter för den här processen. Återställning ändrar bara din lokala version tills du trycker Spara.</div></div><button type="button" id="p48-version-close" class="p48-version-close" aria-label="Stäng versionshistorik">×</button></div>
+  <div class="p48-version-actions"><button type="button" id="p48-version-create" class="p48-mini">+ Spara version nu</button><span id="p48-version-status" class="p48-version-status"></span></div>
+  <div id="p48-version-list" class="p48-version-list"></div>
+  <div class="p48-version-note">Maplini sparar högst 20 versioner per process. En ny version skapas bara när innehållet faktiskt har ändrats.</div>
 </section>
 
 <div id="p48-walkthrough-backdrop" class="p48-walkthrough-backdrop" hidden></div>
@@ -1819,9 +2155,9 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
     <button type="button" id="p48-walkthrough-close" class="p48-walkthrough-close" aria-label="Stäng processgenomgång">×</button>
   </div>
   <div id="p48-walkthrough-start" class="p48-walkthrough-start">
-    <div class="p48-walkthrough-intro">Följ processen ett steg i taget. Svara <strong>Ja</strong> eller <strong>Nej</strong> och Maplini tar dig vidare längs rätt väg.</div>
-    <label class="p48-walkthrough-person-label">Namn / initialer
-      <input id="p48-walkthrough-person" type="text" maxlength="120" placeholder="Namn eller initialer">
+    <div class="p48-walkthrough-intro">Följ processen som den är ritad – ett steg i taget. Maplini visar <strong>vad du gör nu</strong> och <strong>vad som kommer sedan</strong>.</div>
+    <label class="p48-walkthrough-person-label">Namn / initialer <span class="p48-walkthrough-optional">(valfritt)</span>
+      <input id="p48-walkthrough-person" type="text" maxlength="120" placeholder="Behövs bara om genomgången ska följas upp">
     </label>
     <div id="p48-walkthrough-start-choice" class="p48-walkthrough-start-choice"></div>
     <button type="button" id="p48-walkthrough-start-btn" class="p48-btn primary p48-walkthrough-main-btn">Starta genomgång</button>
@@ -1834,11 +2170,14 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   <div id="p48-walkthrough-run" class="p48-walkthrough-run" hidden>
     <div class="p48-walkthrough-progress"><span id="p48-walkthrough-step-count">Steg 1</span><span id="p48-walkthrough-deviation-count">0 avvikelser</span></div>
     <div id="p48-walkthrough-trail" class="p48-walkthrough-trail" aria-label="Din position i processen"></div>
+    <div id="p48-walkthrough-return-note" class="p48-walkthrough-return-note" hidden></div>
     <div class="p48-walkthrough-step-card">
+      <div class="p48-walkthrough-now">Gör nu</div>
       <div id="p48-walkthrough-step-type" class="p48-walkthrough-step-type"></div>
       <div id="p48-walkthrough-step-title" class="p48-walkthrough-step-title"></div>
       <div id="p48-walkthrough-step-description" class="p48-walkthrough-step-description"></div>
       <div id="p48-walkthrough-step-meta" class="p48-walkthrough-step-meta"></div>
+      <div id="p48-walkthrough-coming" class="p48-walkthrough-coming" hidden><span>DÄREFTER</span><strong id="p48-walkthrough-coming-text"></strong></div>
     </div>
     <div id="p48-walkthrough-questions" class="p48-walkthrough-questions"></div>
     <div id="p48-walkthrough-next-choices" class="p48-walkthrough-next-choices"></div>
@@ -1893,6 +2232,12 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   <button type="button" id="p48-mobile-reader-fit" title="Anpassa hela processen">⊡</button>
   <button type="button" id="p48-mobile-reader-edit" title="Öppna redigeringsläget">✎</button>
 </div>
+<section id="p48-process-glance" class="p48-process-glance" aria-label="Processöverblick">
+  <div class="p48-glance-item"><div class="p48-glance-label">Börjar med</div><div class="p48-glance-value" id="p48-glance-start">–</div></div>
+  <div class="p48-glance-item"><div class="p48-glance-label">Leder till</div><div class="p48-glance-value" id="p48-glance-end">–</div></div>
+  <div class="p48-glance-item"><div class="p48-glance-label">Ansvar</div><div class="p48-glance-value" id="p48-glance-roles">–</div></div>
+  <div class="p48-glance-item"><div class="p48-glance-label">Omfattning</div><div class="p48-glance-value" id="p48-glance-scope">–</div></div>
+</section>
 <nav id="p48-breadcrumbs" class="p48-breadcrumbs" aria-label="Delprocessnavigation"></nav>
 <div class="p48-body">
   <aside class="p48-side" id="p48-side">
@@ -1954,37 +2299,42 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
       <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Delprocess" title="Dra eller tryck för att lägga till" data-type="subprocess"><span class="p48-icon">▣</span>Delprocess</div>
       <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Anteckning" title="Dra eller tryck för att lägga till" data-type="note"><span class="p48-icon">N</span>Anteckning</div>
       <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Dokument" title="Dra eller tryck för att lägga till" data-type="document"><span class="p48-icon">📄</span>Dokument</div>
-      <div class="p48-step-io">
-        <div class="p48-io-wrap">
-          <div class="p48-io-title">Inputs</div>
-          <div id="p48-inputs" class="p48-io-list"></div>
-          <button type="button" class="p48-addio" id="p48-add-input">+ Lägg till input</button>
-          <div class="p48-io-title">Outputs</div>
-          <div id="p48-outputs" class="p48-io-list"></div>
-          <button type="button" class="p48-addio" id="p48-add-output">+ Lägg till output</button>
-        </div>
-      </div>
     </div>
 
     <div class="p48-format" id="p48-format-panel" data-context="none">
       <div class="p48-title p48-format-context-title" id="p48-format-title">Formatering</div>
       <div class="p48-sub p48-format-context-hint" id="p48-format-hint">Markera en ruta eller pil för att visa relevanta inställningar.</div>
       <div id="p48-controls">
+        <section id="p48-step-understanding" class="p48-step-understanding p48-node-only p48-single-node-only" hidden aria-label="Förstå steget">
+          <div class="p48-step-understanding-head"><strong>Förstå steget</strong><span>Snabböverblick</span></div>
+          <div id="p48-step-understanding-list" class="p48-step-understanding-list"></div>
+          <div id="p48-empty-step-suggestions" class="p48-empty-step-suggestions" hidden><div class="p48-empty-step-suggestions-head">Förslag utifrån stegen runt omkring · kontrollera innan du använder</div><div id="p48-empty-step-suggestion-list"></div></div>
+        </section>
         <div id="p48-process-info" class="p48-process-info p48-node-only p48-single-node-only" hidden>
           <div class="p48-process-info-head">
             <div><div class="p48-title">Om steget</div><div class="p48-small">Beskriv arbetet – utan att belasta canvasen.</div></div>
             <span id="p48-process-info-progress" class="p48-process-info-progress">0 av 8</span>
           </div>
           <label>Vad händer?<textarea id="p48-info-description" rows="3" maxlength="12000" placeholder="Beskriv kort vad som görs och varför."></textarea></label>
-          <div class="p48-process-info-grid">
-            <label>Vem ansvarar?<input id="p48-info-role" type="text" maxlength="300" list="p48-role-suggestions" placeholder="Ex. Kundtjänst"></label>
-            <label>Vilket system?<input id="p48-info-system" type="text" maxlength="500" list="p48-system-suggestions" placeholder="Ex. CRM"></label>
-            <label>Tidsåtgång<input id="p48-info-duration" type="text" maxlength="300" placeholder="Ex. 10 min"></label>
+          <div class="p48-step-io p48-step-io-context">
+            <div class="p48-io-wrap">
+              <div class="p48-io-title">Input</div>
+              <div id="p48-inputs" class="p48-io-list"></div>
+              <button type="button" class="p48-addio" id="p48-add-input">+ Lägg till input</button>
+              <div class="p48-io-title">Output</div>
+              <div id="p48-outputs" class="p48-io-list"></div>
+              <button type="button" class="p48-addio" id="p48-add-output">+ Lägg till output</button>
+            </div>
           </div>
+          <label>Vem ansvarar?<input id="p48-info-role" type="text" maxlength="300" list="p48-role-suggestions" placeholder="Ex. Kundtjänst"></label>
           <datalist id="p48-role-suggestions"></datalist>
           <datalist id="p48-system-suggestions"></datalist>
           <details id="p48-process-info-more" class="p48-process-info-more">
-            <summary>Fördjupa beskrivningen <span id="p48-process-info-more-count"></span></summary>
+            <summary>Mer om steget <span id="p48-process-info-more-count"></span></summary>
+            <div class="p48-process-info-grid">
+              <label>Vilket system?<input id="p48-info-system" type="text" maxlength="500" list="p48-system-suggestions" placeholder="Ex. CRM"></label>
+              <label>Tidsåtgång<input id="p48-info-duration" type="text" maxlength="300" placeholder="Ex. 10 min"></label>
+            </div>
             <label>Instruktion<textarea id="p48-info-instruction" rows="2" maxlength="4000" placeholder="Kort instruktion eller arbetssätt"></textarea></label>
             <label>Risk<textarea id="p48-info-risk" rows="2" maxlength="4000" placeholder="Vad kan gå fel?"></textarea></label>
             <label>Kontroll<textarea id="p48-info-control" rows="2" maxlength="4000" placeholder="Hur förebyggs eller upptäcks risken?"></textarea></label>
@@ -1998,6 +2348,12 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
           </details>
           <div class="p48-process-info-foot">Input och output hanteras separat och sparas med steget.</div>
         </div>
+        <section id="p48-source-trace" class="p48-source-trace p48-node-only p48-single-node-only" hidden aria-label="Källspårning">
+          <div class="p48-source-trace-head"><div><div class="p48-title">Källa till steget</div><div class="p48-small">Underlaget som låg bakom källtolkningen.</div></div><span id="p48-source-trace-count" class="p48-source-trace-count"></span></div>
+          <div id="p48-source-support" class="p48-source-support" hidden></div><div id="p48-source-disagreements" class="p48-source-disagreements"></div><div id="p48-source-trace-list" class="p48-source-trace-list"></div>
+          <div class="p48-source-change"><button id="p48-source-change-btn" type="button">Jämför ny version av källan</button><input id="p48-source-change-file" type="file" accept=".pdf,.docx,.txt,.md,.csv" hidden><div id="p48-source-change-results" class="p48-source-change-results"></div><div class="p48-source-change-note">Maplini ändrar inte processen automatiskt. Du granskar skillnaderna först.</div></div>
+          <div class="p48-source-trace-note"><span class="p48-source-trace-badge">KÄLLSPÅR</span>Visar vad Maplini utgick från när steget skapades. Kontrollera alltid mot originalkällan. För dokument: Kontrollera alltid mot originaldokumentet.</div>
+        </section>
         <details class="p48-visual-details p48-node-only">
           <summary>Utseende</summary>
           <div class="p48-text-format-block p48-node-only">
@@ -2151,9 +2507,25 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
     <aside id="p48-overview" class="p48-overview" hidden aria-label="Processöversikt">
       <div class="p48-overview-head"><span class="p48-overview-title">Processöversikt</span><span id="p48-overview-meta" class="p48-overview-meta"></span><button type="button" id="p48-overview-close" class="p48-overview-close" aria-label="Stäng översikt">×</button></div>
       <div id="p48-overview-stage" class="p48-overview-stage" title="Klicka för att flytta vyn"><div id="p48-overview-viewport" class="p48-overview-viewport"></div></div>
-      <div class="p48-overview-hint">Klicka på ett steg för att hoppa dit, eller klicka i översikten för att flytta vyn.</div>
+      <div class="p48-overview-nav" aria-label="Navigera i processen"><button type="button" id="p48-nav-start" title="Hoppa till processens start">Start</button><button type="button" id="p48-nav-prev" title="Gå till föregående steg">←</button><button type="button" id="p48-nav-next" title="Gå till nästa steg">→</button><button type="button" id="p48-nav-end" title="Hoppa till processens slut">Slut</button><button type="button" id="p48-nav-fit" title="Anpassa hela processen till fönstret">⊡</button></div>
+      <div id="p48-overview-choices" class="p48-overview-choices" hidden></div>
+      <div class="p48-overview-hint">Klicka på ett steg för att hoppa dit. Pilarna följer processens riktiga kopplingar.</div>
     </aside>
-    <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><div id="p48-empty-state" class="p48-empty-state" hidden aria-hidden="true"></div><div id="p48-canvas-watermark" class="p48-canvas-watermark" aria-hidden="true"></div><img id="p48-process-logo" class="p48-process-logo" alt="Processlogotype"><div id="p48-link-hit-layer" class="p48-link-hit-layer"></div><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-link-quick" class="p48-link-quick" role="toolbar" aria-label="Snabbval för pil"><button type="button" data-link-routing="straight" title="Gör pilen rak">— Rak</button><button type="button" data-link-routing="orthogonal" title="Gör pilen vinkelrät">⌜ Vinkelrät</button><button type="button" data-link-routing="free" title="Flytta pilens bana fritt">↝ Fri</button></div><div id="p48-node-quick" class="p48-node-quick" role="toolbar" aria-label="Snabbval för markerade rutor" data-mode="single"><span id="p48-node-quick-flow" class="p48-node-quick-flow" data-single-only></span><button type="button" id="p48-node-quick-next" data-single-only title="Lägg till rekommenderat nästa steg">＋ Nästa</button><button type="button" id="p48-node-quick-next-more" data-single-only title="Välj en annan typ av nästa steg" aria-label="Välj annan typ av nästa steg">▾</button><details id="p48-node-quick-shape" class="p48-node-quick-shape" title="Byt form på markerad ruta"><summary aria-label="Byt form"><span id="p48-node-quick-shape-icon" class="p48-shape-icon standard"></span> Form</summary><div class="p48-node-quick-shape-pop"><button type="button" data-quick-shape="standard" title="Typstandard" aria-label="Typstandard"><span class="p48-shape-icon standard"></span></button><button type="button" data-quick-shape="rectangle" title="Rektangel" aria-label="Rektangel"><span class="p48-shape-icon rectangle"></span></button><button type="button" data-quick-shape="rounded" title="Rundad" aria-label="Rundad"><span class="p48-shape-icon rounded"></span></button><button type="button" data-quick-shape="pill" title="Kapsel" aria-label="Kapsel"><span class="p48-shape-icon pill"></span></button></div></details><details id="p48-node-quick-arrange" data-multi-only><summary title="Ordna markerade rutor">Ordna</summary><div class="p48-node-quick-arrange-pop"><button type="button" data-node-quick-align="top">Överkant</button><button type="button" data-node-quick-align="left">Vänster</button><button type="button" data-node-quick-distribute="horizontal">Jämnt →</button><button type="button" data-node-quick-distribute="vertical">Jämnt ↓</button><button type="button" class="wide" data-node-quick-layout="horizontal">Snygga till markerade →</button><button type="button" class="wide" data-node-quick-layout="vertical">Snygga till markerade ↓</button></div></details><button type="button" id="p48-node-quick-subprocess" class="p48-subprocess-open" data-single-only hidden title="Öppna eller skapa karta för delprocessen">↳ Öppna delprocess</button><button type="button" id="p48-node-quick-format" title="Öppna egenskaper för markerad ruta">Egenskaper</button><label class="p48-quick-color-label" data-multi-only title="Ändra bakgrundsfärg för markerade"><input type="color" id="p48-node-quick-color" value="#ffffff"> Färg</label><button type="button" id="p48-node-quick-duplicate" title="Duplicera markerade">Duplicera</button><button type="button" id="p48-node-quick-delete" class="danger" title="Ta bort markerade">Ta bort</button></div><div id="p48-selection-hull" class="p48-selection-hull" hidden></div><div id="p48-print-frame" class="p48-print-frame"></div>
+    <div id="p48-clean-preview-bar" class="p48-clean-preview-bar" hidden role="status" aria-live="polite"><div class="p48-clean-preview-copy"><strong>Förhandsvisning · Snygga till</strong><span id="p48-clean-preview-summary">Processens logik ändras inte.</span></div><div class="p48-clean-preview-actions"><button type="button" class="p48-btn" id="p48-clean-preview-cancel">Behåll som det är</button><button type="button" class="p48-btn primary" id="p48-clean-preview-apply">Använd</button></div></div>
+    <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><div id="p48-empty-state" class="p48-empty-state" hidden aria-hidden="true">
+      <section class="p48-empty-card" aria-labelledby="p48-empty-title">
+        <div class="p48-empty-kicker">BÖRJA HÄR</div>
+        <h2 id="p48-empty-title" class="p48-empty-title">Vad händer först?</h2>
+        <p class="p48-empty-copy">Skriv den första aktiviteten. Maplini hjälper dig vidare steg för steg.</p>
+        <div class="p48-empty-first-row">
+          <input id="p48-empty-first-text" type="text" maxlength="160" autocomplete="off" spellcheck="true" placeholder="Ex. Ta emot beställning" aria-label="Första aktiviteten">
+          <button type="button" class="primary" id="p48-empty-activity">Skapa</button>
+        </div>
+        <div class="p48-empty-alt"><span>Vill du börja mer metodiskt?</span><button type="button" id="p48-empty-object">▪ Objekt in</button><button type="button" id="p48-empty-start">▶ Start</button></div>
+        <button type="button" class="p48-empty-import" id="p48-empty-import">Klistra in flera steg</button>
+        <div class="p48-empty-tip">När första steget är skapat: tryck <strong>Tab</strong> för nästa steg.</div>
+      </section>
+    </div><div id="p48-canvas-watermark" class="p48-canvas-watermark" aria-hidden="true"></div><img id="p48-process-logo" class="p48-process-logo" alt="Processlogotype"><div id="p48-link-hit-layer" class="p48-link-hit-layer"></div><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-link-quick" class="p48-link-quick" role="toolbar" aria-label="Snabbval för pil"><button type="button" data-link-routing="straight" title="Gör pilen rak">— Rak</button><button type="button" data-link-routing="orthogonal" title="Gör pilen vinkelrät">⌜ Vinkelrät</button><button type="button" data-link-routing="free" title="Flytta pilens bana fritt">↝ Fri</button></div><div id="p48-node-quick" class="p48-node-quick" role="toolbar" aria-label="Snabbval för markerade rutor" data-mode="single"><span id="p48-node-quick-flow" class="p48-node-quick-flow" data-single-only></span><button type="button" id="p48-node-quick-next" data-single-only title="Lägg till nästa steg · Tab" aria-keyshortcuts="Tab">＋ Nästa steg</button><button type="button" id="p48-node-quick-next-more" data-single-only title="Välj typ av nästa steg · Skift+Tab" aria-label="Välj typ av nästa steg" aria-keyshortcuts="Shift+Tab">▾</button><details id="p48-node-quick-shape" class="p48-node-quick-shape" title="Byt form på markerad ruta"><summary aria-label="Byt form"><span id="p48-node-quick-shape-icon" class="p48-shape-icon standard"></span> Form</summary><div class="p48-node-quick-shape-pop"><button type="button" data-quick-shape="standard" title="Typstandard" aria-label="Typstandard"><span class="p48-shape-icon standard"></span></button><button type="button" data-quick-shape="rectangle" title="Rektangel" aria-label="Rektangel"><span class="p48-shape-icon rectangle"></span></button><button type="button" data-quick-shape="rounded" title="Rundad" aria-label="Rundad"><span class="p48-shape-icon rounded"></span></button><button type="button" data-quick-shape="pill" title="Kapsel" aria-label="Kapsel"><span class="p48-shape-icon pill"></span></button></div></details><details id="p48-node-quick-arrange" data-multi-only><summary title="Ordna markerade rutor">Ordna</summary><div class="p48-node-quick-arrange-pop"><button type="button" data-node-quick-align="top">Överkant</button><button type="button" data-node-quick-align="left">Vänster</button><button type="button" data-node-quick-distribute="horizontal">Jämnt →</button><button type="button" data-node-quick-distribute="vertical">Jämnt ↓</button><button type="button" class="wide" data-node-quick-layout="horizontal">Snygga till markerade →</button><button type="button" class="wide" data-node-quick-layout="vertical">Snygga till markerade ↓</button></div></details><button type="button" id="p48-node-quick-subprocess" class="p48-subprocess-open" data-single-only hidden title="Öppna eller skapa karta för delprocessen">↳ Öppna delprocess</button><button type="button" id="p48-node-quick-format" title="Öppna egenskaper för markerad ruta">Egenskaper</button><label class="p48-quick-color-label" data-multi-only title="Ändra bakgrundsfärg för markerade"><input type="color" id="p48-node-quick-color" value="#ffffff"> Färg</label><button type="button" id="p48-node-quick-duplicate" title="Duplicera markerade">Duplicera</button><button type="button" id="p48-node-quick-delete" class="danger" title="Ta bort markerade">Ta bort</button></div><div id="p48-selection-hull" class="p48-selection-hull" hidden></div><div id="p48-print-frame" class="p48-print-frame"></div>
       <div id="p48-snap-guide-x" class="p48-snap-guide p48-snap-guide-x" hidden></div><div id="p48-snap-guide-y" class="p48-snap-guide p48-snap-guide-y" hidden></div>
       <div id="p48-marquee" class="p48-marquee"></div>
       <svg id="p48-svg" viewBox="0 0 2400 1400">
@@ -2217,6 +2589,8 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 <script>__MAPLINI_UI_CORE__</script>
 <script>__MAPLINI_STATE_CORE__</script>
 <script>__MAPLINI_PROCESS_INFO_CORE__</script>
+<script>__MAPLINI_STEP_UNDERSTANDING_CORE__</script>
+<script>__MAPLINI_EMPTY_STEP_SUGGESTIONS_CORE__</script>
 <script>__MAPLINI_WALKTHROUGH_CORE__</script>
 <script>__MAPLINI_RELIABILITY_CORE__</script>
 <script>__MAPLINI_EXPORT_CORE__</script>
@@ -2234,6 +2608,13 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 <script>__MAPLINI_LAYOUT_CORE__</script>
 <script>__MAPLINI_AUTOSAVE_CORE__</script>
 <script>__MAPLINI_PROCESS_INTELLIGENCE_CORE__</script>
+<script>__MAPLINI_VERSION_HISTORY_CORE__</script>
+<script>__MAPLINI_DOCUMENT_INTERPRETATION_CORE__</script>
+<script>__MAPLINI_ANY_SOURCE_CORE__</script>
+<script>__MAPLINI_SOURCE_CHANGE_CORE__</script>
+<script>__MAPLINI_SOURCE_SUPPORT_CORE__</script>
+<script>__MAPLINI_NAVIGATION_CORE__</script>
+<script>__MAPLINI_PERFORMANCE_CORE__</script>
 <script>
 (()=>{
 const root=document.getElementById('pk48'); if(!root||root.dataset.ready==='1')return; root.dataset.ready='1';
@@ -2261,8 +2642,14 @@ function clearRuntimeError(){if(runtimeErrorEl){runtimeErrorEl.hidden=true;runti
    Explicit Maplini operations still call reportRuntimeError() with the banner enabled. */
 window.addEventListener('error',e=>reportRuntimeError(e.error||e.message,'window.error',false));
 window.addEventListener('unhandledrejection',e=>reportRuntimeError(e.reason,'unhandledrejection',false));
-const canvas=root.querySelector('#p48-canvas'),scroll=root.querySelector('#p48-scroll'),emptyState=root.querySelector('#p48-empty-state'),emptyObject=root.querySelector('#p48-empty-object'),emptyActivity=root.querySelector('#p48-empty-activity'),linkLayer=root.querySelector('#p48-links'),temp=root.querySelector('#p48-temp'),snapGuideX=root.querySelector('#p48-snap-guide-x'),snapGuideY=root.querySelector('#p48-snap-guide-y');
-const overviewToggle=root.querySelector('#p48-overview-toggle'),overviewPanel=root.querySelector('#p48-overview'),overviewClose=root.querySelector('#p48-overview-close'),overviewStage=root.querySelector('#p48-overview-stage'),overviewViewport=root.querySelector('#p48-overview-viewport'),overviewMeta=root.querySelector('#p48-overview-meta');
+const findMenu=root.querySelector('#p48-find-menu'),findInput=root.querySelector('#p48-find-input'),findMeta=root.querySelector('#p48-find-meta'),findResults=root.querySelector('#p48-find-results');
+const canvas=root.querySelector('#p48-canvas'),scroll=root.querySelector('#p48-scroll'),emptyState=root.querySelector('#p48-empty-state'),emptyObject=root.querySelector('#p48-empty-object'),emptyActivity=root.querySelector('#p48-empty-activity'),emptyStart=root.querySelector('#p48-empty-start'),emptyFirstText=root.querySelector('#p48-empty-first-text'),linkLayer=root.querySelector('#p48-links'),temp=root.querySelector('#p48-temp'),snapGuideX=root.querySelector('#p48-snap-guide-x'),snapGuideY=root.querySelector('#p48-snap-guide-y');
+const batchDialog=root.querySelector('#p48-batch-dialog'),batchBackdrop=root.querySelector('#p48-batch-backdrop'),batchText=root.querySelector('#p48-batch-text'),batchLaunch=root.querySelector('#p48-batch-launch'),emptyImport=root.querySelector('#p48-empty-import');
+const docDialog=root.querySelector('#p48-doc-dialog'),docBackdrop=root.querySelector('#p48-doc-backdrop'),docLaunch=root.querySelector('#p48-doc-launch'),docFile=root.querySelector('#p48-doc-file'),docStatus=root.querySelector('#p48-doc-status'),docReview=root.querySelector('#p48-doc-review'),docSteps=root.querySelector('#p48-doc-steps'),docCreate=root.querySelector('#p48-doc-create'),docInsights=root.querySelector('#p48-doc-insights'),docStructured=root.querySelector('#p48-doc-structured'),docConflicts=root.querySelector('#p48-doc-conflicts'),docMode=root.querySelector('#p48-doc-mode'),docModeStructured=root.querySelector('#p48-doc-mode-structured'),docModeText=root.querySelector('#p48-doc-mode-text'),sourceUrl=root.querySelector('#p48-source-url'),sourceUrlRun=root.querySelector('#p48-source-url-run'),sourceText=root.querySelector('#p48-source-text'),sourceTextRun=root.querySelector('#p48-source-text-run');
+let docStructuredProposal=[],docFlowPlan=null,docConflictResolutions={};
+const overviewToggle=root.querySelector('#p48-overview-toggle'),overviewPanel=root.querySelector('#p48-overview'),overviewClose=root.querySelector('#p48-overview-close'),overviewStage=root.querySelector('#p48-overview-stage'),overviewViewport=root.querySelector('#p48-overview-viewport'),overviewMeta=root.querySelector('#p48-overview-meta'),overviewChoices=root.querySelector('#p48-overview-choices'),navStartBtn=root.querySelector('#p48-nav-start'),navPrevBtn=root.querySelector('#p48-nav-prev'),navNextBtn=root.querySelector('#p48-nav-next'),navEndBtn=root.querySelector('#p48-nav-end'),navFitBtn=root.querySelector('#p48-nav-fit');
+const responsibilityToggle=root.querySelector('#p48-responsibility-toggle'),responsibilityBar=root.querySelector('#p48-responsibility-bar'),responsibilityLegend=root.querySelector('#p48-responsibility-legend'),responsibilitySummary=root.querySelector('#p48-responsibility-summary'),responsibilityClose=root.querySelector('#p48-responsibility-close');
+let responsibilityMode=false,responsibilityFilter='';
 const breadcrumbs=root.querySelector('#p48-breadcrumbs');
 const mobileToolsBtn=root.querySelector('#p48-mobile-tools'),mobileBackdrop=root.querySelector('#p48-mobile-backdrop'),sidePanel=root.querySelector('#p48-side');
 const mobileBar=root.querySelector('#p48-mobile-bar'),mobileAdd=root.querySelector('#p48-mobile-add'),mobileUndo=root.querySelector('#p48-mobile-undo'),mobileRedo=root.querySelector('#p48-mobile-redo'),mobileFit=root.querySelector('#p48-mobile-fit'),mobileFullscreen=root.querySelector('#p48-mobile-fullscreen'),mobileMore=root.querySelector('#p48-mobile-more'),mobileNext=root.querySelector('#p48-mobile-next'),mobileFormat=root.querySelector('#p48-mobile-format'),mobileDuplicate=root.querySelector('#p48-mobile-duplicate'),mobileContext=root.querySelector('#p48-mobile-context'),mobileDelete=root.querySelector('#p48-mobile-delete');
@@ -2273,7 +2660,8 @@ const nameInput=root.querySelector('#p48-name'),status=root.querySelector('#p48-
 const newProcessDialog=root.querySelector('#p48-new-process-dialog'),newProcessBackdrop=root.querySelector('#p48-new-process-backdrop'),newProcessName=root.querySelector('#p48-new-process-name'),newProcessCreate=root.querySelector('#p48-new-process-create'),newProcessCancel=root.querySelector('#p48-new-process-cancel'),newProcessError=root.querySelector('#p48-new-process-error');
 const conflictDialog=root.querySelector('#p48-conflict-dialog'),conflictBackdrop=root.querySelector('#p48-conflict-backdrop'),conflictSummary=root.querySelector('#p48-conflict-summary'),conflictCopy=root.querySelector('#p48-conflict-copy'),conflictCloud=root.querySelector('#p48-conflict-cloud'),conflictForce=root.querySelector('#p48-conflict-force'),conflictCancel=root.querySelector('#p48-conflict-cancel');
 const saveState=root.querySelector('#p48-save-state'),recoveryBanner=root.querySelector('#p48-recovery-banner'),recoveryRestore=root.querySelector('#p48-recovery-restore'),recoveryIgnore=root.querySelector('#p48-recovery-ignore');
-const analyzeBtn=root.querySelector('#p48-analyze'),analysisPanel=root.querySelector('#p48-analysis-panel'),analysisClose=root.querySelector('#p48-analysis-close'),analysisScore=root.querySelector('#p48-analysis-score'),analysisErrors=root.querySelector('#p48-analysis-errors'),analysisWarnings=root.querySelector('#p48-analysis-warnings'),analysisInfo=root.querySelector('#p48-analysis-info'),analysisNext=root.querySelector('#p48-analysis-next'),analysisNextTitle=root.querySelector('#p48-analysis-next-title'),analysisNextAction=root.querySelector('#p48-analysis-next-action'),analysisNextShow=root.querySelector('#p48-analysis-next-show'),analysisList=root.querySelector('#p48-analysis-list');
+const analyzeBtn=root.querySelector('#p48-analyze'),analysisPanel=root.querySelector('#p48-analysis-panel'),analysisClose=root.querySelector('#p48-analysis-close'),analysisRerun=root.querySelector('#p48-analysis-rerun'),analysisScore=root.querySelector('#p48-analysis-score'),analysisErrors=root.querySelector('#p48-analysis-errors'),analysisWarnings=root.querySelector('#p48-analysis-warnings'),analysisInfo=root.querySelector('#p48-analysis-info'),analysisNext=root.querySelector('#p48-analysis-next'),analysisNextTitle=root.querySelector('#p48-analysis-next-title'),analysisNextAction=root.querySelector('#p48-analysis-next-action'),analysisNextShow=root.querySelector('#p48-analysis-next-show'),analysisList=root.querySelector('#p48-analysis-list');
+const versionHistoryLaunch=root.querySelector('#p48-version-history-launch'),versionPanel=root.querySelector('#p48-version-panel'),versionClose=root.querySelector('#p48-version-close'),versionCreate=root.querySelector('#p48-version-create'),versionStatus=root.querySelector('#p48-version-status'),versionList=root.querySelector('#p48-version-list');
 const controls=root.querySelector('#p48-controls'),formatPanel=root.querySelector('#p48-format-panel'),formatTitle=root.querySelector('#p48-format-title'),formatHint=root.querySelector('#p48-format-hint'),font=root.querySelector('#p48-font'),size=root.querySelector('#p48-size'),textColor=root.querySelector('#p48-textcolor'),bgColor=root.querySelector('#p48-bgcolor');
 const bold=root.querySelector('#p48-bold'),italic=root.querySelector('#p48-italic'),under=root.querySelector('#p48-under');
 const documentLinkEditor=root.querySelector('#p48-document-link-editor'),documentUrlInput=root.querySelector('#p48-document-url'),documentOpenEditor=root.querySelector('#p48-document-open-editor');
@@ -2290,6 +2678,7 @@ const signedOut=root.querySelector('#p48-account-signedout'),signedIn=root.query
 const cloudBadge=root.querySelector('#p48-cloud-badge'),cloudHelp=root.querySelector('#p48-cloud-help');
 const printFrame=root.querySelector('#p48-print-frame');
 const pdfViewSelect=root.querySelector('#p48-pdf-view'),pageCountSelect=root.querySelector('#p48-page-count'),pageQuick=root.querySelector('#p48-page-quick'),pageQuickSummary=root.querySelector('#p48-page-quick-summary'),pageFormatQuick=root.querySelector('#p48-page-format-quick'),pageCountQuick=root.querySelector('#p48-page-count-quick');
+const exportPreviewBtn=root.querySelector('#p48-export-preview'),exportPreviewDialog=root.querySelector('#p48-export-preview-dialog'),exportPreviewBackdrop=root.querySelector('#p48-export-preview-backdrop'),exportPreviewClose=root.querySelector('#p48-export-preview-close'),exportPreviewSummary=root.querySelector('#p48-export-preview-summary'),exportPreviewWarning=root.querySelector('#p48-export-preview-warning'),exportPreviewPages=root.querySelector('#p48-export-preview-pages'),exportPreviewPdf=root.querySelector('#p48-export-preview-pdf'),exportPreviewDocx=root.querySelector('#p48-export-preview-docx');
 const workspaceSelect=root.querySelector('#p48-workspace-select'),workspaceName=root.querySelector('#p48-workspace-name'),createWorkspaceBtn=root.querySelector('#p48-create-workspace'),roleBadge=root.querySelector('#p48-role');
 const authError=root.querySelector('#p48-auth-error');
 const shareBtn=root.querySelector('#p48-share'),shareBox=root.querySelector('#p48-sharebox'),shareUrlInput=root.querySelector('#p48-share-url'),copyShareBtn=root.querySelector('#p48-copy-share'),shareStatus=root.querySelector('#p48-share-status'),revokeShareBtn=root.querySelector('#p48-revoke-share');
@@ -2301,13 +2690,34 @@ const fitScreenBtn=root.querySelector('#p48-fit-screen'),arrangeMenu=root.queryS
 const scaleMenu=root.querySelector('#p48-scale-menu'),processScaleSlider=root.querySelector('#p48-process-scale'),processScaleValue=root.querySelector('#p48-process-scale-value'),scaleFitPageBtn=root.querySelector('#p48-scale-fit-page');
 const accountPanel=root.querySelector('#p48-account-panel'),accountSummaryState=root.querySelector('#p48-account-summary-state');
 const smartLayoutMenu=root.querySelector('#p48-smart-layout-menu'),autoCleanTopBtn=root.querySelector('#p48-auto-clean-top'),autoCleanBtn=root.querySelector('#p48-auto-clean'),smartLayoutHint=root.querySelector('#p48-smart-layout-hint'),smartLayoutChoices=[...root.querySelectorAll('.p48-smart-layout-choice')];
+const cleanPreviewBar=root.querySelector('#p48-clean-preview-bar'),cleanPreviewSummary=root.querySelector('#p48-clean-preview-summary'),cleanPreviewApply=root.querySelector('#p48-clean-preview-apply'),cleanPreviewCancel=root.querySelector('#p48-clean-preview-cancel');
 const inputsBox=root.querySelector('#p48-inputs'),outputsBox=root.querySelector('#p48-outputs');
 const processInfoPanel=root.querySelector('#p48-process-info'),processInfoProgress=root.querySelector('#p48-process-info-progress'),processInfoMore=root.querySelector('#p48-process-info-more'),processInfoMoreCount=root.querySelector('#p48-process-info-more-count'),roleSuggestions=root.querySelector('#p48-role-suggestions'),systemSuggestions=root.querySelector('#p48-system-suggestions');
+const stepUnderstanding=root.querySelector('#p48-step-understanding'),stepUnderstandingList=root.querySelector('#p48-step-understanding-list'),emptyStepSuggestions=root.querySelector('#p48-empty-step-suggestions'),emptyStepSuggestionList=root.querySelector('#p48-empty-step-suggestion-list');
+const sourceTracePanel=root.querySelector('#p48-source-trace'),sourceTraceCount=root.querySelector('#p48-source-trace-count'),sourceTraceList=root.querySelector('#p48-source-trace-list'),sourceSupport=root.querySelector('#p48-source-support'),sourceDisagreements=root.querySelector('#p48-source-disagreements'),sourceChangeBtn=root.querySelector('#p48-source-change-btn'),sourceChangeFile=root.querySelector('#p48-source-change-file'),sourceChangeResults=root.querySelector('#p48-source-change-results');
 const checkQuestionsPanel=root.querySelector('#p48-check-questions'),checkQuestionCount=root.querySelector('#p48-check-question-count'),checkQuestionList=root.querySelector('#p48-check-question-list'),addCheckQuestionBtn=root.querySelector('#p48-add-check-question');
 const deviationLaunch=root.querySelector('#p48-deviation-launch'),deviationBackdrop=root.querySelector('#p48-deviation-backdrop'),deviationPanel=root.querySelector('#p48-deviation-panel'),deviationClose=root.querySelector('#p48-deviation-close'),deviationCloudState=root.querySelector('#p48-deviation-cloud-state'),deviationOpenCount=root.querySelector('#p48-deviation-open-count'),deviationOverdueCount=root.querySelector('#p48-deviation-overdue-count'),deviationResolvedCount=root.querySelector('#p48-deviation-resolved-count'),deviationStatus=root.querySelector('#p48-deviation-status'),deviationOwner=root.querySelector('#p48-deviation-owner'),deviationOverdueOnly=root.querySelector('#p48-deviation-overdue-only'),deviationList=root.querySelector('#p48-deviation-list');
 const improvementContext=root.querySelector('#p48-improvement-context'),improvementTitle=root.querySelector('#p48-improvement-context-title'),improvementText=root.querySelector('#p48-improvement-context-text'),improvementProperties=root.querySelector('#p48-improvement-properties'),improvementResolve=root.querySelector('#p48-improvement-resolve'),improvementClose=root.querySelector('#p48-improvement-close');
-const walkthroughLaunch=root.querySelector('#p48-walkthrough-launch'),walkthroughBackdrop=root.querySelector('#p48-walkthrough-backdrop'),walkthroughPanel=root.querySelector('#p48-walkthrough-panel'),walkthroughClose=root.querySelector('#p48-walkthrough-close'),walkthroughStart=root.querySelector('#p48-walkthrough-start'),walkthroughRun=root.querySelector('#p48-walkthrough-run'),walkthroughSummary=root.querySelector('#p48-walkthrough-summary'),walkthroughPerson=root.querySelector('#p48-walkthrough-person'),walkthroughStartChoice=root.querySelector('#p48-walkthrough-start-choice'),walkthroughStartBtn=root.querySelector('#p48-walkthrough-start-btn'),walkthroughHistoryCount=root.querySelector('#p48-walkthrough-history-count'),walkthroughCloudState=root.querySelector('#p48-walkthrough-cloud-state'),walkthroughHistoryList=root.querySelector('#p48-walkthrough-history-list'),walkthroughStepCount=root.querySelector('#p48-walkthrough-step-count'),walkthroughTrail=root.querySelector('#p48-walkthrough-trail'),walkthroughDeviationCount=root.querySelector('#p48-walkthrough-deviation-count'),walkthroughStepType=root.querySelector('#p48-walkthrough-step-type'),walkthroughStepTitle=root.querySelector('#p48-walkthrough-step-title'),walkthroughStepDescription=root.querySelector('#p48-walkthrough-step-description'),walkthroughStepMeta=root.querySelector('#p48-walkthrough-step-meta'),walkthroughQuestions=root.querySelector('#p48-walkthrough-questions'),walkthroughNextChoices=root.querySelector('#p48-walkthrough-next-choices'),walkthroughNext=root.querySelector('#p48-walkthrough-next'),walkthroughFinish=root.querySelector('#p48-walkthrough-finish'),walkthroughValidation=root.querySelector('#p48-walkthrough-validation'),walkthroughSummaryStatus=root.querySelector('#p48-walkthrough-summary-status'),walkthroughSummaryStats=root.querySelector('#p48-walkthrough-summary-stats'),walkthroughSummaryList=root.querySelector('#p48-walkthrough-summary-list'),walkthroughSavedNote=root.querySelector('#p48-walkthrough-saved-note'),walkthroughCopy=root.querySelector('#p48-walkthrough-copy'),walkthroughRestart=root.querySelector('#p48-walkthrough-restart');
+const walkthroughLaunch=root.querySelector('#p48-walkthrough-launch'),walkthroughBackdrop=root.querySelector('#p48-walkthrough-backdrop'),walkthroughPanel=root.querySelector('#p48-walkthrough-panel'),walkthroughClose=root.querySelector('#p48-walkthrough-close'),walkthroughStart=root.querySelector('#p48-walkthrough-start'),walkthroughRun=root.querySelector('#p48-walkthrough-run'),walkthroughSummary=root.querySelector('#p48-walkthrough-summary'),walkthroughPerson=root.querySelector('#p48-walkthrough-person'),walkthroughStartChoice=root.querySelector('#p48-walkthrough-start-choice'),walkthroughStartBtn=root.querySelector('#p48-walkthrough-start-btn'),walkthroughHistoryCount=root.querySelector('#p48-walkthrough-history-count'),walkthroughCloudState=root.querySelector('#p48-walkthrough-cloud-state'),walkthroughHistoryList=root.querySelector('#p48-walkthrough-history-list'),walkthroughStepCount=root.querySelector('#p48-walkthrough-step-count'),walkthroughTrail=root.querySelector('#p48-walkthrough-trail'),walkthroughReturnNote=root.querySelector('#p48-walkthrough-return-note'),walkthroughDeviationCount=root.querySelector('#p48-walkthrough-deviation-count'),walkthroughStepType=root.querySelector('#p48-walkthrough-step-type'),walkthroughStepTitle=root.querySelector('#p48-walkthrough-step-title'),walkthroughStepDescription=root.querySelector('#p48-walkthrough-step-description'),walkthroughStepMeta=root.querySelector('#p48-walkthrough-step-meta'),walkthroughComing=root.querySelector('#p48-walkthrough-coming'),walkthroughComingText=root.querySelector('#p48-walkthrough-coming-text'),walkthroughQuestions=root.querySelector('#p48-walkthrough-questions'),walkthroughNextChoices=root.querySelector('#p48-walkthrough-next-choices'),walkthroughNext=root.querySelector('#p48-walkthrough-next'),walkthroughFinish=root.querySelector('#p48-walkthrough-finish'),walkthroughValidation=root.querySelector('#p48-walkthrough-validation'),walkthroughSummaryStatus=root.querySelector('#p48-walkthrough-summary-status'),walkthroughSummaryStats=root.querySelector('#p48-walkthrough-summary-stats'),walkthroughSummaryList=root.querySelector('#p48-walkthrough-summary-list'),walkthroughSavedNote=root.querySelector('#p48-walkthrough-saved-note'),walkthroughCopy=root.querySelector('#p48-walkthrough-copy'),walkthroughRestart=root.querySelector('#p48-walkthrough-restart');
+const modeDrawBtn=root.querySelector('#p48-mode-draw');
 const readModeToggle=root.querySelector('#p48-readmode-toggle'),readPanel=root.querySelector('#p48-read-panel'),readPanelKicker=root.querySelector('#p48-read-panel-kicker'),readPanelTitle=root.querySelector('#p48-read-panel-title'),readPanelGrid=root.querySelector('#p48-read-panel-grid'),readPanelEmpty=root.querySelector('#p48-read-panel-empty'),readPanelClose=root.querySelector('#p48-read-panel-close'),readHint=root.querySelector('#p48-read-hint');
+
+function simplifyTopNavigation(){
+  const more=root.querySelector('#p48-more-menu .p48-more-popover');
+  if(!more)return;
+  const advanced=[root.querySelector('#p48-view-menu'),root.querySelector('.p48-smart-layout-split'),root.querySelector('#p48-export-menu')].filter(Boolean);
+  if(!advanced.length)return;
+  const label=document.createElement('div');
+  label.className='p48-pop-title p48-more-section-title p48-secondary-tools-label';
+  label.textContent='Visa, layout & export';
+  more.appendChild(label);
+  advanced.forEach(el=>more.appendChild(el));
+}
+function syncWorkModeButtons(){
+  if(modeDrawBtn){modeDrawBtn.classList.toggle('active',!readMode);modeDrawBtn.setAttribute('aria-pressed',String(!readMode));}
+  if(readModeToggle){readModeToggle.classList.toggle('active',!!readMode);readModeToggle.setAttribute('aria-pressed',String(!!readMode));}
+}
+const processGlance=root.querySelector('#p48-process-glance'),glanceStart=root.querySelector('#p48-glance-start'),glanceEnd=root.querySelector('#p48-glance-end'),glanceRoles=root.querySelector('#p48-glance-roles'),glanceScope=root.querySelector('#p48-glance-scope');
 const mobileReaderBar=root.querySelector('#p48-mobile-reader-bar'),mobileReaderName=root.querySelector('#p48-mobile-reader-name'),mobileReaderFollow=root.querySelector('#p48-mobile-reader-follow'),mobileReaderFit=root.querySelector('#p48-mobile-reader-fit'),mobileReaderEdit=root.querySelector('#p48-mobile-reader-edit');
 const processInfoFields={
   description:root.querySelector('#p48-info-description'),
@@ -2325,6 +2735,9 @@ const addInputBtn=root.querySelector('#p48-add-input'),addOutputBtn=root.querySe
 const selectionHull=root.querySelector('#p48-selection-hull'),nodeQuick=root.querySelector('#p48-node-quick'),nodeQuickFlow=root.querySelector('#p48-node-quick-flow'),nodeQuickNext=root.querySelector('#p48-node-quick-next'),nodeQuickNextMore=root.querySelector('#p48-node-quick-next-more'),nodeQuickSubprocess=root.querySelector('#p48-node-quick-subprocess'),nodeQuickShape=root.querySelector('#p48-node-quick-shape'),nodeQuickShapeIcon=root.querySelector('#p48-node-quick-shape-icon'),nodeQuickShapeChoices=[...root.querySelectorAll('[data-quick-shape]')],nodeQuickFormat=root.querySelector('#p48-node-quick-format'),nodeQuickColor=root.querySelector('#p48-node-quick-color'),nodeQuickDuplicate=root.querySelector('#p48-node-quick-duplicate'),nodeQuickArrange=root.querySelector('#p48-node-quick-arrange'),nodeQuickDelete=root.querySelector('#p48-node-quick-delete'),nodeQuickAlign=[...root.querySelectorAll('[data-node-quick-align]')],nodeQuickDistribute=[...root.querySelectorAll('[data-node-quick-distribute]')],nodeQuickLayout=[...root.querySelectorAll('[data-node-quick-layout]')];
 
 let nodes=new Map(),links=[],selectedId=null,selectedIds=new Set(),selectionMode=false,seq=8,undo=[],redo=[],currentId='proc-1',processes={};
+let cleanPreview=null;
+const quickBuildNodeIds=new Set();
+let quickBuildBranchQueue=[];
 let editingClipboard=null,clipboardPasteOffset=28;
 let selectedLinkIndex=null,selectedLinkIndices=new Set();
 const nodeGeomCache=new Map();
@@ -2413,7 +2826,7 @@ function renderProcessOverview(){
   if(overviewViewport)overviewViewport.hidden=false;
   const tr=overviewTransform(overviewBounds);if(!tr)return false;
   for(const item of nodes.values()){
-    const d=item.data||{},w=item.el.offsetWidth||Number(d.width)||180,h=item.el.offsetHeight||Number(d.height)||76;
+    const d=item.data||{},g=nodeGeom(d.id),w=g?.width||Number(d.width)||180,h=g?.height||Number(d.height)||76;
     const b=document.createElement('button');b.type='button';b.className='p48-overview-node '+String(d.type||'process');b.dataset.overviewNodeId=d.id;b.title=d.text||'Steg';
     if(selectedIds.has(d.id))b.classList.add('selected');
     b.style.left=(tr.ox+(Number(d.x)||0)*tr.scale)+'px';b.style.top=(tr.oy+(Number(d.y)||0)*tr.scale)+'px';
@@ -2421,7 +2834,7 @@ function renderProcessOverview(){
     b.addEventListener('click',e=>{e.stopPropagation();const node=nodes.get(d.id);if(!node)return;select(node.el);centerOverviewOnLogical((Number(d.x)||0)+w/2,(Number(d.y)||0)+h/2)});
     overviewStage.insertBefore(b,overviewViewport);
   }
-  updateOverviewViewport();return true;
+  updateOverviewViewport();refreshOverviewNavigation();return true;
 }
 function scheduleOverviewRefresh(){
   if(!overviewPanel||overviewPanel.hidden||overviewRaf)return;
@@ -2435,6 +2848,32 @@ function setProcessOverview(open){
   if(!overviewPanel||!overviewToggle)return false;
   const show=Boolean(open);overviewPanel.hidden=!show;overviewToggle.setAttribute('aria-expanded',show?'true':'false');overviewToggle.classList.toggle('active',show);
   if(show)requestAnimationFrame(renderProcessOverview);return show;
+}
+
+function navigationState(){return MapliniNavigationCore.analyze([...nodes.values()].map(x=>x.data),links,selectedId)}
+function jumpToProcessNode(id){
+  const item=nodes.get(String(id||''));if(!item)return false;
+  select(item.el);const g=nodeGeom(item.data.id),w=g?.width||Number(item.data.width)||180,h=g?.height||Number(item.data.height)||76;
+  centerOverviewOnLogical((Number(item.data.x)||0)+w/2,(Number(item.data.y)||0)+h/2);
+  item.el.classList.add('p48-find-focus');setTimeout(()=>item.el.classList.remove('p48-find-focus'),900);refreshOverviewNavigation();return true;
+}
+function showNavigationChoices(items,label){
+  if(!overviewChoices)return false;overviewChoices.innerHTML='';
+  const list=Array.isArray(items)?items:[];if(!list.length){overviewChoices.hidden=true;return false}
+  for(const item of list.slice(0,8)){const b=document.createElement('button');b.type='button';b.className='p48-overview-choice';b.textContent=(item.branchLabel?item.branchLabel+' → ':'')+(item.text||'Steg');b.title=(label?label+': ':'')+(item.text||'Steg');b.addEventListener('click',()=>{overviewChoices.hidden=true;jumpToProcessNode(item.id)});overviewChoices.appendChild(b)}
+  overviewChoices.hidden=false;return true;
+}
+function navigateProcess(kind){
+  const state=navigationState();let list=[];
+  if(kind==='start')list=state.starts;else if(kind==='end')list=state.ends;else if(kind==='previous')list=state.previous;else if(kind==='next')list=state.next;
+  if(!list.length){msg(kind==='previous'?'Inget föregående steg':kind==='next'?'Inget nästa steg':'Ingen tydlig punkt att hoppa till');return false}
+  if(list.length===1)return jumpToProcessNode(list[0].id);
+  showNavigationChoices(list,kind==='start'?'Start':kind==='end'?'Slut':kind==='previous'?'Föregående':'Nästa');msg(`${list.length} möjliga val · välj i översikten`);return true;
+}
+function refreshOverviewNavigation(){
+  if(!navStartBtn)return;const state=navigationState();
+  navStartBtn.disabled=!state.starts.length;navEndBtn.disabled=!state.ends.length;navPrevBtn.disabled=!state.previous.length;navNextBtn.disabled=!state.next.length;
+  navPrevBtn.title=state.previous.length>1?`${state.previous.length} föregående steg`:'Gå till föregående steg';navNextBtn.title=state.next.length>1?`${state.next.length} nästa steg`:'Gå till nästa steg';
 }
 
 function zoomAtClientPoint(next,clientX,clientY){
@@ -2889,7 +3328,7 @@ async function deleteCloud(id){
 }
 
 
-function canEdit(){return MapliniAccessCore.canEdit({sharedView,currentRole})&&!readMode}
+function canEdit(){return MapliniAccessCore.canEdit({sharedView,currentRole})&&!readMode&&!cleanPreview}
 function requireEdit(show=true){
   if(canEdit())return true;
   if(show)msg('Endast visning');
@@ -3169,6 +3608,20 @@ function styleOf(d){
   const shapePreset=allowedShapes.has(d.shapePreset)?d.shapePreset:'standard';
   return{fontFamily:d.fontFamily||'Inter',fontSize:Number(d.fontSize||13),textColor:d.textColor||'#17202a',bgColor:d.bgColor||defBg(d.type),fontWeight:d.fontWeight||'700',fontStyle:d.fontStyle||'normal',textDecoration:d.textDecoration||'none',textAlign:d.textAlign||'center',borderColor:d.borderColor||'#637387',borderWidth:Number(d.borderWidth||2),nodeStyle,shapePreset}
 }
+function responsibilityRole(item){
+  if(!item||!['process','subprocess','decision'].includes(String(item.data?.type||'')))return '';
+  return String(ensureProcessInfo(item).responsibleRole||'').trim();
+}
+function responsibilityKey(role){return String(role||'').trim().toLocaleLowerCase('sv-SE')}
+function refreshResponsibilityView(){
+  const counts=new Map();
+  nodes.forEach(item=>{const role=responsibilityRole(item);if(role)counts.set(role,(counts.get(role)||0)+1)});
+  nodes.forEach(item=>{const role=responsibilityRole(item),key=responsibilityKey(role);item.el.dataset.roleView=role||'';item.el.classList.toggle('p48-role-unassigned',!role&&['process','subprocess','decision'].includes(String(item.data?.type||'')));item.el.classList.toggle('p48-role-focus',Boolean(responsibilityFilter)&&key===responsibilityFilter)});
+  if(responsibilityLegend){responsibilityLegend.innerHTML='';[...counts.entries()].sort((a,b)=>a[0].localeCompare(b[0],'sv')).forEach(([role,count])=>{const b=document.createElement('button');b.type='button';b.className='p48-role-chip';b.classList.toggle('active',responsibilityFilter===responsibilityKey(role));b.textContent=`${role} · ${count}`;b.onclick=()=>{responsibilityFilter=responsibilityFilter===responsibilityKey(role)?'':responsibilityKey(role);refreshResponsibilityView();requestFullLinkRender(true)};responsibilityLegend.appendChild(b)});const unassigned=[...nodes.values()].filter(x=>['process','subprocess','decision'].includes(String(x.data?.type||''))&&!responsibilityRole(x)).length;if(unassigned){const u=document.createElement('span');u.className='p48-role-chip unassigned';u.textContent=`Saknar ansvar · ${unassigned}`;responsibilityLegend.appendChild(u)}}
+  root.classList.toggle('p48-role-filtering',Boolean(responsibilityMode&&responsibilityFilter));
+  if(responsibilitySummary){const handoffs=links.filter(l=>{const a=responsibilityRole(nodes.get(l[0])),b=responsibilityRole(nodes.get(l[1]));return a&&b&&responsibilityKey(a)!==responsibilityKey(b)}).length;responsibilitySummary.textContent=`${counts.size} roller · ${handoffs} överlämningar`;}
+}
+function setResponsibilityMode(on){responsibilityMode=Boolean(on);if(!responsibilityMode)responsibilityFilter='';root.classList.toggle('p48-responsibility-mode',responsibilityMode);if(responsibilityBar)responsibilityBar.hidden=!responsibilityMode;if(responsibilityToggle){responsibilityToggle.classList.toggle('active',responsibilityMode);responsibilityToggle.setAttribute('aria-pressed',responsibilityMode?'true':'false')}refreshResponsibilityView();requestFullLinkRender(true);msg(responsibilityMode?'Ansvarsvy – se roller och överlämningar':'Ansvarsvy stängd')}
 function refreshNodeResponsibility(item){
   if(!item||!item.roleBadge)return;
   const eligible=['process','subprocess','decision'].includes(String(item.data?.type||''));
@@ -3312,6 +3765,10 @@ function state(){
   },currentId);
 }
 const LOCAL_KEY='maplini_v050',LOCAL_BACKUP_KEY='maplini_v050_backup',LOCAL_CORRUPT_KEY='maplini_v050_corrupt',LOCAL_RECOVERY_KEY='maplini_recovery_v1';
+const VERSION_HISTORY_KEY='maplini_version_history_v1';
+let versionHistories={};
+function loadVersionHistories(){if(sharedView)return false;try{const raw=localStorage.getItem(VERSION_HISTORY_KEY);const parsed=raw?JSON.parse(raw):{};versionHistories=(parsed&&typeof parsed==='object'&&!Array.isArray(parsed))?parsed:{};for(const id of Object.keys(versionHistories))versionHistories[id]=MapliniVersionHistoryCore.normalizeHistory(versionHistories[id],20);return true}catch(e){versionHistories={};reportRuntimeError(e,'version-history-load');return false}}
+function saveVersionHistories(){if(sharedView)return true;try{localStorage.setItem(VERSION_HISTORY_KEY,JSON.stringify(versionHistories));return true}catch(e){reportRuntimeError(e,'version-history-save');msg('Versionshistoriken kunde inte sparas lokalt');return false}}
 let localSaveTimer=null,localSaveDirty=false,lastLocalPayload='',pendingRecoveryStore=null;
 function localTimeLabel(ts=Date.now()){try{return new Intl.DateTimeFormat('sv-SE',{hour:'2-digit',minute:'2-digit'}).format(new Date(ts))}catch(e){return ''}}
 function setSaveState(next,ts=Date.now()){if(!saveState)return;saveState.dataset.state=next;saveState.textContent=MapliniAutosaveCore.saveLabel(next,localTimeLabel(ts));}
@@ -3415,6 +3872,47 @@ function renderProcesses(force=false){
 }
 let lastProcessListName='';
 
+function versionHistoryForCurrent(){return MapliniVersionHistoryCore.normalizeHistory(versionHistories[currentId]||[],20)}
+function versionDateLabel(ts){try{return new Intl.DateTimeFormat('sv-SE',{dateStyle:'short',timeStyle:'short'}).format(new Date(ts))}catch(e){return new Date(ts).toLocaleString()}}
+function captureProcessVersion(label='Sparad version',announce=false){
+  if(sharedView)return {added:false,history:[]};
+  const st=state(),result=MapliniVersionHistoryCore.addVersion(st,versionHistories[currentId]||[],{limit:20,label,now:Date.now()});
+  versionHistories[currentId]=result.history;saveVersionHistories();
+  if(versionPanel&&!versionPanel.hidden)renderVersionHistory();
+  if(announce)msg(result.added?'Version sparad':'Ingen ny version · processen är oförändrad');
+  return result;
+}
+function renderVersionHistory(){
+  if(!versionList)return;
+  const history=versionHistoryForCurrent(),current=state();
+  versionStatus.textContent=history.length?`${history.length} sparade version${history.length===1?'':'er'}`:'Ingen sparad version ännu';
+  versionList.innerHTML='';
+  if(!history.length){const empty=document.createElement('div');empty.className='p48-version-empty';empty.textContent='Versionshistoriken börjar här. Tryck Spara eller “Spara version nu” för att skapa den första kontrollpunkten.';versionList.appendChild(empty);return}
+  for(const rec of history){
+    const card=document.createElement('div');card.className='p48-version-card';
+    const top=document.createElement('div');top.className='p48-version-top';
+    const name=document.createElement('div');name.className='p48-version-name';name.textContent=rec.label||'Sparad version';
+    const date=document.createElement('div');date.className='p48-version-date';date.textContent=versionDateLabel(rec.createdAt);
+    top.append(name,date);
+    const meta=document.createElement('div');meta.className='p48-version-meta';meta.textContent=`${rec.nodeCount} steg · ${rec.linkCount} koppling${rec.linkCount===1?'':'ar'}`;
+    const diff=document.createElement('div');diff.className='p48-version-diff';diff.textContent=MapliniVersionHistoryCore.diffLabel(MapliniVersionHistoryCore.diff(rec.data,current));
+    const restoreBtn=document.createElement('button');restoreBtn.type='button';restoreBtn.className='p48-version-restore';restoreBtn.textContent='Återställ den här versionen';restoreBtn.addEventListener('click',()=>restoreProcessVersion(rec.id));
+    card.append(top,meta,diff,restoreBtn);versionList.appendChild(card);
+  }
+}
+function openVersionHistory(){if(!versionPanel)return;persist(false,false);renderVersionHistory();versionPanel.hidden=false;if(root.querySelector('#p48-more-menu'))root.querySelector('#p48-more-menu').open=false}
+function closeVersionHistory(){if(versionPanel)versionPanel.hidden=true}
+function restoreProcessVersion(versionId){
+  if(!requireEdit())return false;
+  const history=versionHistoryForCurrent(),rec=history.find(x=>x.id===versionId);if(!rec)return false;
+  if(!confirm(`Återställ versionen från ${versionDateLabel(rec.createdAt)}? Din nuvarande version sparas först som en kontrollpunkt.`))return false;
+  captureProcessVersion('Före återställning',false);
+  const preserved=versionHistoryForCurrent();
+  const restored=MapliniVersionHistoryCore.clone(rec.data);
+  if(!restore(restored)){msg('Kunde inte återställa versionen');return false}
+  versionHistories[currentId]=preserved;saveVersionHistories();processes[currentId]=state();resetHistory();saveLocal(true);renderProcesses(true);renderVersionHistory();
+  msg(ownerId()?'Version återställd lokalt · tryck Spara för att uppdatera molnet':'Version återställd lokalt');return true;
+}
 let idlePersistTimer=null;
 function persistAfterIdle(){
   if(idlePersistTimer)clearTimeout(idlePersistTimer);
@@ -3482,20 +3980,227 @@ function endUndoGesture(){
   if(before!==JSON.stringify(state()))return recordUndoSnapshot(before,true);
   return false;
 }
-function refreshEmptyState(){
-  if(!emptyState)return;
-  emptyState.hidden=true;
+function refreshLargeMapMode(){
+  if(!root||typeof MapliniPerformanceCore==='undefined')return null;
+  const policy=MapliniPerformanceCore.policy(nodes.size,links.length);
+  root.classList.toggle('p48-large-map',policy.large);
+  root.dataset.performanceMode=policy.mode;
+  return policy;
 }
-function addFirstStep(type,objectRole=null){
+function refreshEmptyState(){
+  refreshLargeMapMode();
+  if(!emptyState)return;
+  const show=nodes.size===0&&!sharedView&&!readMode;
+  emptyState.hidden=!show;emptyState.setAttribute('aria-hidden',show?'false':'true');
+}
+function firstStepPoint(){
+  return [Math.max(240,Math.min(canvasLogicalWidth*.32,620)),Math.max(180,Math.min(canvasLogicalHeight*.28,360))];
+}
+function addFirstStep(type,objectRole=null,{text='',edit=true}={}){
   if(!requireEdit())return false;
-  const x=Math.max(240,Math.min(canvasLogicalWidth*.32,620));
-  const y=Math.max(180,Math.min(canvasLogicalHeight*.28,360));
+  const [x,y]=firstStepPoint();
   addNode(type,x,y,{objectRole});
   const item=selectedId?nodes.get(selectedId):null;
-  if(item)requestAnimationFrame(()=>beginInlineEdit(item.el));
+  if(item){
+    const clean=String(text||'').trim();
+    if(clean){item.data.text=clean;item.label.textContent=clean;applyStyle(item);persist();}
+    quickBuildNodeIds.add(item.data.id);
+    requestAnimationFrame(()=>{ensureNodeVisible(item.el);item.el.focus();if(edit&&!clean)beginInlineEdit(item.el)});
+  }
+  refreshEmptyState();
   return true;
 }
-function clearCanvas(){hideSnapGuides();for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();selectedLinkIndex=null;selectedLinkIndices.clear();linkLayer.innerHTML='';clearLinkHitLayer();linkDomByIndex.clear();finishTempArrow();setFormatEnabled(false);refreshControls();refreshLinkControls();updateSelectionUi();refreshEmptyState();scheduleOverviewRefresh()}
+function createFirstActivityFromStarter(){
+  const text=String(emptyFirstText?.value||'').trim();
+  if(!text){if(emptyFirstText){emptyFirstText.focus();emptyFirstText.setAttribute('aria-invalid','true')}msg('Skriv vad som händer först');return false}
+  if(emptyFirstText)emptyFirstText.removeAttribute('aria-invalid');
+  const ok=addFirstStep('process',null,{text,edit:false});
+  if(ok)msg('Första steget klart · tryck Tab för nästa steg');
+  return ok;
+}
+function cleanBatchLine(line){
+  return String(line||'').replace(/^\s*(?:[-*•]+|\d+[.)]|[a-zA-Z][.)])\s*/, '').trim();
+}
+function parseBatchSteps(text){
+  return String(text||'').split(/\r?\n/).map(cleanBatchLine).filter(Boolean).slice(0,80);
+}
+function setBatchDialog(open){
+  if(!batchDialog||!batchBackdrop)return false;
+  const show=Boolean(open);batchDialog.hidden=!show;batchBackdrop.hidden=!show;
+  if(show){if(batchText){batchText.value='';requestAnimationFrame(()=>batchText.focus())}const m=root.querySelector('#p48-more-menu');if(m)m.open=false}
+  return true;
+}
+function batchStepType(text,index,total){
+  const inferred=quickBuildInferredType(text,'process');
+  if(inferred==='end'&&index<total-1)return'process';
+  return inferred;
+}
+function createProcessFromBatch(){
+  if(!requireEdit())return false;
+  const steps=parseBatchSteps(batchText?.value||'');
+  if(!steps.length){msg('Klistra in minst ett steg');if(batchText)batchText.focus();return false}
+  const replacing=nodes.size>0;
+  if(replacing&&!confirm(`Det här ersätter den aktuella canvasen med ${steps.length} importerade steg. Fortsätta?`))return false;
+  pushUndo(true);
+  clearCanvas();
+  const startX=Math.max(180,Math.min(canvasLogicalWidth*.16,340)),startY=Math.max(160,Math.min(canvasLogicalHeight*.24,320));
+  const gapX=250,gapY=135,maxPerRow=6,created=[];
+  for(let i=0;i<steps.length;i++){
+    seq++;const id='n'+seq,type=batchStepType(steps[i],i,steps.length);
+    const row=Math.floor(i/maxPerRow),col=i%maxPerRow,reverse=row%2===1;
+    const visualCol=reverse?(maxPerRow-1-col):col;
+    const x=Math.min(canvasLogicalWidth-240,startX+visualCol*gapX),y=Math.min(canvasLogicalHeight-150,startY+row*gapY);
+    const el=makeNode({id,type,text:steps[i],x,y,objectRole:'intermediate',processInfo:MapliniProcessInfoCore.normalize({})});
+    place(el,x,y);sync(el);created.push(id);
+    if(i>0){const prev=created[i-1];links.push(MapliniConnectorCore.create(prev,id,row===Math.floor((i-1)/maxPerRow)?(reverse?'left':'right'):'bottom',{label:''}))}
+  }
+  polishAutomaticConnectedLinks(created,{forceAuto:true});
+  requestFullLinkRender(true);persist();refreshControls();refreshLinkControls();updateSelectionUi();refreshEmptyState();
+  setBatchDialog(false);if(created.length){const first=nodes.get(created[0]);if(first){select(first.el);requestAnimationFrame(()=>ensureNodeVisible(first.el))}}
+  const decisions=created.filter(id=>nodes.get(id)?.data?.type==='decision').length;
+  msg(`Process skapad · ${steps.length} steg${decisions?` · ${decisions} beslut att kontrollera`:''}`);return true;
+}
+
+
+function setDocDialog(open){
+  if(!docDialog||!docBackdrop)return false;const show=Boolean(open);docDialog.hidden=!show;docBackdrop.hidden=!show;
+  if(show){docStructuredProposal=[];docFlowPlan=null;docConflictResolutions={};if(docFile)docFile.value='';if(sourceUrl)sourceUrl.value='';if(sourceText)sourceText.value='';if(docSteps)docSteps.value='';if(docReview)docReview.hidden=true;if(docStructured)docStructured.hidden=true;if(docConflicts)docConflicts.hidden=true;if(docInsights)docInsights.hidden=true;if(docMode)docMode.hidden=true;if(docCreate)docCreate.disabled=true;if(docStatus)docStatus.textContent='Välj källa ovan.';setDocReviewMode('structured');const m=root.querySelector('#p48-more-menu');if(m)m.open=false}
+  return true;
+}
+function docSentenceCandidates(text){
+  const raw=String(text||'').replace(/\r/g,'\n').replace(/[\t ]+/g,' ').replace(/\n{3,}/g,'\n\n');
+  const lines=raw.split(/\n+/).map(x=>cleanBatchLine(x)).filter(Boolean);let pool=[];
+  for(const line of lines){
+    if(line.length<=150)pool.push(line);else pool.push(...line.split(/(?<=[.!?])\s+(?=[A-ZÅÄÖ])/));
+  }
+  const skip=/^(?:sida \d+|page \d+|innehåll|contents|www\.|https?:|©)/i;
+  const action=/\b(?:ska|skall|kontroller|registr|skick|ta emot|tar emot|godkänn|bedöm|kontakt|dokument|hanter|utför|lägg|lägger|skapa|skapar|väljer|beslut|ansvar|start|avslut|betala|beställ|gransk|signer|arkiver|rapport|inform|planer|bok|mottag|leverer|behandl|sorter|väg|transport)\w*/i;
+  const out=[];
+  for(let x of pool){x=String(x||'').trim().replace(/^[-–—•*]+\s*/,'').replace(/\s+/g,' ');if(x.length<4||x.length>180||skip.test(x))continue;if(!action.test(x)&&!x.endsWith('?'))continue;x=x.replace(/[.;:]$/,'').trim();if(!out.some(v=>v.toLowerCase()===x.toLowerCase()))out.push(x);if(out.length>=80)break}
+  if(out.length<2){for(let x of lines){x=x.trim();if(x.length>=4&&x.length<=140&&!skip.test(x)&&!out.includes(x))out.push(x);if(out.length>=40)break}}
+  return out;
+}
+function loadExternalScript(src,readyTest){return new Promise((resolve,reject)=>{if(readyTest())return resolve();const old=document.querySelector(`script[data-maplini-src="${src}"]`);if(old){old.addEventListener('load',resolve,{once:true});old.addEventListener('error',reject,{once:true});return}const sc=document.createElement('script');sc.src=src;sc.dataset.mapliniSrc=src;sc.onload=resolve;sc.onerror=()=>reject(new Error('Kunde inte ladda dokumentläsaren'));document.head.appendChild(sc)})}
+async function extractDocText(file){
+  const name=String(file?.name||'').toLowerCase();
+  if(/\.(txt|md|csv)$/.test(name))return await file.text();
+  if(name.endsWith('.docx')){await loadExternalScript('https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js',()=>Boolean(window.mammoth));const ab=await file.arrayBuffer();const r=await window.mammoth.extractRawText({arrayBuffer:ab});return r.value||''}
+  if(name.endsWith('.pdf')){await loadExternalScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',()=>Boolean(window.pdfjsLib));if(!window.pdfjsLib)throw new Error('PDF-läsaren kunde inte startas i den här webbläsaren');const ab=await file.arrayBuffer();const pdf=await window.pdfjsLib.getDocument({data:new Uint8Array(ab)}).promise;const pages=[];for(let i=1;i<=Math.min(pdf.numPages,80);i++){const pg=await pdf.getPage(i),c=await pg.getTextContent();pages.push(c.items.map(it=>it.str).join(' '))}return pages.join('\n')}
+  throw new Error('Filtypen stöds inte');
+}
+function escapeDocText(v){return String(v||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function setDocReviewMode(mode){const structured=mode!=='text';if(docStructured)docStructured.hidden=!structured;if(docReview)docReview.hidden=structured;if(docModeStructured)docModeStructured.classList.toggle('active',structured);if(docModeText)docModeText.classList.toggle('active',!structured)}
+function documentConflictList(){return Array.isArray(docFlowPlan?.conflicts)?docFlowPlan.conflicts:[]}
+function unresolvedDocumentConflictCount(){return documentConflictList().filter(c=>!docConflictResolutions[c.id]).length}
+function documentConflictTypeLabel(type){return({responsibility:'Ansvar',system:'System',type:'Stegtyp',order:'Ordning'})[type]||'Konflikt'}
+function clearConflictMessage(conflict){for(const id of conflict.itemIds||[conflict.itemId]){const item=docStructuredProposal.find(x=>x.id===id);if(item&&Array.isArray(item.conflictMessages))item.conflictMessages=item.conflictMessages.filter(m=>m!==conflict.message)}}
+function applyDocumentConflictResolution(conflict,resolution){
+  if(!conflict||!resolution)return false;docConflictResolutions[conflict.id]=resolution;clearConflictMessage(conflict);
+  if(conflict.type==='responsibility'||conflict.type==='system'||conflict.type==='type'){
+    const item=docStructuredProposal.find(x=>x.id===conflict.itemId);if(item){if(conflict.type==='responsibility')item.responsibleRole=String(resolution.value||'');if(conflict.type==='system')item.system=String(resolution.value||'');if(conflict.type==='type')item.type=resolution.value==='decision'?'decision':'process'}
+  }else if(conflict.type==='order'&&docFlowPlan){
+    const dirs=conflict.directions||[];for(const d of dirs){for(const e of docFlowPlan.edges||[]){if(e.kind==='sequence'&&e.from===d.from&&e.to===d.to)e.conflict=true}}
+    if(resolution.kind==='order'){for(const e of docFlowPlan.edges||[]){if(e.kind==='sequence'&&e.from===resolution.from&&e.to===resolution.to)e.conflict=false}}
+  }
+  renderDocumentInterpretation(docStructuredProposal,docFlowPlan);return true;
+}
+function renderDocumentConflictResolution(){
+  if(!docConflicts)return;const conflicts=documentConflictList();if(!conflicts.length){docConflicts.hidden=true;if(docCreate)docCreate.disabled=!docStructuredProposal.length;return}
+  const unresolved=unresolvedDocumentConflictCount();docConflicts.innerHTML='';const head=document.createElement('div');head.className='p48-doc-conflict-head';head.innerHTML=`<strong>Lös konflikter före ritning</strong><span>${unresolved} av ${conflicts.length} kvar</span>`;docConflicts.appendChild(head);
+  for(const c of conflicts){const resolved=docConflictResolutions[c.id];const card=document.createElement('div');card.className='p48-doc-conflict-card'+(resolved?' p48-doc-conflict-resolved':'');const title=document.createElement('div');title.className='p48-doc-conflict-title';title.textContent=`${documentConflictTypeLabel(c.type)} · ${c.message}`;card.appendChild(title);if(c.sources?.length){const src=document.createElement('div');src.className='p48-doc-conflict-sources';src.textContent=`Källor: ${c.sources.join(' · ')}`;card.appendChild(src)}
+    const opts=document.createElement('div');opts.className='p48-doc-conflict-options';
+    if(c.type==='order'){
+      for(const d of c.directions||[]){const b=document.createElement('button');b.type='button';b.textContent=d.label;b.classList.toggle('active',resolved?.kind==='order'&&resolved.from===d.from&&resolved.to===d.to);b.onclick=()=>applyDocumentConflictResolution(c,{kind:'order',from:d.from,to:d.to,label:d.label});opts.appendChild(b)}
+      const none=document.createElement('button');none.type='button';none.textContent='Ingen direkt koppling';none.classList.toggle('active',resolved?.kind==='none');none.onclick=()=>applyDocumentConflictResolution(c,{kind:'none'});opts.appendChild(none);
+    }else{
+      for(const value of c.options||[]){const b=document.createElement('button');b.type='button';b.textContent=c.type==='type'?(value==='decision'?'Beslut':'Aktivitet'):value;b.classList.toggle('active',resolved?.value===value);b.onclick=()=>applyDocumentConflictResolution(c,{kind:'value',value});opts.appendChild(b)}
+    }
+    card.appendChild(opts);
+    if(c.type==='responsibility'||c.type==='system'){const custom=document.createElement('div');custom.className='p48-doc-conflict-custom';const input=document.createElement('input');input.type='text';input.placeholder=c.type==='responsibility'?'Skriv annat ansvar…':'Skriv annat system…';const b=document.createElement('button');b.type='button';b.textContent='Använd';b.onclick=()=>{const value=String(input.value||'').trim();if(value)applyDocumentConflictResolution(c,{kind:'value',value})};input.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();b.click()}});custom.append(input,b);card.appendChild(custom)}
+    docConflicts.appendChild(card)
+  }
+  docConflicts.hidden=false;if(docCreate)docCreate.disabled=unresolved>0||!docStructuredProposal.length;
+  if(docStatus&&conflicts.length){docStatus.dataset.conflicts=String(unresolved)}
+}
+function renderDocumentInterpretation(items,flowPlan=null){
+  docStructuredProposal=Array.isArray(items)?items:[];docFlowPlan=flowPlan&&Array.isArray(flowPlan.edges)?flowPlan:null;
+  const sum=docFlowPlan?.summary||MapliniDocumentInterpretationCore.summary(docStructuredProposal);
+  if(docInsights){
+    const metrics=[['Steg',sum.steps],['Beslut',sum.decisions],['Roller',sum.roles],['System',sum.systems]];if(docFlowPlan?.sourceClassification?.label)metrics.unshift([docFlowPlan.sourceClassification.label,'Typ']);
+    if(docFlowPlan){if(sum.documents>1)metrics.push(['Dokument',sum.documents]);metrics.push(['Vägar',sum.branches||0],['Loopar',sum.loops||0]);if(sum.conflicts)metrics.push(['Konflikter',unresolvedDocumentConflictCount()]);metrics.push(['Kontroll',sum.needsReview])}else metrics.push(['Kontroll',sum.needsReview]);
+    docInsights.innerHTML=metrics.map(([label,n])=>`<div class="p48-doc-insight"><strong>${n}</strong><span>${label}</span></div>`).join('');docInsights.hidden=false
+  }
+  const outgoing=new Map(),incoming=new Map();
+  if(docFlowPlan){for(const e of docFlowPlan.edges||[]){if(!outgoing.has(e.from))outgoing.set(e.from,[]);outgoing.get(e.from).push(e);if(!incoming.has(e.to))incoming.set(e.to,[]);incoming.get(e.to).push(e)}}
+  if(docStructured){docStructured.innerHTML='';docStructuredProposal.forEach((r,i)=>{
+    const row=document.createElement('div');row.className='p48-doc-row';const meta=[];
+    if(r.responsibleRole)meta.push(`Ansvar: ${escapeDocText(r.responsibleRole)}`);if(r.system)meta.push(`System: ${escapeDocText(r.system)}`);if(r.inputs?.length)meta.push(`In: ${escapeDocText(r.inputs.join(', '))}`);if(r.outputs?.length)meta.push(`Ut: ${escapeDocText(r.outputs.join(', '))}`);if(r.subprocessHint)meta.push('Möjlig delprocess');if(r.sourceNames?.length)meta.push(`Källa: ${escapeDocText(r.sourceNames.join(' + '))}`);for(const c of r.conflictMessages||[])meta.push(`⚠ ${escapeDocText(c)}`);
+    const flow=[];for(const e of outgoing.get(r.id)||[]){const target=docStructuredProposal.find(x=>x.id===e.to);if(target){const relation=e.relationLabel?`${escapeDocText(e.relationLabel)} · `:'';flow.push(`${relation}${e.label&&!e.relationLabel?escapeDocText(e.label)+' · ':''}→ ${escapeDocText(target.text.slice(0,60))}`)}}
+    if(r.feedbackTarget&&!r.feedbackTargetId)flow.push(`Möjlig återkoppling → ${escapeDocText(r.feedbackTarget)}`);
+    const kind=r.type==='decision'?'Beslut':r.subprocessHint?'Möjlig delprocess':'Aktivitet';
+    row.classList.toggle('conflict',Boolean(r.conflictMessages?.length));
+    row.innerHTML=`<div class="p48-doc-row-top"><div class="p48-doc-row-text">${i+1}. ${escapeDocText(r.text)}</div><span class="p48-doc-row-badge ${r.review?'review':''}">${escapeDocText(r.confidenceLabel||'Tolkning')}</span></div>${meta.length?`<div class="p48-doc-row-meta">${meta.map(x=>`<span class="p48-doc-meta">${x}</span>`).join('')}</div>`:''}${flow.length?`<div class="p48-doc-row-meta">${flow.map(x=>`<span class="p48-doc-meta">${x}</span>`).join('')}</div>`:''}<div class="p48-doc-source">${kind}${r.type==='decision'?' · vägar skapas bara när texten uttryckligen beskriver dem':''} · underlag: “${escapeDocText(String(r.evidence||'').slice(0,150))}”</div>`;
+    docStructured.appendChild(row)
+  });docStructured.hidden=false}
+  if(docMode)docMode.hidden=false;setDocReviewMode('structured');renderDocumentConflictResolution();
+}
+function documentFlowNodePosition(r,startX,startY){
+  const col=Math.max(0,Number(r.flowColumn)||0),lane=Math.max(-2,Math.min(2,Number(r.flowLane)||0)),page=Math.floor(col/6),local=col%6,reverse=page%2===1,visual=reverse?5-local:local;
+  return{x:Math.min(canvasLogicalWidth-240,startX+visual*250),y:Math.min(canvasLogicalHeight-170,Math.max(100,startY+page*430+lane*135))};
+}
+function createProcessFromStructuredDocument(){
+  if(!requireEdit()||!docStructuredProposal.length)return false;if(unresolvedDocumentConflictCount()>0){msg('Lös dokumentkonflikterna innan processen ritas');return false}const replacing=nodes.size>0;if(replacing&&!confirm(`Det här ersätter den aktuella canvasen med ${docStructuredProposal.length} föreslagna steg. Fortsätta?`))return false;
+  pushUndo(true);clearCanvas();const startX=Math.max(180,Math.min(canvasLogicalWidth*.12,300)),startY=Math.max(300,Math.min(canvasLogicalHeight*.28,420)),created=[],createdByDocId=new Map(),positions=new Map();
+  for(let i=0;i<docStructuredProposal.length;i++){
+    const r=docStructuredProposal[i];seq++;const id='n'+seq;let pos;
+    if(docFlowPlan&&r.id)pos=documentFlowNodePosition(r,startX,startY);else{const row=Math.floor(i/6),col=i%6,reverse=row%2===1,visualCol=reverse?5-col:col;pos={x:Math.min(canvasLogicalWidth-240,startX+visualCol*250),y:Math.min(canvasLogicalHeight-160,startY+row*150)}}
+    const info=MapliniProcessInfoCore.normalize({responsibleRole:r.responsibleRole||'',system:r.system||'',description:r.review?'Dokumenttolkning – kontrollera mot källan.':''});
+    const sourceNames=(r.sourceNames?.length?r.sourceNames:['Källa']),sourceEvidence=r.sourceEvidence||{};const relevantConflicts=documentConflictList().filter(c=>(c.itemIds||[c.itemId]).includes(r.id));const disagreements=relevantConflicts.map(c=>{const rr=docConflictResolutions[c.id]||{};let resolution='';if(rr.kind==='value')resolution=String(rr.value||'');else if(rr.kind==='order')resolution=(c.directions||[]).find(d=>d.from===rr.from&&d.to===rr.to)?.label||'';else if(rr.kind==='none')resolution='Ingen direkt koppling';return{type:c.type,message:c.message,sources:c.sources||[],resolution};});const traceBase={createdFromDocuments:true,sourceType:docFlowPlan?.sourceClassification?.type||'document',sourceTypeLabel:docFlowPlan?.sourceClassification?.label||'Dokument',sources:sourceNames.map(name=>({name,evidence:String(sourceEvidence[name]||r.evidence||'').slice(0,2000)})),disagreements};const sourceTrace=docFlowPlan?.sourceClassification?{kind:'source_import',...traceBase}:{kind:'document_import',...traceBase};
+    const el=makeNode({id,type:['decision','start','end'].includes(r.type)?r.type:'process',text:r.text,x:pos.x,y:pos.y,inputs:r.inputs||[],outputs:r.outputs||[],processInfo:info,sourceTrace});place(el,pos.x,pos.y);sync(el);created.push(id);positions.set(id,pos);if(r.id)createdByDocId.set(r.id,id)
+  }
+  if(docFlowPlan&&docFlowPlan.edges?.length){
+    for(const e of docFlowPlan.edges){if(e.conflict)continue;const from=createdByDocId.get(e.from),to=createdByDocId.get(e.to);if(!from||!to||from===to)continue;const a=positions.get(from),b=positions.get(to),dx=(b?.x||0)-(a?.x||0),dy=(b?.y||0)-(a?.y||0),side=Math.abs(dx)>=Math.abs(dy)?(dx>=0?'right':'left'):(dy>=0?'bottom':'top');links.push(MapliniConnectorCore.create(from,to,side,{label:e.label||'',autoManaged:true}))}
+  }else{
+    for(let i=1;i<created.length;i++){const a=positions.get(created[i-1]),b=positions.get(created[i]),dx=(b?.x||0)-(a?.x||0),dy=(b?.y||0)-(a?.y||0),side=Math.abs(dx)>=Math.abs(dy)?(dx>=0?'right':'left'):(dy>=0?'bottom':'top');links.push(MapliniConnectorCore.create(created[i-1],created[i],side,{label:''}))}
+  }
+  polishAutomaticConnectedLinks(created,{forceAuto:true});requestFullLinkRender(true);persist();refreshControls();refreshLinkControls();updateSelectionUi();refreshEmptyState();setDocDialog(false);if(created.length){const first=nodes.get(created[0]);if(first){select(first.el);requestAnimationFrame(()=>ensureNodeVisible(first.el))}}
+  const sum=docFlowPlan?.summary||MapliniDocumentInterpretationCore.summary(docStructuredProposal);const flowBits=[];if(sum.branches)flowBits.push(`${sum.branches} grenvägar`);if(sum.loops)flowBits.push(`${sum.loops} återkopplingar`);msg(`Processförslag ritat · ${sum.steps} steg${flowBits.length?' · '+flowBits.join(' · '):''} · ${sum.needsReview} behöver kontroll`);return true;
+}
+function prepareAnySourceProposal(text,sourceName){
+  const raw=String(text||'').trim();if(raw.length<20)throw new Error('Källan innehåller för lite text för att skapa ett meningsfullt förslag');
+  docConflictResolutions={};const flowPlan=MapliniAnySourceCore.plan(raw,MapliniDocumentInterpretationCore,90),structured=flowPlan.items||[];
+  if(!structured.length)throw new Error('Jag hittade inget tydligt flöde i källan');
+  const name=String(sourceName||'Inklistrad källa');for(const item of structured){item.sourceNames=[name];item.sourceEvidence={[name]:item.evidence||''}}
+  docSteps.value=structured.map(x=>x.text).join('\n');renderDocumentInterpretation(structured,flowPlan);const sum=flowPlan.summary||{},cl=flowPlan.sourceClassification;
+  docStatus.textContent=`${cl?.label||'Flöde'} föreslaget · ${sum.steps||structured.length} steg${sum.relations?` · ${sum.relations} tydliga samband`:''} · ${sum.needsReview||0} behöver kontroll. Granska innan processen ritas.`;return flowPlan;
+}
+function handlePastedSource(){
+  try{if(docCreate)docCreate.disabled=true;if(docStatus)docStatus.textContent='Analyserar inklistrad text…';prepareAnySourceProposal(sourceText?.value||'','Inklistrad text')}catch(err){if(docStatus)docStatus.textContent=`Kunde inte skapa förslag: ${err?.message||err}`}
+}
+async function handleSourceUrl(){
+  const raw=sourceUrl?.value||'',url=MapliniAnySourceCore.normalizeUrl(raw);if(!url){if(docStatus)docStatus.textContent='Ange en giltig http/https-länk.';return}
+  if(docCreate)docCreate.disabled=true;if(docStatus)docStatus.textContent='Hämtar artikeltext via extern lästjänst…';if(sourceUrlRun)sourceUrlRun.disabled=true;
+  try{const res=await fetch(MapliniAnySourceCore.readerUrl(url),{headers:{'Accept':'text/plain'}});if(!res.ok)throw new Error(`Källan kunde inte hämtas (${res.status})`);const md=await res.text(),text=MapliniAnySourceCore.markdownToText(md);if(!text||text.length<30)throw new Error('Källan innehöll ingen läsbar artikeltext');prepareAnySourceProposal(text,`Webb: ${url}`)}catch(err){if(docStatus)docStatus.textContent=`Kunde inte läsa länken: ${err?.message||err}. Klistra gärna in artikeltexten i stället.`}finally{if(sourceUrlRun)sourceUrlRun.disabled=false}
+}
+async function handleDocumentFiles(fileList){
+  const files=[...(fileList||[])];if(!files.length)return;
+  if(files.length>8){docStatus.textContent='Välj högst 8 dokument åt gången.';return}
+  const tooLarge=files.find(f=>f.size>15*1024*1024);if(tooLarge){docStatus.textContent=`${tooLarge.name} är större än 15 MB.`;return}
+  docConflictResolutions={};docStatus.textContent=`Läser och jämför ${files.length} dokument…`;docCreate.disabled=true;docReview.hidden=true;if(docStructured)docStructured.hidden=true;if(docInsights)docInsights.hidden=true;if(docMode)docMode.hidden=true;
+  try{
+    const docs=[];for(let i=0;i<files.length;i++){const file=files[i];docStatus.textContent=`Läser ${i+1}/${files.length}: ${file.name}…`;docs.push({name:file.name,text:await extractDocText(file)})}
+    const flowPlan=files.length===1?MapliniDocumentInterpretationCore.interpretFlow(docs[0].text,80):MapliniDocumentInterpretationCore.interpretDocuments(docs,100),structured=flowPlan.items;if(files.length===1)flowPlan.sourceClassification=MapliniAnySourceCore.classifySource(docs[0].text);if(files.length===1){for(const item of structured){item.sourceNames=[docs[0].name];item.sourceEvidence={[docs[0].name]:item.evidence||''}}}
+    if(!structured.length)throw new Error('Jag hittade inga tydliga processsteg i dokumenten');docSteps.value=structured.map(x=>x.text).join('\n');renderDocumentInterpretation(structured,flowPlan);const sum=flowPlan.summary,flowText=(sum.branches||sum.loops)?` · ${sum.branches||0} grenvägar · ${sum.loops||0} återkopplingar`:'';const conflictText=sum.conflicts?` · ${sum.conflicts} konflikter`:'';docStatus.textContent=`Gemensamt förslag klart · ${sum.steps} steg · ${sum.roles} roller · ${sum.systems} system${flowText}${conflictText} · ${sum.needsReview} behöver kontroll.${sum.conflicts?' Lös konflikterna ovan innan processen kan ritas.':''}`
+  }catch(err){docStatus.textContent=`Kunde inte skapa förslag: ${err?.message||err}`}
+}
+function createProcessFromDocumentProposal(){
+  if(unresolvedDocumentConflictCount()>0){msg('Lös dokumentkonflikterna innan processen ritas');setDocReviewMode('structured');return false}
+  if(docModeStructured?.classList.contains('active')&&docStructuredProposal.length)return createProcessFromStructuredDocument();
+  if(!docSteps)return false;const text=docSteps.value;if(!parseBatchSteps(text).length){msg('Förslaget innehåller inga steg');return false}
+  if(batchText)batchText.value=text;const ok=createProcessFromBatch();if(ok){setDocDialog(false);msg('Processförslag ritat · kontrollera flöde, ansvar och beslut mot dokumentet')}return ok;
+}
+
+function clearCanvas(){hideSnapGuides();quickBuildNodeIds.clear();quickBuildBranchQueue=[];for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();selectedLinkIndex=null;selectedLinkIndices.clear();linkLayer.innerHTML='';clearLinkHitLayer();linkDomByIndex.clear();finishTempArrow();setFormatEnabled(false);refreshControls();refreshLinkControls();updateSelectionUi();refreshEmptyState();scheduleOverviewRefresh()}
 function clearEntireCanvas(){
   if(!requireEdit())return false;
   if(nodes.size===0&&links.length===0){msg('Canvasen är redan tom');return false}
@@ -3505,6 +4210,7 @@ function clearEntireCanvas(){
   return changed;
 }
 function restore(s){
+  clearCleanPreviewState();
   closeImprovementContext();
   let raw;
   try{raw=typeof s==='string'?JSON.parse(s):clone(s)}
@@ -3542,7 +4248,7 @@ function restore(s){
   (d.nodes||[]).forEach(makeNode);
   links=MapliniConnectorCore.normalizeLinks(d.links||[]);
   seq=Math.max(0,...[...nodes.keys()].map(id=>parseInt(String(id).replace(/\D/g,''),10)||0));
-  requestFullLinkRender(true);refreshEmptyState();clearRuntimeError();scheduleOverviewRefresh();
+  requestFullLinkRender(true);refreshEmptyState();clearRuntimeError();scheduleOverviewRefresh();if(readMode)refreshProcessGlance();
   return true;
 }
 function parentLinkForProcess(processId){
@@ -3599,6 +4305,7 @@ function openLinkedSubprocess(item){
 }
 function openProcess(id){
   if(!processes[id])return;
+  closeVersionHistory();
   const previousId=currentId,previous=processes[previousId]?clone(processes[previousId]):null;
   currentId=id;resetHistory();
   processes[id]=MapliniStateCore.normalizeProcess(processes[id],id);
@@ -3615,7 +4322,7 @@ function setNewProcessDialog(open){
   if(show){
     persist();
     if(newProcessError){newProcessError.hidden=true;newProcessError.textContent=''}
-    if(newProcessName){newProcessName.value='Ny process';requestAnimationFrame(()=>{newProcessName.focus();newProcessName.select()})}
+    if(newProcessName){newProcessName.value='';newProcessName.placeholder='Ex. Hantera kundfaktura';requestAnimationFrame(()=>newProcessName.focus())}
   }else if(newProcessName){newProcessName.blur()}
   return true;
 }
@@ -3630,7 +4337,8 @@ function createNewProcessFromDialog(){
   currentId=uid();processes[currentId]=MapliniWorkflowCore.emptyProcess(currentId,n);
   processes[currentId].localModifiedAt=Date.now();resetHistory();restore(processes[currentId]);
   saveLocal(true);renderProcesses();scroll.scrollLeft=0;scroll.scrollTop=0;refreshEmptyState();
-  setNewProcessDialog(false);msg('Ny process skapad · lägg till första steget på canvasen');
+  setNewProcessDialog(false);msg('Ny process skapad · skriv vad som händer först');
+  setTimeout(()=>{refreshEmptyState();if(emptyFirstText&&!emptyState.hidden)emptyFirstText.focus()},0);
   return true;
 }
 function newProcess(){if(!requireEdit())return;setNewProcessDialog(true)}
@@ -3667,6 +4375,7 @@ async function deleteProcess(id){
     msg('Radering misslyckades · tidigare läge återställt');return;
   }
 
+  delete versionHistories[id];saveVersionHistories();
   renderProcesses(true);refreshControls();refreshLinkControls();updateSelectionUi();
   const cloudOk=await deleteCloud(id);
   if(cloudOk){
@@ -3699,33 +4408,47 @@ function showSnapGuides(result){
     if(result.snapX!=null)snapGuideY.style.left=result.snapX+'px';
   }
 }
-function magneticSnap(start,proposedX,proposedY,excludeIds){
-  const w=start.width||180,h=start.height||70;
-  const movingX=[proposedX,proposedX+w/2,proposedX+w];
-  const movingY=[proposedY,proposedY+h/2,proposedY+h];
-  let bestX=null,bestY=null;
+function buildMagneticSnapTargets(excludeIds){
+  const excluded=excludeIds instanceof Set?excludeIds:new Set(excludeIds||[]),x=[],y=[],centerX=[],centerY=[];
   for(const item of nodes.values()){
-    if(excludeIds.has(item.data.id))continue;
-    const ox=parseFloat(item.el.style.left)||0,oy=parseFloat(item.el.style.top)||0,ow=item.el.offsetWidth,oh=item.el.offsetHeight;
-    const targetsX=[ox,ox+ow/2,ox+ow],targetsY=[oy,oy+oh/2,oy+oh];
-    /* Center-to-center alignment is the strongest snap because it produces a truly straight
-       connector between differently sized nodes. Give it a slightly larger capture range. */
-    const centerDx=targetsX[1]-movingX[1],centerDy=targetsY[1]-movingY[1];
-    if(Math.abs(centerDx)<=14&&(!bestX||-1<bestX.score))bestX={diff:centerDx,abs:Math.abs(centerDx),score:-1,line:targetsX[1],centerPair:true};
-    if(Math.abs(centerDy)<=14&&(!bestY||-1<bestY.score))bestY={diff:centerDy,abs:Math.abs(centerDy),score:-1,line:targetsY[1],centerPair:true};
-    for(let mi=0;mi<movingX.length;mi++)for(let ti=0;ti<targetsX.length;ti++){
-      const tx=targetsX[ti],diff=tx-movingX[mi],abs=Math.abs(diff);
-      const centerPair=mi===1&&ti===1,score=abs-(centerPair?4:0);
-      if(abs<=SNAP_TOLERANCE&&(!bestX||score<bestX.score))bestX={diff,abs,score,line:tx,centerPair};
-    }
-    for(let mi=0;mi<movingY.length;mi++)for(let ti=0;ti<targetsY.length;ti++){
-      const ty=targetsY[ti],diff=ty-movingY[mi],abs=Math.abs(diff);
-      const centerPair=mi===1&&ti===1,score=abs-(centerPair?4:0);
-      if(abs<=SNAP_TOLERANCE&&(!bestY||score<bestY.score))bestY={diff,abs,score,line:ty,centerPair};
-    }
+    const id=String(item.data?.id||'');if(excluded.has(id))continue;
+    const g=nodeGeom(id);if(!g)continue;
+    const cx=g.left+g.width/2,cy=g.top+g.height/2;
+    x.push(g.left,cx,g.left+g.width);y.push(g.top,cy,g.top+g.height);centerX.push(cx);centerY.push(cy);
+  }
+  x.sort((a,b)=>a-b);y.sort((a,b)=>a-b);centerX.sort((a,b)=>a-b);centerY.sort((a,b)=>a-b);
+  return{x,y,centerX,centerY};
+}
+function nearestSortedValue(values,target,tolerance){
+  if(!values||!values.length)return null;
+  let lo=0,hi=values.length;
+  while(lo<hi){const mid=(lo+hi)>>1;if(values[mid]<target)lo=mid+1;else hi=mid}
+  let best=null;
+  for(const idx of [lo-1,lo]){
+    if(idx<0||idx>=values.length)continue;
+    const value=values[idx],diff=value-target,abs=Math.abs(diff);
+    if(abs<=tolerance&&(!best||abs<best.abs))best={value,diff,abs};
+  }
+  return best;
+}
+function magneticSnap(start,proposedX,proposedY,excludeIds,targetCache=null){
+  const w=start.width||180,h=start.height||70;
+  const movingX=[proposedX,proposedX+w/2,proposedX+w],movingY=[proposedY,proposedY+h/2,proposedY+h];
+  const targets=targetCache||buildMagneticSnapTargets(excludeIds);
+  let bestX=null,bestY=null;
+  /* Center-to-center alignment keeps straight connectors visually strongest. */
+  const centerX=nearestSortedValue(targets.centerX,movingX[1],14),centerY=nearestSortedValue(targets.centerY,movingY[1],14);
+  if(centerX)bestX={diff:centerX.diff,abs:centerX.abs,score:-1,line:centerX.value,centerPair:true};
+  if(centerY)bestY={diff:centerY.diff,abs:centerY.abs,score:-1,line:centerY.value,centerPair:true};
+  for(let mi=0;mi<movingX.length;mi++){
+    const hit=nearestSortedValue(targets.x,movingX[mi],SNAP_TOLERANCE);if(!hit)continue;
+    const score=hit.abs;if(!bestX||score<bestX.score)bestX={diff:hit.diff,abs:hit.abs,score,line:hit.value,centerPair:false};
+  }
+  for(let mi=0;mi<movingY.length;mi++){
+    const hit=nearestSortedValue(targets.y,movingY[mi],SNAP_TOLERANCE);if(!hit)continue;
+    const score=hit.abs;if(!bestY||score<bestY.score)bestY={diff:hit.diff,abs:hit.abs,score,line:hit.value,centerPair:false};
   }
   let x=proposedX+(bestX?bestX.diff:0),y=proposedY+(bestY?bestY.diff:0);
-  /* If no nearby node alignment exists, use the invisible 10px base grid. */
   if(!bestX)x=Math.round(x/SNAP_GRID)*SNAP_GRID;
   if(!bestY)y=Math.round(y/SNAP_GRID)*SNAP_GRID;
   return{x,y,snapX:bestX?bestX.line:null,snapY:bestY?bestY.line:null};
@@ -3895,11 +4618,12 @@ function refreshNodeQuickToolbar(){
   if(nodeQuickNext){
     const source=!multi&&isNextStepSource(items[0]);
     nodeQuickNext.disabled=!source;nodeQuickNext.hidden=!source;
-    if(source){nodeQuickNext.textContent=preferredNextLabel(items[0]);nodeQuickNext.title='Lägg till rekommenderat nästa steg direkt · Tab';}
+    if(source){nodeQuickNext.textContent=preferredNextLabel(items[0]);nodeQuickNext.title=items[0].data.type==='decision'?'Skapa Ja- och Nej-grenar · Tab':'Lägg till nästa rekommenderade steg · Tab';}
   }
   if(nodeQuickNextMore){
     const source=!multi&&isNextStepSource(items[0]);
     nodeQuickNextMore.disabled=!source;nodeQuickNextMore.hidden=!source;
+    if(source)nodeQuickNextMore.title='Välj typ av nästa steg · Skift+Tab';
   }
   if(nodeQuickSubprocess){
     const sub=!multi&&items[0]?.data?.type==='subprocess';
@@ -4058,6 +4782,53 @@ function finishTempArrow(){
 }
 
 function readTypeLabel(type){return ({start:'Start',end:'Slut',process:'Aktivitet',decision:'Beslut',document:'Dokument',object:'Objekt',subprocess:'Delprocess'})[type]||'Steg'}
+function processGlanceSummary(){
+  const all=[...nodes.values()],incoming=new Map(all.map(item=>[item.data.id,0]));
+  for(const link of links){const to=String(link?.to||'');if(incoming.has(to))incoming.set(to,(incoming.get(to)||0)+1)}
+  const first=all.find(item=>item.data.type==='start')||all.filter(item=>(incoming.get(item.data.id)||0)===0).sort((a,b)=>(Number(a.data.x)||0)-(Number(b.data.x)||0))[0]||all[0];
+  const last=all.find(item=>item.data.type==='end')||all.slice().sort((a,b)=>(Number(b.data.x)||0)-(Number(a.data.x)||0))[0];
+  const roles=[];for(const item of all){if(!processInfoEligible(item))continue;const role=String(ensureProcessInfo(item).responsibleRole||'').trim();if(role&&!roles.some(v=>v.toLocaleLowerCase('sv-SE')===role.toLocaleLowerCase('sv-SE')))roles.push(role)}
+  return {start:String(first?.data?.text||'Inte angivet'),startId:String(first?.data?.id||''),end:String(last?.data?.text||'Inte angivet'),endId:String(last?.data?.id||''),roles,steps:all.length,decisions:all.filter(item=>item.data.type==='decision').length};
+}
+function refreshReadScanGuide(){
+  const g=processGlanceSummary();
+  for(const item of nodes.values()){
+    const id=String(item?.data?.id||'');
+    item.el.classList.toggle('p48-read-start',readMode&&id===g.startId);
+    item.el.classList.toggle('p48-read-end',readMode&&id===g.endId&&g.endId!==g.startId);
+    item.el.classList.toggle('p48-read-decision',readMode&&item.data.type==='decision');
+  }
+  refreshReadFocusPath();
+}
+function refreshReadFocusPath(){
+  const active=readMode&&selectedId&&nodes.has(String(selectedId));
+  root.classList.toggle('p48-read-focus-active',Boolean(active));
+  const prev=new Set(),next=new Set(),activeLinks=new Set();
+  if(active){
+    links.forEach((link,index)=>{
+      const from=String(link?.[0]||''),to=String(link?.[1]||'');
+      if(to===String(selectedId)){prev.add(from);activeLinks.add(index)}
+      if(from===String(selectedId)){next.add(to);activeLinks.add(index)}
+    });
+  }
+  for(const item of nodes.values()){
+    const id=String(item?.data?.id||'');
+    item.el.classList.toggle('p48-read-focus-current',Boolean(active)&&id===String(selectedId));
+    item.el.classList.toggle('p48-read-focus-prev',Boolean(active)&&prev.has(id));
+    item.el.classList.toggle('p48-read-focus-next',Boolean(active)&&next.has(id));
+  }
+  for(const [index,entry] of linkDomByIndex.entries()){if(entry?.group)entry.group.classList.toggle('p48-read-focus-link',Boolean(active)&&activeLinks.has(index))}
+}
+function jumpReadAnchor(id){
+  const item=nodes.get(String(id||''));if(!item)return false;select(item.el);ensureNodeVisible(item.el);renderReadPanel(item);return true;
+}
+function refreshProcessGlance(){
+  if(!processGlance)return;const g=processGlanceSummary();
+  if(glanceStart){glanceStart.textContent=g.start;glanceStart.title=g.start}if(glanceEnd){glanceEnd.textContent=g.end;glanceEnd.title=g.end}
+  if(glanceRoles){const value=g.roles.length?g.roles.join(', '):'Ansvar ej angivet';glanceRoles.textContent=value;glanceRoles.title=value;glanceRoles.classList.toggle('muted',!g.roles.length)}
+  if(glanceScope)glanceScope.textContent=`${g.steps} steg · ${g.decisions} beslut`;
+  refreshReadScanGuide();
+}
 function renderReadPanel(item){
   if(!readMode||!readPanel)return;
   if(!item){readPanel.hidden=true;return}
@@ -4067,6 +4838,15 @@ function renderReadPanel(item){
   ];
   readPanelKicker.textContent=readTypeLabel(item.data.type);readPanelTitle.textContent=item.data.text||'Namnlöst steg';readPanelGrid.innerHTML='';let shown=0;
   for(const [label,value] of fields){if(!String(value||'').trim())continue;shown++;const wrap=document.createElement('div');wrap.className='p48-read-field';const l=document.createElement('div');l.className='p48-read-label';l.textContent=label;const v=document.createElement('div');v.className='p48-read-value';v.textContent=String(value);wrap.append(l,v);readPanelGrid.appendChild(wrap)}
+  const next=stepUnderstandingNext(item);
+  if(next.length){
+    const wrap=document.createElement('div');wrap.className='p48-read-field p48-read-next';
+    const l=document.createElement('div');l.className='p48-read-label';l.textContent='Därefter';
+    const v=document.createElement('div');v.className='p48-read-value';v.textContent=next.map(x=>x.label?`${x.label} → ${x.title}`:x.title).join(' · ');
+    wrap.append(l,v);readPanelGrid.appendChild(wrap);shown++;
+  }else if(item.data.type==='end'){
+    const wrap=document.createElement('div');wrap.className='p48-read-field p48-read-next';const l=document.createElement('div');l.className='p48-read-label';l.textContent='Därefter';const v=document.createElement('div');v.className='p48-read-value';v.textContent='Processen slutar här';wrap.append(l,v);readPanelGrid.appendChild(wrap);shown++;
+  }
   readPanelEmpty.hidden=shown>0;readPanel.hidden=false;
 }
 function refreshMobileReaderBar(){
@@ -4075,21 +4855,21 @@ function refreshMobileReaderBar(){
 }
 function setReadMode(on){return setReadModeWithOptions(on)}
 function setReadModeWithOptions(on,{silent=false}={}){
-  readMode=Boolean(on);root.classList.toggle('p48-read-mode',readMode);if(readModeToggle){readModeToggle.classList.toggle('active',readMode);readModeToggle.setAttribute('aria-pressed',readMode?'true':'false');readModeToggle.textContent=readMode?'✎ Redigera':'◉ Läsvy'}if(readHint)readHint.hidden=!readMode;
-  if(!readMode&&readPanel)readPanel.hidden=true;refreshMobileReaderBar();applyRoleUi();refreshControls();updateSelectionUi();if(readMode&&selectedId)renderReadPanel(nodes.get(selectedId));if(!silent)msg(readMode?'Läsvy – tryck på ett steg för detaljer':'Redigeringsläge');
+  readMode=Boolean(on);root.classList.toggle('p48-read-mode',readMode);syncWorkModeButtons();if(readMode)refreshProcessGlance();else refreshReadScanGuide();if(readModeToggle){readModeToggle.textContent='Förstå'}if(readHint)readHint.hidden=!readMode;
+  if(!readMode&&readPanel)readPanel.hidden=true;refreshMobileReaderBar();applyRoleUi();refreshControls();updateSelectionUi();if(readMode&&selectedId)renderReadPanel(nodes.get(selectedId));refreshReadFocusPath();if(!silent)msg(readMode?'Läsvy – tryck på ett steg för detaljer':'Redigeringsläge');
 }
 function activateMobileConsumptionDefault(){
   if(mobileConsumptionInitialized||!isMobileLayout()||!nodes.size)return false;
   mobileConsumptionInitialized=true;setReadModeWithOptions(true,{silent:true});
   msg(MapliniAccessCore.canEdit({sharedView,currentRole})?'Mobil läsvy – Följ processen eller tryck ✎ för att redigera':'Mobil läsvy');
-  requestAnimationFrame(()=>fitProcessToScreen());return true;
+  requestAnimationFrame(()=>fitMobileReadProcess({announce:false}));return true;
 }
 function select(el){
   const hadLinks=(selectedLinkIndex!=null||selectedLinkIndices.size>0);
   selectedLinkIndex=null;selectedLinkIndices.clear();refreshLinkControls();
   selectedIds.clear();selectedId=el.dataset.id;selectedIds.add(selectedId);
   refreshControls();updateSelectionUi();scheduleOverviewRefresh();
-  if(readMode)renderReadPanel(nodes.get(selectedId));
+  if(readMode){renderReadPanel(nodes.get(selectedId));refreshReadFocusPath()}
   if(hadLinks)requestFullLinkRender(true);
 }
 function toggleNodeSelection(el){
@@ -4154,7 +4934,61 @@ function renderSuggestionList(el,values){
   if(!el)return;el.innerHTML='';
   for(const value of values){const option=document.createElement('option');option.value=value;el.appendChild(option);}
 }
+function normalizeSourceTrace(value){
+  const src=(value&&typeof value==='object'&&!Array.isArray(value))?value:{};
+  const sources=Array.isArray(src.sources)?src.sources:[];const clean=[];
+  for(const entry of sources){const name=String(entry?.name||'').trim().slice(0,240),evidence=String(entry?.evidence||'').trim().slice(0,2000);if(!name&&!evidence)continue;if(!clean.some(x=>x.name===name&&x.evidence===evidence))clean.push({name:name||'Dokument',evidence})}
+  const disagreements=[];for(const d of (Array.isArray(src.disagreements)?src.disagreements:[])){const type=String(d?.type||'').slice(0,40),message=String(d?.message||'').trim().slice(0,500),ds=[...new Set((Array.isArray(d?.sources)?d.sources:[]).map(x=>String(x||'').trim().slice(0,240)).filter(Boolean))].slice(0,8),resolution=String(d?.resolution||'').trim().slice(0,240);if(message)disagreements.push({type,message,sources:ds,resolution})}
+  return {kind:['document_import','source_import'].includes(src.kind)?src.kind:'',sources:clean.slice(0,8),disagreements:disagreements.slice(0,12),createdFromDocuments:Boolean(src.createdFromDocuments),sourceType:String(src.sourceType||''),sourceTypeLabel:String(src.sourceTypeLabel||'')};
+}
+
+function renderSourceChangeComparison(comp){
+  if(!sourceChangeResults)return;sourceChangeResults.innerHTML='';const sum=comp?.summary||{};const head=document.createElement('div');head.className='p48-source-change-item';head.innerHTML=`<strong>${sum.changed||0} ändrade · ${sum.missing||0} saknas · ${sum.unchanged||0} oförändrade</strong>Processen är inte ändrad.`;sourceChangeResults.appendChild(head);
+  for(const r of (comp?.results||[]).filter(x=>x.status!=='unchanged').slice(0,12)){const el=document.createElement('div');el.className='p48-source-change-item';const label=r.status==='changed'?'Verkar ändrat':'Hittas inte längre';el.innerHTML=`<strong>${label} · ${escapeDocText(String(r.text||'').slice(0,90))}</strong><div>Förr: “${escapeDocText(String(r.oldEvidence||'').slice(0,180))}”</div>${r.newEvidence?`<div>Ny närmaste text: “${escapeDocText(String(r.newEvidence).slice(0,180))}”</div>`:''}`;sourceChangeResults.appendChild(el)}
+}
+async function compareSelectedSourceVersion(file){
+  const item=selectedId?nodes.get(selectedId):null;if(!item||!file||!window.MapliniSourceChangeCore)return false;const trace=normalizeSourceTrace(item.data.sourceTrace);if(!trace.sources.length)return false;
+  try{if(sourceChangeResults)sourceChangeResults.innerHTML='<div class="p48-source-change-item"><strong>Läser ny version…</strong></div>';const text=await extractDocText(file);const sourceName=trace.sources[0].name;const steps=[...nodes.values()].map(n=>({id:n.data.id,text:n.data.text,sourceTrace:normalizeSourceTrace(n.data.sourceTrace)}));const comp=MapliniSourceChangeCore.compareSteps(steps,text,sourceName);renderSourceChangeComparison(comp);return true}catch(err){if(sourceChangeResults)sourceChangeResults.innerHTML=`<div class="p48-source-change-item"><strong>Kunde inte jämföra</strong>${escapeDocText(err?.message||err)}</div>`;return false}
+}
+function renderSourceTrace(item){
+  if(!sourceTracePanel||!sourceTraceList)return;const trace=normalizeSourceTrace(item?.data?.sourceTrace),visible=['document_import','source_import'].includes(trace.kind)&&trace.sources.length>0;sourceTracePanel.hidden=!visible;sourceTraceList.innerHTML='';if(sourceDisagreements)sourceDisagreements.innerHTML='';if(sourceSupport){sourceSupport.hidden=true;sourceSupport.textContent='';}if(!visible){if(sourceTraceCount)sourceTraceCount.textContent='';return}
+  if(sourceTraceCount)sourceTraceCount.textContent=`${trace.sources.length} källa${trace.sources.length===1?'':'or'}`;if(sourceChangeResults)sourceChangeResults.innerHTML='';
+  const support=window.MapliniSourceSupportCore?MapliniSourceSupportCore.summarize(trace):null;if(sourceSupport&&support){sourceSupport.hidden=false;sourceSupport.classList.toggle('warn',support.hasDisagreement);sourceSupport.innerHTML=`<strong>${escapeDocText(support.headline)}</strong>${support.detail?`<div>${escapeDocText(support.detail)}</div>`:''}`;}
+  if(sourceDisagreements&&support?.disagreements?.length){for(const d of support.disagreements){const el=document.createElement('div');el.className='p48-source-disagreement';el.innerHTML=`<strong>${escapeDocText(d.label)}</strong>${escapeDocText(d.message)}${d.sources.length?`<small>Källor: ${escapeDocText(d.sources.join(' · '))}</small>`:''}${d.resolution?`<small>Vald lösning: ${escapeDocText(d.resolution)}</small>`:''}`;sourceDisagreements.appendChild(el)}}
+  for(const src of trace.sources){const card=document.createElement('div');card.className='p48-source-trace-item';const name=document.createElement('div');name.className='p48-source-trace-name';name.textContent=src.name||'Dokument';const evidence=document.createElement('div');evidence.className='p48-source-trace-evidence';evidence.textContent=src.evidence?`“${src.evidence}”`:'Ingen källtext sparad';card.append(name,evidence);sourceTraceList.appendChild(card)}
+}
+if(sourceChangeBtn&&sourceChangeFile){sourceChangeBtn.addEventListener('click',()=>sourceChangeFile.click());sourceChangeFile.addEventListener('change',async()=>{const f=sourceChangeFile.files?.[0];if(f)await compareSelectedSourceVersion(f);sourceChangeFile.value='';});}
+
+function stepUnderstandingNext(item){
+  const outgoing=links.filter(l=>String(l&&l[0])===String(item?.data?.id));
+  return outgoing.map(l=>{const target=nodes.get(String(l[1]));const style=linkStyle(l);return {title:String(target?.data?.text||'').trim(),label:String(style?.label||'').trim()}}).filter(x=>x.title);
+}
+function emptyStepContext(item){
+  const incoming=links.filter(l=>String(l&&l[1])===String(item?.data?.id)).map(l=>nodes.get(String(l[0]))).filter(Boolean).map(n=>({title:n.data.text,type:n.data.type}));
+  const outgoing=links.filter(l=>String(l&&l[0])===String(item?.data?.id)).map(l=>nodes.get(String(l[1]))).filter(Boolean).map(n=>({title:n.data.text,type:n.data.type}));
+  ensureIO(item);return {type:item.data.type,title:item.data.text,inputs:item.data.inputs,outputs:item.data.outputs,incoming,outgoing};
+}
+function applyEmptyStepSuggestion(item,text){
+  if(!item||!text||!requireEdit())return false;pushUndo();item.data.text=String(text).trim().slice(0,500);item.label.textContent=item.data.text;invalidateNodeGeom(item.data.id);markNodeLinksDirty(item.data.id);drawLinks();persist();renderStepUnderstanding(item);msg('Förslaget lades in – kontrollera att det stämmer');return true;
+}
+function renderEmptyStepSuggestions(item){
+  if(!emptyStepSuggestions||!emptyStepSuggestionList||!window.MapliniEmptyStepSuggestionsCore){if(emptyStepSuggestions)emptyStepSuggestions.hidden=true;return}
+  const result=MapliniEmptyStepSuggestionsCore.suggest(emptyStepContext(item));emptyStepSuggestionList.innerHTML='';emptyStepSuggestions.hidden=!result.eligible||!result.suggestions.length;if(emptyStepSuggestions.hidden)return;
+  for(const suggestion of result.suggestions){const row=document.createElement('div');row.className='p48-empty-step-suggestion';const text=document.createElement('div');const strong=document.createElement('strong');strong.textContent=suggestion.text;const small=document.createElement('small');small.textContent=suggestion.reason;text.append(strong,small);const use=document.createElement('button');use.type='button';use.textContent='Använd';use.addEventListener('click',()=>applyEmptyStepSuggestion(item,suggestion.text));row.append(text,use);emptyStepSuggestionList.appendChild(row)}
+}
+function renderStepUnderstanding(item){
+  if(!stepUnderstanding||!stepUnderstandingList||!window.MapliniStepUnderstandingCore){if(stepUnderstanding)stepUnderstanding.hidden=true;return}
+  const eligible=processInfoEligible(item);stepUnderstanding.hidden=!eligible;if(!eligible){if(emptyStepSuggestions)emptyStepSuggestions.hidden=true;return}
+  ensureIO(item);const info=ensureProcessInfo(item);const summary=MapliniStepUnderstandingCore.summarize({
+    type:item.data.type,title:item.data.text,description:info.description,responsibleRole:info.responsibleRole,inputs:item.data.inputs,outputs:item.data.outputs,next:stepUnderstandingNext(item)
+  });
+  stepUnderstandingList.innerHTML='';
+  for(const row of summary.rows){const el=document.createElement('div');el.className='p48-step-understanding-row'+(row.missing?' missing':'')+(row.key==='next'?' p48-step-understanding-next':'');const key=document.createElement('b');key.textContent=row.label;const value=document.createElement('span');value.textContent=row.value;el.append(key,value);stepUnderstandingList.appendChild(el)}
+  renderEmptyStepSuggestions(item);
+}
 function renderProcessInfoEditor(item){
+  renderSourceTrace(item);
+  renderStepUnderstanding(item);
   const eligible=processInfoEligible(item);
   if(processInfoPanel)processInfoPanel.hidden=!eligible;
   if(!eligible)return;
@@ -4287,9 +5121,13 @@ function setFormatEnabled(enabled){
   const editable=canEdit();
   const context=linkMode?'link':(multiNodeMode?'multi':(enabled?'node':'none'));
   if(formatPanel)formatPanel.dataset.context=context;
+  root.classList.toggle('p48-side-context-node',context==='node');
+  root.classList.toggle('p48-side-context-link',context==='link');
+  root.classList.toggle('p48-side-context-multi',context==='multi');
+  root.classList.toggle('p48-side-context-active',context!=='none');
   if(deleteNodeBtn)deleteNodeBtn.hidden=!(context==='node'&&selectedIds.size===1&&selectedId!=null);
   if(formatTitle){
-    formatTitle.textContent=context==='link'?'Pil':(context==='multi'?'Flera rutor':(context==='node'?'Ruta':'Formatering'));
+    formatTitle.textContent=context==='link'?'Redigera pil':(context==='multi'?'Redigera markering':(context==='node'?'Redigera steg':'Verktyg'));
   }
   if(formatHint){
     if(context==='link')formatHint.textContent='Ändra text, utseende och beteende för den markerade pilen.';
@@ -4320,7 +5158,7 @@ function refreshControls(){
   const items=selectedNodeItems();
   const item=selectedId?nodes.get(selectedId):null;
   if(!items.length){
-    setFormatEnabled(false);inputsBox.innerHTML='';outputsBox.innerHTML='';if(processInfoPanel)processInfoPanel.hidden=true;
+    setFormatEnabled(false);inputsBox.innerHTML='';outputsBox.innerHTML='';if(processInfoPanel)processInfoPanel.hidden=true;if(stepUnderstanding)stepUnderstanding.hidden=true;if(sourceTracePanel)sourceTracePanel.hidden=true;
     if(documentLinkEditor)documentLinkEditor.hidden=true;
     if(documentUrlInput)documentUrlInput.value='';
     if(documentOpenEditor){documentOpenEditor.hidden=true;documentOpenEditor.removeAttribute('href');}
@@ -4344,7 +5182,7 @@ function refreshControls(){
   if(documentLinkEditor)documentLinkEditor.hidden=multi||!item||item.data.type!=='document';
   if(documentUrlInput)documentUrlInput.value=(!multi&&item&&item.data.type==='document')?(item.data.documentUrl||''):'';
   if(documentOpenEditor){const u=(!multi&&item&&item.data.type==='document')?safeDocumentUrl(item.data.documentUrl):'';documentOpenEditor.hidden=!u;if(u)documentOpenEditor.href=u;else documentOpenEditor.removeAttribute('href');}
-  if(!multi&&item){renderIOEditor(item);renderProcessInfoEditor(item)}else{inputsBox.innerHTML='';outputsBox.innerHTML='';if(processInfoPanel)processInfoPanel.hidden=true;}
+  if(!multi&&item){renderIOEditor(item);renderProcessInfoEditor(item)}else{inputsBox.innerHTML='';outputsBox.innerHTML='';if(processInfoPanel)processInfoPanel.hidden=true;if(stepUnderstanding)stepUnderstanding.hidden=true;if(sourceTracePanel)sourceTracePanel.hidden=true;}
 }
 for(const [key,el] of Object.entries(processInfoFields)){
   if(!el)continue;
@@ -4386,6 +5224,53 @@ function beginInlineEdit(el){
   selection.removeAllRanges();
   selection.addRange(range);
 }
+function quickBuildInferredType(text,currentType='process'){
+  const value=String(text||'').trim();
+  const lower=value.toLocaleLowerCase('sv-SE');
+  if(!value)return currentType;
+  if(value.endsWith('?')||/^(är|har|kan|ska|får|behöver|måste|finns|blev|blir)\b/.test(lower)||/^(godkänd|korrekt|komplett|relevant|ok|okej)\??$/.test(lower))return'decision';
+  if(/^(slut|klart|avslut|avsluta|processen slutar|processen avslutas)\b/.test(lower))return'end';
+  if(/^(ta|kontrollera|skicka|granska|registrera|boka|skapa|lägg|hantera|bedöm|beräkna|informera|kontakta|godkänn|avvisa|beställ|planera|utför|följ|dokumentera|uppdatera|hämta|läs|välj|förbered|starta|öppna|stäng|matcha|verifiera)\b/.test(lower))return'process';
+  return currentType;
+}
+function nodeNextChoicesForType(type){
+  if(type==='process')return[['object','▪ Objekt / resultat'],['decision','◇ Beslut'],['document','📄 Dokument'],['end','■ Slut']];
+  if(type==='object')return[['process','▭ Aktivitet'],['decision','◇ Beslut'],['end','■ Slut']];
+  return[['object','▪ Objekt'],['process','▭ Aktivitet'],['decision','◇ Beslut'],['document','📄 Dokument'],['end','■ Slut']];
+}
+function rebuildNodeNextMenu(item){
+  if(!item?.nextMenu)return;
+  const menu=item.nextMenu;menu.innerHTML='';
+  if(item.data.type==='decision'){
+    const pair=document.createElement('button');pair.type='button';pair.className='p48-next-step-choice decision-pair';pair.dataset.decisionPair='true';pair.textContent='Ja + Nej';pair.title='Skapa båda beslutets grenar';menu.appendChild(pair);
+  }
+  const rejoin=document.createElement('button');rejoin.type='button';rejoin.className='p48-next-step-choice branch-rejoin';rejoin.dataset.branchRejoin='true';rejoin.textContent='↘ Sammanför Ja + Nej';rejoin.hidden=true;menu.appendChild(rejoin);item.rejoinChoice=rejoin;
+  nodeNextChoicesForType(item.data.type).forEach(([type,caption])=>{const b=document.createElement('button');b.type='button';b.className='p48-next-step-choice';b.dataset.nextType=type;b.textContent=caption;if(type===preferredNextType(item))b.classList.add('recommended');menu.appendChild(b)});
+  menu.querySelectorAll('.p48-next-step-choice').forEach(b=>{b.addEventListener('pointerdown',e=>e.stopPropagation());b.addEventListener('click',e=>{e.stopPropagation();e.preventDefault();if(b.dataset.decisionPair==='true')addDecisionBranches(item.data.id);else if(b.dataset.branchRejoin==='true')addBranchRejoin(item.data.id);else addNextStepFromNode(item.data.id,b.dataset.nextType)})});
+}
+function applyQuickBuildInferredType(item){
+  if(!item)return String(item?.data?.type||'');
+  const oldType=String(item.data.type||'process'),nextType=quickBuildInferredType(item.data.text,oldType);
+  if(nextType===oldType)return oldType;
+  ['start','end','object','process','decision','document','subprocess'].forEach(t=>item.el.classList.remove(t));item.el.classList.add(nextType);item.data.type=nextType;
+  if(nextType==='object'){item.data.objectRole=item.data.objectRole||'intermediate';item.el.dataset.objectRole=item.data.objectRole}else{delete item.data.objectRole;delete item.el.dataset.objectRole}
+  rebuildNodeNextMenu(item);applyStyle(item);renderNodeIO(item);invalidateNodeGeom(item.data.id);markNodeLinksDirty(item.data.id);requestFullLinkRender(true);persist();refreshControls();updateSelectionUi();
+  return nextType;
+}
+function continueQuickBuild(nodeId){
+  const item=nodes.get(String(nodeId));if(!item||!canEdit())return false;
+  const queueIndex=quickBuildBranchQueue.indexOf(String(nodeId));
+  if(queueIndex>=0){
+    quickBuildNodeIds.delete(String(nodeId));quickBuildBranchQueue.splice(queueIndex,1);
+    if(quickBuildBranchQueue.length){const next=nodes.get(quickBuildBranchQueue[0]);if(next){select(next.el);requestAnimationFrame(()=>{ensureNodeVisible(next.el);beginInlineEdit(next.el)});msg('Skriv den andra beslutsgrenen · Enter när den är klar');return true}}
+    msg('Beslutsgrenar klara · Tab fortsätter från markerad gren');return true;
+  }
+  const inferred=applyQuickBuildInferredType(item);quickBuildNodeIds.delete(String(nodeId));
+  if(inferred==='end'){msg('Processens slut är klart');return true}
+  if(inferred==='decision'){return addDecisionBranches(item.data.id,{quickBuild:true})}
+  return addNextStepFromNode(item.data.id,'process');
+}
+
 function finishInlineEdit(el){
   const item=nodes.get(el.dataset.id);
   if(!item)return;
@@ -4421,7 +5306,7 @@ function createConnectedNodeAt(source,side,clientX,clientY){
   const autoLabel=decisionAutoLabel(source.data.id);
   links.push(MapliniConnectorCore.create(source.data.id,id,side,{label:autoLabel}));
   polishAutomaticConnectedLinks([source.data.id,id],{forceAuto:true});
-  celebrateCreatedNode(el);select(el);requestFullLinkRender(true);persist();refreshControls();refreshLinkControls();updateSelectionUi();
+  celebrateCreatedNode(el);quickBuildNodeIds.add(id);select(el);requestFullLinkRender(true);persist();refreshControls();refreshLinkControls();updateSelectionUi();
   const names={object:'Objekt ut',process:'Aktivitet',decision:'Beslut',document:'Dokument',end:'Slut'};
   msg((names[type]||'Steg')+' skapat och kopplat');
   requestAnimationFrame(()=>{ensureNodeVisible(el);beginInlineEdit(el)});
@@ -4480,15 +5365,21 @@ label.addEventListener('dblclick',e=>{e.stopPropagation();beginInlineEdit(el)});
 label.addEventListener('input',()=>{const item=nodes.get(el.dataset.id);if(item&&canEdit()){invalidateNodeGeom(item.data.id);markNodeLinksDirty(item.data.id);drawLinks()}});
 label.addEventListener('blur',()=>finishInlineEdit(el));
 label.addEventListener('keydown',e=>{
-  if(e.key==='Escape'){e.preventDefault();finishInlineEdit(el);el.focus();}
+  if(e.key==='Escape'){e.preventDefault();e.stopPropagation();finishInlineEdit(el);el.focus();}
   if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){
-    e.preventDefault();finishInlineEdit(el);
+    e.preventDefault();e.stopPropagation();quickBuildNodeIds.delete(String(el.dataset.id));finishInlineEdit(el);
     const item=nodes.get(el.dataset.id),type=preferredNextType(item);
     if(item&&item.data&&item.data.type==='decision')addDecisionBranches(el.dataset.id);
     else if(type)addNextStepFromNode(el.dataset.id,type);
     return;
   }
-  if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();finishInlineEdit(el);el.focus();}
+  if(e.key==='Enter'&&!e.shiftKey){
+    e.preventDefault();e.stopPropagation();
+    const rapid=quickBuildNodeIds.has(String(el.dataset.id));
+    finishInlineEdit(el);
+    if(rapid){continueQuickBuild(el.dataset.id);return}
+    el.focus();
+  }
 });
 let suppressSelectClick=false;
 el.addEventListener('click',e=>{
@@ -4509,12 +5400,14 @@ el.addEventListener('pointerdown',e=>{
   if(groupIds)activeIds.forEach(id=>nodes.get(id)?.el.classList.add('p48-group-dragging'));
   const startItems=activeIds.map(id=>{const item=nodes.get(id);return item?{id,x:parseFloat(item.el.style.left)||0,y:parseFloat(item.el.style.top)||0,width:item.el.offsetWidth,height:item.el.offsetHeight}:null}).filter(Boolean);
   const startVia=MapliniEditingCore.movedInternalVias(links,activeIds,0,0).map(v=>({index:v.index,viaX:v.viaX,viaY:v.viaY}));
+  const snapExclude=new Set(activeIds),snapTargets=buildMagneticSnapTargets(snapExclude);
   const sx=e.clientX,sy=e.clientY,pointerType=e.pointerType||'mouse';
-  let mutated=false;
+  let mutated=false,pendingMove=null,moveRaf=0;
   fastGeometryInteraction=true;
   el.classList.add('p48-dragging');
   try{el.setPointerCapture(e.pointerId)}catch(ignore){}
-  const mv=ev=>{
+  const applyMove=ev=>{
+    if(!ev)return;
     const screenDx=ev.clientX-sx,screenDy=ev.clientY-sy;
     if(!mutated&&MapliniMobileCore.movedEnough(screenDx,screenDy,pointerType)){pushUndo(true);mutated=true}
     if(!mutated)return;
@@ -4522,7 +5415,7 @@ el.addEventListener('pointerdown',e=>{
     let delta=MapliniEditingCore.groupMoveDelta(startItems,raw.dx,raw.dy,MapliniCanvasCore.DEFAULT_BOUNDS,20);
     const reference=startItems.find(x=>x.id===el.dataset.id)||startItems[0];
     if(reference){
-      const snapped=magneticSnap(reference,reference.x+delta.dx,reference.y+delta.dy,new Set(activeIds));
+      const snapped=magneticSnap(reference,reference.x+delta.dx,reference.y+delta.dy,snapExclude,snapTargets);
       delta={dx:snapped.x-reference.x,dy:snapped.y-reference.y};
       showSnapGuides(snapped);
       el.classList.toggle('p48-snapped',snapped.snapX!=null||snapped.snapY!=null);
@@ -4539,7 +5432,10 @@ el.addEventListener('pointerdown',e=>{
     drawLinks();
     if(groupIds)refreshSelectionHull();
   };
+  const flushMove=()=>{moveRaf=0;const ev=pendingMove;pendingMove=null;applyMove(ev)};
+  const mv=ev=>{pendingMove=ev;if(!moveRaf)moveRaf=requestAnimationFrame(flushMove)};
   const done=()=>{
+    if(moveRaf){cancelAnimationFrame(moveRaf);moveRaf=0}if(pendingMove){const ev=pendingMove;pendingMove=null;applyMove(ev)}
     el.removeEventListener('pointermove',mv);el.removeEventListener('pointerup',done);el.removeEventListener('pointercancel',done);
     try{if(el.hasPointerCapture&&el.hasPointerCapture(e.pointerId))el.releasePointerCapture(e.pointerId)}catch(ignore){}
     hideSnapGuides();
@@ -4641,10 +5537,12 @@ function preferredNextType(item){
   return null;
 }
 function preferredNextLabel(item){
+  const current=String(item?.data?.type||'');
+  if(current==='decision')return'＋ Ja + Nej';
   const type=preferredNextType(item);
   if(type==='object')return'＋ Objekt ut';
   if(type==='process')return'＋ Aktivitet';
-  return'＋ Nästa';
+  return'＋ Nästa steg';
 }
 function workflowCue(item){
   const current=String(item?.data?.type||'');
@@ -4847,6 +5745,7 @@ function addDecisionBranchPair(source,direction){
   return[yesEl,noEl];
 }
 function addDecisionBranches(sourceId){
+  const quickBuild=Boolean(arguments[1]&&arguments[1].quickBuild===true);
   if(!requireEdit())return false;
   const source=nodes.get(sourceId);
   if(!source||source.data.type!=='decision'){msg('Markera först ett beslut');return false}
@@ -4864,6 +5763,7 @@ function addDecisionBranches(sourceId){
   }
   polishAutomaticConnectedLinks([sourceId,...created.map(el=>el.dataset.id)],{forceAuto:true});
   closeNodeNextMenus();
+  if(quickBuild&&created.length){created.forEach(el=>quickBuildNodeIds.add(el.dataset.id));quickBuildBranchQueue=created.map(el=>el.dataset.id);}
   if(created.length)select(created[0]);
   requestFullLinkRender(true);persist();refreshControls();refreshLinkControls();updateSelectionUi();
   msg(created.length===2?'Ja- och Nej-grenar skapade symmetriskt':'Den saknade beslutsgrenen skapades');
@@ -4891,9 +5791,9 @@ function addNextStepFromNode(sourceId,type='process'){
   el.style.left=pos.x+'px';el.style.top=pos.y+'px';sync(el);
   const autoLabel=decisionAutoLabel(sourceId);links.push(MapliniConnectorCore.create(sourceId,id,nextStepConnectorSide(pos.direction||direction),{label:autoLabel}));
   polishAutomaticConnectedLinks([sourceId,id],{forceAuto:true});
-  closeNodeNextMenus();select(el);requestFullLinkRender(true);persist();refreshControls();refreshLinkControls();updateSelectionUi();
+  closeNodeNextMenus();quickBuildNodeIds.add(id);select(el);requestFullLinkRender(true);persist();refreshControls();refreshLinkControls();updateSelectionUi();
   const names={object:(nextObjectRole==='output'?'Objekt ut':'Objekt'),process:'Aktivitet',decision:'Beslut',document:'Dokument',end:'Slut'};
-  msg((names[type]||'Steg')+' tillagt · skriv namnet · Ctrl+Enter fortsätter');
+  msg((names[type]||'Steg')+' tillagt · skriv namnet · Enter fortsätter · Ctrl+Enter fortsätter klassiskt');
   requestAnimationFrame(()=>{ensureNodeVisible(el);beginInlineEdit(el)});return true;
 }
 
@@ -5239,6 +6139,7 @@ function renderAllLinksNow(){
     g.dataset.linkIndex=String(index);
     const branchKind=branchSemantic(st.label);
     const groupClasses=[];if(branchKind)groupClasses.push(`p48-branch-${branchKind}`);if(selectedLinkIndex===index||selectedLinkIndices.has(index))groupClasses.push('p48-link-selected');
+    const roleA=responsibilityRole(nodes.get(a)),roleB=responsibilityRole(nodes.get(b));if(roleA&&roleB&&responsibilityKey(roleA)!==responsibilityKey(roleB))groupClasses.push('p48-link-handoff');if(responsibilityFilter&&(responsibilityKey(roleA)===responsibilityFilter||responsibilityKey(roleB)===responsibilityFilter))groupClasses.push('p48-link-role-focus');
     if(groupClasses.length)g.setAttribute('class',groupClasses.join(' '));
 
     if(selectedLinkIndex===index){
@@ -5302,6 +6203,8 @@ function renderAllLinksNow(){
     g.appendChild(hit);
     linkDomByIndex.set(index,{group:g,visible:v,hit,halo:(selectedLinkIndex===index?g.querySelector('.p48-link-selection'):null),marker:mk||null,label:labelEl||null});linkLayer.appendChild(g);
   });
+
+  refreshReadFocusPath();
 
   if(selectedLinkIndex!=null){
     const selected=links[selectedLinkIndex],A=selected&&nodes.get(selected[0])?.el,B=selected&&nodes.get(selected[1])?.el;
@@ -5466,6 +6369,46 @@ document.addEventListener('pointerdown',e=>{
   }
 },true);
 
+
+
+// v0.20.62 – fast process search/navigation. Uses only data already stored on the current map.
+function processFindHaystack(item){
+  if(!item)return'';
+  const d=item.data||{},info=MapliniProcessInfoCore.normalize(d.processInfo||{});
+  const parts=[d.text,info.responsibleRole,info.system,info.description,info.instruction];
+  if(d.type==='document')parts.push(d.documentName,d.documentTitle,d.url);
+  return parts.filter(Boolean).join(' ').toLocaleLowerCase('sv-SE');
+}
+function processFindContext(item){
+  const d=item?.data||{},info=MapliniProcessInfoCore.normalize(d.processInfo||{}),bits=[];
+  if(info.responsibleRole)bits.push('Ansvar: '+info.responsibleRole);
+  if(info.system)bits.push('System: '+info.system);
+  if(d.type==='document'&&(d.documentName||d.documentTitle))bits.push('Dokument: '+(d.documentName||d.documentTitle));
+  return bits.join(' · ')||({process:'Aktivitet',decision:'Beslut',object:'Objekt',document:'Dokument',subprocess:'Delprocess',start:'Start',end:'Slut'}[d.type]||'Steg');
+}
+function clearProcessFindHits(){for(const item of nodes.values())item.el.classList.remove('p48-find-hit')}
+function jumpToProcessFindResult(id){
+  const item=nodes.get(String(id));if(!item)return false;
+  clearProcessFindHits();item.el.classList.add('p48-find-hit');select(item.el);ensureNodeVisible(item.el);
+  setTimeout(()=>item.el.classList.remove('p48-find-hit'),1800);
+  return true;
+}
+function renderProcessFind(){
+  if(!findInput||!findResults||!findMeta)return;
+  const q=String(findInput.value||'').trim().toLocaleLowerCase('sv-SE');findResults.innerHTML='';clearProcessFindHits();
+  if(q.length<2){findMeta.textContent='Skriv minst 2 tecken.';return}
+  const matches=[...nodes.values()].filter(item=>processFindHaystack(item).includes(q)).slice(0,30);
+  findMeta.textContent=matches.length?`${matches.length}${matches.length===30?'+':''} träff${matches.length===1?'':'ar'} · klicka för att hoppa till steget`:'Ingen träff';
+  if(!matches.length){const e=document.createElement('div');e.className='p48-find-empty';e.textContent='Prova ett steg, en roll, ett system eller dokumentnamn.';findResults.appendChild(e);return}
+  matches.forEach((item,index)=>{const b=document.createElement('button');b.type='button';b.className='p48-find-result';b.dataset.findId=item.data.id;b.setAttribute('role','option');b.innerHTML=`<strong>${escapeDocText(item.data.text||'Namnlöst steg')}</strong><span>${escapeDocText(processFindContext(item))}</span>`;b.addEventListener('click',()=>jumpToProcessFindResult(item.data.id));findResults.appendChild(b);if(index===0)item.el.classList.add('p48-find-hit')});
+}
+if(findInput){findInput.addEventListener('input',renderProcessFind);findInput.addEventListener('keydown',e=>{if(e.key==='Enter'){const first=findResults?.querySelector('[data-find-id]');if(first){e.preventDefault();jumpToProcessFindResult(first.dataset.findId)}}else if(e.key==='Escape'){findMenu?.removeAttribute('open');clearProcessFindHits()}})}
+if(findMenu)findMenu.addEventListener('toggle',()=>{if(findMenu.open){setTimeout(()=>{findInput?.focus();findInput?.select();renderProcessFind()},0)}else clearProcessFindHits()});
+window.addEventListener('keydown',e=>{
+  if(!(e.ctrlKey||e.metaKey)||String(e.key).toLowerCase()!=='f')return;
+  if(['INPUT','TEXTAREA'].includes(e.target?.tagName)&&e.target!==findInput)return;
+  e.preventDefault();if(findMenu){findMenu.open=true;setTimeout(()=>findInput?.focus(),0)}
+});
 
 function isMobileLayout(){
   return window.matchMedia('(max-width:900px), (pointer:coarse) and (max-width:1100px)').matches;
@@ -6108,7 +7051,7 @@ function closeWalkthrough(){
 function renderWalkthroughStart(){
   if(!walkthroughStartChoice)return;
   const data=walkthroughNodeData(),starts=MapliniWalkthroughCore.startNodeIds(data,links);
-  walkthroughState={history:[],currentId:null,currentAnswers:{},currentDeviationDetails:{},person:'',startedAt:null,startIds:starts,savedRunId:null,rootProcessId:String(currentId||''),rootProcessName:String(nameInput.value.trim()||'Namnlös process').slice(0,300),processStack:[],pendingSubprocessStarts:null};
+  walkthroughState={history:[],currentId:null,currentAnswers:{},currentDeviationDetails:{},person:'',startedAt:null,startIds:starts,savedRunId:null,rootProcessId:String(currentId||''),rootProcessName:String(nameInput.value.trim()||'Namnlös process').slice(0,300),processStack:[],pendingSubprocessStarts:null,returnNotice:null};
   walkthroughStartChoice.innerHTML='';
   if(!starts.length){
     const empty=document.createElement('div');empty.className='p48-walkthrough-validation';empty.textContent='Processen saknar rutor att gå igenom.';walkthroughStartChoice.appendChild(empty);
@@ -6153,11 +7096,10 @@ function selectedWalkthroughStartId(){
 function beginWalkthrough(){
   if(!walkthroughState)return;
   const id=selectedWalkthroughStartId();if(!id)return;
-  const person=String(walkthroughPerson?.value||'').trim().slice(0,120);
-  if(!person){setWalkthroughValidation('Ange namn eller initialer så att genomgången kan följas upp.');walkthroughPerson?.focus();return}
+  const person=String(walkthroughPerson?.value||'').trim().slice(0,120)||'Anonym';
   setWalkthroughValidation('');
   walkthroughState.person=person;
-  walkthroughState.startedAt=Date.now();walkthroughState.rootProcessId=String(currentId||'');walkthroughState.rootProcessName=String(nameInput.value.trim()||'Namnlös process').slice(0,300);walkthroughState.processStack=[];walkthroughState.pendingSubprocessStarts=null;walkthroughState.currentId=id;walkthroughState.currentAnswers={};walkthroughState.currentDeviationDetails={};walkthroughState.history=[];walkthroughState.savedRunId=null;
+  walkthroughState.startedAt=Date.now();walkthroughState.rootProcessId=String(currentId||'');walkthroughState.rootProcessName=String(nameInput.value.trim()||'Namnlös process').slice(0,300);walkthroughState.processStack=[];walkthroughState.pendingSubprocessStarts=null;walkthroughState.returnNotice=null;walkthroughState.currentId=id;walkthroughState.currentAnswers={};walkthroughState.currentDeviationDetails={};walkthroughState.history=[];walkthroughState.savedRunId=null;
   if(walkthroughStart)walkthroughStart.hidden=true;if(walkthroughRun)walkthroughRun.hidden=false;if(walkthroughSummary)walkthroughSummary.hidden=true;
   renderWalkthroughStep();
 }
@@ -6202,9 +7144,34 @@ function walkthroughProcessPath(){
   for(const frame of walkthroughState.processStack||[])ids.push(String(frame.childProcessId||''));
   return ids.filter(Boolean).map(id=>String(processes[id]?.name||'Namnlös process'));
 }
+function walkthroughEdgeTargetText(edge){
+  if(!edge)return'';
+  return String(nodes.get(String(edge.to))?.data?.text||'Nästa steg');
+}
+function renderWalkthroughReturnNotice(){
+  if(!walkthroughReturnNote||!walkthroughState)return;
+  const notice=walkthroughState.returnNotice;walkthroughReturnNote.innerHTML='';
+  if(!notice){walkthroughReturnNote.hidden=true;return}
+  const text=document.createElement('span');
+  const strong=document.createElement('strong');strong.textContent='Tillbaka i huvudflödet. ';
+  text.appendChild(strong);text.appendChild(document.createTextNode(notice.nextText?`Fortsätt med ${notice.nextText}.`:`Fortsätt där processen tar vid.`));
+  walkthroughReturnNote.appendChild(text);walkthroughReturnNote.hidden=false;
+  walkthroughState.returnNotice=null;
+}
+function walkthroughAnswerTarget(question,answer,item){
+  if(!question||question.kind!=='route'||!item)return'';
+  const edges=MapliniWalkthroughCore.nextEdges(item.data.id,walkthroughNodeData(),links);
+  const mapped=MapliniWalkthroughCore.routeEdges(edges);
+  if(mapped.ambiguous)return'';
+  const edge=answer==='yes'?mapped.yes:mapped.no;
+  return walkthroughEdgeTargetText(edge);
+}
+function scrollWalkthroughToCurrentStep(){
+  requestAnimationFrame(()=>{if(!walkthroughRun||walkthroughRun.hidden)return;try{walkthroughRun.scrollTo({top:0,behavior:'smooth'})}catch(_){walkthroughRun.scrollTop=0}});
+}
 function renderPendingSubprocessStart(){
   const pending=walkthroughState?.pendingSubprocessStarts;if(!pending)return false;
-  clearWalkthroughHighlight();setWalkthroughValidation('');
+  clearWalkthroughHighlight();setWalkthroughValidation('');if(walkthroughReturnNote)walkthroughReturnNote.hidden=true;
   if(walkthroughStepType)walkthroughStepType.textContent='DELPROCESS · VÄLJ START';
   if(walkthroughStepTitle)walkthroughStepTitle.textContent=String(processes[currentId]?.name||'Delprocess');
   if(walkthroughStepDescription){walkthroughStepDescription.textContent='Den här delprocessen har flera startpunkter. Välj var genomgången ska börja.';walkthroughStepDescription.hidden=false}
@@ -6221,7 +7188,7 @@ function renderPendingSubprocessStart(){
       walkthroughNextChoices.appendChild(btn);
     });
   }
-  updateWalkthroughProgress();return true;
+  updateWalkthroughProgress();scrollWalkthroughToCurrentStep();return true;
 }
 function returnFromWalkthroughSubprocess(){
   if(!walkthroughState)return false;
@@ -6229,7 +7196,7 @@ function returnFromWalkthroughSubprocess(){
   if(!stack.length){showWalkthroughSummary();return true}
   const frame=stack.pop();walkthroughState.pendingSubprocessStarts=null;
   persist();openProcess(frame.parentProcessId);
-  if(frame.returnNextId){walkthroughState.currentId=String(frame.returnNextId);walkthroughState.currentAnswers={};walkthroughState.currentDeviationDetails={};renderWalkthroughStep();return true}
+  if(frame.returnNextId){walkthroughState.currentId=String(frame.returnNextId);walkthroughState.currentAnswers={};walkthroughState.currentDeviationDetails={};walkthroughState.returnNotice={parentProcessId:String(frame.parentProcessId||''),nextText:String(nodes.get(String(frame.returnNextId))?.data?.text||'nästa steg')};renderWalkthroughStep();return true}
   walkthroughState.currentId=null;
   return returnFromWalkthroughSubprocess();
 }
@@ -6250,7 +7217,7 @@ function renderWalkthroughStep(){
   const item=nodes.get(String(walkthroughState.currentId));
   if(!item){showWalkthroughSummary();return}
   const data=item.data,info=ensureProcessInfo(item),questions=walkthroughQuestionsFor(item);
-  highlightWalkthroughNode(data.id);setWalkthroughValidation('');renderWalkthroughTrail(item);
+  highlightWalkthroughNode(data.id);setWalkthroughValidation('');renderWalkthroughTrail(item);renderWalkthroughReturnNotice();
   const walkthroughCard=walkthroughRun?.querySelector('.p48-walkthrough-step-card');
   if(walkthroughCard){walkthroughCard.classList.remove('p48-step-enter');void walkthroughCard.offsetWidth;walkthroughCard.classList.add('p48-step-enter')}
   if(walkthroughStepType)walkthroughStepType.textContent=typeLabel(data.type);
@@ -6261,6 +7228,14 @@ function renderWalkthroughStep(){
     const path=walkthroughProcessPath();if(path.length>1){const chip=document.createElement('span');chip.textContent=path.join(' › ');walkthroughStepMeta.appendChild(chip)}
     const meta=[['Ansvar',info.responsibleRole],['System',info.system],['Tid',info.duration]];
     meta.forEach(([label,value])=>{if(!value)return;const chip=document.createElement('span');chip.textContent=`${label}: ${value}`;walkthroughStepMeta.appendChild(chip)});
+  }
+  if(walkthroughComing&&walkthroughComingText){
+    const nextEdges=MapliniWalkthroughCore.nextEdges(data.id,walkthroughNodeData(),links);
+    let coming='';
+    if(!nextEdges.length)coming=(walkthroughState?.processStack||[]).length?'Tillbaka till huvudprocessen':'Processen är klar';
+    else if(nextEdges.length===1)coming=walkthroughEdgeTargetText(nextEdges[0]);
+    else coming=`${nextEdges.length} möjliga vägar – ditt svar avgör vilken`;
+    walkthroughComingText.textContent=coming;walkthroughComing.hidden=false;
   }
   if(walkthroughQuestions){
     walkthroughQuestions.innerHTML='';
@@ -6290,7 +7265,8 @@ function renderWalkthroughStep(){
       deviation.append(devTitle,explanationLabel,ownerLabel,dueLabel);
       for(const answer of ['yes','no']){
         const btn=document.createElement('button');btn.type='button';btn.className='p48-walkthrough-answer';btn.dataset.answer=answer;
-        const answerText=document.createElement('span');answerText.textContent=answer==='yes'?'Ja':'Nej';
+        const answerText=document.createElement('span');answerText.textContent=q.quick?(answer==='yes'?'Klart':'Inte klart'):(answer==='yes'?'Ja':'Nej');
+        const targetText=walkthroughAnswerTarget(q,answer,item);if(targetText){const target=document.createElement('span');target.className='p48-walkthrough-answer-target';target.textContent=`→ ${targetText}`;answerText.appendChild(target)}
         const keyHint=document.createElement('span');keyHint.className='p48-keyhint';keyHint.textContent=answer==='yes'?'J':'N';
         btn.append(answerText,keyHint);
         if(walkthroughState.currentAnswers[q.id]===answer)btn.classList.add('active');
@@ -6318,11 +7294,11 @@ function renderWalkthroughStep(){
     if(canAuto){
       const hint=document.createElement('div');hint.className='p48-walkthrough-auto-next';
       hint.textContent=q.kind==='route'?'Ditt svar väljer rätt väg automatiskt':'Ja tar dig direkt vidare · Nej stannar om något behöver följas upp';
-      if(q.quick)hint.textContent='Ja eller Nej tar dig direkt vidare';
+      if(q.quick)hint.textContent='Klart tar dig direkt vidare · Inte klart låter dig stanna upp';
       walkthroughQuestions.appendChild(hint);
     }
   }
-  updateWalkthroughProgress();
+  updateWalkthroughProgress();scrollWalkthroughToCurrentStep();
 }
 
 function maybeAutoAdvanceWalkthrough(item,question,answer){
@@ -6379,12 +7355,12 @@ function renderWalkthroughNavigation(item){
   if(walkthroughFinish)walkthroughFinish.hidden=true;
 
   if(edges.length===0){
-    if(walkthroughFinish){walkthroughFinish.hidden=false;walkthroughFinish.onclick=()=>commitWalkthroughStep(null)}
+    if(walkthroughFinish){walkthroughFinish.hidden=false;walkthroughFinish.textContent=(walkthroughState?.processStack||[]).length?'Klar här – tillbaka till huvudflödet →':'Klar – avsluta genomgång';walkthroughFinish.onclick=()=>commitWalkthroughStep(null)}
     return;
   }
   if(edges.length===1){
     if(walkthroughNext){
-      const target=nodes.get(edges[0].to);walkthroughNext.hidden=false;walkthroughNext.textContent=`Nästa: ${target?.data?.text||'nästa steg'} →`;
+      const target=nodes.get(edges[0].to);walkthroughNext.hidden=false;walkthroughNext.textContent=`Fortsätt: ${target?.data?.text||'nästa steg'} →`;
       walkthroughNext.onclick=()=>commitWalkthroughStep(edges[0].to);
     }
     return;
@@ -6802,6 +7778,8 @@ async function renderMapSnapshot(){
   const pad=60,header=90,scale=Math.min(2,Math.max(1,1800/Math.max(900,b.width)));
   const width=Math.ceil((b.width+pad*2)*scale),height=Math.ceil((b.height+pad*2+header)*scale);
   const out=document.createElement('canvas');out.width=width;out.height=height;
+  out.dataset.exportHeaderPx=String(Math.round(header*scale));
+  out.dataset.exportScale=String(scale);
   const ctx=out.getContext('2d');ctx.scale(scale,scale);
   ctx.fillStyle='#ffffff';ctx.fillRect(0,0,width/scale,height/scale);
 
@@ -6923,6 +7901,32 @@ function buildPdfFromJpeg(jpeg,imgW,imgH){
   const spec=pageSpec();
   return buildMultiPagePdfFromCanvas(null,jpeg,imgW,imgH,spec,1);
 }
+function composeExportPageCanvases(canvasEl,count){
+  const pages=[];
+  const safeCount=Math.max(1,Math.min(8,Number(count)||1));
+  if(!canvasEl)return pages;
+  if(safeCount===1){pages.push(canvasEl);return pages;}
+  const headerPx=Math.max(0,Math.min(canvasEl.height-1,Number(canvasEl.dataset?.exportHeaderPx)||0));
+  const bodyY=headerPx,bodyH=Math.max(1,canvasEl.height-bodyY);
+  const sliceW=Math.ceil(canvasEl.width/safeCount);
+  for(let i=0;i<safeCount;i++){
+    const sx=i*sliceW,sw=Math.max(1,Math.min(sliceW,canvasEl.width-sx));
+    const c=document.createElement('canvas');
+    c.width=sw;c.height=headerPx+bodyH;
+    const cx=c.getContext('2d');
+    cx.fillStyle='#fff';cx.fillRect(0,0,c.width,c.height);
+    // Repeat the full export header on every page, scaled down only when a page is narrower.
+    if(headerPx>0){
+      const headerScale=Math.min(1,sw/canvasEl.width);
+      const dh=Math.max(1,Math.round(headerPx*headerScale));
+      cx.drawImage(canvasEl,0,0,canvasEl.width,headerPx,0,0,sw,dh);
+      if(dh<headerPx){cx.fillStyle='#fff';cx.fillRect(0,dh,sw,headerPx-dh)}
+    }
+    cx.drawImage(canvasEl,sx,bodyY,sw,bodyH,0,headerPx,sw,bodyH);
+    pages.push(c);
+  }
+  return pages;
+}
 function buildMultiPagePdfFromCanvas(canvasEl,jpeg,imgW,imgH,spec,count){
   const pageW=spec.pdfW,pageH=spec.pdfH,margin=28;
   const parts=[asciiBytes('%PDF-1.4\n%Maplini\n')],offsets={};
@@ -6934,20 +7938,9 @@ function buildMultiPagePdfFromCanvas(canvasEl,jpeg,imgW,imgH,spec,count){
   const pageObjs=[],contentObjs=[],imageObjs=[];
   let nextObj=3;
 
-  // If we have a canvas, slice it into equal-width image pages.
   const slices=[];
   if(canvasEl){
-    const sliceW=Math.ceil(canvasEl.width/count);
-    for(let i=0;i<count;i++){
-      const x=i*sliceW;
-      const w=Math.min(sliceW,canvasEl.width-x);
-      const c=document.createElement('canvas');
-      c.width=w;c.height=canvasEl.height;
-      const cx=c.getContext('2d');
-      cx.fillStyle='#fff';cx.fillRect(0,0,w,c.height);
-      cx.drawImage(canvasEl,x,0,w,canvasEl.height,0,0,w,canvasEl.height);
-      slices.push({jpeg:canvasJpegBytes(c,.94),w,h:c.height});
-    }
+    for(const c of composeExportPageCanvases(canvasEl,count))slices.push({jpeg:canvasJpegBytes(c,.94),w:c.width,h:c.height});
   }else{
     slices.push({jpeg,w:imgW,h:imgH});
   }
@@ -6978,52 +7971,31 @@ function buildMultiPagePdfFromCanvas(canvasEl,jpeg,imgW,imgH,spec,count){
   parts.push(asciiBytes(tail));
   return cat(parts);
 }
+function buildDocxWithPages(pageCanvases,title,spec){
+  const landscape=String(spec?.code||'A4L').endsWith('L'),isA3=String(spec?.code||'A4L').startsWith('A3');
+  const portraitW=isA3?16838:11906,portraitH=isA3?23811:16838;
+  const pgW=landscape?portraitH:portraitW,pgH=landscape?portraitW:portraitH;
+  const maxCx=Math.max(1,(pgW-960)*635),maxCy=Math.max(1,(pgH-960)*635);
+  const images=[];const rels=[];const paras=[];
+  pageCanvases.forEach((c,idx)=>{
+    const jpeg=canvasJpegBytes(c,.94),rid=`rId${idx+1}`,name=`process-map-${idx+1}.jpg`;
+    let cx=maxCx,cy=Math.round(cx*c.height/c.width);
+    if(cy>maxCy){cy=maxCy;cx=Math.round(cy*c.width/c.height)}
+    const pageBreak=idx?'<w:pageBreakBefore/>':'';
+    paras.push(`<w:p><w:pPr><w:jc w:val="center"/>${pageBreak}</w:pPr><w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="${idx+1}" name="Maplini process page ${idx+1}"/><a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic><pic:nvPicPr><pic:cNvPr id="${idx+1}" name="${name}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${rid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`);
+    rels.push(`<Relationship Id="${rid}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/${name}"/>`);
+    images.push({name:`word/media/${name}`,data:jpeg});
+  });
+  const doc=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><w:body>${paras.join('')}<w:sectPr><w:pgSz w:w="${pgW}" w:h="${pgH}"${landscape?' w:orient="landscape"':''}/><w:pgMar w:top="480" w:right="480" w:bottom="480" w:left="480"/></w:sectPr></w:body></w:document>`;
+  const contentTypes=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="jpg" ContentType="image/jpeg"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/></Types>`;
+  const packageRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>`;
+  const docRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${rels.join('')}</Relationships>`;
+  return mkzip([{name:'[Content_Types].xml',data:contentTypes},{name:'_rels/.rels',data:packageRels},{name:'word/document.xml',data:doc},{name:'word/_rels/document.xml.rels',data:docRels},...images]);
+}
 function buildDocxWithJpeg(jpeg,imgW,imgH,title){
-  const maxCx=9144000,maxCy=6400800; // roughly 10 x 7 in
-  let cx=maxCx,cy=Math.round(cx*imgH/imgW);
-  if(cy>maxCy){cy=maxCy;cx=Math.round(cy*imgW/imgH)}
-  const safeTitle=String(title||'Maplini process').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-  const doc=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"
- xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"
- xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"
- xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"
- xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture">
-<w:body>
-<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="32"/></w:rPr><w:t>${safeTitle}</w:t></w:r></w:p>
-<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:drawing>
-<wp:inline distT="0" distB="0" distL="0" distR="0">
-<wp:extent cx="${cx}" cy="${cy}"/><wp:docPr id="1" name="Maplini process map"/>
-<a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">
-<pic:pic><pic:nvPicPr><pic:cNvPr id="0" name="process-map.jpg"/><pic:cNvPicPr/></pic:nvPicPr>
-<pic:blipFill><a:blip r:embed="rId1"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>
-<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${cx}" cy="${cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>
-</pic:pic></a:graphicData></a:graphic>
-</wp:inline></w:drawing></w:r></w:p>
-<w:sectPr><w:pgSz w:w="16838" w:h="11906" w:orient="landscape"/><w:pgMar w:top="720" w:right="720" w:bottom="720" w:left="720"/></w:sectPr>
-</w:body></w:document>`;
-  const contentTypes=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
-<Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
-<Default Extension="xml" ContentType="application/xml"/>
-<Default Extension="jpg" ContentType="image/jpeg"/>
-<Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
-</Types>`;
-  const packageRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
-</Relationships>`;
-  const docRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
-<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/process-map.jpg"/>
-</Relationships>`;
-  return mkzip([
-    {name:'[Content_Types].xml',data:contentTypes},
-    {name:'_rels/.rels',data:packageRels},
-    {name:'word/document.xml',data:doc},
-    {name:'word/_rels/document.xml.rels',data:docRels},
-    {name:'word/media/process-map.jpg',data:jpeg}
-  ]);
+  // Compatibility path for old tests/callers: one-page DOCX.
+  const c=document.createElement('canvas');c.width=imgW;c.height=imgH;
+  return buildDocxWithPages([c],title,{code:'A4L'});
 }
 function downloadBytes(bytes,name,type,kind='binary'){
   const check=MapliniExportCore.validateBytes(bytes,kind);
@@ -7031,6 +8003,50 @@ function downloadBytes(bytes,name,type,kind='binary'){
   const blob=new Blob([bytes],{type}),a=document.createElement('a');
   a.href=URL.createObjectURL(blob);a.download=MapliniExportCore.safeFileName(name);a.click();
   setTimeout(()=>URL.revokeObjectURL(a.href),1500);
+}
+function exportBoundaryWarnings(snapshot,count){
+  const safeCount=Math.max(1,Math.min(8,Number(count)||1));
+  if(safeCount<=1)return [];
+  const b=exportBounds();if(!b)return [];
+  const scale=Number(snapshot?.dataset?.exportScale)||1,pad=60;
+  const sliceW=Math.ceil(snapshot.width/safeCount),nearPx=Math.max(18,Math.round(28*scale));
+  const warnings=[];
+  for(const item of nodes.values()){
+    const d=item.data||{},w=item.el?.offsetWidth||Number(d.width)||180;
+    const left=(pad-b.minX+(Number(d.x)||0))*scale,right=left+w*scale;
+    for(let i=1;i<safeCount;i++){
+      const boundary=i*sliceW;
+      if((left<boundary&&right>boundary)||Math.min(Math.abs(left-boundary),Math.abs(right-boundary))<=nearPx){
+        warnings.push({page:i,label:String(d.text||'Namnlöst steg').trim().slice(0,90)});break;
+      }
+    }
+  }
+  return warnings;
+}
+function closeExportPreview(){
+  if(exportPreviewDialog)exportPreviewDialog.hidden=true;
+  if(exportPreviewBackdrop)exportPreviewBackdrop.hidden=true;
+}
+async function openExportPreview(){
+  if(!exportPreviewDialog||!exportPreviewPages)return;
+  try{
+    prepareExport();
+    if(exportPreviewSummary)exportPreviewSummary.textContent='Skapar förhandsgranskning…';
+    exportPreviewPages.innerHTML='';
+    exportPreviewDialog.hidden=false;if(exportPreviewBackdrop)exportPreviewBackdrop.hidden=false;
+    const shot=await renderMapSnapshot(),spec=pageSpec(),count=desiredPageCount(),pages=composeExportPageCanvases(shot,count);
+    if(exportPreviewSummary)exportPreviewSummary.textContent=`${spec.name} · ${count} ${count===1?'sida':'sidor'} · samma indelning för PDF och DOCX`;
+    const warnings=exportBoundaryWarnings(shot,count);
+    if(exportPreviewWarning){
+      exportPreviewWarning.hidden=!warnings.length;
+      exportPreviewWarning.textContent=warnings.length?`Kontrollera sidgränsen: ${warnings.map(w=>'”'+w.label+'”').join(', ')} ligger nära eller över en sidbrytning. Flytta steget på canvasen eller välj ett annat sidformat/antal sidor om du vill undvika delningen.`:'';
+    }
+    pages.forEach((page,idx)=>{
+      const card=document.createElement('div');card.className='p48-export-preview-page';
+      const label=document.createElement('strong');label.textContent=`Sida ${idx+1} av ${pages.length}`;card.appendChild(label);
+      const thumb=document.createElement('canvas');thumb.width=page.width;thumb.height=page.height;thumb.getContext('2d').drawImage(page,0,0);card.appendChild(thumb);exportPreviewPages.appendChild(card);
+    });
+  }catch(err){reportRuntimeError(err,'export-preview');closeExportPreview();msg('Förhandsgranskning misslyckades')}
 }
 async function exportPdf(){
   try{
@@ -7041,16 +8057,17 @@ async function exportPdf(){
     const jpeg=canvasJpegBytes(shot,.94);
     const pdf=buildMultiPagePdfFromCanvas(shot,jpeg,shot.width,shot.height,spec,count);
     downloadBytes(pdf,cleanFileName(state().name)+`_${spec.code}_${count}sidor.pdf`,'application/pdf','pdf');
-    msg(`PDF skapad · ${spec.name} · ${count} sida${count>1?'or':''}`);
+    msg(`PDF skapad · ${spec.name} · ${count} ${count===1?'sida':'sidor'}`);
   }catch(err){reportRuntimeError(err,'export-pdf');msg('PDF-export misslyckades')}
 }
 async function exportDoc(){
   try{
     prepareExport();
-    const shot=await renderMapSnapshot(),jpeg=canvasJpegBytes(shot,.94);
-    const docx=buildDocxWithJpeg(jpeg,shot.width,shot.height,state().name);
-    downloadBytes(docx,cleanFileName(state().name)+'.docx','application/vnd.openxmlformats-officedocument.wordprocessingml.document','zip');
-    msg('DOCX skapad');
+    const shot=await renderMapSnapshot(),spec=pageSpec(),count=desiredPageCount();
+    const pages=composeExportPageCanvases(shot,count);
+    const docx=buildDocxWithPages(pages,state().name,spec);
+    downloadBytes(docx,cleanFileName(state().name)+`_${spec.code}_${count}sidor.docx`,'application/vnd.openxmlformats-officedocument.wordprocessingml.document','zip');
+    msg(`DOCX skapad · ${spec.name} · ${count} ${count===1?'sida':'sidor'}`);
   }catch(err){reportRuntimeError(err,'export-docx');msg('DOCX-export misslyckades')}
 }
 
@@ -7136,8 +8153,26 @@ function addFromPalette(item,{closeMobile=false}={}){
   const paletteName=item.dataset.type==='object'?(item.dataset.objectRole==='input'?'Objekt in':'Objekt ut'):(item.dataset.type==='process'?'Aktivitet':'Steg');
   msg(`${paletteName} tillagt · markera rutan och använd Nästa för att fortsätta`);
 }
-if(emptyObject)emptyObject.addEventListener('click',()=>addFirstStep('object','input'));
-if(emptyActivity)emptyActivity.addEventListener('click',()=>addFirstStep('process'));
+if(emptyObject)emptyObject.addEventListener('click',()=>{if(addFirstStep('object','input'))msg('Objekt in tillagt · skriv vad som triggar processen')});
+if(emptyStart)emptyStart.addEventListener('click',()=>{if(addFirstStep('start'))msg('Start tillagd · skriv en tydlig startpunkt')});
+if(emptyActivity)emptyActivity.addEventListener('click',createFirstActivityFromStarter);
+if(emptyImport)emptyImport.addEventListener('click',()=>setBatchDialog(true));
+if(batchLaunch)batchLaunch.addEventListener('click',()=>setBatchDialog(true));
+const batchClose=root.querySelector('#p48-batch-close'),batchCancel=root.querySelector('#p48-batch-cancel'),batchCreate=root.querySelector('#p48-batch-create');
+if(batchClose)batchClose.addEventListener('click',()=>setBatchDialog(false));if(batchCancel)batchCancel.addEventListener('click',()=>setBatchDialog(false));if(batchBackdrop)batchBackdrop.addEventListener('click',()=>setBatchDialog(false));if(batchCreate)batchCreate.addEventListener('click',createProcessFromBatch);
+if(docLaunch)docLaunch.addEventListener('click',()=>setDocDialog(true));
+if(docBackdrop)docBackdrop.addEventListener('click',()=>setDocDialog(false));
+for(const id of ['p48-doc-close','p48-doc-cancel']){const el=root.querySelector('#'+id);if(el)el.addEventListener('click',()=>setDocDialog(false))}
+if(docFile)docFile.addEventListener('change',()=>handleDocumentFiles(docFile.files));
+if(sourceTextRun)sourceTextRun.addEventListener('click',handlePastedSource);
+if(sourceText)sourceText.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();handlePastedSource()}});
+if(sourceUrlRun)sourceUrlRun.addEventListener('click',handleSourceUrl);
+if(sourceUrl)sourceUrl.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();handleSourceUrl()}});
+if(docCreate)docCreate.addEventListener('click',createProcessFromDocumentProposal);
+if(docModeStructured)docModeStructured.addEventListener('click',()=>setDocReviewMode('structured'));if(docModeText)docModeText.addEventListener('click',()=>setDocReviewMode('text'));
+if(docDialog)docDialog.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();setDocDialog(false)}});
+if(batchText)batchText.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();setBatchDialog(false)}else if(e.key==='Enter'&&(e.ctrlKey||e.metaKey)){e.preventDefault();createProcessFromBatch()}});
+if(emptyFirstText)emptyFirstText.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();createFirstActivityFromStarter()}else if(e.key==='Escape'){e.preventDefault();emptyFirstText.blur()}});
 root.querySelectorAll('.p48-item').forEach(i=>{
   i.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',JSON.stringify({type:i.dataset.type,objectRole:i.dataset.objectRole||null}));e.dataTransfer.effectAllowed='copy'});
   i.addEventListener('click',e=>{if(isMobileLayout()){e.preventDefault();addFromPalette(i,{closeMobile:true})}});
@@ -7166,6 +8201,7 @@ if(newProcessName)newProcessName.addEventListener('keydown',e=>{
 });
 
 root.querySelector('#p48-save').addEventListener('click',async()=>{
+  captureProcessVersion('Sparad version',false);
   if(ownerId()){
     try{
       const result=await saveCurrentToCloud();
@@ -7186,6 +8222,9 @@ root.querySelector('#p48-save').addEventListener('click',async()=>{
   const localOk=saveLocal(true);
   msg(localOk?'Sparad lokalt':'Lokal sparning misslyckades');
 });
+if(versionHistoryLaunch)versionHistoryLaunch.addEventListener('click',openVersionHistory);
+if(versionClose)versionClose.addEventListener('click',closeVersionHistory);
+if(versionCreate)versionCreate.addEventListener('click',()=>captureProcessVersion('Manuell kontrollpunkt',true));
 if(conflictCopy)conflictCopy.addEventListener('click',keepConflictLocalCopy);
 if(conflictCloud)conflictCloud.addEventListener('click',loadConflictCloudVersion);
 if(conflictForce)conflictForce.addEventListener('click',async()=>{try{await forceConflictCloudVersion()}catch(e){console.error(e);msg('Kunde inte ersätta molnversionen · inget skrevs över')}});
@@ -7217,6 +8256,17 @@ if(deviationOverdueOnly)deviationOverdueOnly.addEventListener('change',renderDev
 if(improvementProperties)improvementProperties.addEventListener('click',()=>{if(activeImprovementDeviation?.nodeId&&nodes.has(String(activeImprovementDeviation.nodeId))){const item=nodes.get(String(activeImprovementDeviation.nodeId));select(item.el)}focusFormattingPanel()});
 if(improvementResolve)improvementResolve.addEventListener('click',resolveActiveImprovement);
 if(improvementClose)improvementClose.addEventListener('click',closeImprovementContext);
+
+if(responsibilityToggle)responsibilityToggle.addEventListener('click',()=>setResponsibilityMode(!responsibilityMode));
+if(responsibilityClose)responsibilityClose.addEventListener('click',()=>setResponsibilityMode(false));
+simplifyTopNavigation();
+syncWorkModeButtons();
+if(processGlance){
+  const items=[...processGlance.querySelectorAll('.p48-glance-item')];
+  if(items[0]){items[0].classList.add('p48-glance-action');items[0].tabIndex=0;items[0].title='Hoppa till processens början';items[0].addEventListener('click',()=>jumpReadAnchor(processGlanceSummary().startId));items[0].addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();jumpReadAnchor(processGlanceSummary().startId)}})}
+  if(items[1]){items[1].classList.add('p48-glance-action');items[1].tabIndex=0;items[1].title='Hoppa till processens slut';items[1].addEventListener('click',()=>jumpReadAnchor(processGlanceSummary().endId));items[1].addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();jumpReadAnchor(processGlanceSummary().endId)}})}
+}
+if(modeDrawBtn)modeDrawBtn.addEventListener('click',()=>setReadMode(false));
 if(readModeToggle)readModeToggle.addEventListener('click',()=>setReadMode(!readMode));
 if(mobileReaderFollow)mobileReaderFollow.addEventListener('click',openWalkthrough);
 if(mobileReaderFit)mobileReaderFit.addEventListener('click',fitProcessToScreen);
@@ -7351,6 +8401,7 @@ function createGoogleSheetDirect(){
 }
 
 root.querySelector('#p48-pdf').addEventListener('click',exportPdf);root.querySelector('#p48-doc').addEventListener('click',exportDoc);root.querySelector('#p48-sheets').addEventListener('click',exportGoogleSheets);root.querySelector('#p48-sheets-direct').addEventListener('click',createGoogleSheetDirect);
+if(exportPreviewBtn)exportPreviewBtn.addEventListener('click',openExportPreview);if(exportPreviewClose)exportPreviewClose.addEventListener('click',closeExportPreview);if(exportPreviewBackdrop)exportPreviewBackdrop.addEventListener('click',closeExportPreview);if(exportPreviewPdf)exportPreviewPdf.addEventListener('click',exportPdf);if(exportPreviewDocx)exportPreviewDocx.addEventListener('click',exportDoc);
 const sheetsMenu=root.querySelector('.p48-sheets-menu');
 root.querySelector('#p48-sheets').addEventListener('click',()=>{if(sheetsMenu)sheetsMenu.open=false;});
 root.querySelector('#p48-sheets-direct').addEventListener('click',()=>{if(sheetsMenu)sheetsMenu.open=false;});
@@ -7772,7 +8823,7 @@ function renderProcessAnalysis(result){
     if(f.nodeIds.length){
       const action=document.createElement('button');action.type='button';action.className='p48-analysis-item-action';
       action.textContent=f.nodeIds.length===1?'Visa berörd ruta →':`Visa ${f.nodeIds.length} berörda rutor →`;
-      action.addEventListener('click',()=>focusAnalysisNodes(f.nodeIds));item.appendChild(action);
+      action.addEventListener('click',()=>focusAnalysisNodes(f.nodeIds));action.addEventListener('click',()=>{if(window.matchMedia&&window.matchMedia('(max-width:700px), (pointer:coarse)').matches)analysisPanel.hidden=true;});item.appendChild(action);
     }
     if(f.code==='direct_activity'&&Number.isInteger(f.meta?.linkIndex)&&links[f.meta.linkIndex]){
       const fixNow=document.createElement('button');fixNow.type='button';fixNow.className='p48-btn primary';fixNow.style.marginTop='7px';
@@ -7788,13 +8839,13 @@ function renderProcessAnalysis(result){
 function runProcessAnalysis(){
   const data=[...nodes.values()].map(x=>x.data);const result=MapliniProcessIntelligenceCore.analyze(data,links,{longChainThreshold:5});renderProcessAnalysis(result);msg(result.findings.length?`Processkontroll klar · ${result.findings.length} saker att gå igenom`:'Processkontroll klar · inga strukturella problem hittades');return result;
 }
-if(analyzeBtn)analyzeBtn.addEventListener('click',runProcessAnalysis);if(analysisClose)analysisClose.addEventListener('click',()=>{analysisPanel.hidden=true});
+if(analyzeBtn)analyzeBtn.addEventListener('click',runProcessAnalysis);if(analysisRerun)analysisRerun.addEventListener('click',runProcessAnalysis);if(analysisClose)analysisClose.addEventListener('click',()=>{analysisPanel.hidden=true});
 
 function selectedNodeRects(ids){
   const wanted=ids?new Set(ids):null,out=[];
   for(const item of nodes.values()){
     if(wanted&&!wanted.has(item.data.id))continue;
-    out.push({id:item.data.id,x:Number(item.data.x)||0,y:Number(item.data.y)||0,width:item.el.offsetWidth||Number(item.data.width)||180,height:item.el.offsetHeight||Number(item.data.height)||76});
+    const g=nodeGeom(item.data.id);out.push({id:item.data.id,x:Number(item.data.x)||0,y:Number(item.data.y)||0,width:g?.width||Number(item.data.width)||180,height:g?.height||Number(item.data.height)||76});
   }
   return out;
 }
@@ -7864,6 +8915,35 @@ function fitProcessToScreen(){
   requestAnimationFrame(()=>{scroll.scrollLeft=result.scrollLeft;scroll.scrollTop=result.scrollTop;if(hnav)hnav.scrollLeft=scroll.scrollLeft;scheduleHorizontalNavSync()});
   msg(`Anpassad till ${Math.round(result.scale*100)}%`);return true;
 }
+function mobileReadFocusRect(rects){
+  const list=Array.isArray(rects)?rects:[];if(!list.length)return null;
+  const starts=list.filter(r=>nodes.get(String(r.id))?.data?.type==='start');
+  return (starts.length?starts:list).slice().sort((a,b)=>(Number(a.x)||0)-(Number(b.x)||0)||(Number(a.y)||0)-(Number(b.y)||0))[0]||null;
+}
+function fitMobileReadProcess(options={}){
+  const rects=selectedNodeRects();if(!rects.length){if(options.announce!==false)msg('Processen har inga rutor att anpassa');return false}
+  const viewport={width:Math.max(1,scroll.clientWidth),height:Math.max(1,scroll.clientHeight)};
+  const fitted=MapliniEditingCore.fitToScreen(rects,viewport,{margin:18,minScale:.25,maxScale:1.25});if(!fitted)return false;
+  /* Mobile read mode prioritises legibility over fitting the whole desktop canvas.
+     If fitting every step would make labels thumbnail-sized, open at a readable scale
+     and anchor the viewport at the process start. The explicit Fit button still shows all. */
+  const readableFloor=rects.length<=20?.76:rects.length<=80?.64:.52;
+  const scale=Math.min(1.25,Math.max(fitted.scale,readableFloor));
+  const usingReadableFocus=scale>fitted.scale+.015;
+  const focus=mobileReadFocusRect(rects)||fitted.box;
+  applyCanvasScale(scale,false);
+  requestAnimationFrame(()=>{
+    if(usingReadableFocus){
+      const focusX=Number(focus.x ?? focus.left ?? 0),focusY=Number(focus.y ?? focus.top ?? 0),focusH=Number(focus.height)||0;
+      scroll.scrollLeft=Math.max(0,focusX*scale-18);
+      scroll.scrollTop=Math.max(0,(focusY+focusH/2)*scale-Math.min(viewport.height,320)*.32);
+    }else{scroll.scrollLeft=fitted.scrollLeft;scroll.scrollTop=fitted.scrollTop}
+    if(hnav)hnav.scrollLeft=scroll.scrollLeft;scheduleHorizontalNavSync();
+  });
+  if(options.announce!==false)msg(usingReadableFocus?`Läsvy ${Math.round(scale*100)}% · startsteget i fokus`:`Anpassad till ${Math.round(scale*100)}%`);
+  return true;
+}
+
 function applyNodePositions(positionMap,label,recordHistory=true){
   if(!requireEdit())return false;if(!positionMap||!Object.keys(positionMap).length)return false;
   if(recordHistory)pushUndo(true);
@@ -7906,19 +8986,35 @@ function connectedNodeIds(ids=[...nodes.keys()]){
   }
   return [...connected];
 }
+function clearCleanPreviewState(){
+  cleanPreview=null;root.classList.remove('p48-clean-preview');if(cleanPreviewBar)cleanPreviewBar.hidden=true;
+}
+function renderCleanPreviewPositions(positionMap){
+  for(const [id,pos] of Object.entries(positionMap||{})){const item=nodes.get(String(id));if(!item)continue;item.el.style.left=Number(pos.x)+'px';item.el.style.top=Number(pos.y)+'px';invalidateNodeGeom(String(id));markNodeLinksDirty(String(id));}
+  requestFullLinkRender(true);drawLinks();scheduleOverviewRefresh();
+}
+function cancelCleanPreview(announce=true){
+  if(!cleanPreview)return false;const original=cleanPreview.original;clearCleanPreviewState();renderCleanPreviewPositions(original);refreshControls();updateSelectionUi();if(announce)msg('Ingen ändring gjordes');return true;
+}
+function applyCleanPreview(){
+  if(!cleanPreview)return false;const preview=cleanPreview;clearCleanPreviewState();pushUndo(true);
+  for(const [id,pos] of Object.entries(preview.positions)){const item=nodes.get(String(id));if(!item)continue;item.el.style.left=Number(pos.x)+'px';item.el.style.top=Number(pos.y)+'px';sync(item.el);invalidateNodeGeom(String(id));markNodeLinksDirty(String(id));}
+  polishAutomaticConnectedLinks(preview.ids,{forceAuto:true});persist();requestFullLinkRender(true);drawLinks();refreshControls();updateSelectionUi();scheduleOverviewRefresh();msg('Processen snyggades till · Ångra återställer tidigare layout');return true;
+}
 function autoCleanProcess(){
+  if(cleanPreview){msg('Välj Använd eller Behåll som det är först');return false}
   if(!requireEdit())return false;
-  const allIds=[...nodes.keys()];
-  if(allIds.length<2){msg('Processen behöver minst två rutor');return false}
-  const ids=connectedNodeIds(allIds);
-  if(ids.length<2){msg('Koppla ihop minst två rutor först · Snygga till följer pilarna i processen');return false}
-  const isolated=allIds.length-ids.length,orientation=preferredLayoutOrientation(ids);
-  const ok=smartLayout('all',orientation,ids);
-  if(ok){
-    const extra=isolated?` · ${isolated} okopplad${isolated===1?' ruta':'e rutor'} lämnades kvar`:'';
-    msg(`Klart · flödet är upprätat, jämnt fördelat och pilarna har snyggats till${extra}`);
-  }
-  return ok;
+  const allIds=[...nodes.keys()];if(allIds.length<2){msg('Processen behöver minst två rutor');return false}
+  const ids=connectedNodeIds(allIds);if(ids.length<2){msg('Koppla ihop minst två rutor först · Snygga till följer pilarna i processen');return false}
+  const isolated=allIds.length-ids.length,orientation=preferredLayoutOrientation(ids),wanted=new Set(ids);
+  const internalLinks=links.filter(l=>Array.isArray(l)&&wanted.has(String(l[0]))&&wanted.has(String(l[1])));
+  const rects=selectedNodeRects(ids),positions=MapliniLayoutCore.smartLayout(rects,internalLinks,{orientation,mainGap:132,crossGap:64,bounds:{width:canvasLogicalWidth,height:canvasLogicalHeight,padding:36}});
+  const original=Object.fromEntries(rects.map(r=>[String(r.id),{x:Number(r.x)||0,y:Number(r.y)||0}]));
+  let moved=0,totalDistance=0;for(const id of ids){const a=original[id],b=positions[id];if(!a||!b)continue;const d=Math.hypot((b.x||0)-a.x,(b.y||0)-a.y);if(d>=1){moved++;totalDistance+=d}}
+  if(!moved){msg('Processen är redan väl uppradad');return false}
+  cleanPreview={ids,positions,original,orientation,isolated};root.classList.add('p48-clean-preview');if(cleanPreviewBar)cleanPreviewBar.hidden=false;
+  if(cleanPreviewSummary)cleanPreviewSummary.textContent=`${moved} ${moved===1?'ruta flyttas':'rutor flyttas'} · logiken och stegen ändras inte${isolated?` · ${isolated} okopplad${isolated===1?' ruta':'e rutor'} lämnas kvar`:''}.`;
+  renderCleanPreviewPositions(positions);closeTransientMenus();refreshControls();updateSelectionUi();msg('Förhandsvisning · kontrollera layouten innan du använder den');return true;
 }
 function smartLayout(scope,orientation,explicitIds=null){
   if(!requireEdit())return false;
@@ -7939,7 +9035,7 @@ function smartLayout(scope,orientation,explicitIds=null){
 }
 
 function closeTransientMenus(except=null){
-  const menus=[smartLayoutMenu,root.querySelector('#p48-export-menu'),root.querySelector('#p48-more-menu'),scaleMenu,root.querySelector('#p48-logo-menu'),root.querySelector('.p48-canvas-menu'),root.querySelector('.p48-sheets-menu')];
+  const menus=[smartLayoutMenu,root.querySelector('#p48-view-menu'),root.querySelector('#p48-export-menu'),root.querySelector('#p48-more-menu'),scaleMenu,root.querySelector('#p48-logo-menu'),root.querySelector('.p48-canvas-menu'),root.querySelector('.p48-sheets-menu')];
   for(const menu of menus){
     // Nested menus (e.g. Sheets inside Export or Processyta inside More) must keep
     // their parent details open. Close only unrelated transient menus.
@@ -7949,7 +9045,7 @@ function closeTransientMenus(except=null){
   const nextMenus=root.querySelectorAll('.p48-next-menu:not([hidden])');
   nextMenus.forEach(menu=>{menu.hidden=true;const owner=menu.closest('.p48-node');const btn=owner&&owner.querySelector('.p48-next-btn');if(btn)btn.setAttribute('aria-expanded','false')});
 }
-for(const menu of [smartLayoutMenu,root.querySelector('#p48-export-menu'),root.querySelector('#p48-more-menu'),scaleMenu,root.querySelector('#p48-logo-menu'),root.querySelector('.p48-canvas-menu'),root.querySelector('.p48-sheets-menu')]){
+for(const menu of [smartLayoutMenu,root.querySelector('#p48-view-menu'),root.querySelector('#p48-export-menu'),root.querySelector('#p48-more-menu'),scaleMenu,root.querySelector('#p48-logo-menu'),root.querySelector('.p48-canvas-menu'),root.querySelector('.p48-sheets-menu')]){
   if(menu)menu.addEventListener('toggle',()=>{if(menu.open)closeTransientMenus(menu)});
 }
 const exportMenu=root.querySelector('#p48-export-menu');
@@ -7963,6 +9059,11 @@ if(scroll)scroll.addEventListener('pointerdown',e=>{
 if(fitScreenBtn)fitScreenBtn.addEventListener('click',fitProcessToScreen);
 if(overviewToggle)overviewToggle.addEventListener('click',()=>setProcessOverview(overviewPanel&&overviewPanel.hidden));
 if(overviewClose)overviewClose.addEventListener('click',()=>setProcessOverview(false));
+if(navStartBtn)navStartBtn.addEventListener('click',()=>navigateProcess('start'));
+if(navPrevBtn)navPrevBtn.addEventListener('click',()=>navigateProcess('previous'));
+if(navNextBtn)navNextBtn.addEventListener('click',()=>navigateProcess('next'));
+if(navEndBtn)navEndBtn.addEventListener('click',()=>navigateProcess('end'));
+if(navFitBtn)navFitBtn.addEventListener('click',()=>{fitProcessToScreen();refreshOverviewNavigation()});
 if(overviewStage)overviewStage.addEventListener('click',e=>{
   if(e.target.closest('.p48-overview-node')||!overviewBounds)return;
   const rect=overviewStage.getBoundingClientRect(),tr=overviewTransform(overviewBounds);if(!tr)return;
@@ -7991,6 +9092,8 @@ if(processScaleSlider){
   processScaleSlider.addEventListener('change',()=>{if(processScaleGesture)endUndoGesture();processScaleGesture=false;if(scaleMenu)scaleMenu.open=true});
 }
 if(scaleFitPageBtn)scaleFitPageBtn.addEventListener('click',()=>{if(scaleWholeProcess(1,true)&&scaleMenu)scaleMenu.open=false});
+if(cleanPreviewApply)cleanPreviewApply.addEventListener('click',applyCleanPreview);
+if(cleanPreviewCancel)cleanPreviewCancel.addEventListener('click',()=>cancelCleanPreview(true));
 if(autoCleanTopBtn)autoCleanTopBtn.addEventListener('click',()=>autoCleanProcess());
 if(autoCleanBtn)autoCleanBtn.addEventListener('click',()=>{if(autoCleanProcess()&&smartLayoutMenu)smartLayoutMenu.open=false});
 smartLayoutChoices.forEach(btn=>btn.addEventListener('click',()=>{if(smartLayout(btn.dataset.layoutScope,btn.dataset.layoutOrientation)&&smartLayoutMenu)smartLayoutMenu.open=false}));
@@ -7999,6 +9102,7 @@ if(nodeQuick){nodeQuick.addEventListener('pointerdown',e=>e.stopPropagation());n
 if(nodeQuickNext)nodeQuickNext.addEventListener('click',e=>{
   e.preventDefault();e.stopPropagation();
   const item=selectedId&&selectedIds.size===1?nodes.get(selectedId):null;
+  if(item&&item.data&&item.data.type==='decision'){addDecisionBranches(item.data.id);return;}
   const type=preferredNextType(item);
   if(item&&type)addNextStepFromNode(item.data.id,type);
 });
@@ -8049,6 +9153,7 @@ loadCloudSession();
 const SHARE_TOKEN="__SHARE_TOKEN__";
 (async()=>{
  if(SHARE_TOKEN&&await loadShared(SHARE_TOKEN))return;
+ loadVersionHistories();
  if(!loadLocal()){processes[starter.id]=clone(starter);currentId=starter.id}
  try{
   openProcess(currentId);
@@ -8088,6 +9193,7 @@ function syncResponsiveLayout(){
   if(scroll){scroll.style.visibility='visible';scroll.style.pointerEvents='auto';}
   refreshMobileReaderBar();
   if(mobile&&!mobileConsumptionInitialized&&nodes.size)setTimeout(activateMobileConsumptionDefault,0);
+  else if(mobile&&readMode&&nodes.size)setTimeout(()=>fitMobileReadProcess({announce:false}),0);
   invalidateNodeGeom();
   requestFullLinkRender();
   scheduleHorizontalNavSync();
@@ -8138,6 +9244,8 @@ html = html.replace("__MAPLINI_CANVAS_CORE__", _CANVAS_CORE_JS)
 html = html.replace("__MAPLINI_UI_CORE__", _UI_CORE_JS)
 html = html.replace("__MAPLINI_STATE_CORE__", _STATE_CORE_JS)
 html = html.replace("__MAPLINI_PROCESS_INFO_CORE__", _PROCESS_INFO_CORE_JS)
+html = html.replace("__MAPLINI_STEP_UNDERSTANDING_CORE__", _STEP_UNDERSTANDING_CORE_JS)
+html = html.replace("__MAPLINI_EMPTY_STEP_SUGGESTIONS_CORE__", _EMPTY_STEP_SUGGESTIONS_CORE_JS)
 html = html.replace("__MAPLINI_WALKTHROUGH_CORE__", _WALKTHROUGH_CORE_JS)
 html = html.replace("__MAPLINI_RELIABILITY_CORE__", _RELIABILITY_CORE_JS)
 html = html.replace("__MAPLINI_EXPORT_CORE__", _EXPORT_CORE_JS)
@@ -8155,6 +9263,13 @@ html = html.replace("__MAPLINI_EDITING_CORE__", _EDITING_CORE_JS)
 html = html.replace("__MAPLINI_LAYOUT_CORE__", _LAYOUT_CORE_JS)
 html = html.replace("__MAPLINI_AUTOSAVE_CORE__", _AUTOSAVE_CORE_JS)
 html = html.replace("__MAPLINI_PROCESS_INTELLIGENCE_CORE__", _PROCESS_INTELLIGENCE_CORE_JS)
+html = html.replace("__MAPLINI_VERSION_HISTORY_CORE__", _VERSION_HISTORY_CORE_JS)
+html = html.replace("__MAPLINI_DOCUMENT_INTERPRETATION_CORE__", _DOCUMENT_INTERPRETATION_CORE_JS)
+html = html.replace("__MAPLINI_ANY_SOURCE_CORE__", _ANY_SOURCE_CORE_JS)
+html = html.replace("__MAPLINI_SOURCE_CHANGE_CORE__", _SOURCE_CHANGE_CORE_JS)
+html = html.replace("__MAPLINI_SOURCE_SUPPORT_CORE__", _SOURCE_SUPPORT_CORE_JS)
+html = html.replace("__MAPLINI_NAVIGATION_CORE__", _NAVIGATION_CORE_JS)
+html = html.replace("__MAPLINI_PERFORMANCE_CORE__", _PERFORMANCE_CORE_JS)
 html = html.replace("__SUPABASE_URL__", _SUPABASE_URL)
 html = html.replace("__SUPABASE_ANON_KEY__", _SUPABASE_ANON_KEY)
 html = html.replace("__PUBLIC_APP_URL__", _PUBLIC_APP_URL)

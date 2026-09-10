@@ -5,7 +5,7 @@ APP = (ROOT / "app.py").read_text(encoding="utf-8")
 EDIT = (ROOT / "maplini_editing_core.js").read_text(encoding="utf-8")
 
 def test_v02015_release_and_flow_obstacle_contract():
-    assert 'APP_VERSION = "0.20.34"' in APP
+    assert 'APP_VERSION = "0.20.71"' in APP
     assert 'function existingFlowSegments(' in APP
     assert 'linkSegments:existingFlowSegments([sourceId])' in APP
     assert 'function flowSegmentCollisionPenalty(' in EDIT

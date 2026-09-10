@@ -1,3 +1,152 @@
+## Senaste release: v0.20.71 – Focus Path i Förstå
+
+I Förstå-läget kan användaren klicka på ett steg och få dess inkommande väg, aktuella steg och möjliga nästa steg visuellt framlyfta medan resten av kartan dämpas. Funktionen bygger enbart på befintliga kopplingar och ändrar inte processdata.
+
+# Maplini v0.20.70 – Read Scan Guide
+
+Förstå-läget hjälper nu en ny läsare att orientera sig direkt: processens start markeras **BÖRJA HÄR**, beslut markeras **VÄGVAL** och processens slut markeras **SLUT**. Överblickens start/slut går att klicka på, och när ett steg öppnas visas exakt vad som kommer **Därefter** utifrån de verkliga kopplingarna. Maplini rangordnar eller gissar aldrig beslutsgrenar.
+
+# Maplini v0.20.69 – Smart Layout Rhythm
+
+Automatisk layout ger nu extra luft där processen faktiskt behöver det: runt beslut, parallella grenar och sammanfogningar. Raka kedjor hålls fortsatt kompakta. Processens steg, kopplingar och logik ändras inte.
+
+# Maplini v0.20.68
+
+Canvasen är nu visuellt optimerad för snabbare läsning av processer.
+
+# Maplini v0.20.67 – Canvas Flow Builder
+
+När ett redigerbart steg markeras visas nu den viktigaste byggåtgärden direkt på canvasen: **+ nästa steg**. Knappen skapar den rekommenderade stegtypen, kopplar den automatiskt, placerar den i flödet och öppnar namnet för direkt redigering. **Tab** gör samma sak och **Skift+Tab** öppnar typvalet. På beslut heter primäråtgärden **+ Ja + Nej** och skapar båda beslutets grenar i stället för att gissa en väg. Befintlig snabbbygglogik, undo och datastruktur är oförändrade.
+
+# Maplini v0.20.66 – Contextual Sidebar
+
+När en ruta eller pil markeras flyttar Maplini nu den relevanta redigeringen högst upp i vänsterpanelen. Det vanligaste stegarbetet är samlat: beskrivning, ansvar samt input/output visas direkt, medan system, tidsåtgång och fördjupning ligger under **Mer om steget**. Byggpalett, sparade processer och konto finns kvar men hamnar visuellt efter det aktuella arbetet. Ingen processdata eller backendmodell ändras.
+
+# Maplini v0.20.65 – UI Simplification Pass
+## v0.20.63 – Process Navigator
+
+- Klickbar processöversikt har nu Start, Föregående, Nästa, Slut och Anpassa.
+- Navigationen följer verkliga processkopplingar; flera möjliga vägar visas som val i översikten i stället för att Maplini gissar.
+- Hoppa direkt mellan delar av stora processkartor utan att manuellt panorera runt canvasen.
+
+# Maplini v0.20.62 – Hitta i processen
+
+- Ny kompakt **Hitta**-funktion i huvudverktygsraden.
+- Sök i stegtext, ansvarig roll, system, beskrivning, instruktion och dokumentmetadata.
+- Klicka på en träff för att hoppa direkt till och markera rätt ruta på canvasen.
+- `Ctrl+F` / `Cmd+F` öppnar Maplinis processesökning när fokus inte ligger i ett annat textfält.
+- Sökningen ändrar ingen processdata och fungerar helt lokalt i den öppna processen.
+
+# Maplini v0.20.61 – Smartare tomma steg
+
+När ett nytt steg fortfarande heter exempelvis **Ny aktivitet** kan Maplini nu visa upp till tre korta förslag baserade på explicit kontext runt steget: angiven input/output samt direkt kopplade steg. Förslagen visas som förslag att kontrollera och används aldrig automatiskt. När steget fått ett riktigt namn försvinner hjälpen.
+
+# Maplini v0.20.60 – Förstå steget direkt
+
+När en aktivitet, delprocess eller beslutspunkt markeras visar Maplini nu en kompakt **Förstå steget**-överblick direkt i sidopanelen: **Vad? Vem? Input? Output? Sedan?**. Överblicken bygger bara på sparad processinformation och verkliga kopplingar i modellen; saknad information markeras som saknad i stället för att hittas på. Vanlig redigering finns kvar direkt under överblicken.
+
+# Maplini v0.20.58 – Export Preview
+## v0.20.56 – Bättre visuell källjämförelse
+
+När ett processsteg bygger på flera dokument visar källpanelen nu en kompakt sammanfattning av hur många källor som beskriver samma steg. Om underlagen innehåller en konflikt bevaras den som granskningsinformation även efter att användaren valt en lösning, med konflikttyp, berörda källor och vald lösning. Processen ändras inte av källpanelen och canvasen belastas inte med nya permanenta etiketter.
+ v0.20.54 – Förstå samband
+
+Maplini kan nu utgå från mer än processdokument. Under **Källa → processförslag** kan användaren välja ett eller flera dokument, klistra in valfri text eller ange en URL till en artikel/nyhet. Källan klassificeras som **arbetsprocess**, **besluts-/ärendeflöde**, **händelseförlopp** eller **allmänt flöde**, varefter Maplini skapar ett granskningsbart visuellt förslag.
+
+För arbetsprocesser används den befintliga strukturerade tolkningen med beslut, ansvar, system, input/output, tydliga grenar och återkopplingar. För exempelvis nyhetstext kan Maplini i stället föreslå ett kronologiskt händelseförlopp. Varje steg behåller källspårningen så användaren kan se vad tolkningen byggde på. **Allt är fortfarande ett förslag**, och osäkerheter markeras för kontroll innan canvasen ändras.
+
+Lokala PDF/DOCX/TXT/MD/CSV-filer behandlas fortsatt i webbläsaren. När användaren väljer URL-hämtning används en extern lästjänst för att göra webbsidan läsbar; gränssnittet informerar om detta innan användaren trycker **Hämta & analysera**. Ingen Supabase-/RLS-/schemaändring krävs.
+
+# Maplini v0.20.52 – Källspårning på processkartan
+
+När flera dokument säger olika saker stannar Maplini nu innan canvasen ändras och låter användaren **reda ut skillnaden**. Konflikter om ansvar, system, stegtyp och direkt ordning visas som tydliga val. För ansvar/system går det även att skriva ett eget alternativ. Vid ordningskonflikt kan användaren välja vilken riktning som gäller eller att ingen direkt koppling ska finnas.
+
+**Rita processförslag** är låst tills alla dokumentkonflikter har fått ett explicit beslut. Därmed går Maplini från "här finns en motsägelse" till ett granskningsflöde som producerar ett beslutat processutkast utan att själv välja vilken källa som är sann. Dokumentbehandlingen är fortsatt lokal i webbläsaren och ingen Supabase-/RLS-/schemaändring krävs.
+
+# Maplini v0.20.50 – Flera dokument → en gemensam process
+
+- Dokumentimporten kan nu ta emot upp till 8 PDF/DOCX/TXT/MD/CSV-filer samtidigt.
+- Maplini väger ihop överlappande steg i ett gemensamt processförslag och visar vilka källdokument som stöder varje steg.
+- Motstridiga uppgifter om ansvar, system eller direkt stegordning markeras som **Behöver kontroll**.
+- Konflikter i stegordning får ingen automatisk koppling på canvasen; Maplini gissar inte vilken källa som är rätt.
+- Dokumenten behandlas fortsatt lokalt i webbläsaren och ingen ny Supabase-data eller migration krävs.
+
+## v0.20.49 – Dokument → verkligt flöde
+
+Maplini kan nu gå från strukturerad dokumenttolkning till ett **riktigt processflödesförslag** när dokumentet uttryckligen beskriver vägar. Formuleringar som `Om …, gör …, annars …` blir ett beslut med märkta **Ja/Nej-grenar**. När texten tydligt säger att arbetet går **tillbaka till** ett tidigare, entydigt steg kan Maplini föreslå en återkopplingsloop märkt **Tillbaka**. Om målet är otydligt skapas ingen påhittad koppling; punkten markeras i stället för kontroll.
+
+Granskningsvyn visar nu också upptäckta grenvägar, loopar och möjliga delprocessreferenser innan canvasen ändras. Flödeslayouten håller beslutet centralt, grenar ovanför/under huvudlinjen och återkopplingar som riktiga länkar. Allt är fortfarande ett **förslag som ska jämföras med källdokumentet**. Dokumentet läses lokalt i webbläsaren och ingen Supabase-, RLS- eller schemaändring krävs.
+
+## v0.20.48 – Smart dokumenttolkning
+
+Maplini kan nu ta nästa steg från **Dokument → processförslag**. Efter textutvinning analyseras dokumentet lokalt och ett granskningsbart strukturerat förslag visas. För varje kandidat försöker Maplini identifiera aktivitet/beslut, ansvarig roll, system och möjliga input/output. Varje tolkning visar sin källtext och om den är tydlig, trolig eller behöver kontroll.
+
+Det är fortfarande ett **förslag**, inte en sanning. Maplini skapar inte påhittade Ja/Nej-grenar och användaren måste kontrollera tolkningen mot originaldokumentet. Strukturerade metadata följer med till processens vanliga noder när förslaget ritas. Ingen databas- eller RLS-förändring krävs.
+
+## v0.20.47 – Dokument → processförslag
+
+PDF, DOCX, TXT, MD och CSV kan läsas i webbläsaren till ett granskningsbart processförslag innan canvasen ändras. Dokumentinnehåll skickas inte till Maplinis server i denna version. PDF/DOCX-läsarna laddas som klientbibliotek från CDN.
+
+## Senaste release: v0.20.46 – Första processen
+
+Första minuterna i Maplini är nu kortare. När en ny process skapas är processnamnet ett tomt fält med ett konkret exempel i stället för `Ny process`. När namnet bekräftas hamnar fokus direkt på canvasens fråga **Vad händer först?**. Användaren skriver första aktiviteten och trycker **Enter**.
+
+Det skapade steget förblir markerat och får tangentbordsfokus, så det befintliga **Tab → nästa steg**-flödet tar vid utan mus. Den som vill arbeta striktare enligt metoden kan i stället börja med **Objekt in** eller **Start**. Startytan visas bara för en helt tom, redigerbar process och visas inte i Läsvy eller delad vy. Ingen processlogik, datamodell eller molnkonfiguration ändras.
+
+## Senaste release: v0.20.43 – Kärnflödespolish
+
+Efter en strikt användargranskning har desktopens toppfält förenklats utan att funktioner tas bort. **Zoom, Anpassa, Översikt och Ansvar** ligger nu samlat under **Visa ▾**, medan **Följ processen**, Läsvy, Spara och Snygga till fortsätter vara nära kärnarbetet.
+
+I **••• Mer** används nu det konsekventa namnet **Processkontroll**, avvikelser är nedflyttade till **Övrigt**, och en dubblerad rubrik för Processyta är borttagen. Förändringen är medvetet UI-fokuserad: ingen processlogik, datamodell, Supabase-, RLS- eller OAuth-konfiguration ändras.
+
+## Senaste release: v0.20.42 – Versionshistorik
+
+Maplini har nu en lättviktig **versionshistorik** för riktiga arbetsprocesser. När användaren trycker **Spara** skapas en kontrollpunkt bara om processens innehåll faktiskt har ändrats. Historiken visar när versionen sparades, hur många steg/kopplingar den innehöll och en konkret skillnad mot dagens process.
+
+En tidigare version kan återställas utan att nuvarande arbete riskeras: Maplini sparar först nuläget som en egen kontrollpunkt och återställer sedan den valda versionen. För molnanvändare görs återställningen först lokalt; ett vanligt **Spara** krävs för att skriva den återställda processen till molnet.
+
+Versionshistoriken ligger separat från processens vanliga autosparade state för att inte göra varje dragning och textändring tyngre. I v0.20.42 är historiken **lokal per webbläsare/enhet** och kräver ingen Supabase-, RLS- eller schemaändring. Högst 20 kontrollpunkter sparas per process.
+
+## Senaste release: v0.20.41 – Processkontroll
+
+Processkontrollen ger nu fler **konkreta saker att kontrollera** utan hittepåbetyg. Den hittar bland annat beslut där en tydlig Ja-väg saknar Nej-väg, oetiketterade beslut, rutor som inte går att nå från Start, flöden som går in i Start eller ut från Slut samt ansvarsgap baserat på befintligt `responsibleRole`.
+
+Fynden är fortsatt transparenta: Maplini skiljer på strukturfakta och bedömningar, visar vilken regel som utlöst fyndet och låter användaren hoppa direkt till berörda rutor. På mobil stängs kontrollpanelen efter hoppet så canvasen blir synlig. **↻ Igen** kör kontrollen på nytt efter en ändring. Ingen ny datamodell eller molnmigrering krävs.
+
+## Senaste release: v0.20.40 – Följ processen 2.0
+
+Följ processen är nu mer **operativt**: den visar tydligt **Gör nu**, använder **Klart / Inte klart** för vanliga arbetssteg och visar, när ett beslut har entydiga Ja/Nej-vägar, vart respektive svar leder innan användaren trycker.
+
+Vid länkade delprocesser blir återgången till huvudflödet tydligare och nästa steg visas direkt. På mobil återställs Follow-panelen till aktuellt steg efter varje övergång så användaren inte behöver leta efter nästa handling. Förbättringen ändrar inte processlogik, datamodell eller molnkonfiguration och bygger inte vidare på avvikelseadministration.
+
+## Senaste release: v0.20.39 – Safe Cleanup Preview
+
+`✨ Snygga till` är nu **förhandsvisning först**. Maplini visar den föreslagna upprätningen direkt på canvasen utan att ändra sparad processdata. Användaren väljer sedan **Använd** eller **Behåll som det är**.
+
+När förslaget används sparas layouten som en enda ångringsbar operation och automatiska pilar poleras. Okopplade rutor lämnas orörda. Processens steg, länkar och logik ändras aldrig av funktionen. Ingen ny datamodell eller molnmigrering krävs.
+
+## Tidigare release: v0.20.38 – Supersnabbt processbyggande
+
+Maplini går nu snabbare att **skriva fram**. När ett nytt steg skapats i snabbflödet skriver användaren namnet och trycker **Enter** för att fortsätta direkt till nästa aktivitet. Frågor som `Godkänd?` tolkas deterministiskt som beslut och får Ja/Nej-grenar, medan tydliga handlingsfraser behålls som aktiviteter. Maplini hittar inte på processinnehåll; användaren skriver fortfarande själva processen.
+
+Vid ett beslut leds användaren genom båda grenarnas texter i följd. Klassiska Tab, typval och Ctrl/Cmd+Enter finns kvar för användare som vill styra exakt typ och följa Objekt → Aktivitet → Objekt-metodiken. Ingen ny datamodell eller molnmigrering krävs.
+
+## Senaste release: v0.20.37 – Responsibility View
+
+Ansvarsvyn gör roller, ansvarsgap och överlämningar synliga direkt ovanpå den befintliga processkartan utan att ändra layouten.
+
+## Senaste release: v0.20.36 – Mobile Canvas Fit & Readability
+
+Mobil Läsvy prioriterar nu **läsbarhet framför att pressa in hela desktop-canvasen på en telefonskärm**. Om en process skulle behöva krympas till miniatyrstorlek öppnas den i stället på en läsbar zoomnivå med startsteget (eller vänstersta steget) i fokus. Den befintliga **Anpassa**-knappen finns kvar för den som vill se hela processen på en gång.
+
+Mobilhuvudet är samtidigt lägre, läsytan mer kompakt och onödig tom canvasyta har minskats. Vid 390 px testbredd ökade standardzoom för exempelprocessen från **25 % till 76 %**, första stegets renderade bredd från cirka **53 px till 162 px**, mobilhuvudet sjönk från cirka **60 px till 52 px** och läsytan från cirka **574 px till 540 px**. Geometrin verifieras i Chromium på 360, 390 och 430 px breda mobila viewportar.
+
+## Senaste release: v0.20.35 – Large Process Interaction Performance
+
+Maplini har nu en reproducerbar Chromium-baslinje för hur stora processer känns under faktisk interaktion. Den viktigaste förbättringen är dragning: magnetisk snap bygger nu sin målbild en gång per draggest och använder snabb närmaste-träff-sökning, i stället för att läsa layout för hundratals eller tusentals andra rutor vid varje pointer-move. Pointer-moves samlas dessutom till högst en geometri-/piluppdatering per bildruta.
+
+I samma benchmarkmiljö sjönk kostnaden för **200 snap-beräkningar vid 1 000 steg från cirka 353 ms till nära mätgolvet**, medan minimapens viewport-uppdatering också blev billigare. Den kompletta draggesten behåller full slutposition och gör en full pilrendering när gesten avslutas. Ingen processdata eller molnmodell har ändrats.
+
 ## Senaste release: v0.20.34 – Large Process Performance
 
 Maplini har nu en reproducerbar prestandabaslinje för stora processkartor. Connector-routing begränsar dyr korsningsanalys på mycket stora kartor men behåller hinderundvikande, och persist-flödet gör mindre duplicerat arbete. Resultatet är snabbare öppning av stora kartor utan ändring av processdata eller molnmodell.
@@ -640,3 +789,25 @@ Automatisk placering väger nu in befintliga kopplingslinjer för att minska öv
 
 ### v0.20.27 – Safe Sharing & Revoke
 Publik processdelning visar nu aktiv status och kan återkallas direkt. Den gamla länken slutar då fungera eftersom både delningstoken och delningsläge rensas i molnet.
+
+
+
+### v0.20.46 – Förstå processen på 30 sekunder
+Läsvyn ger nu en snabb orientering om processens början, resultat, ansvar och omfattning innan användaren går ner i enskilda steg.
+
+
+## v0.20.46
+**Klistra in steg** gör en enkel radlista till ett färdigt, kopplat processutkast. Frågor känns igen som beslut, men Maplini gissar inte Ja/Nej-vägar.
+
+### v0.20.55 – Source Change Detection
+Markera ett källskapat steg och välj **Jämför ny version av källan**. Maplini jämför den nya filen mot sparade källspår och visar vilka steg som verkar berörda. Processen ändras aldrig automatiskt.
+
+## v0.20.58 – Export som faktiskt ser ut som processen
+- PDF-export på flera sidor upprepar exporthuvudet i stället för att kapa det mellan sidor.
+- DOCX använder samma valda A4/A3-format och sidantal som PDF-inställningen.
+- Stora processer exporteras till flera DOCX-sidor i stället för att pressas ihop på en enda sida.
+- Samma renderade processbild används konsekvent för PDF och DOCX, inklusive nodstilar, kopplingar, etiketter, bakgrund och logotyp.
+- Ingen ändring av processdata, schema eller editorarkitektur.
+
+### v0.20.59 – Följ processen för förstagångsanvändaren
+Genomgången visar tydligare **Gör nu → Därefter**. Namn är valfritt, så användaren kan prova en process direkt utan administrativ friktion. Vid flera möjliga vägar säger Maplini att svaret avgör nästa väg i stället för att gissa.

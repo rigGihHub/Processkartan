@@ -34,9 +34,15 @@ function safeFileName(name){
   }
   return s;
 }
+function pageSlicePlan(width,count,headerPx){
+  const w=Math.max(1,Math.round(Number(width)||1)),c=Math.max(1,Math.min(8,Math.round(Number(count)||1))),h=Math.max(0,Math.round(Number(headerPx)||0));
+  const sliceW=Math.ceil(w/c),out=[];
+  for(let i=0;i<c;i++){const x=i*sliceW;if(x>=w)break;out.push({x,width:Math.min(sliceW,w-x),headerPx:h});}
+  return out;
+}
 function deletionPlan(store,deleteId){
   const ids=Object.keys((store&&store.processes)||{}).filter(id=>id!==deleteId);
   return {remainingIds:ids,nextId:ids[0]||null,deletingCurrent:!!(store&&store.currentId===deleteId)};
 }
-global.MapliniExportCore={validateBytes,safeFileName,deletionPlan};
+global.MapliniExportCore={validateBytes,safeFileName,pageSlicePlan,deletionPlan};
 })(typeof window!=='undefined'?window:globalThis);

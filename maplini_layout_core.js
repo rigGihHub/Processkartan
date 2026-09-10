@@ -126,6 +126,9 @@ function smartLayout(items,links,options){
   let mainGap=Math.max(32,Number(opts.mainGap)||160),baseCrossGap=Math.max(24,Number(opts.crossGap)||72);
   const bounds=opts.bounds||{},padding=Math.max(0,Number(bounds.padding)||24),boundWidth=Math.max(1,Number(bounds.width)||2400),boundHeight=Math.max(1,Number(bounds.height)||1400);
   const nodeById=new Map(nodes.map(n=>[n.id,n])),levelMainSize=new Map();
+  const forwardEdges=edges.filter(e=>!e.feedback),incomingCount=new Map(nodes.map(n=>[n.id,0])),outgoingCount=new Map(nodes.map(n=>[n.id,0]));
+  forwardEdges.forEach(e=>{outgoingCount.set(e.from,(outgoingCount.get(e.from)||0)+1);incomingCount.set(e.to,(incomingCount.get(e.to)||0)+1)});
+  const levelNeedsAir=new Map(levels.map(r=>[r,(groups.get(r)||[]).some(id=>(outgoingCount.get(id)||0)>1||(incomingCount.get(id)||0)>1)]));
   levels.forEach(r=>{const list=groups.get(r).map(id=>nodeById.get(id));levelMainSize.set(r,Math.max(...list.map(n=>orientation==='horizontal'?n.width:n.height)))});
   const totalMain=levels.reduce((sum,r)=>sum+levelMainSize.get(r),0),availableMain=(orientation==='horizontal'?boundWidth:boundHeight)-padding*2;
   if(levels.length>1&&totalMain+mainGap*(levels.length-1)>availableMain)mainGap=Math.max(32,(availableMain-totalMain)/(levels.length-1));
@@ -134,7 +137,10 @@ function smartLayout(items,links,options){
   for(const r of levels){
     const list=groups.get(r).map(id=>nodeById.get(id));
     const crossSizes=list.map(n=>orientation==='horizontal'?n.height:n.width),rawCross=crossSizes.reduce((a,b)=>a+b,0),availableCross=(orientation==='horizontal'?boundHeight:boundWidth)-padding*2;
-    const crossGap=list.length>1?Math.max(24,Math.min(baseCrossGap,(availableCross-rawCross)/(list.length-1))):0,totalCross=rawCross+crossGap*Math.max(0,list.length-1);
+    // Branch/merge ranks need more breathing room than a simple chain.
+    const branchAir=list.length>1?Math.max(18,baseCrossGap*.35):0;
+    const wantedCrossGap=baseCrossGap+branchAir;
+    const crossGap=list.length>1?Math.max(24,Math.min(wantedCrossGap,(availableCross-rawCross)/(list.length-1))):0,totalCross=rawCross+crossGap*Math.max(0,list.length-1);
     const crossCenter=orientation==='horizontal'?box.centerY:box.centerX,crossStart=Math.max(padding,Math.min((orientation==='horizontal'?boundHeight:boundWidth)-padding-totalCross,crossCenter-totalCross/2));
     let crossCursor=crossStart;
     for(const n of list){
@@ -142,14 +148,15 @@ function smartLayout(items,links,options){
       else out[n.id]={x:Math.round(crossCursor),y:Math.round(mainCursor)};
       crossCursor+=(orientation==='horizontal'?n.height:n.width)+crossGap;
     }
-    mainCursor+=levelMainSize.get(r)+mainGap;
+    const nextR=levels[levels.indexOf(r)+1];
+    const transitionAir=(levelNeedsAir.get(r)||(nextR!=null&&levelNeedsAir.get(nextR)))?Math.max(20,mainGap*.18):0;
+    mainCursor+=levelMainSize.get(r)+mainGap+transitionAir;
   }
   // Center each rank on the actual flow, not merely on the old drawing's global center.
   // This gives straight main paths, balanced Ja/Nej branches and centered merge steps.
   const crossPos=id=>orientation==='horizontal'?out[id].y:out[id].x;
   const crossSize=n=>orientation==='horizontal'?n.height:n.width;
   const crossCenterOf=id=>{const n=nodeById.get(id);return crossPos(id)+crossSize(n)/2};
-  const forwardEdges=edges.filter(e=>!e.feedback);
   const predecessors=new Map(nodes.map(n=>[n.id,[]])),successors=new Map(nodes.map(n=>[n.id,[]]));
   forwardEdges.forEach(e=>{predecessors.get(e.to).push(e.from);successors.get(e.from).push(e.to)});
   const crossBound=orientation==='horizontal'?boundHeight:boundWidth;

@@ -1,0 +1,21 @@
+const fs=require('fs'),vm=require('vm');
+vm.runInThisContext(fs.readFileSync('maplini_document_interpretation_core.js','utf8'));
+const c=globalThis.MapliniDocumentInterpretationCore;
+function ok(v,m){if(!v)throw new Error(m)}
+let plan=c.interpretFlow('Kundservice tar emot beställningen. Om kunduppgifterna är kompletta, registrerar Kundservice ordern, annars kontaktar Kundservice kunden. Ekonomi godkänner ordern.');
+ok(plan.items.length===5,'expanded branch should create decision + two branch actions');
+ok(plan.summary.decisions===1,'one decision');
+ok(plan.summary.branches===2,'two labeled branch edges');
+ok(plan.edges.some(e=>e.label==='Ja'),'yes edge');
+ok(plan.edges.some(e=>e.label==='Nej'),'no edge');
+const decision=plan.items.find(x=>x.type==='decision');
+ok(decision&&decision.review,'decision remains reviewable');
+plan=c.interpretFlow('Handläggaren kontrollerar ansökan. Ekonomi godkänner ärendet. Vid fel går ärendet tillbaka till kontrollerar ansökan.');
+ok(plan.summary.loops===1,'explicit unique feedback target creates loop');
+ok(plan.edges.some(e=>e.kind==='loop'&&e.label==='Tillbaka'),'loop edge');
+plan=c.interpretFlow('Handläggaren kontrollerar ansökan. Handläggaren kompletterar ärendet. Vid fel skickas ärendet tillbaka till handläggaren.');
+ok(plan.summary.loops===0,'ambiguous role target must not invent a loop');
+ok(plan.items.some(x=>x.feedbackTarget&&!x.feedbackTargetId&&x.review),'ambiguous feedback remains review item');
+plan=c.interpretFlow('Kundservice följer enligt rutin reklamationshantering.');
+ok(plan.summary.subProcesses===1,'subprocess hint');
+console.log('document real flow core PASS');

@@ -21,6 +21,8 @@ CORE_REPLACEMENTS = {
     "__MAPLINI_UI_CORE__": "maplini_ui_core.js",
     "__MAPLINI_STATE_CORE__": "maplini_state_core.js",
     "__MAPLINI_PROCESS_INFO_CORE__": "maplini_process_info_core.js",
+    "__MAPLINI_STEP_UNDERSTANDING_CORE__": "maplini_step_understanding_core.js",
+    "__MAPLINI_EMPTY_STEP_SUGGESTIONS_CORE__": "maplini_empty_step_suggestions_core.js",
     "__MAPLINI_WALKTHROUGH_CORE__": "maplini_walkthrough_core.js",
     "__MAPLINI_RELIABILITY_CORE__": "maplini_reliability_core.js",
     "__MAPLINI_EXPORT_CORE__": "maplini_export_core.js",
@@ -38,6 +40,12 @@ CORE_REPLACEMENTS = {
     "__MAPLINI_LAYOUT_CORE__": "maplini_layout_core.js",
     "__MAPLINI_AUTOSAVE_CORE__": "maplini_autosave_core.js",
     "__MAPLINI_PROCESS_INTELLIGENCE_CORE__": "maplini_process_intelligence_core.js",
+    "__MAPLINI_VERSION_HISTORY_CORE__": "maplini_version_history_core.js",
+    "__MAPLINI_DOCUMENT_INTERPRETATION_CORE__": "maplini_document_interpretation_core.js",
+    "__MAPLINI_ANY_SOURCE_CORE__": "maplini_any_source_core.js",
+    "__MAPLINI_SOURCE_CHANGE_CORE__": "maplini_source_change_core.js",
+    "__MAPLINI_SOURCE_SUPPORT_CORE__": "maplini_source_support_core.js",
+    "__MAPLINI_NAVIGATION_CORE__": "maplini_navigation_core.js",
 }
 
 
@@ -91,6 +99,8 @@ def run() -> None:
         page.wait_for_selector("#p48-link-hit-layer .p48-link-hit-segment")
 
         # v0.20.29: opt-in process overview mirrors the existing nodes and supports jump navigation.
+        page.locator("#p48-more-menu > summary").click()
+        page.locator("#p48-view-menu > summary").click()
         page.locator("#p48-overview-toggle").click()
         page.wait_for_timeout(40)
         assert page.locator("#p48-overview").is_visible()
@@ -98,10 +108,19 @@ def run() -> None:
         page.locator("#p48-overview-stage .p48-overview-node").first.click()
         page.wait_for_timeout(20)
         assert page.locator("#p48-overview-viewport").is_visible()
+        # v0.20.66: navigate through actual process connections inside the overview.
+        page.locator("#p48-nav-start").click()
+        assert page.locator("#p48-canvas .p48-node.selected").get_attribute("data-id") == "n1"
+        page.locator("#p48-nav-next").click()
+        assert page.locator("#p48-canvas .p48-node.selected").get_attribute("data-id") == "n2"
+        page.locator("#p48-nav-end").click()
+        assert page.locator("#p48-canvas .p48-node.selected").get_attribute("data-id") == "n4"
+        page.locator("#p48-nav-prev").click()
+        assert page.locator("#p48-canvas .p48-node.selected").get_attribute("data-id") == "n3"
         page.locator("#p48-overview-close").click()
         assert not page.locator("#p48-overview").is_visible()
 
-        # v0.20.34: read mode removes editing chrome while keeping the process interactive.
+        # v0.20.35: read mode removes editing chrome while keeping the process interactive.
         page.locator("#p48-readmode-toggle").click()
         page.wait_for_timeout(30)
         assert "p48-read-mode" in (page.locator("#pk48").get_attribute("class") or "")
@@ -155,7 +174,7 @@ def run() -> None:
 
         # v0.15.5 connector formatting panel is self-contained.
         assert page.locator("#p48-link-width").is_visible()
-        assert page.locator("#p48-format-title").inner_text().strip() == "Pil"
+        assert page.locator("#p48-format-title").inner_text().strip() == "Redigera pil"
         assert "markerade pilen" in page.locator("#p48-format-hint").inner_text()
         assert not page.locator("#p48-bordercolor").is_visible()
         assert not page.locator("#p48-borderwidth").is_visible()
@@ -178,7 +197,7 @@ def run() -> None:
         page.mouse.up()
         page.wait_for_timeout(60)
         path_after = page.locator("#p48-links .p48-link-visible").first.get_attribute("d")
-        assert page.locator("#p48-format-title").inner_text().strip() == "Ruta"
+        assert page.locator("#p48-format-title").inner_text().strip() == "Redigera steg"
         assert "markerade rutan" in page.locator("#p48-format-hint").inner_text()
 
         # Ctrl-click adds a second node to selection, then Ctrl-click removes it again.
@@ -188,10 +207,10 @@ def run() -> None:
         second = node_ids.nth(1)
         first.click()
         second.click(modifiers=["Control"])
-        assert page.locator("#p48-format-title").inner_text().strip() == "Flera rutor"
+        assert page.locator("#p48-format-title").inner_text().strip() == "Redigera markering"
         assert page.locator("#p48-canvas .p48-node.multi-selected").count() >= 2
         second.click(modifiers=["Control"])
-        assert page.locator("#p48-format-title").inner_text().strip() == "Ruta"
+        assert page.locator("#p48-format-title").inner_text().strip() == "Redigera steg"
         assert page.locator("#p48-delete-node").is_visible(), "Delete-node action did not appear for a selected node"
         free_after_node_move = page.evaluate("() => ({dx:Number(window.__mapliniTestState.link(0)[3].freeDx||0),dy:Number(window.__mapliniTestState.link(0)[3].freeDy||0)})")
         assert path_before != path_after, "Connector endpoint/path did not follow moved node"
@@ -204,19 +223,17 @@ def run() -> None:
         node_x_after_undo = page.evaluate("() => Number(window.__mapliniTestState.node('n1').x)")
         assert node_x_after_undo < node_x_before_undo - 20, (node_x_before_undo, node_x_after_undo)
 
-        # v0.14.9 command-surface smoke: nested details must keep their parent open.
+        # v0.20.67 command-surface smoke: secondary tools live under More, and nested details keep parents open.
+        if not page.locator("#p48-more-menu").evaluate("(el) => el.open"):
+            page.locator("#p48-more-menu > summary").click()
         page.locator("#p48-export-menu > summary").click()
+        assert page.locator("#p48-more-menu").evaluate("(el) => el.open")
         assert page.locator("#p48-export-menu").evaluate("(el) => el.open")
         page.locator("#p48-export-menu .p48-sheets-menu > summary").click()
         assert page.locator("#p48-export-menu").evaluate("(el) => el.open"), "Opening Sheets closed Export"
         assert page.locator("#p48-export-menu .p48-sheets-menu").evaluate("(el) => el.open")
-
-        page.locator("#p48-more-menu > summary").click()
-        # Native <details> toggle events are queued by Chromium; allow the menu-closing
-        # handler one short turn before asserting unrelated menus have closed.
-        page.wait_for_timeout(20)
-        assert page.locator("#p48-more-menu").evaluate("(el) => el.open")
-        assert not page.locator("#p48-export-menu").evaluate("(el) => el.open"), "Unrelated Export menu stayed open"
+        page.locator("#p48-export-menu > summary").click()
+        assert page.locator("#p48-more-menu").evaluate("(el) => el.open"), "Closing Export closed More"
         page.locator("#p48-more-menu > .p48-more-popover > .p48-canvas-menu > summary").click()
         assert page.locator("#p48-more-menu").evaluate("(el) => el.open"), "Opening Processyta closed More"
         assert page.locator("#p48-more-menu .p48-canvas-menu").evaluate("(el) => el.open")
@@ -276,12 +293,13 @@ def run() -> None:
         page.evaluate("() => { if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(()=>{}); }")
         page.wait_for_timeout(30)
 
-        # v0.20.10: an empty process opens directly on the canvas without an onboarding card.
+        # v0.20.47: an editable empty process shows one lightweight first-step starter.
         page.evaluate("() => window.__mapliniTestState.clear()")
         page.wait_for_timeout(30)
-        assert not page.locator("#p48-empty-state").is_visible()
-        assert page.locator("#p48-empty-object").count() == 0
-        assert page.locator("#p48-empty-activity").count() == 0
+        assert page.locator("#p48-empty-state").is_visible()
+        assert page.locator("#p48-empty-first-text").count() == 1
+        assert page.locator("#p48-empty-object").count() == 1
+        assert page.locator("#p48-empty-activity").count() == 1
         assert page.locator("#p48-canvas .p48-node").count() == 0
 
         # v0.15.7 typography cleanup: keep seven focused choices but preserve
@@ -313,15 +331,16 @@ def run() -> None:
         assert page.locator("#p48-canvas .p48-node.object").count() == 1
         assert page.locator("#p48-canvas .p48-node.object").first.is_visible()
 
-        # v0.20.10 first view: empty canvas stays clean; A4 portrait remains default.
+        # v0.20.47 first view: empty canvas gets one compact starter; A4 portrait remains default.
         assert page.locator("#p48-pdf-view").input_value() == "A4P"
         page.evaluate("() => window.__mapliniTestState.clear()")
-        assert not page.locator("#p48-empty-state").is_visible()
-        assert page.locator("#p48-empty-state .p48-empty-card").count() == 0
+        assert page.locator("#p48-empty-state").is_visible()
+        assert page.locator("#p48-empty-state .p48-empty-card").count() == 1
 
         # v0.15.10: zoom must scale the actual embedded canvas, so child nodes/text
         # visually scale with the canvas rather than only changing scroll dimensions.
         transform_before = page.locator("#p48-canvas").evaluate("(el) => getComputedStyle(el).transform")
+        page.locator("#p48-view-menu > summary").click()
         page.locator("#p48-zoom-out").click()
         page.wait_for_timeout(80)
         transform_after = page.locator("#p48-canvas").evaluate("(el) => getComputedStyle(el).transform")
@@ -333,7 +352,7 @@ def run() -> None:
         # The connector panel is hard-hidden until a connector is actually selected.
         page.evaluate("() => window.__mapliniTestState.clear()")
         assert page.locator("#p48-link-format").is_hidden()
-        assert (page.locator("#p48-format-title").text_content() or "").strip() == "Formatering"
+        assert (page.locator("#p48-format-title").text_content() or "").strip() == "Verktyg"
 
         # v0.15.9 node style cleanup: three focused choices, but older saved
         # 3D/glass styles remain represented without being rewritten.
@@ -358,7 +377,8 @@ def run() -> None:
         page.wait_for_timeout(40)
         assert not page.locator("#p48-new-process-dialog").is_visible()
         assert page.locator("#p48-name").input_value() == "Browser smoke process"
-        assert not page.locator("#p48-empty-state").is_visible()
+        assert page.locator("#p48-empty-state").is_visible()
+        assert page.locator("#p48-empty-first-text").evaluate('(el) => document.activeElement === el')
         page.locator("#p48-new").click()
         page.wait_for_timeout(20)
         page.locator("#p48-new-process-name").press("Escape")

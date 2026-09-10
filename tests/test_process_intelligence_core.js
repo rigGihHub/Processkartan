@@ -62,3 +62,34 @@ console.log('actionable guidance contract ok');
   if(f.severity!=='warning')throw new Error('direct activity should be warning');
   if(f.meta.linkIndex!==1)throw new Error('direct activity should expose link index');
 }
+
+// v0.20.41 concrete process control rules
+r=P.analyze([
+ {id:'s',type:'start',text:'Start'},
+ {id:'d',type:'decision',text:'Godkänd?',processInfo:{responsibleRole:'Chef'}},
+ {id:'a',type:'process',text:'Fortsätt',processInfo:{responsibleRole:''}},
+ {id:'b',type:'process',text:'Stoppa',processInfo:{responsibleRole:'Chef'}},
+ {id:'e',type:'end',text:'Slut'},
+ {id:'x',type:'process',text:'Ö'}
+],[
+ ['s','d','right',{}],
+ ['d','a','right',{label:'Ja'}],
+ ['d','b','right',{label:''}],
+ ['a','e','right',{}],
+ ['b','e','right',{}]
+]);
+assert(r.findings.some(f=>f.code==='decision_yes_no'&&f.title.includes('Nej')));
+assert(r.findings.some(f=>f.code==='responsibility_missing'&&f.nodeIds.includes('a')));
+assert(r.findings.some(f=>f.code==='unreachable'&&f.nodeIds.includes('x')));
+assert(r.findings.find(f=>f.code==='decision_yes_no').evidenceKind==='fact');
+
+r=P.analyze([
+ {id:'s',type:'start',text:'Start'},
+ {id:'d',type:'decision',text:'Val?'},
+ {id:'a',type:'process',text:'A'},
+ {id:'b',type:'process',text:'B'},
+ {id:'e',type:'end',text:'Slut'}
+],[['s','d','right',{}],['d','a','right',{}],['d','b','right',{}],['a','e','right',{}],['b','e','right',{}]]);
+assert(r.findings.some(f=>f.code==='decision_unlabeled'));
+assert(r.findings.some(f=>f.code==='responsibility_absent'));
+console.log('v0.20.41 concrete process control ok');

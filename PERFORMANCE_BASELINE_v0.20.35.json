@@ -1,0 +1,34 @@
+[
+  {
+    "nodes": 100,
+    "links": 96,
+    "restore_ms": 79.6,
+    "serialize_ms": 1.9,
+    "save_flush_ms": 2,
+    "overview_ms": 1.5
+  },
+  {
+    "nodes": 250,
+    "links": 240,
+    "restore_ms": 264.9,
+    "serialize_ms": 4.2,
+    "save_flush_ms": 4.2,
+    "overview_ms": 4.6
+  },
+  {
+    "nodes": 500,
+    "links": 480,
+    "restore_ms": 823.4,
+    "serialize_ms": 8.3,
+    "save_flush_ms": 6.9,
+    "overview_ms": 5.7
+  },
+  {
+    "nodes": 1000,
+    "links": 960,
+    "restore_ms": 2982.2,
+    "serialize_ms": 19.6,
+    "save_flush_ms": 17.7,
+    "overview_ms": 17.7
+  }
+]

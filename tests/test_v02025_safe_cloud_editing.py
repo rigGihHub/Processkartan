@@ -3,7 +3,7 @@ APP = Path(__file__).resolve().parents[1] / 'app.py'
 SRC = APP.read_text(encoding='utf-8')
 
 def test_version():
-    assert 'APP_VERSION = "0.20.34"' in SRC
+    assert 'APP_VERSION = "0.20.71"' in SRC
 
 def test_existing_cloud_process_uses_compare_and_swap_patch():
     assert "updated_at=eq.'+encodeURIComponent(expected)" in SRC

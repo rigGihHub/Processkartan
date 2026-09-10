@@ -42,3 +42,15 @@ const crossLinks=[['p1','q2'],['p2','q1']];
 const cross=L.smartLayout(crossNodes,crossLinks,{orientation:'horizontal',mainGap:120,crossGap:60});
 assert(cross.q2.y<cross.q1.y,'barycentric ordering follows parent order and avoids a crossing');
 console.log('layout core ok');
+
+// Branch rhythm: a decision rank gets more breathing room than a plain two-lane rank.
+const rhythmNodes=[
+ {id:'s',x:20,y:120,width:100,height:50},{id:'decision',x:220,y:120,width:120,height:60},
+ {id:'yes',x:440,y:40,width:120,height:60},{id:'no',x:440,y:200,width:120,height:60},{id:'merge',x:700,y:120,width:120,height:60}
+];
+const rhythmLinks=[['s','decision'],['decision','yes','right',{label:'Ja'}],['decision','no','right',{label:'Nej'}],['yes','merge'],['no','merge']];
+const rhythm=L.smartLayout(rhythmNodes,rhythmLinks,{orientation:'horizontal',mainGap:100,crossGap:50,bounds:{width:1800,height:900,padding:20}});
+assert(rhythm.no.y-(rhythm.yes.y+60)>=60,'decision branches receive extra cross-axis breathing room');
+assert(rhythm.yes.x-(rhythm.decision.x+120)>=115,'space after a branching decision is larger than the base main gap');
+assert(rhythm.merge.x-(rhythm.yes.x+120)>=115,'space before a merge is larger than the base main gap');
+console.log('layout rhythm ok');

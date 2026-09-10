@@ -14,7 +14,7 @@ APP=ROOT/'app.py'
 CORE_REPLACEMENTS={
     '__MAPLINI_CONNECTOR_CORE__':'maplini_connector_core.js','__MAPLINI_CANVAS_CORE__':'maplini_canvas_core.js',
     '__MAPLINI_UI_CORE__':'maplini_ui_core.js','__MAPLINI_STATE_CORE__':'maplini_state_core.js',
-    '__MAPLINI_PROCESS_INFO_CORE__':'maplini_process_info_core.js','__MAPLINI_WALKTHROUGH_CORE__':'maplini_walkthrough_core.js',
+    '__MAPLINI_PROCESS_INFO_CORE__':'maplini_process_info_core.js','__MAPLINI_STEP_UNDERSTANDING_CORE__':'maplini_step_understanding_core.js','__MAPLINI_EMPTY_STEP_SUGGESTIONS_CORE__':'maplini_empty_step_suggestions_core.js','__MAPLINI_WALKTHROUGH_CORE__':'maplini_walkthrough_core.js',
     '__MAPLINI_RELIABILITY_CORE__':'maplini_reliability_core.js','__MAPLINI_EXPORT_CORE__':'maplini_export_core.js',
     '__MAPLINI_WORKFLOW_CORE__':'maplini_workflow_core.js','__MAPLINI_PERFORMANCE_CORE__':'maplini_performance_core.js',
     '__MAPLINI_MOBILE_CORE__':'maplini_mobile_core.js','__MAPLINI_SELECTION_CORE__':'maplini_selection_core.js',
@@ -32,7 +32,7 @@ def extract_html():
             if isinstance(node.value,ast.Constant) and isinstance(node.value.value,str): html=node.value.value; break
     assert html
     for token,fn in CORE_REPLACEMENTS.items(): html=html.replace(token,(ROOT/fn).read_text(encoding='utf-8'))
-    for token,val in [('__MAPLINI_LOGO__',''),('__MAPLINI_VERSION__','0.20.34'),('__SUPABASE_URL__',''),('__SUPABASE_ANON_KEY__',''),('__PUBLIC_APP_URL__','https://example.invalid'),('__SHARE_TOKEN__','')]: html=html.replace(token,val)
+    for token,val in [('__MAPLINI_LOGO__',''),('__MAPLINI_VERSION__','0.20.35'),('__SUPABASE_URL__',''),('__SUPABASE_ANON_KEY__',''),('__PUBLIC_APP_URL__','https://example.invalid'),('__SHARE_TOKEN__','')]: html=html.replace(token,val)
     needle="let pdfView='A4P',pageCountMode='auto',canvasScale=1,canvasLogicalWidth=2400,canvasLogicalHeight=1400,processScalePercent=100,processScaleGesture=false;"
     hook="""window.__perf={restore:p=>{const t=performance.now();restore(p);return performance.now()-t},serialize:()=>{const t=performance.now();JSON.stringify(state());return performance.now()-t},save:()=>{persist(false,false);const t=performance.now();saveLocal(true);return performance.now()-t},overview:()=>{setProcessOverview(true);const t=performance.now();renderProcessOverview();return performance.now()-t},closeOverview:()=>setProcessOverview(false),count:()=>nodes.size};"""
     html=html.replace(needle,needle+hook)
@@ -66,5 +66,5 @@ def main():
             rows.append({'nodes':n,'links':len(payload['links']),'restore_ms':round(statistics.median(vals),2),'serialize_ms':serialize,'save_flush_ms':save,'overview_ms':overview})
         browser.close()
     print(json.dumps(rows,indent=2))
-    (ROOT/'PERFORMANCE_BASELINE_v0.20.34.json').write_text(json.dumps(rows,indent=2)+'\n',encoding='utf-8')
+    (ROOT/'PERFORMANCE_BASELINE_v0.20.35.json').write_text(json.dumps(rows,indent=2)+'\n',encoding='utf-8')
 if __name__=='__main__': main()

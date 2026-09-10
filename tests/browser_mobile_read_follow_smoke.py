@@ -1,4 +1,4 @@
-"""Chromium smoke test for v0.20.34 mobile read/follow experience."""
+"""Chromium smoke test for v0.20.36 mobile read/follow experience."""
 from pathlib import Path
 from playwright.sync_api import sync_playwright
 import importlib.util

@@ -5,7 +5,7 @@ APP=(ROOT/'app.py').read_text(encoding='utf-8')
 
 
 def test_version_and_large_map_routing_policy_present():
-    assert 'APP_VERSION = "0.20.34"' in APP
+    assert 'APP_VERSION = "0.20.71"' in APP
     assert 'routingEnvelopeFilter' in APP
     assert 'links.length<=400' in APP
     assert 'fullRoutingObstacles=automaticRoutingObstacles([])' in APP
