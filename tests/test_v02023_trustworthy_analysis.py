@@ -5,7 +5,7 @@ APP=(ROOT/'app.py').read_text(encoding='utf-8')
 CORE=(ROOT/'maplini_process_intelligence_core.js').read_text(encoding='utf-8')
 
 def test_version():
-    assert 'APP_VERSION = "0.20.71"' in APP
+    assert 'APP_VERSION = "0.20.80"' in APP
 
 def test_health_score_removed_from_ui_and_core():
     assert 'PROCESSHÄLSA' not in APP

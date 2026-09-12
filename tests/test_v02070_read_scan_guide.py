@@ -2,7 +2,7 @@ from pathlib import Path
 SRC=Path("app.py").read_text(encoding="utf-8")
 
 def test_version():
-    assert 'APP_VERSION = "0.20.71"' in SRC
+    assert 'APP_VERSION = "0.20.80"' in SRC
 
 def test_read_scan_anchor_css_exists():
     assert 'v0.20.70 – read scan guide' in SRC

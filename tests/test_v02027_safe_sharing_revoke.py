@@ -1,7 +1,7 @@
 from pathlib import Path
 SRC=Path("app.py").read_text()
 
-def test_version(): assert 'APP_VERSION = "0.20.71"' in SRC
+def test_version(): assert 'APP_VERSION = "0.20.80"' in SRC
 def test_active_share_state_is_visible():
     assert 'p48-share-status' in SRC and 'Publik läslänk aktiv' in SRC
     assert "shareBtn.textContent=active?'Dela process · aktiv länk':'Dela process'" in SRC

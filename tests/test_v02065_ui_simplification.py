@@ -9,7 +9,7 @@ def template():
     return APP[start:end]
 
 def test_release_and_three_modes_are_primary():
-    assert 'APP_VERSION = "0.20.71"' in APP
+    assert 'APP_VERSION = "0.20.80"' in APP
     soup=BeautifulSoup(template(),"html.parser")
     top=soup.select_one('.p48-top-simplified')
     modes=top.select_one('.p48-work-modes')
@@ -23,7 +23,7 @@ def test_secondary_tools_are_relocated_not_duplicated():
     for element_id in ('p48-view-menu','p48-export-menu','p48-smart-layout-menu'):
         assert len(soup.select(f'#{element_id}'))==1
     assert 'simplifyTopNavigation()' in APP
-    assert "more.appendChild(el)" in APP
+    assert "presentation.body.appendChild(el)" in APP
 
 def test_draw_and_understand_modes_reuse_existing_read_mode():
     assert "modeDrawBtn.addEventListener('click',()=>setReadMode(false))" in APP

@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.20.71"
+APP_VERSION = "0.20.80"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -604,6 +604,8 @@ header[data-testid="stHeader"]{height:2rem}
 .p48-find-empty{padding:10px 4px;color:#7c8991;font:600 10px/1.4 Inter,system-ui}
 .p48-node.p48-find-hit{box-shadow:0 0 0 4px rgba(31,111,85,.18),0 4px 16px rgba(31,111,85,.12)!important}
 @media(max-width:700px),(pointer:coarse){.p48-find-popover{position:fixed;left:8px;right:8px;top:62px;width:auto}.p48-find-input{min-height:46px;font-size:16px}.p48-find-result{min-height:48px;padding:10px}}
+
+
 
 </style>
 """, unsafe_allow_html=True)
@@ -1830,6 +1832,322 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 }
 
 
+
+/* v0.20.73 – Canvas First: fix the desktop hierarchy seen in live use. */
+@media(min-width:901px){
+  .p48-body{grid-template-columns:320px minmax(0,1fr)!important}
+  .p48-side{padding:14px!important;background:#fbfcfb!important}
+  .p48-side .p48-section,.p48-side .p48-format{padding-left:2px;padding-right:2px}
+}
+/* Page/export geometry is secondary while mapping. It remains available in export/settings. */
+.p48-page-quick{display:none!important}
+/* Compact node actions: one creation affordance + one overflow menu, not a toolbar wider than the node. */
+.p48-node-quick[data-mode="single"]{min-width:0!important;max-width:220px!important;padding:3px!important;gap:2px!important;border-radius:10px!important}
+.p48-node-quick[data-mode="single"] #p48-node-quick-next{font-size:0!important;width:30px!important;min-width:30px!important;height:30px!important;padding:0!important;border-radius:8px!important;justify-content:center!important}
+.p48-node-quick[data-mode="single"] #p48-node-quick-next::before{content:"＋";font:850 18px/1 Inter,system-ui}
+.p48-node-quick[data-mode="single"] #p48-node-quick-next-more{font-size:0!important;width:30px!important;min-width:30px!important;height:30px!important;padding:0!important;border-radius:8px!important;justify-content:center!important;margin-left:0!important}
+.p48-node-quick[data-mode="single"] #p48-node-quick-next-more::before{content:"⋯";font:850 18px/1 Inter,system-ui;letter-spacing:1px}
+.p48-node-quick[data-mode="single"] #p48-node-quick-shape,
+.p48-node-quick[data-mode="single"] #p48-node-quick-subprocess,
+.p48-node-quick[data-mode="single"] #p48-node-quick-format,
+.p48-node-quick[data-mode="single"] #p48-node-quick-duplicate,
+.p48-node-quick[data-mode="single"] #p48-node-quick-delete{display:none!important}
+/* The plus attached to a node should feel like a connection handle, not a Windows-era button. */
+.p48-next-step-wrap{left:calc(100% + 9px)!important}
+.p48-next-step-btn{width:30px!important;height:30px!important;border:0!important;border-radius:999px!important;background:#2f8b70!important;color:#fff!important;box-shadow:0 4px 12px rgba(47,139,112,.22)!important;font:800 0/1 Inter,system-ui!important;display:grid!important;place-items:center!important}
+.p48-next-step-btn::before{content:"＋";font:800 18px/1 Inter,system-ui}
+.p48-next-step-btn:hover,.p48-next-step-btn:focus-visible{transform:scale(1.06)!important;background:#25765f!important;box-shadow:0 5px 14px rgba(47,139,112,.28)!important}
+.p48-next-step-menu{left:38px!important;border-color:#d8e2dd!important;border-radius:12px!important;padding:6px!important;box-shadow:0 12px 30px rgba(31,52,70,.16)!important}
+.p48-next-step-choice{border:0!important;background:transparent!important;border-radius:8px!important;padding:9px 8px!important}
+.p48-next-step-choice:hover{background:#f0f6f3!important}
+/* Selected node should remain the visual focus. */
+.p48-node.selected{outline:2px solid #3d78d8!important;outline-offset:3px!important}
+
+/* v0.20.73 – Floating Tools: keep secondary tools out of the document flow. */
+@media(min-width:901px){
+  .p48-brand{height:72px!important;min-height:72px!important;padding:5px 14px!important}
+  .p48-brand-inner{width:240px!important;align-items:center!important}
+  .p48-logo-crop{width:240px!important;height:39px!important}
+  .p48-logo-crop img{width:240px!important}
+  .p48-tagline{font-size:9px!important}
+  .p48-version{font-size:8px!important}
+  .p48-top-simplified{position:relative!important;z-index:210!important;display:flex!important;align-items:center!important;flex-wrap:nowrap!important;min-height:48px!important}
+  .p48-more-menu{position:relative!important;flex:0 0 auto!important}
+  .p48-more-popover{
+    position:fixed!important;top:138px!important;right:18px!important;left:auto!important;
+    width:min(360px,calc(100vw - 36px))!important;max-height:calc(100vh - 156px)!important;
+    overflow:auto!important;overscroll-behavior:contain!important;box-sizing:border-box!important;
+    display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:7px!important;
+    padding:12px!important;border:1px solid #d7e1dc!important;border-radius:14px!important;
+    background:rgba(255,255,255,.985)!important;box-shadow:0 18px 48px rgba(31,52,70,.18)!important;
+    z-index:320!important;backdrop-filter:blur(10px)!important
+  }
+  .p48-more-popover>.p48-more-section-title,
+  .p48-more-popover>.p48-sharebox,
+  .p48-more-popover>.p48-scale-menu,
+  .p48-more-popover>.p48-canvas-menu,
+  .p48-more-popover>.p48-logo-menu,
+  .p48-more-popover>.p48-view-menu,
+  .p48-more-popover>.p48-export-menu,
+  .p48-more-popover>.p48-smart-layout-split,
+  .p48-more-popover>.p48-secondary-tools-label{grid-column:1/-1!important}
+  .p48-more-popover>.p48-more-section-title{margin:5px 0 0!important;padding:8px 2px 1px!important;border-top:1px solid #e7ece9!important;font-size:9px!important;letter-spacing:.07em!important;color:#677b72!important}
+  .p48-more-popover>.p48-more-section-title:first-child{margin-top:0!important;padding-top:1px!important;border-top:0!important}
+  .p48-more-popover>.p48-btn{min-width:0!important;width:100%!important;box-sizing:border-box!important;justify-content:flex-start!important;text-align:left!important;white-space:normal!important}
+  .p48-more-popover>.p48-more-wide{width:100%!important}
+  .p48-more-popover>.p48-more-selection-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;grid-column:1/-1!important}
+  .p48-more-popover>.p48-more-selection-actions .p48-btn{width:100%!important}
+  .p48-more-popover>.p48-view-menu>summary,
+  .p48-more-popover>.p48-export-menu>summary,
+  .p48-more-popover>.p48-scale-menu>summary,
+  .p48-more-popover>.p48-canvas-menu>summary,
+  .p48-more-popover>.p48-logo-menu>summary{min-height:34px!important;border-radius:9px!important;background:#fafcfb!important}
+}
+@media(max-width:900px){
+  .p48-more-popover{position:fixed!important;left:10px!important;right:10px!important;top:76px!important;width:auto!important;max-height:calc(100dvh - 96px)!important;z-index:320!important}
+}
+
+/* v0.20.74 – Editor Coherence: one header, calmer sidebar, cleaner selection. */
+@media(min-width:901px){
+  .p48-brand{position:absolute!important;top:0!important;left:0!important;z-index:225!important;width:238px!important;height:54px!important;min-height:54px!important;padding:5px 10px!important;border-bottom:0!important;background:transparent!important;box-sizing:border-box!important;pointer-events:none}
+  .p48-brand-inner{width:218px!important;height:44px!important;align-items:flex-start!important;justify-content:center!important;gap:0!important}
+  .p48-logo-crop{width:218px!important;height:29px!important}
+  .p48-logo-crop img{width:218px!important;height:auto!important}
+  .p48-tagline{font-size:7px!important;letter-spacing:.16em!important;margin-left:4px!important}
+  .p48-version{position:absolute!important;left:179px!important;bottom:4px!important;font-size:7px!important;color:#81908a!important}
+  .p48-top-simplified{min-height:54px!important;padding:6px 10px 6px 246px!important;gap:6px!important;border-bottom:1px solid #e3e9e6!important;box-sizing:border-box!important}
+  .p48-top-simplified .p48-name{min-width:170px!important;max-width:280px!important;height:36px!important;border-radius:9px!important;padding:0 10px!important}
+  .p48-top-simplified .p48-btn,.p48-work-modes{min-height:36px!important}
+  .p48-body{grid-template-columns:304px minmax(0,1fr)!important}
+  .p48-side{padding:10px 12px 16px!important;border-right:1px solid #e4e9e6!important;background:#fcfdfc!important}
+}
+/* Selection should feel like one object, not a cluster of toolbars. The attached green + remains the primary creation action. */
+.p48-node-quick[data-mode="single"]{display:none!important}
+.p48-node.selected{outline:2px solid #3976c9!important;outline-offset:3px!important;box-shadow:0 0 0 1px rgba(57,118,201,.08),0 8px 22px rgba(31,52,70,.10)!important}
+.p48-node.selected .p48-handle{opacity:.62!important}
+.p48-node.selected .p48-handle:hover{opacity:1!important}
+/* Contextual editing panel: clear hierarchy and less card-on-card noise. */
+#pk48.p48-side-context-active #p48-format-panel{border:0!important;border-radius:12px!important;background:#fff!important;box-shadow:0 1px 0 #e7ece9,0 8px 22px rgba(31,52,70,.055)!important;padding:12px!important;margin:0 0 10px!important}
+#pk48.p48-side-context-active #p48-format-panel>.p48-format-context-title{font-size:14px!important;line-height:1.2!important;color:#223b32!important;margin-bottom:3px!important}
+#pk48.p48-side-context-active #p48-format-panel>.p48-format-context-hint{font-size:10px!important;line-height:1.45!important;color:#75857f!important;margin-bottom:10px!important}
+#pk48.p48-side-context-node .p48-step-understanding{padding:9px 10px!important;margin-bottom:10px!important;border-color:#dbe7e1!important;background:#f8fbf9!important}
+#pk48.p48-side-context-node .p48-step-understanding-head{margin-bottom:6px!important}
+#pk48.p48-side-context-node .p48-step-understanding-head strong{font-size:10px!important}
+#pk48.p48-side-context-node .p48-step-understanding-head span{font-size:8px!important}
+#pk48.p48-side-context-node .p48-step-understanding-row{grid-template-columns:54px minmax(0,1fr)!important;gap:6px!important;font-size:10px!important;line-height:1.35!important}
+#pk48.p48-side-context-node .p48-step-understanding-row b{font-size:9px!important;text-transform:uppercase!important;letter-spacing:.035em!important}
+#pk48.p48-side-context-node #p48-process-info{padding-top:2px!important}
+#pk48.p48-side-context-node #p48-process-info .p48-process-info-head{margin-bottom:8px!important}
+#pk48.p48-side-context-node #p48-process-info label{font-size:10px!important;color:#455c53!important}
+#pk48.p48-side-context-node #p48-process-info input,#pk48.p48-side-context-node #p48-process-info textarea{border-color:#d8e1dd!important;border-radius:8px!important;background:#fff!important}
+#pk48.p48-side-context-node .p48-addio{border-style:solid!important;border-color:#d9e3de!important;background:#f8fbf9!important;border-radius:8px!important}
+#pk48.p48-side-context-node .p48-process-info-more>summary,#pk48.p48-side-context-node .p48-check-questions>summary{padding:8px 2px!important;font-weight:750!important;color:#40594f!important}
+/* Secondary sidebar areas recede while editing, but remain available below. */
+#pk48.p48-side-context-active .p48-side>.p48-method-palette,#pk48.p48-side-context-active .p48-side>.p48-section:not(.p48-method-palette),#pk48.p48-side-context-active .p48-side>#p48-account-panel{opacity:.68;transition:opacity .12s ease}
+#pk48.p48-side-context-active .p48-side>.p48-method-palette:hover,#pk48.p48-side-context-active .p48-side>.p48-section:not(.p48-method-palette):hover,#pk48.p48-side-context-active .p48-side>#p48-account-panel:hover{opacity:1}
+@media(max-width:900px){.p48-node-quick[data-mode="single"]{display:none!important}}
+
+/* v0.20.75 – Calm Neutral Sidebar: nothing selected means navigation + creation, not a permanent inspector. */
+#pk48:not(.p48-side-context-active) #p48-format-panel{display:none!important}
+@media(min-width:901px){
+  #pk48:not(.p48-side-context-active) .p48-side{padding-top:12px!important}
+  #pk48:not(.p48-side-context-active) .p48-method-palette{
+    border:0!important;background:transparent!important;padding:0!important;margin:0 0 10px!important;
+  }
+  #pk48:not(.p48-side-context-active) .p48-method-palette>.p48-title{
+    font-size:14px!important;line-height:1.2!important;color:#223b32!important;margin:0 0 4px!important;
+  }
+  #pk48:not(.p48-side-context-active) .p48-palette-hint{margin:0 0 9px!important;color:#72827b!important;font-size:10px!important;line-height:1.4!important}
+  #pk48:not(.p48-side-context-active) .p48-method-flow{display:none!important}
+  #pk48:not(.p48-side-context-active) .p48-item-core{
+    min-height:40px!important;padding:7px 9px!important;margin-bottom:6px!important;border-radius:10px!important;
+    border-color:#d9e3de!important;box-shadow:none!important;
+  }
+  #pk48:not(.p48-side-context-active) .p48-item-core small{font-size:8.5px!important}
+  #pk48:not(.p48-side-context-active) .p48-section:not(.p48-method-palette){
+    border-top:1px solid #e7ece9!important;border-left:0!important;border-right:0!important;border-bottom:0!important;
+    border-radius:0!important;background:transparent!important;padding:11px 0 0!important;margin:4px 0 0!important;
+  }
+  #pk48:not(.p48-side-context-active) .p48-section:not(.p48-method-palette)>.p48-title{font-size:11px!important;color:#50645b!important;margin-bottom:7px!important}
+  #pk48:not(.p48-side-context-active) #p48-account-panel{margin-top:auto!important;border-top:1px solid #e7ece9!important;border-left:0!important;border-right:0!important;border-bottom:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+}
+.p48-palette-more{margin-top:8px;border-top:1px solid #e7ece9;padding-top:7px}
+.p48-palette-more>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;list-style:none;cursor:pointer;padding:6px 2px;border-radius:8px;color:#456056;font:800 10px/1.2 Inter,system-ui}
+.p48-palette-more>summary::-webkit-details-marker{display:none}
+.p48-palette-more>summary::before{content:"＋";width:20px;height:20px;display:grid;place-items:center;border-radius:999px;background:#eef5f1;color:#28664f;font-size:14px;flex:0 0 auto}
+.p48-palette-more[open]>summary::before{content:"−"}
+.p48-palette-more>summary span{margin-left:auto;color:#8a9892;font:650 8.5px/1.2 Inter,system-ui}
+.p48-palette-more-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.p48-palette-more-grid .p48-item{min-height:34px!important;margin:0!important;padding:7px 8px!important;border-radius:8px!important;font-size:10px!important;gap:6px!important}
+.p48-palette-more-grid .p48-icon{font-size:10px!important}
+@media(max-width:900px){
+  .p48-palette-more-grid{grid-template-columns:1fr 1fr}
+}
+
+
+
+/* v0.20.77 – Secondary Tools Cleanup: hierarchy inside Mer instead of a flat toolbox. */
+.p48-more-popover[data-organized="1"]{display:block!important;padding:12px!important}
+.p48-more-popover[data-organized="1"]>.p48-more-intro{display:grid;gap:2px;margin:0 0 10px;padding:0 2px 10px;border-bottom:1px solid #e7ece9}
+.p48-more-intro strong{font-size:13px;line-height:1.2;color:#243a31}
+.p48-more-intro span{font-size:10.5px;line-height:1.35;color:#718078}
+.p48-more-group-label{margin:0 0 6px;font-size:9px;font-weight:800;letter-spacing:.075em;text-transform:uppercase;color:#73827a}
+.p48-more-quick{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.p48-more-quick>.p48-more-group-label{grid-column:1/-1}
+.p48-more-quick #p48-doc-launch{grid-column:1/-1;background:#f0f7f3!important;border-color:#c9ded3!important;color:#225b47!important;font-weight:750!important}
+.p48-more-quick #p48-batch-launch,.p48-more-quick #p48-analyze{background:#fafcfb!important}
+.p48-more-collaboration{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:0 0 10px;padding:10px 0;border-top:1px solid #eef2ef;border-bottom:1px solid #eef2ef}
+.p48-more-collaboration>.p48-more-group-label,.p48-more-collaboration>.p48-sharebox{grid-column:1/-1}
+.p48-more-collaboration>.p48-btn{min-width:0!important;width:100%!important;background:transparent!important;border-color:#dce5e0!important;box-shadow:none!important}
+.p48-more-group{margin:0;border-bottom:1px solid #edf1ef}
+.p48-more-group>summary{list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:39px;padding:0 3px;cursor:pointer;font-size:11.5px;font-weight:750;color:#354940}
+.p48-more-group>summary::-webkit-details-marker{display:none}
+.p48-more-group-chevron{font-size:15px;color:#788980;transition:transform .15s ease}
+.p48-more-group[open] .p48-more-group-chevron{transform:rotate(180deg)}
+.p48-more-group-body{display:grid;gap:7px;padding:2px 0 10px}
+.p48-more-group-body>.p48-btn,.p48-more-group-body>details,.p48-more-group-body>.p48-smart-layout-split{width:100%!important;box-sizing:border-box!important}
+.p48-more-group-body>.p48-btn{justify-content:flex-start!important;text-align:left!important;background:#fafcfb!important;border-color:#dfe7e3!important;box-shadow:none!important}
+.p48-more-group-body .p48-more-selection-actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important}
+.p48-more-group-body .p48-more-selection-actions .p48-btn{width:100%!important}
+.p48-more-group-body #p48-clear-canvas,.p48-more-group-body #p48-deviation-launch{background:#fffafa!important}
+.p48-more-group-body>.p48-view-menu>summary,.p48-more-group-body>.p48-export-menu>summary,.p48-more-group-body>.p48-scale-menu>summary,.p48-more-group-body>.p48-canvas-menu>summary,.p48-more-group-body>.p48-logo-menu>summary{width:100%!important;min-height:34px!important;box-sizing:border-box!important;text-align:left!important;background:#fafcfb!important;border-radius:9px!important}
+.p48-more-group-body>.p48-smart-layout-split{display:grid!important;grid-template-columns:1fr auto!important;gap:4px!important}
+.p48-more-group-body .p48-view-popover,.p48-more-group-body .p48-export-popover,.p48-more-group-body .p48-scale-popover,.p48-more-group-body .p48-canvas-popover,.p48-more-group-body .p48-logo-popover,.p48-more-group-body .p48-smart-layout-popover{position:relative!important;top:auto!important;left:auto!important;right:auto!important;margin-top:6px!important;width:auto!important;min-width:0!important;max-width:none!important;box-shadow:none!important;border-color:#dbe3df!important;background:#fbfcfb!important}
+@media(max-width:900px){.p48-more-quick,.p48-more-collaboration{grid-template-columns:1fr}.p48-more-quick #p48-doc-launch,.p48-more-quick>.p48-more-group-label,.p48-more-collaboration>.p48-more-group-label,.p48-more-collaboration>.p48-sharebox{grid-column:1}}
+
+/* v0.20.76 – Calm Command Bar: process identity left, work modes centered, utilities right. */
+@media(min-width:901px){
+  .p48-top-simplified{
+    display:grid!important;
+    grid-template-columns:minmax(300px,1fr) auto minmax(260px,1fr) auto!important;
+    align-items:center!important;
+    column-gap:14px!important;
+    min-height:58px!important;
+    padding:7px 12px 7px 246px!important;
+    background:rgba(255,255,255,.985)!important;
+  }
+  .p48-process-cluster{display:flex;align-items:center;gap:6px;min-width:0;justify-self:start;max-width:100%}
+  .p48-process-cluster .p48-name{min-width:150px!important;width:clamp(170px,18vw,290px)!important;max-width:290px!important;height:38px!important;border:1px solid transparent!important;background:#f6f8f7!important;border-radius:10px!important;font-size:12px!important;padding:0 11px!important;box-shadow:none!important}
+  .p48-process-cluster .p48-name:hover,.p48-process-cluster .p48-name:focus{background:#fff!important;border-color:#cad8d1!important;box-shadow:0 0 0 3px rgba(43,123,97,.06)!important}
+  .p48-process-cluster .p48-btn{height:36px!important;min-height:36px!important;border-radius:9px!important;box-shadow:none!important}
+  .p48-new-compact{width:42px!important;min-width:42px!important;padding:0!important;gap:0!important;font-size:17px!important;color:#36554a!important;background:#fff!important;border-color:#d9e2de!important}
+  .p48-new-compact .p48-new-label{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important}
+  .p48-save-quiet{gap:5px!important;padding:0 10px!important;border-color:transparent!important;background:transparent!important;color:#456056!important;font-weight:760!important}
+  .p48-save-quiet:hover{background:#f2f6f4!important;border-color:#dbe4df!important}
+  .p48-work-modes{justify-self:center!important;margin:0!important;padding:3px!important;border-radius:12px!important;background:#f1f5f3!important;border:1px solid #d8e2dd!important;box-shadow:none!important}
+  .p48-work-modes .p48-mode-btn{min-width:68px!important;min-height:34px!important;padding:6px 12px!important;border-radius:9px!important;font-size:11px!important}
+  .p48-top-utilities{display:flex;align-items:center;justify-self:end;gap:5px;min-width:0}
+  .p48-top-utilities>.p48-btn,.p48-top-utilities>details>summary{min-height:36px!important;height:36px!important;border-radius:9px!important;background:transparent!important;border-color:transparent!important;color:#52675e!important;box-shadow:none!important}
+  .p48-top-utilities>.p48-btn:hover,.p48-top-utilities>details>summary:hover{background:#f3f6f5!important;border-color:#dde5e1!important}
+  .p48-top-utilities .p48-find-menu>summary{font-size:0!important;width:38px!important;min-width:38px!important;padding:0!important;display:grid!important;place-items:center!important}
+  .p48-top-utilities .p48-find-menu>summary::before{content:'⌕';font-size:17px;line-height:1}
+  .p48-top-utilities .p48-icon-action{width:36px!important;min-width:36px!important;padding:0!important;font-size:15px!important}
+  .p48-top-utilities #p48-more-menu>summary{padding:0 9px!important;font-size:0!important;min-width:38px!important}
+  .p48-top-utilities #p48-more-menu>summary::before{content:'•••';font-size:15px;letter-spacing:.08em}
+  .p48-top-utilities>.p48-view-menu,.p48-top-utilities>.p48-export-menu,.p48-top-utilities>.p48-smart-layout-split{display:none!important}
+  .p48-top-simplified>.p48-spacer{display:none!important}
+  .p48-top-simplified>.p48-save-state{justify-self:end!important;margin-left:0!important;white-space:nowrap}
+}
+@media(min-width:901px) and (max-width:1180px){
+  .p48-top-simplified{grid-template-columns:minmax(245px,1fr) auto auto auto!important;column-gap:8px!important}
+  .p48-process-cluster .p48-name{width:185px!important}
+  .p48-save-quiet span:last-child{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important}
+  .p48-save-quiet{width:38px!important;min-width:38px!important;padding:0!important;justify-content:center!important}
+  .p48-work-modes .p48-mode-btn{min-width:56px!important;padding:6px 8px!important}
+}
+@media(max-width:900px){
+  .p48-process-cluster{display:contents}
+  .p48-top-utilities{display:contents}
+}
+
+/* v0.20.80 – Unified Controls: one calm interaction language across editor controls. */
+#pk48{
+  --p48-control-h:38px;
+  --p48-control-radius:9px;
+  --p48-control-border:#d5dfda;
+  --p48-control-border-hover:#b7cbc1;
+  --p48-control-bg:#fff;
+  --p48-control-hover:#f4f8f6;
+  --p48-control-active:#eaf4ef;
+  --p48-control-text:#30473e;
+  --p48-control-muted:#66776f;
+  --p48-focus:#2f8065;
+  --p48-focus-ring:rgba(47,128,101,.16);
+}
+#pk48 .p48-btn,
+#pk48 .p48-addio,
+#pk48 .p48-insert-link-step,
+#pk48 .p48-more-group>summary,
+#pk48 .p48-view-menu>summary,
+#pk48 .p48-export-menu>summary,
+#pk48 .p48-scale-menu>summary,
+#pk48 .p48-canvas-menu>summary,
+#pk48 .p48-logo-menu>summary{
+  border-color:var(--p48-control-border);
+  border-radius:var(--p48-control-radius);
+  color:var(--p48-control-text);
+  box-shadow:none;
+  transition:background-color .12s ease,border-color .12s ease,color .12s ease,box-shadow .12s ease,transform .08s ease;
+}
+#pk48 .p48-btn:not(.primary):not(.danger),
+#pk48 .p48-insert-link-step{background:var(--p48-control-bg)}
+#pk48 .p48-btn:hover:not(:disabled):not(.primary):not(.danger),
+#pk48 .p48-addio:hover:not(:disabled),
+#pk48 .p48-insert-link-step:hover:not(:disabled),
+#pk48 .p48-view-menu>summary:hover,
+#pk48 .p48-export-menu>summary:hover,
+#pk48 .p48-scale-menu>summary:hover,
+#pk48 .p48-canvas-menu>summary:hover,
+#pk48 .p48-logo-menu>summary:hover{
+  background:var(--p48-control-hover);
+  border-color:var(--p48-control-border-hover);
+}
+#pk48 .p48-btn:active:not(:disabled),
+#pk48 .p48-addio:active:not(:disabled),
+#pk48 .p48-insert-link-step:active:not(:disabled){transform:translateY(1px)}
+#pk48 .p48-btn.primary{background:#2f8065;border-color:#2f8065;color:#fff;box-shadow:0 1px 2px rgba(29,83,65,.12)}
+#pk48 .p48-btn.primary:hover:not(:disabled){background:#286f58;border-color:#286f58}
+#pk48 .p48-btn.danger{background:#fff;border-color:#ebcfcb;color:#a63a32}
+#pk48 .p48-btn.danger:hover:not(:disabled){background:#fff5f4;border-color:#dfaaa4;color:#922d26}
+#pk48 button:disabled,#pk48 select:disabled,#pk48 input:disabled,#pk48 textarea:disabled{opacity:.46;cursor:not-allowed}
+#pk48 :is(input[type="text"],input[type="search"],input[type="url"],input[type="date"],input[type="number"],input:not([type]),.p48-name,textarea,select){
+  border:1px solid var(--p48-control-border);
+  border-radius:var(--p48-control-radius);
+  background:#fff;
+  color:#263a32;
+  box-shadow:0 1px 1px rgba(31,52,70,.02);
+  font-family:Inter,system-ui,sans-serif;
+  transition:border-color .12s ease,box-shadow .12s ease,background-color .12s ease;
+}
+#pk48 :is(input[type="text"],input[type="search"],input[type="url"],input[type="date"],input[type="number"],input:not([type]),.p48-name,textarea,select):hover:not(:disabled){border-color:#c3d1ca}
+#pk48 :is(input[type="text"],input[type="search"],input[type="url"],input[type="date"],input[type="number"],input:not([type]),.p48-name,textarea,select):focus,
+#pk48 :is(input[type="text"],input[type="search"],input[type="url"],input[type="date"],input[type="number"],input:not([type]),.p48-name,textarea,select):focus-visible{
+  outline:0!important;
+  border-color:var(--p48-focus)!important;
+  box-shadow:0 0 0 3px var(--p48-focus-ring)!important;
+}
+#pk48 :is(.p48-btn,.p48-addio,.p48-insert-link-step,.p48-mini,.p48-item,summary):focus-visible{
+  outline:0!important;
+  border-color:var(--p48-focus)!important;
+  box-shadow:0 0 0 3px var(--p48-focus-ring)!important;
+}
+#pk48 .p48-addio{background:#fbfcfb;border-style:dashed;color:#416054}
+#pk48 .p48-addio:hover{background:#f2f7f4;border-style:solid}
+#pk48 .p48-node-quick,#pk48 .p48-link-quick{border-color:#d6e0db;background:rgba(255,255,255,.985);box-shadow:0 8px 22px rgba(31,52,70,.12)}
+#pk48 .p48-node-quick button,#pk48 .p48-node-quick summary,#pk48 .p48-node-quick .p48-quick-color-label,#pk48 .p48-link-quick button{
+  border-radius:8px;color:#435b51;transition:background-color .12s ease,border-color .12s ease,color .12s ease;
+}
+#pk48 .p48-node-quick button:hover,#pk48 .p48-node-quick summary:hover,#pk48 .p48-node-quick .p48-quick-color-label:hover,#pk48 .p48-link-quick button:hover{
+  background:#f1f7f4;border-color:#c7d9d0;color:#245f4b;
+}
+#pk48 .p48-link-quick button.active,#pk48 .p48-node-quick-shape-pop button.active{background:var(--p48-control-active);border-color:#9fc4b3;color:#225f49}
+#pk48 .p48-more-group>summary:hover{background:#f6f9f7}
+#pk48 .p48-more-group[open]>summary{color:#245f4b}
+#pk48 .p48-save-state{box-shadow:none}
+@media(max-width:700px),(pointer:coarse){
+  #pk48{--p48-control-h:44px;--p48-control-radius:10px}
+  #pk48 .p48-btn{min-height:44px}
+}
 </style>
 
 <div class="p48-brand">
@@ -1841,15 +2159,18 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 </div>
 <div class="p48-top p48-top-simplified">
   <strong>Process</strong>
-  <input id="p48-name" class="p48-name" value="Exempel – upphandlingsprocess" aria-label="Processnamn">
-  <button type="button" class="p48-btn" id="p48-new" title="Skapa ny process">+ Ny process</button>
-  <button type="button" class="p48-btn p48-mobile-tools-btn" id="p48-mobile-tools" aria-expanded="false" aria-controls="p48-side">☰ Verktyg</button>
-  <button type="button" class="p48-btn" id="p48-save" title="Spara process">Spara</button>
+  <div class="p48-process-cluster" aria-label="Aktuell process">
+    <input id="p48-name" class="p48-name" value="Exempel – upphandlingsprocess" aria-label="Processnamn">
+    <button type="button" class="p48-btn p48-new-compact" id="p48-new" title="Skapa ny process"><span aria-hidden="true">＋</span><span class="p48-new-label">Ny</span></button>
+    <button type="button" class="p48-btn p48-mobile-tools-btn" id="p48-mobile-tools" aria-expanded="false" aria-controls="p48-side">☰ Verktyg</button>
+    <button type="button" class="p48-btn p48-save-quiet" id="p48-save" title="Spara process"><span aria-hidden="true">✓</span><span>Spara</span></button>
+  </div>
   <div class="p48-work-modes" role="group" aria-label="Arbetssätt">
     <button type="button" class="p48-btn p48-mode-btn active" id="p48-mode-draw" aria-pressed="true" title="Rita och redigera processen">Rita</button>
     <button type="button" class="p48-btn p48-readmode-toggle p48-mode-btn" id="p48-readmode-toggle" title="Förstå processen utan redigeringsverktyg" aria-pressed="false">Förstå</button>
     <button type="button" class="p48-btn p48-walkthrough-launch p48-mode-btn" id="p48-walkthrough-launch" title="Gå igenom processen steg för steg">Följ</button>
   </div>
+  <div class="p48-top-utilities" aria-label="Snabbverktyg">
   <details class="p48-find-menu" id="p48-find-menu">
     <summary class="p48-btn" title="Hitta ett steg i processen (Ctrl/Cmd+F)">⌕ Hitta</summary>
     <div class="p48-find-popover">
@@ -2047,6 +2368,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
     </div>
   </details>
 
+  </div>
   <span class="p48-spacer"></span>
   <span id="p48-save-state" class="p48-save-state" data-state="saved" aria-live="polite">Autosparad</span>
   <span id="p48-status" class="p48-status" role="status" aria-live="polite"></span>
@@ -2292,13 +2614,17 @@ Skicka orderbekräftelse"></textarea>
       <div class="p48-item p48-item-core p48-item-object" draggable="true" role="button" tabindex="0" aria-label="Lägg till Objekt in" title="Det som triggar eller behövs före en aktivitet" data-type="object" data-object-role="input"><span class="p48-icon">▪</span><span><strong>Objekt in</strong><small>Trigger / det som behövs</small></span></div>
       <div class="p48-item p48-item-core" draggable="true" role="button" tabindex="0" aria-label="Lägg till Aktivitet" title="Det som görs och transformerar objekt" data-type="process"><span class="p48-icon">▭</span><span><strong>Aktivitet</strong><small>Det som görs</small></span></div>
       <div class="p48-item p48-item-core p48-item-object" draggable="true" role="button" tabindex="0" aria-label="Lägg till Objekt ut" title="Resultatet från en aktivitet" data-type="object" data-object-role="output"><span class="p48-icon">▪</span><span><strong>Objekt ut</strong><small>Resultat / det som blir</small></span></div>
-      <div class="p48-palette-more-label">Fler typer</div>
-      <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Start" title="Markera processens gräns" data-type="start"><span class="p48-icon">▶</span>Start</div>
-      <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Beslut" title="Dra eller tryck för att lägga till" data-type="decision"><span class="p48-icon">◇</span>Beslut</div>
-      <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Slut" title="Markera processens gräns" data-type="end"><span class="p48-icon">■</span>Slut</div>
-      <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Delprocess" title="Dra eller tryck för att lägga till" data-type="subprocess"><span class="p48-icon">▣</span>Delprocess</div>
-      <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Anteckning" title="Dra eller tryck för att lägga till" data-type="note"><span class="p48-icon">N</span>Anteckning</div>
-      <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Dokument" title="Dra eller tryck för att lägga till" data-type="document"><span class="p48-icon">📄</span>Dokument</div>
+      <details class="p48-palette-more" id="p48-palette-more">
+        <summary>Fler typer <span>Start, beslut, dokument…</span></summary>
+        <div class="p48-palette-more-grid">
+          <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Start" title="Markera processens gräns" data-type="start"><span class="p48-icon">▶</span>Start</div>
+          <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Beslut" title="Dra eller tryck för att lägga till" data-type="decision"><span class="p48-icon">◇</span>Beslut</div>
+          <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Slut" title="Markera processens gräns" data-type="end"><span class="p48-icon">■</span>Slut</div>
+          <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Delprocess" title="Dra eller tryck för att lägga till" data-type="subprocess"><span class="p48-icon">▣</span>Delprocess</div>
+          <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Anteckning" title="Dra eller tryck för att lägga till" data-type="note"><span class="p48-icon">N</span>Anteckning</div>
+          <div class="p48-item" draggable="true" role="button" tabindex="0" aria-label="Lägg till Dokument" title="Dra eller tryck för att lägga till" data-type="document"><span class="p48-icon">📄</span>Dokument</div>
+        </div>
+      </details>
     </div>
 
     <div class="p48-format" id="p48-format-panel" data-context="none">
@@ -2704,14 +3030,71 @@ const readModeToggle=root.querySelector('#p48-readmode-toggle'),readPanel=root.q
 
 function simplifyTopNavigation(){
   const more=root.querySelector('#p48-more-menu .p48-more-popover');
-  if(!more)return;
-  const advanced=[root.querySelector('#p48-view-menu'),root.querySelector('.p48-smart-layout-split'),root.querySelector('#p48-export-menu')].filter(Boolean);
-  if(!advanced.length)return;
-  const label=document.createElement('div');
-  label.className='p48-pop-title p48-more-section-title p48-secondary-tools-label';
-  label.textContent='Visa, layout & export';
-  more.appendChild(label);
-  advanced.forEach(el=>more.appendChild(el));
+  if(!more||more.dataset.organized==='1')return;
+  more.dataset.organized='1';
+
+  // v0.20.77: make Mer feel like a secondary command palette, not a wall of equal buttons.
+  const sectionTitles=[...more.querySelectorAll(':scope > .p48-more-section-title')];
+  sectionTitles.forEach(el=>el.remove());
+
+  const intro=document.createElement('div');
+  intro.className='p48-more-intro';
+  intro.innerHTML='<strong>Fler verktyg</strong><span>Sådant du använder mer sällan, samlat utan att störa ritandet.</span>';
+  more.prepend(intro);
+
+  const quick=document.createElement('div');
+  quick.className='p48-more-quick';
+  const quickTitle=document.createElement('div');
+  quickTitle.className='p48-more-group-label';
+  quickTitle.textContent='Snabbåtgärder';
+  quick.appendChild(quickTitle);
+  ['p48-batch-launch','p48-doc-launch','p48-analyze'].forEach(id=>{
+    const el=root.querySelector('#'+id); if(el)quick.appendChild(el);
+  });
+  intro.after(quick);
+
+  const collaboration=document.createElement('div');
+  collaboration.className='p48-more-collaboration';
+  const collabTitle=document.createElement('div');
+  collabTitle.className='p48-more-group-label';
+  collabTitle.textContent='Dela & historik';
+  collaboration.appendChild(collabTitle);
+  ['p48-share','p48-version-history-launch','p48-sharebox'].forEach(id=>{
+    const el=root.querySelector('#'+id); if(el)collaboration.appendChild(el);
+  });
+  quick.after(collaboration);
+
+  function makeGroup(id,title){
+    const details=document.createElement('details');
+    details.className='p48-more-group';
+    details.id=id;
+    const summary=document.createElement('summary');
+    summary.innerHTML='<span>'+title+'</span><span class="p48-more-group-chevron" aria-hidden="true">⌄</span>';
+    const body=document.createElement('div');
+    body.className='p48-more-group-body';
+    details.append(summary,body);
+    return {details,body};
+  }
+
+  const edit=makeGroup('p48-more-edit-group','Redigering & struktur');
+  ['p48-select-tool','p48-duplicate-selection','p48-delete-selection','p48-clear-canvas','p48-scale-menu'].forEach(id=>{
+    const el=root.querySelector('#'+id);
+    if(!el)return;
+    const selection=el.closest('.p48-more-selection-actions');
+    if(selection&&selection.parentElement===more){ if(!edit.body.contains(selection))edit.body.appendChild(selection); }
+    else edit.body.appendChild(el);
+  });
+  collaboration.after(edit.details);
+
+  const presentation=makeGroup('p48-more-presentation-group','Utseende, layout & export');
+  const advanced=[root.querySelector('#p48-view-menu'),root.querySelector('.p48-smart-layout-split'),root.querySelector('.p48-canvas-menu'),root.querySelector('#p48-logo-menu'),root.querySelector('#p48-export-menu')].filter(Boolean);
+  advanced.forEach(el=>presentation.body.appendChild(el));
+  edit.details.after(presentation.details);
+
+  const other=makeGroup('p48-more-other-group','Övrigt');
+  const deviation=root.querySelector('#p48-deviation-launch');
+  if(deviation)other.body.appendChild(deviation);
+  presentation.details.after(other.details);
 }
 function syncWorkModeButtons(){
   if(modeDrawBtn){modeDrawBtn.classList.toggle('active',!readMode);modeDrawBtn.setAttribute('aria-pressed',String(!readMode));}
@@ -4200,7 +4583,7 @@ function createProcessFromDocumentProposal(){
   if(batchText)batchText.value=text;const ok=createProcessFromBatch();if(ok){setDocDialog(false);msg('Processförslag ritat · kontrollera flöde, ansvar och beslut mot dokumentet')}return ok;
 }
 
-function clearCanvas(){hideSnapGuides();quickBuildNodeIds.clear();quickBuildBranchQueue=[];for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();selectedLinkIndex=null;selectedLinkIndices.clear();linkLayer.innerHTML='';clearLinkHitLayer();linkDomByIndex.clear();finishTempArrow();setFormatEnabled(false);refreshControls();refreshLinkControls();updateSelectionUi();refreshEmptyState();scheduleOverviewRefresh()}
+function clearCanvas(){closeTransientMenus();hideSnapGuides();quickBuildNodeIds.clear();quickBuildBranchQueue=[];for(const x of nodes.values())x.el.remove();nodes.clear();links=[];selectedId=null;selectedIds.clear();selectedLinkIndex=null;selectedLinkIndices.clear();linkLayer.innerHTML='';clearLinkHitLayer();linkDomByIndex.clear();finishTempArrow();setFormatEnabled(false);refreshControls();refreshLinkControls();updateSelectionUi();refreshEmptyState();scheduleOverviewRefresh()}
 function clearEntireCanvas(){
   if(!requireEdit())return false;
   if(nodes.size===0&&links.length===0){msg('Canvasen är redan tom');return false}
@@ -4249,6 +4632,7 @@ function restore(s){
   links=MapliniConnectorCore.normalizeLinks(d.links||[]);
   seq=Math.max(0,...[...nodes.keys()].map(id=>parseInt(String(id).replace(/\D/g,''),10)||0));
   requestFullLinkRender(true);refreshEmptyState();clearRuntimeError();scheduleOverviewRefresh();if(readMode)refreshProcessGlance();
+  if(!readMode)requestAnimationFrame(()=>requestAnimationFrame(()=>{if(!readMode&&nodes.size&&nodes.size<=12)fitProcessToScreen()}));
   return true;
 }
 function parentLinkForProcess(processId){
@@ -9057,7 +9441,7 @@ if(scroll)scroll.addEventListener('pointerdown',e=>{
   if(e.target===scroll||e.target===canvas||e.target.classList?.contains('p48-print-page'))closeTransientMenus();
 },{capture:true});
 if(fitScreenBtn)fitScreenBtn.addEventListener('click',fitProcessToScreen);
-if(overviewToggle)overviewToggle.addEventListener('click',()=>setProcessOverview(overviewPanel&&overviewPanel.hidden));
+if(overviewToggle)overviewToggle.addEventListener('click',()=>{closeTransientMenus();setProcessOverview(overviewPanel&&overviewPanel.hidden)});
 if(overviewClose)overviewClose.addEventListener('click',()=>setProcessOverview(false));
 if(navStartBtn)navStartBtn.addEventListener('click',()=>navigateProcess('start'));
 if(navPrevBtn)navPrevBtn.addEventListener('click',()=>navigateProcess('previous'));
@@ -9276,4 +9660,51 @@ html = html.replace("__PUBLIC_APP_URL__", _PUBLIC_APP_URL)
 html = html.replace("__SHARE_TOKEN__", st.query_params.get("share", ""))
 if not _CLOUD_ENABLED:
     st.caption("Molnlagring är inte aktiverad ännu. Lägg Supabase-inställningarna i Streamlit Secrets enligt README.")
+
+html = html.replace('</style>', '''
+/* v0.20.80 – Typography & Spacing: calmer information rhythm without adding UI. */
+#pk48{
+  --p48-text-xs:10.5px;
+  --p48-text-sm:11.5px;
+  --p48-text-md:13px;
+  --p48-text-lg:15px;
+  --p48-leading-tight:1.25;
+  --p48-leading-body:1.45;
+  --p48-space-1:4px;
+  --p48-space-2:8px;
+  --p48-space-3:12px;
+  --p48-space-4:16px;
+}
+#pk48{font-size:var(--p48-text-md);line-height:var(--p48-leading-body)}
+#pk48 .p48-top-simplified{min-height:50px!important;padding-top:6px!important;padding-bottom:6px!important}
+#pk48 .p48-name{font-size:13px!important;font-weight:650!important;letter-spacing:-.01em}
+#pk48 .p48-work-modes .p48-mode-btn{font-size:11.5px!important;font-weight:650!important;letter-spacing:0}
+#pk48 .p48-left{font-size:12px;line-height:1.42}
+#pk48 .p48-left h3,#pk48 .p48-left h4{letter-spacing:-.01em;line-height:1.25}
+#pk48 .p48-left h3{font-size:13px!important;margin:0 0 8px!important}
+#pk48 .p48-left h4{font-size:11.5px!important;margin:12px 0 6px!important;color:#334b41}
+#pk48 .p48-left label{font-size:10.5px!important;font-weight:650!important;line-height:1.25;color:#52675e}
+#pk48 .p48-left .p48-muted,#pk48 .p48-left small{font-size:10.5px!important;line-height:1.4;color:#718078}
+#pk48 .p48-left input,#pk48 .p48-left textarea,#pk48 .p48-left select{font-size:12px!important;line-height:1.4}
+#pk48 .p48-left textarea{padding:8px 9px!important}
+#pk48 .p48-left .p48-addio{min-height:34px!important;font-size:11px!important}
+#pk48 .p48-left details>summary{font-size:11.5px!important;line-height:1.35;padding-top:6px;padding-bottom:6px}
+#pk48 .p48-inspector,#pk48 .p48-tools{gap:8px!important}
+#pk48 .p48-node .p48-node-title,#pk48 .p48-node .p48-title{font-weight:650;letter-spacing:-.012em;line-height:1.3}
+#pk48 .p48-node .p48-node-meta,#pk48 .p48-node .p48-meta{font-size:10.5px;line-height:1.35}
+#pk48 .p48-more-panel{font-size:11.5px;line-height:1.35}
+#pk48 .p48-more-panel h3,#pk48 .p48-more-panel h4{letter-spacing:-.01em;line-height:1.25}
+#pk48 .p48-more-group>summary{font-size:11.5px!important;font-weight:650!important}
+#pk48 .p48-more-panel .p48-btn{min-height:34px!important;font-size:11px!important}
+#pk48 .p48-btn{font-weight:600}
+#pk48 .p48-save-state{font-size:10.5px!important}
+#pk48 .p48-node-quick,#pk48 .p48-link-quick{font-size:10.5px;line-height:1.25}
+#pk48 .p48-node-quick button,#pk48 .p48-node-quick summary,#pk48 .p48-link-quick button{min-height:30px}
+@media(max-width:900px){
+  #pk48 .p48-top-simplified{min-height:auto!important}
+  #pk48 .p48-left{font-size:12px}
+}
+
+
+''' + '</style>', 1)
 components.html(html, height=920, scrolling=False)

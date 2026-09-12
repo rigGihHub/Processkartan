@@ -10,7 +10,7 @@ def template():
     return BeautifulSoup(APP[start:end],"html.parser")
 
 def test_release_version():
-    assert 'APP_VERSION = "0.20.71"' in APP
+    assert 'APP_VERSION = "0.20.80"' in APP
 
 def test_view_tools_are_grouped_without_losing_ids():
     soup=template()

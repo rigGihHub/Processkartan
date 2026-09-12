@@ -100,6 +100,7 @@ def run() -> None:
 
         # v0.20.29: opt-in process overview mirrors the existing nodes and supports jump navigation.
         page.locator("#p48-more-menu > summary").click()
+        page.locator("#p48-more-presentation-group > summary").click()
         page.locator("#p48-view-menu > summary").click()
         page.locator("#p48-overview-toggle").click()
         page.wait_for_timeout(40)
@@ -226,6 +227,8 @@ def run() -> None:
         # v0.20.67 command-surface smoke: secondary tools live under More, and nested details keep parents open.
         if not page.locator("#p48-more-menu").evaluate("(el) => el.open"):
             page.locator("#p48-more-menu > summary").click()
+        if not page.locator("#p48-more-presentation-group").evaluate("(el) => el.open"):
+            page.locator("#p48-more-presentation-group > summary").click()
         page.locator("#p48-export-menu > summary").click()
         assert page.locator("#p48-more-menu").evaluate("(el) => el.open")
         assert page.locator("#p48-export-menu").evaluate("(el) => el.open")
@@ -234,7 +237,7 @@ def run() -> None:
         assert page.locator("#p48-export-menu .p48-sheets-menu").evaluate("(el) => el.open")
         page.locator("#p48-export-menu > summary").click()
         assert page.locator("#p48-more-menu").evaluate("(el) => el.open"), "Closing Export closed More"
-        page.locator("#p48-more-menu > .p48-more-popover > .p48-canvas-menu > summary").click()
+        page.locator("#p48-more-presentation-group .p48-canvas-menu > summary").click()
         assert page.locator("#p48-more-menu").evaluate("(el) => el.open"), "Opening Processyta closed More"
         assert page.locator("#p48-more-menu .p48-canvas-menu").evaluate("(el) => el.open")
 
@@ -340,6 +343,10 @@ def run() -> None:
         # v0.15.10: zoom must scale the actual embedded canvas, so child nodes/text
         # visually scale with the canvas rather than only changing scroll dimensions.
         transform_before = page.locator("#p48-canvas").evaluate("(el) => getComputedStyle(el).transform")
+        if page.locator("#p48-more-menu").get_attribute("open") is None:
+            page.locator("#p48-more-menu > summary").click()
+        if not page.locator("#p48-more-presentation-group").evaluate("(el) => el.open"):
+            page.locator("#p48-more-presentation-group > summary").click()
         page.locator("#p48-view-menu > summary").click()
         page.locator("#p48-zoom-out").click()
         page.wait_for_timeout(80)

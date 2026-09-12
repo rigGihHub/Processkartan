@@ -3,7 +3,7 @@ APP = Path(__file__).resolve().parents[1] / 'app.py'
 SRC = APP.read_text(encoding='utf-8')
 
 def test_version_02031():
-    assert 'APP_VERSION = "0.20.71"' in SRC
+    assert 'APP_VERSION = "0.20.80"' in SRC
 
 def test_walkthrough_tracks_root_and_process_stack():
     assert 'walkthroughState.rootProcessId=String(currentId' in SRC

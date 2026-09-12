@@ -12,7 +12,7 @@ def run():
         page=browser.new_page(viewport={'width':1440,'height':950});errors=[]
         page.on('pageerror',lambda e:errors.append(str(e)))
         page.set_content(html,wait_until='load');page.wait_for_selector('#p48-canvas .p48-node')
-        page.locator('#p48-export-menu > summary').click()
+        page.locator('#p48-more-menu > summary').click(); page.locator('#p48-more-presentation-group > summary').click(); page.locator('#p48-export-menu > summary').click()
         page.locator('#p48-pdf-view').select_option('A4L')
         page.locator('#p48-page-count').select_option('2')
         page.locator('#p48-export-preview').click()

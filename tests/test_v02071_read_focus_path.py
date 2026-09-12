@@ -1,7 +1,7 @@
 from pathlib import Path
 SRC=Path("app.py").read_text(encoding="utf-8")
 
-def test_version(): assert 'APP_VERSION = "0.20.71"' in SRC
+def test_version(): assert 'APP_VERSION = "0.20.80"' in SRC
 def test_focus_path_is_read_mode_only():
     assert 'p48-read-focus-active' in SRC
     assert 'readMode&&selectedId' in SRC

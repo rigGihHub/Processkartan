@@ -5,7 +5,7 @@ APP = (ROOT / "app.py").read_text(encoding="utf-8")
 EDIT = (ROOT / "maplini_editing_core.js").read_text(encoding="utf-8")
 
 def test_release_version_and_lane_helper_present():
-    assert 'APP_VERSION = "0.20.71"' in APP
+    assert 'APP_VERSION = "0.20.80"' in APP
     assert 'function branchContinuationLane(sourceId)' in APP
     assert 'smartFlowContinuationPosition' in APP
 

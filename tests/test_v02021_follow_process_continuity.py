@@ -4,7 +4,7 @@ APP = Path(__file__).resolve().parents[1] / "app.py"
 TEXT = APP.read_text(encoding="utf-8")
 
 def test_version_and_transition_contract():
-    assert 'APP_VERSION = "0.20.71"' in TEXT
+    assert 'APP_VERSION = "0.20.80"' in TEXT
     assert 'function prepareWalkthroughTransition(fromId,toId)' in TEXT
     assert 'p48-walk-link-transition' in TEXT
     assert 'p48-walk-arriving' in TEXT

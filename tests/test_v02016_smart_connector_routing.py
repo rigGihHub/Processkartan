@@ -6,7 +6,7 @@ CORE = (ROOT / "maplini_connector_core.js").read_text(encoding="utf-8")
 
 
 def test_v02016_release_and_smart_routing_contract():
-    assert 'APP_VERSION = "0.20.71"' in APP
+    assert 'APP_VERSION = "0.20.80"' in APP
     assert 'function automaticRoutingObstacles(' in APP
     assert 'MapliniConnectorCore.smartOrthogonalRoute(' in APP
     assert "effective.autoManaged&&effective.anchorMode==='auto'" in APP

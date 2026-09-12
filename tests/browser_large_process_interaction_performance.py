@@ -22,6 +22,9 @@ CORE_REPLACEMENTS={
     '__MAPLINI_ACCESS_CORE__':'maplini_access_core.js','__MAPLINI_PRIVACY_CORE__':'maplini_privacy_core.js',
     '__MAPLINI_EDITING_CORE__':'maplini_editing_core.js','__MAPLINI_LAYOUT_CORE__':'maplini_layout_core.js',
     '__MAPLINI_AUTOSAVE_CORE__':'maplini_autosave_core.js','__MAPLINI_PROCESS_INTELLIGENCE_CORE__':'maplini_process_intelligence_core.js',
+    '__MAPLINI_VERSION_HISTORY_CORE__':'maplini_version_history_core.js','__MAPLINI_DOCUMENT_INTERPRETATION_CORE__':'maplini_document_interpretation_core.js',
+    '__MAPLINI_ANY_SOURCE_CORE__':'maplini_any_source_core.js','__MAPLINI_SOURCE_CHANGE_CORE__':'maplini_source_change_core.js',
+    '__MAPLINI_SOURCE_SUPPORT_CORE__':'maplini_source_support_core.js','__MAPLINI_NAVIGATION_CORE__':'maplini_navigation_core.js',
 }
 
 def extract_html():

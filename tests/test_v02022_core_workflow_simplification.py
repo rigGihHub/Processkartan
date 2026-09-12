@@ -9,7 +9,7 @@ def template():
     return APP[start:end]
 
 def test_release_version():
-    assert 'APP_VERSION = "0.20.71"' in APP
+    assert 'APP_VERSION = "0.20.80"' in APP
 
 def test_primary_topbar_keeps_core_work_modes_and_hides_secondary_direct_children():
     soup=BeautifulSoup(template(),"html.parser")

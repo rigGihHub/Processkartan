@@ -9,7 +9,7 @@ def template():
     return APP[start:end]
 
 def test_release_version():
-    assert 'APP_VERSION = "0.20.71"' in APP
+    assert 'APP_VERSION = "0.20.80"' in APP
 
 def test_next_step_is_exposed_as_primary_canvas_action():
     soup=BeautifulSoup(template(),'html.parser')

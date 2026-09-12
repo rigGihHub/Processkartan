@@ -3,7 +3,7 @@ from pathlib import Path
 APP = (Path(__file__).resolve().parents[1] / "app.py").read_text(encoding="utf-8")
 
 def test_version_and_read_mode_controls():
-    assert 'APP_VERSION = "0.20.71"' in APP
+    assert 'APP_VERSION = "0.20.80"' in APP
     assert 'id="p48-readmode-toggle"' in APP
     assert 'id="p48-read-panel"' in APP
     assert 'id="p48-read-hint"' in APP

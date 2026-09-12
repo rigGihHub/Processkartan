@@ -17,12 +17,18 @@ def run():
         assert nodes.count()>0
         nodes.first.click()
         page.wait_for_timeout(100)
-        quick=page.locator('#p48-node-quick')
+        quick=page.locator('.p48-node.p48-next-visible .p48-next-step-wrap')
         assert quick.is_visible()
-        next_btn=page.locator('#p48-node-quick-next')
+        next_btn=quick.locator('.p48-next-step-btn')
         assert next_btn.is_visible()
         before=page.locator('#p48-canvas .p48-node').count()
         next_btn.click()
+        menu=quick.locator('.p48-next-step-menu')
+        assert menu.is_visible()
+        choice=menu.locator('.p48-next-step-choice.recommended')
+        if choice.count()==0:
+            choice=menu.locator('.p48-next-step-choice').first
+        choice.click()
         page.wait_for_timeout(120)
         after=page.locator('#p48-canvas .p48-node').count()
         assert after==before+1,(before,after)

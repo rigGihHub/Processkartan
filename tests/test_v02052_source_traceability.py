@@ -3,7 +3,7 @@ ROOT=Path(__file__).resolve().parents[1]
 SRC=(ROOT/'app.py').read_text(encoding='utf-8')
 
 def test_version():
-    assert 'APP_VERSION = "0.20.71"' in SRC
+    assert 'APP_VERSION = "0.20.80"' in SRC
 
 def test_source_trace_panel_exists():
     for token in ['p48-source-trace','Källa till steget','p48-source-trace-list','KÄLLSPÅR']:

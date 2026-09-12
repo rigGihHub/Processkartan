@@ -1,4 +1,13 @@
-## Senaste release: v0.20.71 – Focus Path i Förstå
+## Senaste release: v0.20.80 – Release Candidate
+
+Den här releasen samlar de senaste UI-/canvasförbättringarna till en release candidate och kör dem genom hela kärnflödet. Ett faktiskt mobilfel hittades och rättades: vid återställning av en liten process kunde en schemalagd desktop-fit köra efter att mobil **Förstå** hade aktiverats och skriva över den läsbara zoomen till 25 %. Fit-racet avbryts nu när läsvyn hunnit aktiveras.
+
+Ingen ny processfunktion eller datamodell införs i v0.20.80. Fokus är stabilitet, regressions-QA och pushberedskap.
+
+### v0.20.79 – Typography & Spacing
+
+Maplini använder den harmoniserade typografiska skalan och spacing-rytmen från v0.20.79 tillsammans med Unified Controls från v0.20.78, Calm Command Bar och den hierarkiska `Mer`-panelen.
+
 
 I Förstå-läget kan användaren klicka på ett steg och få dess inkommande väg, aktuella steg och möjliga nästa steg visuellt framlyfta medan resten av kartan dämpas. Funktionen bygger enbart på befintliga kopplingar och ändrar inte processdata.
 

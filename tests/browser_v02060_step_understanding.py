@@ -21,7 +21,7 @@ def run():
         rows=page.locator('#p48-step-understanding-list .p48-step-understanding-row')
         assert rows.count()==5
         text=page.locator('#p48-step-understanding').inner_text()
-        for label in ['Vad?','Vem?','Input','Output','Sedan']:
+        for label in ['VAD?','VEM?','INPUT','OUTPUT','SEDAN']:
             assert label in text
         # Populate actual step metadata and confirm the compact summary updates from it.
         page.locator('#p48-info-description').fill('Kontrollera att ordern är komplett.')

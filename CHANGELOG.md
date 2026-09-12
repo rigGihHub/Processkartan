@@ -1,3 +1,64 @@
+## v0.20.80 – Release Candidate
+
+- Samlad release-candidate-QA av kärnflödet **Rita → Förstå → Följ**, dokumentflöden, export, mobil läsvy och stora processer.
+- Fixar ett riktigt mobilrace där desktop-fit kunde skriva över Förstå-lägets läsbara zoom och lämna processen på 25 %.
+- Uppdaterar historiska browsertester till dagens avsiktliga UI-struktur; ingen ny produktfunktion eller datamodelländring.
+
+## v0.20.79 – Typography & Spacing
+- Harmoniserad typografisk skala, radhojd och spacing genom editorn.
+- Tydligare hierarki i sidopanel, topprad, noder och sekundära verktyg utan nya funktioner.
+
+## 0.20.78 – Unified Controls
+- Samlar knappar, dropdowns, textfält och fokuslägen i ett gemensamt visuellt kontrollsystem.
+- Ger samma gröna fokuslogik, radier, hover och disabled-states i editor, sidopanel och sekundära verktyg.
+- Städar node/link quick-actions så de inte ser ut som separata äldre komponentfamiljer.
+- Ingen ändring av processdata, Supabase, RLS eller OAuth.
+
+## v0.20.77 – Secondary Tools Cleanup
+
+- Gör **Mer** till en hierarkisk sekundär kommandopanel i stället för en platt knappmatris.
+- Prioriterar **Källa → processförslag**, **Klistra in steg** och **Processkontroll** som snabbåtgärder.
+- Samlar **Dela process** och **Versionshistorik** i en lugn samarbetsrad.
+- Lägger redigering/struktur, utseende/layout/export och övrigt i hopfällbara grupper.
+- Behåller samtliga befintliga ID:n och funktioner; ingen processdata, Supabase-, RLS- eller OAuth-logik ändras.
+
+## v0.20.76 – Calm Command Bar
+
+- Delar upp desktop-toppraden i processidentitet, arbetsläge och sekundära verktyg.
+- Gör **Rita · Förstå · Följ** till tydlig visuell kärna.
+- Komprimerar Ny process, Spara, Hitta, Ångra/Gör om och Mer utan att ändra deras ID:n eller funktion.
+- Stänger tillfälliga menyer när canvasen återställs så flytande paneler inte blockerar nästa handling.
+- Ingen ändring av processdata, Supabase, RLS eller sparformat.
+
+## v0.20.75 – Calm Neutral Sidebar
+
+- Neutral sidebar now hides the unused inspector until a node/link is selected.
+- Core creation tools stay visible; secondary node types are collapsed under “Fler typer”.
+- Saved processes and account controls visually recede in the neutral state.
+- Editing context remains unchanged when a node or link is selected.
+
+## v0.20.74 – Editor Coherence
+- Slår ihop desktop-headerns visuella hierarki så logotyp och arbetskontroller använder samma rad.
+- Gör vänsterpanelen lugnare och mer fokuserad när ett steg redigeras.
+- Tar bort den duplicerade flytande single-node-toolbaren; den gröna + på noden är enda primära canvasåtgärden.
+- Behåller alla funktioner via sidopanel/övriga menyer.
+
+## v0.20.73 – Floating Tools & Canvas First
+
+- `Mer` öppnas nu som en fast flytande verktygslåda på höger sida och kan inte längre trycka ned toppfältet eller canvasen.
+- Verktygslådan är komprimerad till två kolumner där det är lämpligt, medan avancerade delmenyer behåller full bredd.
+- Desktop-toppraden hålls på en enda stabil rad när `Mer` är öppen.
+- Sidformat ligger fortsatt utanför canvasens standardvy från v0.20.72.
+- Ingen ändring av processdata, kopplingslogik eller sparformat.
+
+## v0.20.73 – Canvas First
+
+- Desktop sidebar widened to 320 px for readable editing.
+- Page-format quick control removed from the mapping canvas; export/settings remain the home for page geometry.
+- Node quick actions reduced to a compact create/overflow treatment.
+- Inline next-step plus redesigned as a clean circular connection action.
+- Small processes auto-fit/center on open so the canvas does not strand content in the top-left corner.
+
 # v0.20.71 – FOCUS PATH I FÖRSTÅ
 
 - Markerat steg i Förstå lyfter inkommande steg, aktuellt steg och alla faktiska nästa steg.

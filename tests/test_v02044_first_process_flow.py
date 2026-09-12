@@ -4,7 +4,7 @@ APP = (Path(__file__).resolve().parents[1] / "app.py").read_text(encoding="utf-8
 
 
 def test_v02044_first_process_flow_contract():
-    assert 'APP_VERSION = "0.20.71"' in APP
+    assert 'APP_VERSION = "0.20.80"' in APP
     assert 'placeholder="Ex. Hantera kundfaktura"' in APP
     assert 'id="p48-empty-first-text"' in APP
     assert 'placeholder="Ex. Ta emot beställning"' in APP

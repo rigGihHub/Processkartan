@@ -2,7 +2,7 @@ from pathlib import Path
 APP=Path(__file__).resolve().parents[1]/"app.py"
 SRC=APP.read_text(encoding="utf-8")
 
-def test_version(): assert 'APP_VERSION = "0.20.71"' in SRC
+def test_version(): assert 'APP_VERSION = "0.20.80"' in SRC
 def test_document_ui():
     for token in ['p48-doc-launch','p48-doc-file','p48-doc-steps','p48-doc-create','Dokument → processförslag']: assert token in SRC
 def test_supported_document_extractors():

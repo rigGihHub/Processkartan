@@ -2,7 +2,7 @@ from pathlib import Path
 SRC=Path("app.py").read_text()
 
 def test_version():
-    assert 'APP_VERSION = "0.20.71"' in SRC
+    assert 'APP_VERSION = "0.20.80"' in SRC
 
 def test_canvas_hierarchy_css():
     assert 'v0.20.68 – canvas visual hierarchy' in SRC

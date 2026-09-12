@@ -18,7 +18,7 @@ def run():
         page.evaluate("document.querySelector('#p48-doc-launch').click()")
         page.locator('#p48-doc-file').set_input_files(str(sample));page.wait_for_timeout(260)
         status=page.locator('#p48-doc-status').inner_text();assert 'grenvägar' in status,status
-        structured=page.locator('#p48-doc-structured').inner_text();assert 'Ja →' in structured and 'Nej →' in structured,structured
+        structured=page.locator('#p48-doc-structured').inner_text();assert 'Ja · →' in structured and 'Nej · →' in structured,structured
         page.locator('#p48-doc-create').click();page.wait_for_timeout(220)
         assert page.locator('#p48-canvas .p48-node.decision').count()==1
         canvas_text=page.locator('#p48-canvas').inner_text();assert 'Kunduppgifterna är kompletta?' in canvas_text

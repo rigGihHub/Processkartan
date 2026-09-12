@@ -22,8 +22,8 @@ def run():
         assert page.locator('.p48-top-simplified > #p48-view-menu').count()==0
         assert page.locator('.p48-top-simplified > #p48-export-menu').count()==0
         assert page.locator('.p48-top-simplified > .p48-smart-layout-split').count()==0
-        assert page.locator('#p48-more-menu .p48-more-popover > #p48-view-menu').count()==1
-        assert page.locator('#p48-more-menu .p48-more-popover > #p48-export-menu').count()==1
+        assert page.locator('#p48-more-presentation-group #p48-view-menu').count()==1
+        assert page.locator('#p48-more-presentation-group #p48-export-menu').count()==1
         # Understand reuses read mode, Draw returns to edit mode.
         page.locator('#p48-readmode-toggle').click()
         assert 'p48-read-mode' in (page.locator('#pk48').get_attribute('class') or '')
@@ -33,6 +33,7 @@ def run():
         assert page.locator('#p48-mode-draw').get_attribute('aria-pressed')=='true'
         # More exposes relocated tools without duplicate IDs.
         page.locator('#p48-more-menu > summary').click()
+        page.locator('#p48-more-presentation-group > summary').click()
         assert page.locator('#p48-view-menu > summary').is_visible()
         assert page.locator('#p48-export-menu > summary').is_visible()
         assert page.locator('.p48-smart-layout-split').is_visible()

@@ -21,6 +21,6 @@ with sync_playwright() as p:
     assert start.evaluate("e=>getComputedStyle(e).minHeight")=='52px'
     assert start.evaluate("e=>getComputedStyle(e).boxShadow")!='none'
     process.click(); page.wait_for_timeout(30)
-    assert process.evaluate("e=>getComputedStyle(e).outlineOffset")=='4px'
+    assert process.evaluate("e=>getComputedStyle(e).outlineOffset")=='3px'
     b.close()
 print('v0.20.68 canvas visual hierarchy browser smoke ok')

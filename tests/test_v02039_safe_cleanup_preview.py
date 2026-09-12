@@ -2,7 +2,7 @@ from pathlib import Path
 APP=Path(__file__).resolve().parents[1].joinpath('app.py').read_text()
 
 def test_version_and_preview_contract():
-    assert 'APP_VERSION = "0.20.71"' in APP
+    assert 'APP_VERSION = "0.20.80"' in APP
     assert 'id="p48-clean-preview-bar"' in APP
     assert 'id="p48-clean-preview-apply"' in APP
     assert 'id="p48-clean-preview-cancel"' in APP

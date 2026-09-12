@@ -3,7 +3,7 @@ from pathlib import Path
 APP = Path('app.py').read_text(encoding='utf-8')
 
 def test_version():
-    assert 'APP_VERSION = "0.20.71"' in APP
+    assert 'APP_VERSION = "0.20.80"' in APP
 
 def test_overview_is_opt_in_and_has_navigation_contract():
     assert 'id="p48-overview-toggle"' in APP
