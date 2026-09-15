@@ -1,3 +1,10 @@
+## v0.20.91 – Visible Formatting
+
+- Visar rutans viktigaste formatering direkt när ett steg markeras: bakgrund, textfärg, fet, kursiv och understruken text.
+- Lägger textstorlek i samma kompakta verktygsrad med tydliga minus- och plusknappar.
+- Synkroniserar snabbformateringen med befintliga Utseende-inställningar och stödjer även flera markerade rutor.
+- Behåller typsnitt, justering, form, kant och kopplingspunkter under Utseende för att sidopanelen ska förbli lugn.
+
 ## v0.20.90 – Canvas Stage
 
 - Stoppar automatisk förstoring av små processer; Anpassa kan zooma ut men aldrig blåsa upp kompakta rutor över 100 %.

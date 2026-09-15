@@ -7,7 +7,7 @@ UI_CORE = (ROOT / "maplini_ui_core.js").read_text(encoding="utf-8")
 
 
 def test_version_and_pdf_guide_default_are_consistent():
-    assert 'APP_VERSION = "0.20.90"' in APP
+    assert 'APP_VERSION = "0.20.91"' in APP
     assert '<option value="off" selected>Ingen PDF-yta</option>' in APP
     assert "let pdfView='off',pageCountMode='auto'" in APP
 

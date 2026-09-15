@@ -5,7 +5,7 @@ APP = (Path(__file__).parents[1] / "app.py").read_text(encoding="utf-8")
 
 
 def test_small_maps_are_never_magnified_by_fit():
-    assert 'APP_VERSION = "0.20.90"' in APP
+    assert 'APP_VERSION = "0.20.91"' in APP
     assert "margin:72,minScale:.25,maxScale:1" in APP
     assert "maxScale:1.5" not in APP[APP.index("function fitProcessToScreen()"):APP.index("function mobileReadFocusRect")]
 

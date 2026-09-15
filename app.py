@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.20.90"
+APP_VERSION = "0.20.91"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -2231,6 +2231,33 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 #pk48 .p48-node-size-presets-head span{font-size:8.5px!important;font-weight:550!important;color:#87948e!important}
 #pk48 .p48-node-size-preset{min-height:30px!important;border-radius:7px!important;background:transparent!important;box-shadow:none!important}
 #pk48 .p48-node-size-preset.active{background:#eaf4ef!important}
+/* v0.20.91 – The controls used while drawing stay in sight. Advanced visual
+   settings remain available below without making the sidebar feel like a form. */
+#pk48 .p48-quick-format{
+  margin:0 0 14px!important;padding:10px 0 11px!important;border-top:1px solid #e5ebe8!important;
+  border-bottom:1px solid #e5ebe8!important;background:transparent!important;
+}
+#pk48 .p48-quick-format-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:0 0 8px;color:#31483f;font:700 10.5px/1.3 Inter,system-ui}
+#pk48 .p48-quick-format-head span{color:#87948e;font-size:8.5px;font-weight:550;white-space:nowrap}
+#pk48 .p48-quick-format-row{display:flex;align-items:center;gap:5px;min-width:0}
+#pk48 .p48-quick-format-color{
+  display:flex;align-items:center;gap:5px;height:32px;padding:0 7px;border:1px solid #d7e0dc;border-radius:7px;
+  color:#50645b;background:#fff;font:650 9.5px/1 Inter,system-ui;cursor:pointer;
+}
+#pk48 .p48-quick-format-color input{width:17px!important;height:17px!important;min-height:17px!important;margin:0!important;padding:0!important;border:0!important;border-radius:50%!important;background:transparent!important;cursor:pointer}
+#pk48 .p48-quick-format-color input::-webkit-color-swatch-wrapper{padding:0}
+#pk48 .p48-quick-format-color input::-webkit-color-swatch{border:1px solid rgba(23,32,42,.18);border-radius:50%}
+#pk48 .p48-quick-format-color input::-moz-color-swatch{border:1px solid rgba(23,32,42,.18);border-radius:50%}
+#pk48 .p48-quick-format-separator{width:1px;height:22px;margin:0 1px;background:#e2e8e5}
+#pk48 .p48-quick-format-button,#pk48 .p48-quick-format-size button{
+  display:grid;place-items:center;width:32px;height:32px;min-height:32px;padding:0;border:1px solid #d7e0dc;border-radius:7px;
+  color:#40584e;background:#fff;font:650 12px/1 Inter,system-ui;cursor:pointer;box-shadow:none;
+}
+#pk48 .p48-quick-format-button:hover,#pk48 .p48-quick-format-size button:hover{border-color:#9fc4b3;background:#f1f7f4;color:#225f49}
+#pk48 .p48-quick-format-button.active{border-color:#75a58f;background:#eaf4ef;color:#225f49}
+#pk48 .p48-quick-format-size{display:grid;grid-template-columns:1fr 32px 46px 32px;align-items:center;gap:5px;margin-top:7px;color:#65776f;font:650 9.5px/1 Inter,system-ui}
+#pk48 .p48-quick-format-size output{text-align:center;color:#40584e;font:650 10px/1 Inter,system-ui;font-variant-numeric:tabular-nums}
+#pk48 .p48-quick-format button:focus-visible,#pk48 .p48-quick-format input:focus-visible{outline:2px solid rgba(47,128,101,.45)!important;outline-offset:2px!important}
 /* Quick-next belongs beside the node, never inside its content flow. */
 #pk48 .p48-node>.p48-next-step-wrap{
   position:absolute!important;left:calc(100% + 8px)!important;top:50%!important;
@@ -2764,6 +2791,23 @@ Skicka orderbekräftelse"></textarea>
       <div class="p48-title p48-format-context-title" id="p48-format-title">Formatering</div>
       <div class="p48-sub p48-format-context-hint" id="p48-format-hint">Markera en ruta eller pil för att visa relevanta inställningar.</div>
       <div id="p48-controls">
+        <div class="p48-quick-format p48-node-only" aria-label="Snabbformatering">
+          <div class="p48-quick-format-head"><strong>Formatera ruta</strong><span>Fler val under Utseende</span></div>
+          <div class="p48-quick-format-row">
+            <label class="p48-quick-format-color" title="Rutans bakgrundsfärg"><span>Ruta</span><input id="p48-quick-bg" type="color" value="#ffffff"></label>
+            <label class="p48-quick-format-color" title="Textfärg"><span>Text</span><input id="p48-quick-text" type="color" value="#17202a"></label>
+            <span class="p48-quick-format-separator" aria-hidden="true"></span>
+            <button type="button" class="p48-quick-format-button" id="p48-quick-bold" title="Fet text" aria-label="Fet text" aria-pressed="false"><b>B</b></button>
+            <button type="button" class="p48-quick-format-button" id="p48-quick-italic" title="Kursiv text" aria-label="Kursiv text" aria-pressed="false"><i>I</i></button>
+            <button type="button" class="p48-quick-format-button" id="p48-quick-under" title="Understruken text" aria-label="Understruken text" aria-pressed="false"><u>U</u></button>
+          </div>
+          <div class="p48-quick-format-size" role="group" aria-label="Textstorlek">
+            <span>Textstorlek</span>
+            <button type="button" id="p48-quick-size-down" title="Minska textstorleken" aria-label="Minska textstorleken">−</button>
+            <output id="p48-quick-size-value">13 px</output>
+            <button type="button" id="p48-quick-size-up" title="Öka textstorleken" aria-label="Öka textstorleken">+</button>
+          </div>
+        </div>
         <div id="p48-process-info" class="p48-process-info p48-node-only p48-single-node-only" hidden>
           <div class="p48-process-info-head">
             <div><div class="p48-title">Om steget</div><div class="p48-small">Beskriv arbetet – utan att belasta canvasen.</div></div>
@@ -3130,6 +3174,7 @@ const analyzeBtn=root.querySelector('#p48-analyze'),analysisPanel=root.querySele
 const versionHistoryLaunch=root.querySelector('#p48-version-history-launch'),versionPanel=root.querySelector('#p48-version-panel'),versionClose=root.querySelector('#p48-version-close'),versionCreate=root.querySelector('#p48-version-create'),versionStatus=root.querySelector('#p48-version-status'),versionList=root.querySelector('#p48-version-list');
 const controls=root.querySelector('#p48-controls'),formatPanel=root.querySelector('#p48-format-panel'),formatTitle=root.querySelector('#p48-format-title'),formatHint=root.querySelector('#p48-format-hint'),font=root.querySelector('#p48-font'),size=root.querySelector('#p48-size'),textColor=root.querySelector('#p48-textcolor'),bgColor=root.querySelector('#p48-bgcolor');
 const bold=root.querySelector('#p48-bold'),italic=root.querySelector('#p48-italic'),under=root.querySelector('#p48-under');
+const quickBg=root.querySelector('#p48-quick-bg'),quickText=root.querySelector('#p48-quick-text'),quickBold=root.querySelector('#p48-quick-bold'),quickItalic=root.querySelector('#p48-quick-italic'),quickUnder=root.querySelector('#p48-quick-under'),quickSizeDown=root.querySelector('#p48-quick-size-down'),quickSizeUp=root.querySelector('#p48-quick-size-up'),quickSizeValue=root.querySelector('#p48-quick-size-value');
 const documentLinkEditor=root.querySelector('#p48-document-link-editor'),documentUrlInput=root.querySelector('#p48-document-url'),documentOpenEditor=root.querySelector('#p48-document-open-editor');
 const fontAllBtn=root.querySelector('#p48-font-all');
 const nodeStyleSelect=root.querySelector('#p48-node-style'),nodeShapeSelect=root.querySelector('#p48-node-shape'),nodeStyleAllBtn=root.querySelector('#p48-node-style-all');
@@ -5730,6 +5775,9 @@ function refreshControls(){
   size.value=sharedStyleValue(items,'fontSize')??s.fontSize;
   textColor.value=sharedStyleValue(items,'textColor')||s.textColor;
   bgColor.value=sharedStyleValue(items,'bgColor')||s.bgColor;
+  if(quickSizeValue)quickSizeValue.value=`${sharedStyleValue(items,'fontSize')??s.fontSize} px`;
+  if(quickText)quickText.value=sharedStyleValue(items,'textColor')||s.textColor;
+  if(quickBg)quickBg.value=sharedStyleValue(items,'bgColor')||s.bgColor;
   borderColor.value=sharedStyleValue(items,'borderColor')||s.borderColor;
   borderWidth.value=String(sharedStyleValue(items,'borderWidth')??s.borderWidth);
   syncNodeStyleSelect(sharedStyleValue(items,'nodeStyle')||s.nodeStyle);
@@ -5738,6 +5786,7 @@ function refreshControls(){
   bold.classList.toggle('active',sharedStyleValue(items,'fontWeight')==='700');
   italic.classList.toggle('active',sharedStyleValue(items,'fontStyle')==='italic');
   under.classList.toggle('active',sharedStyleValue(items,'textDecoration')==='underline');
+  [[quickBold,'fontWeight','700'],[quickItalic,'fontStyle','italic'],[quickUnder,'textDecoration','underline']].forEach(([button,key,value])=>{if(!button)return;const active=sharedStyleValue(items,key)===value;button.classList.toggle('active',active);button.setAttribute('aria-pressed',String(active));});
   root.querySelectorAll('[data-text-align]').forEach(b=>b.classList.toggle('active',b.dataset.textAlign===sharedStyleValue(items,'textAlign')));
   if(documentLinkEditor)documentLinkEditor.hidden=multi||!item||item.data.type!=='document';
   if(documentUrlInput)documentUrlInput.value=(!multi&&item&&item.data.type==='document')?(item.data.documentUrl||''):'';
@@ -9235,6 +9284,14 @@ borderWidth.addEventListener('change',()=>{
   updateStyle({borderWidth:Number(borderWidth.value)});
 });
 bold.addEventListener('click',()=>{const items=selectedNodeItems();if(items.length)updateStyle({fontWeight:items.every(x=>styleOf(x.data).fontWeight==='700')?'400':'700'})});italic.addEventListener('click',()=>{const items=selectedNodeItems();if(items.length)updateStyle({fontStyle:items.every(x=>styleOf(x.data).fontStyle==='italic')?'normal':'italic'})});under.addEventListener('click',()=>{const items=selectedNodeItems();if(items.length)updateStyle({textDecoration:items.every(x=>styleOf(x.data).textDecoration==='underline')?'none':'underline'})});root.querySelectorAll('[data-text-align]').forEach(b=>b.addEventListener('click',()=>updateStyle({textAlign:b.dataset.textAlign})));
+if(quickBg)quickBg.addEventListener('change',()=>updateStyle({bgColor:quickBg.value}));
+if(quickText)quickText.addEventListener('change',()=>updateStyle({textColor:quickText.value}));
+if(quickBold)quickBold.addEventListener('click',()=>bold.click());
+if(quickItalic)quickItalic.addEventListener('click',()=>italic.click());
+if(quickUnder)quickUnder.addEventListener('click',()=>under.click());
+function adjustQuickFontSize(delta){const items=selectedNodeItems();if(!items.length)return;const current=Number(sharedStyleValue(items,'fontSize')??styleOf(items[0].data).fontSize)||13;updateStyle({fontSize:Math.max(10,Math.min(36,current+delta))});}
+if(quickSizeDown)quickSizeDown.addEventListener('click',()=>adjustQuickFontSize(-1));
+if(quickSizeUp)quickSizeUp.addEventListener('click',()=>adjustQuickFontSize(1));
 
 
 
