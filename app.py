@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.20.80"
+APP_VERSION = "0.20.82"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -2144,6 +2144,28 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 #pk48 .p48-more-group>summary:hover{background:#f6f9f7}
 #pk48 .p48-more-group[open]>summary{color:#245f4b}
 #pk48 .p48-save-state{box-shadow:none}
+/* v0.20.82 – Canvas Calm verified in the rendered app. Keep these selectors
+   stronger than legacy rules so the result does not depend on stylesheet order. */
+#pk48 .p48-next-step-wrap{left:calc(100% + 7px)!important}
+#pk48 .p48-next-step-btn{
+  width:24px!important;height:24px!important;border:1px solid #9fc4b3!important;
+  border-radius:999px!important;background:rgba(255,255,255,.96)!important;
+  color:#2f8065!important;box-shadow:0 1px 4px rgba(31,52,70,.08)!important;
+  opacity:.72!important;font-size:0!important;
+}
+#pk48 .p48-next-step-btn::before{content:"+"!important;font:750 15px/1 Inter,system-ui!important;transform:translateY(-.5px)}
+#pk48 .p48-next-step-btn:hover,#pk48 .p48-next-step-btn:focus-visible{
+  opacity:1!important;transform:scale(1.04)!important;background:#edf6f1!important;
+  color:#24664f!important;border-color:#6fa58e!important;box-shadow:0 2px 7px rgba(31,92,70,.12)!important;
+}
+#pk48 .p48-node.selected .p48-next-step-btn{opacity:1!important}
+#pk48 .p48-next-step-menu{left:31px!important}
+#pk48 .p48-node.process{box-shadow:0 1px 4px rgba(31,52,70,.07)!important}
+#pk48 .p48-node.process:hover{box-shadow:0 2px 7px rgba(31,52,70,.09)!important}
+#pk48.p48-side-context-node .p48-step-understanding-head strong{font-size:11px!important}
+#pk48.p48-side-context-node .p48-step-understanding-head span{font-size:9px!important;white-space:nowrap}
+#pk48.p48-side-context-node .p48-step-understanding-row{grid-template-columns:60px minmax(0,1fr)!important;gap:8px!important;font-size:10.5px!important;line-height:1.4!important}
+#pk48.p48-side-context-node .p48-step-understanding-row b{font-size:8.5px!important;line-height:1.45!important}
 @media(max-width:700px),(pointer:coarse){
   #pk48{--p48-control-h:44px;--p48-control-radius:10px}
   #pk48 .p48-btn{min-height:44px}
@@ -2232,8 +2254,8 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
       </details>
       <div class="p48-pop-title p48-export-page-title">Sidformat</div>
       <select id="p48-pdf-view" class="p48-btn" title="PDF-yta">
-        <option value="off">Ingen PDF-yta</option>
-        <option value="A4P" selected>A4 stående</option>
+        <option value="off" selected>Ingen PDF-yta</option>
+        <option value="A4P">A4 stående</option>
         <option value="A4L">A4 liggande</option>
         <option value="A3P">A3 stående</option>
         <option value="A3L">A3 liggande</option>
@@ -3133,7 +3155,7 @@ let cloudSession=null,sharedView=false;
 let cloudLoadedProcessIds=new Set();
 let cloudLoadedProcessScopes=new Map();
 let currentWorkspaceId=null,currentWorkspaceOwnerId=null,currentRole='owner',printPreview=false;
-let pdfView='A4P',pageCountMode='auto',canvasScale=1,canvasLogicalWidth=2400,canvasLogicalHeight=1400,processScalePercent=100,processScaleGesture=false;
+let pdfView='off',pageCountMode='auto',canvasScale=1,canvasLogicalWidth=2400,canvasLogicalHeight=1400,processScalePercent=100,processScaleGesture=false;
 let walkthroughState=null;
 let activeImprovementDeviation=null;
 let readMode=false,mobileConsumptionInitialized=false,mobileWalkthroughForcedRead=false;

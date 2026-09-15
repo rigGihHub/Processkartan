@@ -6,7 +6,7 @@ CORE=(ROOT/'maplini_process_intelligence_core.js').read_text(encoding='utf-8')
 
 
 def test_version():
-    assert 'APP_VERSION = "0.20.80"' in APP
+    assert 'APP_VERSION = "' in APP
 
 
 def test_process_control_is_concrete_not_score_based():

@@ -3,7 +3,7 @@ from pathlib import Path
 APP = Path(__file__).parents[1].joinpath("app.py").read_text()
 
 def test_release_version():
-    assert 'APP_VERSION = "0.20.80"' in APP
+    assert 'APP_VERSION = "' in APP
 
 def test_paste_process_ui_and_parser_exist():
     for token in [

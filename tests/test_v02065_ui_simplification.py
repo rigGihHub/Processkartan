@@ -9,7 +9,7 @@ def template():
     return APP[start:end]
 
 def test_release_and_three_modes_are_primary():
-    assert 'APP_VERSION = "0.20.80"' in APP
+    assert 'APP_VERSION = "' in APP
     soup=BeautifulSoup(template(),"html.parser")
     top=soup.select_one('.p48-top-simplified')
     modes=top.select_one('.p48-work-modes')

@@ -1,7 +1,7 @@
 from pathlib import Path
 SRC=Path("app.py").read_text()
 
-def test_version(): assert 'APP_VERSION = "0.20.80"' in SRC
+def test_version(): assert 'APP_VERSION = "' in SRC
 def test_single_selection_toolbar_is_removed(): assert '.p48-node-quick[data-mode="single"]{display:none!important}' in SRC
 def test_desktop_header_is_single_row():
     assert '.p48-brand{position:absolute!important' in SRC

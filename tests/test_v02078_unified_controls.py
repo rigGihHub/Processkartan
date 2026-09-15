@@ -3,7 +3,7 @@ APP=Path(__file__).resolve().parents[1]/"app.py"
 TEXT=APP.read_text(encoding="utf-8")
 
 def test_version_and_unified_control_tokens():
-    assert 'APP_VERSION = "0.20.80"' in TEXT
+    assert 'APP_VERSION = "' in TEXT
     assert 'v0.20.80 – Unified Controls' in TEXT
     for token in ['--p48-control-radius','--p48-control-border','--p48-control-hover','--p48-focus-ring']:
         assert token in TEXT

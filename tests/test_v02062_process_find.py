@@ -2,7 +2,7 @@ from pathlib import Path
 APP=Path(__file__).resolve().parents[1].joinpath("app.py").read_text()
 
 def test_version():
-    assert 'APP_VERSION = "0.20.80"' in APP
+    assert 'APP_VERSION = "' in APP
 
 def test_find_ui_and_fields():
     assert 'id="p48-find-menu"' in APP

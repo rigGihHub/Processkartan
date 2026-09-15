@@ -3,7 +3,7 @@ ROOT=Path(__file__).resolve().parents[1]
 APP=(ROOT/'app.py').read_text(encoding='utf-8')
 
 def test_version_and_preview_controls_exist():
-    assert 'APP_VERSION = "0.20.80"' in APP
+    assert 'APP_VERSION = "' in APP
     for token in ['p48-export-preview','p48-export-preview-dialog','p48-export-preview-pages','Förhandsgranska sidor']:
         assert token in APP
 

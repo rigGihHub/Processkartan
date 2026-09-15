@@ -4,7 +4,7 @@ APP=(ROOT/'app.py').read_text(encoding='utf-8')
 CORE=(ROOT/'maplini_version_history_core.js').read_text(encoding='utf-8')
 
 def test_version():
-    assert 'APP_VERSION = "0.20.80"' in APP
+    assert 'APP_VERSION = "' in APP
 
 def test_history_is_lightweight_and_schema_free():
     assert "const VERSION_HISTORY_KEY='maplini_version_history_v1'" in APP

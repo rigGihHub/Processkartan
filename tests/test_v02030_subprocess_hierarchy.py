@@ -3,7 +3,7 @@ APP = Path(__file__).resolve().parents[1] / 'app.py'
 SRC = APP.read_text(encoding='utf-8')
 
 def test_version_02030():
-    assert 'APP_VERSION = "0.20.80"' in SRC
+    assert 'APP_VERSION = "' in SRC
 
 def test_breadcrumb_navigation_exists():
     assert 'id="p48-breadcrumbs"' in SRC

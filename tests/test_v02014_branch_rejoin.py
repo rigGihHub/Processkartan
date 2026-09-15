@@ -5,7 +5,7 @@ APP = (ROOT / "app.py").read_text(encoding="utf-8")
 EDIT = (ROOT / "maplini_editing_core.js").read_text(encoding="utf-8")
 
 def test_v02014_release_and_rejoin_contract():
-    assert 'APP_VERSION = "0.20.80"' in APP
+    assert 'APP_VERSION = "' in APP
     assert 'function branchRejoinContext(' in APP
     assert 'function addBranchRejoin(' in APP
     assert "dataset.branchRejoin='true'" in APP

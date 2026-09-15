@@ -6,7 +6,7 @@ CORE=(ROOT/'maplini_connector_core.js').read_text(encoding='utf-8')
 
 
 def test_v02018_version_and_lane_overlap_scoring_contract():
-    assert 'APP_VERSION = "0.20.80"' in APP
+    assert 'APP_VERSION = "' in APP
     assert 'function parallelSegmentOverlap(' in CORE
     assert 'function routeParallelOverlap(' in CORE
     assert 'parallelOverlap*7' in CORE

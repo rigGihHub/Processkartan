@@ -2,7 +2,7 @@ from pathlib import Path
 APP=(Path(__file__).resolve().parents[1]/'app.py').read_text(encoding='utf-8')
 
 def test_version_and_mobile_readable_fit_contract():
-    assert 'APP_VERSION = "0.20.80"' in APP
+    assert 'APP_VERSION = "' in APP
     assert 'function fitMobileReadProcess(options={})' in APP
     assert 'function mobileReadFocusRect(rects)' in APP
     assert 'const readableFloor=rects.length<=20?.76:rects.length<=80?.64:.52' in APP

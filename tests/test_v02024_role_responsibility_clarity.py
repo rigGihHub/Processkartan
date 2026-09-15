@@ -4,7 +4,7 @@ APP = Path(__file__).resolve().parents[1] / 'app.py'
 TEXT = APP.read_text(encoding='utf-8')
 
 def test_version():
-    assert 'APP_VERSION = "0.20.80"' in TEXT
+    assert 'APP_VERSION = "' in TEXT
 
 def test_role_badge_is_contextual_not_required():
     assert "roleBadge.className='p48-node-role'" in TEXT

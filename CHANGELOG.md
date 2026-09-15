@@ -1,3 +1,11 @@
+## v0.20.82 – Canvas Calm verified
+
+- Fixar CSS-ordningsfelet som gjorde att nodernas `+` fortfarande renderades som en fylld grön knapp live.
+- Gör **Ingen PDF-yta** till verkligt grundläge i både HTML och runtime, utan efterhandskorrigering.
+- Förbättrar läsbarheten i snabböverblicken för markerade steg.
+- Synkar appens versionsmetadata och regressionstester med releasen.
+- Ingen ändring av processdata, kopplingslogik, Supabase, RLS eller sparformat.
+
 ## v0.20.80 – Release Candidate
 
 - Samlad release-candidate-QA av kärnflödet **Rita → Förstå → Följ**, dokumentflöden, export, mobil läsvy och stora processer.

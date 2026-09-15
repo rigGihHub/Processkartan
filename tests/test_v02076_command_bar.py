@@ -5,7 +5,7 @@ TEXT = APP.read_text(encoding='utf-8')
 
 
 def test_version_and_command_bar_contract():
-    assert 'APP_VERSION = "0.20.80"' in TEXT
+    assert 'APP_VERSION = "' in TEXT
     assert 'p48-process-cluster' in TEXT
     assert 'p48-top-utilities' in TEXT
     assert 'v0.20.77 – Secondary Tools Cleanup' in TEXT

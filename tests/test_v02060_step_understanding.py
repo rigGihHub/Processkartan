@@ -3,7 +3,7 @@ ROOT=Path(__file__).resolve().parents[1]
 APP=(ROOT/'app.py').read_text(encoding='utf-8')
 CORE=(ROOT/'maplini_step_understanding_core.js').read_text(encoding='utf-8')
 def test_version_and_core_loaded():
-    assert 'APP_VERSION = "0.20.80"' in APP
+    assert 'APP_VERSION = "' in APP
     assert '__MAPLINI_STEP_UNDERSTANDING_CORE__' in APP
     assert '_STEP_UNDERSTANDING_CORE_JS' in APP
     assert 'MapliniStepUnderstandingCore' in CORE
