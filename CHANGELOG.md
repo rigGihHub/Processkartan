@@ -1,3 +1,10 @@
+## v0.20.85 – Small Canvas Readability
+
+- Förhindrar att vanliga ord i aktivitetsrutor bryts mitt i ordet.
+- Säkrar en läsbar minsta bredd för aktivitetsrutor, även för äldre sparade smala rutor.
+- Tar bort den extra horisontella navigatorn på små processkartor och tonar ned webbläsarens scrollbars.
+- Ändrar inte användarens nodpositioner, processlogik eller kopplingar.
+
 ## v0.20.84 – Field Order Hotfix
 
 - Säkrar att fältetiketterna **Vad händer?** och **Vem ansvarar?** alltid visas före sina kontroller i stegredigeringen.

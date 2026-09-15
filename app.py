@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.20.84"
+APP_VERSION = "0.20.85"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -2164,6 +2164,16 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 #pk48 .p48-next-step-menu{left:31px!important}
 #pk48 .p48-node.process{box-shadow:0 1px 4px rgba(31,52,70,.07)!important}
 #pk48 .p48-node.process:hover{box-shadow:0 2px 7px rgba(31,52,70,.09)!important}
+#pk48 .p48-node .p48-label{font-family:Inter,system-ui,sans-serif;word-break:normal;overflow-wrap:break-word;hyphens:none}
+#pk48 .p48-node.process{min-width:200px!important}
+@media(min-width:901px){
+  #pk48.p48-small-map .p48-hnav{display:none!important}
+  #pk48 .p48-scroll{scrollbar-width:thin;scrollbar-color:rgba(91,108,101,.34) transparent}
+  #pk48 .p48-scroll::-webkit-scrollbar{width:8px;height:8px}
+  #pk48 .p48-scroll::-webkit-scrollbar-track{background:transparent}
+  #pk48 .p48-scroll::-webkit-scrollbar-thumb{background:rgba(91,108,101,.30);border:2px solid transparent;border-radius:999px;background-clip:padding-box}
+  #pk48 .p48-scroll::-webkit-scrollbar-thumb:hover{background:rgba(66,86,77,.48);border:2px solid transparent;background-clip:padding-box}
+}
 #pk48.p48-side-context-node .p48-step-understanding-head strong{font-size:11px!important}
 #pk48.p48-side-context-node .p48-step-understanding-head span{font-size:9px!important;white-space:nowrap}
 #pk48.p48-side-context-node .p48-step-understanding-row{grid-template-columns:60px minmax(0,1fr)!important;gap:8px!important;font-size:10.5px!important;line-height:1.4!important}
@@ -4404,6 +4414,7 @@ function refreshLargeMapMode(){
   if(!root||typeof MapliniPerformanceCore==='undefined')return null;
   const policy=MapliniPerformanceCore.policy(nodes.size,links.length);
   root.classList.toggle('p48-large-map',policy.large);
+  root.classList.toggle('p48-small-map',nodes.size>0&&nodes.size<=12);
   root.dataset.performanceMode=policy.mode;
   return policy;
 }
