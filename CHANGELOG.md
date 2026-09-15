@@ -1,3 +1,10 @@
+## v0.20.86 – Resizable Nodes Restored
+
+- Tar bort den hårda minsta aktivitetsbredden från v0.20.85.
+- Aktivitetsrutor kan åter göras ned till 120 px med sina resize-handtag.
+- Behåller normal ordbrytning så text inte delas mitt i vanliga ord.
+- Ingen ändring av processdata eller sparformat.
+
 ## v0.20.85 – Small Canvas Readability
 
 - Förhindrar att vanliga ord i aktivitetsrutor bryts mitt i ordet.

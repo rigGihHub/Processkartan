@@ -9,6 +9,7 @@ assert(!C.rectsIntersect({left:0,top:0,right:10,bottom:10},{left:11,top:11,right
 let p=C.place(-100,-100,180,76);assert.strictEqual(p.x,10);assert.strictEqual(p.y,10);
 p=C.place(9999,9999,180,76);assert(p.x<=2210&&p.y<=1314);
 let r=C.resize({x:10,y:10,width:180,height:76},'nw',-500,-500,'process');assert(r.x>=10&&r.y>=10&&r.width<=700&&r.height<=500);
+r=C.resize({x:10,y:10,width:180,height:76},'se',-500,0,'process');assert.strictEqual(r.width,120);
 r=C.resize({x:10,y:10,width:180,height:180},'se',100,20,'decision');assert.strictEqual(r.width,r.height);assert(r.width>=130&&r.width<=420);
 assert(!C.hasMeaningfulDelta(1,0));assert(C.hasMeaningfulDelta(2,0));
 console.log('canvas core OK');

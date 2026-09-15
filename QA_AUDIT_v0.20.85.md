@@ -7,7 +7,7 @@ Readability correction based on a real desktop screenshot of a two-step process.
 ## Expected result
 
 - Activity labels wrap at word boundaries.
-- Legacy narrow activity boxes remain readable.
+- Activity labels remain readable without overriding the user's chosen width.
 - Small maps do not show the duplicate horizontal navigator.
 - Large-map navigation and process geometry remain unchanged.
 

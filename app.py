@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.20.85"
+APP_VERSION = "0.20.86"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -2165,7 +2165,6 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 #pk48 .p48-node.process{box-shadow:0 1px 4px rgba(31,52,70,.07)!important}
 #pk48 .p48-node.process:hover{box-shadow:0 2px 7px rgba(31,52,70,.09)!important}
 #pk48 .p48-node .p48-label{font-family:Inter,system-ui,sans-serif;word-break:normal;overflow-wrap:break-word;hyphens:none}
-#pk48 .p48-node.process{min-width:200px!important}
 @media(min-width:901px){
   #pk48.p48-small-map .p48-hnav{display:none!important}
   #pk48 .p48-scroll{scrollbar-width:thin;scrollbar-color:rgba(91,108,101,.34) transparent}
