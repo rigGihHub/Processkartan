@@ -1,3 +1,11 @@
+## v0.20.88 – Flow-aware Palette
+
+- Gör palettens vanliga klick fungerande även på desktop; dragning är inte längre ett krav.
+- När exakt en lämplig ruta är markerad skapar klick på Aktivitet, Objekt ut, Beslut, Dokument eller Slut ett kopplat nästa steg.
+- Start, Anteckning och Objekt in fortsätter skapas fristående eftersom de inte säkert betyder “nästa steg”.
+- Vid markerat beslut öppnas vägvalet i stället för att Maplini gissar en gren.
+- Dragning till en bestämd canvasposition behåller sitt tidigare fristående beteende.
+
 ## v0.20.87 – Direct Node Sizing
 
 - Lägger till tydliga storleksval: **Kompakt**, **Normal** och **Stor** när en eller flera rutor markeras.

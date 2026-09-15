@@ -6,7 +6,7 @@ UNDERSTANDING_CORE = (Path(__file__).resolve().parents[1] / "maplini_step_unders
 
 
 def test_edit_form_precedes_context_summary():
-    assert 'APP_VERSION = "0.20.87"' in APP
+    assert 'APP_VERSION = "0.20.88"' in APP
     assert APP.index('id="p48-process-info"') < APP.index('id="p48-step-understanding"')
 
 

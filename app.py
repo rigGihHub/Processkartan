@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.20.87"
+APP_VERSION = "0.20.88"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -1959,7 +1959,8 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   #pk48:not(.p48-side-context-active) .p48-method-palette>.p48-title{
     font-size:14px!important;line-height:1.2!important;color:#223b32!important;margin:0 0 4px!important;
   }
-  #pk48:not(.p48-side-context-active) .p48-palette-hint{margin:0 0 9px!important;color:#72827b!important;font-size:10px!important;line-height:1.4!important}
+#pk48:not(.p48-side-context-active) .p48-palette-hint{margin:0 0 9px!important;color:#72827b!important;font-size:10px!important;line-height:1.4!important}
+#pk48.p48-side-context-node .p48-palette-hint{display:block;margin:0 0 8px!important;padding:7px 8px;border-radius:8px;background:#f1f7f4;color:#416255!important;font-size:9px!important;line-height:1.4!important}
   #pk48:not(.p48-side-context-active) .p48-method-flow{display:none!important}
   #pk48:not(.p48-side-context-active) .p48-item-core{
     min-height:40px!important;padding:7px 9px!important;margin-bottom:6px!important;border-radius:10px!important;
@@ -8624,8 +8625,19 @@ function paletteInsertPoint(){
 }
 function addFromPalette(item,{closeMobile=false}={}){
   if(!item||sharedView)return;
+  const source=selectedIds.size===1?nodes.get([...selectedIds][0]):null;
+  const type=String(item.dataset.type||'process'),explicitInput=type==='object'&&item.dataset.objectRole==='input';
+  const canContinue=Boolean(source&&isNextStepSource(source)&&!['start','note'].includes(type)&&!explicitInput);
+  if(canContinue&&source.data.type==='decision'){
+    closeNodeNextMenus(source.nextWrap);source.nextMenu.hidden=false;source.nextBtn.setAttribute('aria-expanded','true');
+    if(closeMobile)setMobileTools(false);msg('Beslut behöver tydliga vägar · välj Ja + Nej eller en specifik stegtyp');return;
+  }
+  if(canContinue){
+    if(closeMobile)setMobileTools(false);
+    addNextStepFromNode(source.data.id,type);return;
+  }
   const [x,y]=paletteInsertPoint();
-  addNode(item.dataset.type,x,y,{objectRole:item.dataset.objectRole||null});
+  addNode(type,x,y,{objectRole:item.dataset.objectRole||null});
   if(closeMobile)setMobileTools(false);
   const paletteName=item.dataset.type==='object'?(item.dataset.objectRole==='input'?'Objekt in':'Objekt ut'):(item.dataset.type==='process'?'Aktivitet':'Steg');
   msg(`${paletteName} tillagt · markera rutan och använd Nästa för att fortsätta`);
@@ -8652,7 +8664,7 @@ if(batchText)batchText.addEventListener('keydown',e=>{if(e.key==='Escape'){e.pre
 if(emptyFirstText)emptyFirstText.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();createFirstActivityFromStarter()}else if(e.key==='Escape'){e.preventDefault();emptyFirstText.blur()}});
 root.querySelectorAll('.p48-item').forEach(i=>{
   i.addEventListener('dragstart',e=>{e.dataTransfer.setData('text/plain',JSON.stringify({type:i.dataset.type,objectRole:i.dataset.objectRole||null}));e.dataTransfer.effectAllowed='copy'});
-  i.addEventListener('click',e=>{if(isMobileLayout()){e.preventDefault();addFromPalette(i,{closeMobile:true})}});
+  i.addEventListener('click',e=>{e.preventDefault();addFromPalette(i,{closeMobile:isMobileLayout()})});
   i.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();addFromPalette(i,{closeMobile:isMobileLayout()})}});
 });
 canvas.addEventListener('dragover',e=>{e.preventDefault();e.dataTransfer.dropEffect='copy'});

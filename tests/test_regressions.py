@@ -234,7 +234,7 @@ def test_v01015_mobile_palette_supports_tap_and_keyboard_add():
     items = soup.select('.p48-item[role="button"][tabindex="0"]')
     assert len(items) == 9
     assert "function addFromPalette(item,{closeMobile=false}={})" in APP
-    assert "if(isMobileLayout()){e.preventDefault();addFromPalette(i,{closeMobile:true})}" in APP
+    assert "i.addEventListener('click',e=>{e.preventDefault();addFromPalette(i,{closeMobile:isMobileLayout()})})" in APP
     assert "if(e.key==='Enter'||e.key===' ')" in APP
     assert "setMobileTools(false)" in APP
 
