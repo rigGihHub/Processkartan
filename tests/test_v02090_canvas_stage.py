@@ -23,4 +23,5 @@ def test_single_step_palette_click_continues_the_flow():
 def test_small_map_stage_removes_desktop_document_chrome():
     assert "#pk48.p48-small-map .p48-scroll{scrollbar-width:none!important" in APP
     assert "#p48-canvas.p48-default-surface" in APP
+    assert "background-image:none!important" in APP
     assert "canvas.classList.toggle('p48-default-surface'" in APP

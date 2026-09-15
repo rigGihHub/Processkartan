@@ -11,7 +11,7 @@ Canvas Stage rättar den visuella skalan och nybörjarflödet för små processe
 - Fri resize ned till 120 px är oförändrad.
 - Ett palettklick fortsätter automatiskt en process som bara har ett steg.
 - Småkartor döljer visuella scrollbars utan att blockera panorering eller stora kartor.
-- Endast vit, enfärgad standardcanvas får den neutrala arbetsytan; användarvalda bakgrunder lämnas orörda.
+- Endast vit, enfärgad standardcanvas får den rena neutrala arbetsytan; användarvalda bakgrunder lämnas orörda.
 - Äldre systemstandard för nodkant migreras till en tunnare, lugnare standard utan att skriva över andra användarvalda färger.
 
 ## Automatiska kontroller

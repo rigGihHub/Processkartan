@@ -2259,7 +2259,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 #pk48.p48-small-map .p48-scroll::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
 #pk48.p48-small-map #p48-canvas.p48-default-surface{
   background-color:#f7f9f8!important;
-  background-image:radial-gradient(circle at 50% 32%,rgba(255,255,255,.96) 0,rgba(255,255,255,.58) 32%,rgba(247,249,248,0) 64%)!important;
+  background-image:none!important;
 }
 #pk48 .p48-node.process:not(.p48-style-raised):not(.p48-style-3d):not(.p48-style-glass){
   border-radius:8px!important;box-shadow:0 1px 2px rgba(31,52,70,.07)!important;
