@@ -1,3 +1,9 @@
+## v0.20.84 – Field Order Hotfix
+
+- Säkrar att fältetiketterna **Vad händer?** och **Vem ansvarar?** alltid visas före sina kontroller i stegredigeringen.
+- Gör ordningen explicit i både HTML och CSS så att äldre globala formulärregler inte kan vända läsflödet.
+- Ingen ändring av processdata, beteende, synk eller sparformat.
+
 ## v0.20.83 – Focused Step Editing
 
 - Låter redigeringsfälten komma före sammanhangsöversikten när ett steg markeras.
