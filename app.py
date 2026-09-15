@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.20.89"
+APP_VERSION = "0.20.90"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -2253,6 +2253,25 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 #pk48 .p48-node.selected .p48-handle.left{left:-6px!important;transform:translateY(-50%)}
 #pk48 .p48-node.selected .p48-handle.top{top:-6px!important;transform:translateX(-50%)}
 #pk48 .p48-node.selected .p48-handle.bottom{bottom:-6px!important;transform:translateX(-50%)}
+/* v0.20.90 – Canvas Stage: small processes stay at a human scale and the
+   process, rather than browser chrome, owns the visual field. */
+#pk48.p48-small-map .p48-scroll{scrollbar-width:none!important;background:#f7f9f8!important}
+#pk48.p48-small-map .p48-scroll::-webkit-scrollbar{display:none!important;width:0!important;height:0!important}
+#pk48.p48-small-map #p48-canvas.p48-default-surface{
+  background-color:#f7f9f8!important;
+  background-image:radial-gradient(circle at 50% 32%,rgba(255,255,255,.96) 0,rgba(255,255,255,.58) 32%,rgba(247,249,248,0) 64%)!important;
+}
+#pk48 .p48-node.process:not(.p48-style-raised):not(.p48-style-3d):not(.p48-style-glass){
+  border-radius:8px!important;box-shadow:0 1px 2px rgba(31,52,70,.07)!important;
+}
+#pk48 .p48-node.process:not(.p48-style-raised):not(.p48-style-3d):not(.p48-style-glass):hover{
+  box-shadow:0 3px 10px rgba(31,52,70,.09)!important;
+}
+#pk48 .p48-node .p48-label{line-height:1.25!important}
+#pk48 .p48-node>.p48-next-step-wrap{left:calc(100% + 7px)!important}
+#pk48 .p48-next-step-btn{width:20px!important;height:20px!important;box-shadow:none!important;opacity:.34!important}
+#pk48 .p48-next-step-btn::before{font-size:13px!important}
+#pk48 .p48-next-step-menu{left:27px!important}
 @media(max-width:700px),(pointer:coarse){
   #pk48 .p48-node>.p48-next-step-wrap{left:calc(100% + 6px)!important}
   #pk48 .p48-node.selected .p48-handle{opacity:.5!important}
@@ -3968,6 +3987,7 @@ function applyProcessStyle(force=false){
   const c=processPatternColor||'#d7e1e8';
   const bg=processBackground||'#ffffff';
   const type=processBackgroundType||'solid';
+  canvas.classList.toggle('p48-default-surface',type==='solid'&&String(bg).toLowerCase()==='#ffffff');
 
   canvas.style.backgroundColor=(type==='none')?'transparent':bg;
   canvas.style.backgroundImage='none';
@@ -4111,7 +4131,8 @@ function styleOf(d){
   const allowedShapes=new Set(['standard','rectangle','rounded','pill']);
   const nodeStyle=allowedNodeStyles.has(d.nodeStyle)?d.nodeStyle:'standard';
   const shapePreset=allowedShapes.has(d.shapePreset)?d.shapePreset:'standard';
-  return{fontFamily:d.fontFamily||'Inter',fontSize:Number(d.fontSize||13),textColor:d.textColor||'#17202a',bgColor:d.bgColor||defBg(d.type),fontWeight:d.fontWeight||'700',fontStyle:d.fontStyle||'normal',textDecoration:d.textDecoration||'none',textAlign:d.textAlign||'center',borderColor:d.borderColor||'#637387',borderWidth:Number(d.borderWidth||2),nodeStyle,shapePreset}
+  const legacyBorder=!d.borderColor||d.borderColor==='#637387';
+  return{fontFamily:d.fontFamily||'Inter',fontSize:Number(d.fontSize||13),textColor:d.textColor||'#17202a',bgColor:d.bgColor||defBg(d.type),fontWeight:d.fontWeight||'700',fontStyle:d.fontStyle||'normal',textDecoration:d.textDecoration||'none',textAlign:d.textAlign||'center',borderColor:legacyBorder?'#7f8d87':d.borderColor,borderWidth:legacyBorder&&Number(d.borderWidth||2)===2?1.5:Number(d.borderWidth||1.5),nodeStyle,shapePreset}
 }
 function responsibilityRole(item){
   if(!item||!['process','subprocess','decision'].includes(String(item.data?.type||'')))return '';
@@ -5598,9 +5619,9 @@ function sharedStyleValue(items,key){
   return items.every(item=>styleOf(item.data)[key]===first)?first:null;
 }
 const nodeSizePresets={
-  compact:{process:[140,60],object:[120,54],decision:[140,140],default:[140,60]},
-  normal:{process:[200,76],object:[170,64],decision:[180,180],default:[200,76]},
-  large:{process:[280,100],object:[240,86],decision:[240,240],default:[280,100]}
+  compact:{process:[128,52],object:[116,46],decision:[124,124],default:[128,52]},
+  normal:{process:[176,64],object:[152,54],decision:[156,156],default:[176,64]},
+  large:{process:[232,82],object:[204,70],decision:[204,204],default:[232,82]}
 };
 function nodePresetDimensions(item,preset){
   const config=nodeSizePresets[preset];if(!config||!item)return null;
@@ -8686,7 +8707,7 @@ function paletteInsertPoint(){
 }
 function addFromPalette(item,{closeMobile=false}={}){
   if(!item||sharedView)return;
-  const source=selectedIds.size===1?nodes.get([...selectedIds][0]):null;
+  const source=selectedIds.size===1?nodes.get([...selectedIds][0]):(nodes.size===1?[...nodes.values()][0]:null);
   const type=String(item.dataset.type||'process'),explicitInput=type==='object'&&item.dataset.objectRole==='input';
   const canContinue=Boolean(source&&isNextStepSource(source)&&!['start','note'].includes(type)&&!explicitInput);
   if(canContinue&&source.data.type==='decision'){
@@ -9469,7 +9490,9 @@ function scaleWholeProcess(factor,fitToPage=false,recordHistory=true){
 }
 function fitProcessToScreen(){
   const rects=selectedNodeRects();if(!rects.length){msg('Processen har inga rutor att anpassa');return false}
-  const result=MapliniEditingCore.fitToScreen(rects,{width:scroll.clientWidth,height:scroll.clientHeight},{margin:64,minScale:.25,maxScale:1.5});if(!result)return false;
+  /* Fitting may zoom out, but never magnify a small map. A compact node must
+     remain compact instead of becoming 150% after every process open. */
+  const result=MapliniEditingCore.fitToScreen(rects,{width:scroll.clientWidth,height:scroll.clientHeight},{margin:72,minScale:.25,maxScale:1});if(!result)return false;
   applyCanvasScale(result.scale,false);
   requestAnimationFrame(()=>{scroll.scrollLeft=result.scrollLeft;scroll.scrollTop=result.scrollTop;if(hnav)hnav.scrollLeft=scroll.scrollLeft;scheduleHorizontalNavSync()});
   msg(`Anpassad till ${Math.round(result.scale*100)}%`);return true;

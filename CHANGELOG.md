@@ -1,3 +1,13 @@
+## v0.20.90 – Canvas Stage
+
+- Stoppar automatisk förstoring av små processer; Anpassa kan zooma ut men aldrig blåsa upp kompakta rutor över 100 %.
+- Gör storlekspresets märkbart mindre: Kompakt 128×52, Normal 176×64 och Stor 232×82 för aktiviteter.
+- Döljer dokumentlika scrollbars på små kartor och ger standardcanvasen en mycket lätt neutral arbetsyta.
+- Gör standardaktiviteter plattare med tunnare systemkant, mindre radie och nästan ingen skugga.
+- Krymper snabbskapandets plus till 20 px och låter det framträda först vid fokus eller hover.
+- När processen bara har ett steg fortsätter ett palettklick automatiskt därifrån även om markeringen tappats.
+- Ändrar inte användarvalda processfärger, specialstilar, kopplingslogik eller sparformat.
+
 ## v0.20.89 – Editor Reset
 
 - Flyttar snabbskapandets `+` säkert utanför rutan i den faktiskt renderade CSS:en.
