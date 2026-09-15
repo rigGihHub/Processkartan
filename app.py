@@ -8816,14 +8816,22 @@ if(processGlance){
   if(items[0]){items[0].classList.add('p48-glance-action');items[0].tabIndex=0;items[0].title='Hoppa till processens början';items[0].addEventListener('click',()=>jumpReadAnchor(processGlanceSummary().startId));items[0].addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();jumpReadAnchor(processGlanceSummary().startId)}})}
   if(items[1]){items[1].classList.add('p48-glance-action');items[1].tabIndex=0;items[1].title='Hoppa till processens slut';items[1].addEventListener('click',()=>jumpReadAnchor(processGlanceSummary().endId));items[1].addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();jumpReadAnchor(processGlanceSummary().endId)}})}
 }
-if(modeDrawBtn)modeDrawBtn.addEventListener('click',()=>setReadMode(false));
-if(readModeToggle)readModeToggle.addEventListener('click',()=>setReadMode(!readMode));
+/* Work modes are delegated from the stable editor root. Streamlit may move
+   command-bar elements while organizing the UI; one capture handler avoids
+   stale or duplicated target listeners. */
+root.addEventListener('click',e=>{
+  const mode=e.target&&e.target.closest?e.target.closest('#p48-mode-draw,#p48-readmode-toggle,#p48-walkthrough-launch'):null;
+  if(!mode||!root.contains(mode))return;
+  e.preventDefault();e.stopImmediatePropagation();
+  if(mode.id==='p48-mode-draw')setReadMode(false);
+  else if(mode.id==='p48-readmode-toggle')setReadMode(!readMode);
+  else openWalkthrough();
+},true);
 if(mobileReaderFollow)mobileReaderFollow.addEventListener('click',openWalkthrough);
 if(mobileReaderFit)mobileReaderFit.addEventListener('click',fitProcessToScreen);
 if(mobileReaderEdit)mobileReaderEdit.addEventListener('click',()=>{mobileConsumptionInitialized=true;setReadMode(false)});
 if(readPanelClose)readPanelClose.addEventListener('click',()=>{readPanel.hidden=true});
 document.addEventListener('keydown',e=>{if(readMode&&e.key==='Escape'){e.preventDefault();setReadMode(false)}});
-if(walkthroughLaunch)walkthroughLaunch.addEventListener('click',openWalkthrough);
 if(walkthroughClose)walkthroughClose.addEventListener('click',closeWalkthrough);
 if(walkthroughBackdrop)walkthroughBackdrop.addEventListener('click',closeWalkthrough);
 if(walkthroughStartBtn)walkthroughStartBtn.addEventListener('click',beginWalkthrough);

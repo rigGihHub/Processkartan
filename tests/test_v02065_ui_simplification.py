@@ -26,8 +26,8 @@ def test_secondary_tools_are_relocated_not_duplicated():
     assert "presentation.body.appendChild(el)" in APP
 
 def test_draw_and_understand_modes_reuse_existing_read_mode():
-    assert "modeDrawBtn.addEventListener('click',()=>setReadMode(false))" in APP
-    assert "readModeToggle.addEventListener('click',()=>setReadMode(!readMode))" in APP
+    assert "if(mode.id==='p48-mode-draw')setReadMode(false)" in APP
+    assert "else if(mode.id==='p48-readmode-toggle')setReadMode(!readMode)" in APP
     assert "readModeToggle.textContent='Förstå'" in APP
 
 def test_no_data_or_backend_schema_change_for_ui_pass():

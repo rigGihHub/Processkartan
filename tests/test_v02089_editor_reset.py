@@ -28,3 +28,10 @@ def test_responsive_and_lifecycle_hooks_stay_inside_editor_scope():
     assert APP.index("function syncResponsiveLayout()") < scope_close
     assert APP.index("function flushLifecycleSave(context)") < scope_close
     assert APP.index("function alignEditorTop()") < scope_close
+
+
+def test_primary_work_modes_use_one_stable_delegated_switch():
+    assert "closest('#p48-mode-draw,#p48-readmode-toggle,#p48-walkthrough-launch')" in APP
+    assert "e.stopImmediatePropagation()" in APP
+    assert "else if(mode.id==='p48-readmode-toggle')setReadMode(!readMode)" in APP
+    assert "else openWalkthrough()" in APP
