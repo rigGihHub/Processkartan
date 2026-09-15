@@ -5,7 +5,7 @@ APP = (Path(__file__).resolve().parents[1] / "app.py").read_text(encoding="utf-8
 
 
 def test_desktop_palette_click_is_an_actual_action():
-    assert 'APP_VERSION = "0.20.91"' in APP
+    assert 'APP_VERSION = "0.20.92"' in APP
     assert "i.addEventListener('click',e=>{e.preventDefault();addFromPalette(i,{closeMobile:isMobileLayout()})})" in APP
 
 

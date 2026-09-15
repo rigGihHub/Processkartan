@@ -1,3 +1,10 @@
+## v0.20.92 – Understand Sidebar
+
+- Behåller vänsterflanken i Förstå på desktop i stället för att låta hela arbetsytan hoppa i sidled.
+- Ersätter ritverktygen med en lugn, klickbar lista över processens steg.
+- Markerar aktuellt steg och ger direktval för början och hela processen.
+- Mobil behåller den tidigare skärmfokuserade läsvyn utan sidopanel.
+
 ## v0.20.91 – Visible Formatting
 
 - Visar rutans viktigaste formatering direkt när ett steg markeras: bakgrund, textfärg, fet, kursiv och understruken text.
