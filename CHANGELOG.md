@@ -1,3 +1,12 @@
+## v0.20.89 – Editor Reset
+
+- Flyttar snabbskapandets `+` säkert utanför rutan i den faktiskt renderade CSS:en.
+- Ersätter åtta konkurrerande markeringspunkter med en enda tydlig storlekskontroll; kopplingspunkter tonas ned tills de används.
+- Tar bort den duplicerade sammanhangssammanfattningen från Rita-panelen och låter redigeringsfälten vara huvuduppgiften.
+- Plattar ut stegredigeringen och rutstorleksvalen så sidopanelen inte består av kort inuti kort.
+- Återställer sidopanelen till toppen när användaren väljer ett nytt steg.
+- Bevarar användarens processfärger, typsnitt, positioner, fria rutstorlekar och processlogik.
+
 ## v0.20.88 – Flow-aware Palette
 
 - Gör palettens vanliga klick fungerande även på desktop; dragning är inte längre ett krav.

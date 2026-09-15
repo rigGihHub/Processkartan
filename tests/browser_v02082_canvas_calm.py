@@ -26,7 +26,7 @@ with sync_playwright() as playwright:
 
     page.locator("#p48-canvas .p48-node").nth(1).click()
     summary = page.locator("#p48-step-understanding")
-    assert summary.is_visible()
+    assert not summary.is_visible()
     assert summary.locator(".p48-step-understanding-row").count() >= 5
     assert summary.locator(".p48-step-understanding-head").inner_text() == "Stegets sammanhang"
 

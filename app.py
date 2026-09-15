@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.20.88"
+APP_VERSION = "0.20.89"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -2199,6 +2199,65 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 #pk48.p48-side-context-node .p48-step-understanding-row{padding:4px 0!important;border-top:1px solid #f0f3f1}
 #pk48.p48-side-context-node .p48-step-understanding-row:first-child{border-top:0}
 #pk48.p48-side-context-node .p48-step-understanding-next{margin-top:2px!important;padding-top:7px!important;border-top-color:#dde7e2!important}
+/* v0.20.89 – Editor Reset. This final layer deliberately wins over the
+   accumulated legacy editor CSS; keep the canvas interaction visually quiet. */
+@media(min-width:1200px){#pk48 .p48-body{grid-template-columns:336px minmax(0,1fr)!important}}
+#pk48.p48-side-context-active #p48-format-panel{
+  margin:0!important;padding:4px 2px 14px!important;border:0!important;border-radius:0!important;
+  background:transparent!important;box-shadow:none!important;
+}
+#pk48.p48-side-context-active #p48-format-panel>.p48-format-context-title{
+  margin:0 0 3px!important;font-size:15px!important;letter-spacing:-.01em!important;
+}
+#pk48.p48-side-context-active #p48-format-panel>.p48-format-context-hint{
+  margin:0 0 14px!important;max-width:29em;font-size:10.5px!important;line-height:1.45!important;
+}
+#pk48.p48-side-context-node #p48-process-info{display:grid;gap:12px;padding:0!important}
+#pk48.p48-side-context-node #p48-process-info .p48-process-info-head{margin:0!important}
+#pk48.p48-side-context-node #p48-process-info>label{gap:6px!important;margin:0!important}
+#pk48.p48-side-context-node #p48-process-info textarea{min-height:72px;padding:9px 10px!important;line-height:1.45!important}
+#pk48.p48-side-context-node #p48-process-info input{min-height:36px;padding:7px 9px!important}
+#pk48.p48-side-context-node .p48-step-io-context{margin:0!important}
+#pk48.p48-side-context-node .p48-io-title{margin:2px 0 5px!important}
+#pk48.p48-side-context-node .p48-addio{min-height:34px!important;margin:0 0 7px!important}
+/* The edit form already contains What, Who, Input and Output. Do not repeat
+   empty values below it in Draw mode; Understand has its own focused panel. */
+#pk48:not(.p48-read-mode).p48-side-context-node #p48-step-understanding{display:none!important}
+#pk48 .p48-node-size-presets{
+  margin:4px 0 12px!important;padding:10px 0 0!important;border:0!important;border-top:1px solid #e5ebe8!important;
+  border-radius:0!important;background:transparent!important;
+}
+#pk48 .p48-node-size-presets-head{margin:0 0 7px!important}
+#pk48 .p48-node-size-presets-head span{font-size:8.5px!important;font-weight:550!important;color:#87948e!important}
+#pk48 .p48-node-size-preset{min-height:30px!important;border-radius:7px!important;background:transparent!important;box-shadow:none!important}
+#pk48 .p48-node-size-preset.active{background:#eaf4ef!important}
+/* Quick-next belongs beside the node, never inside its content flow. */
+#pk48 .p48-node>.p48-next-step-wrap{
+  position:absolute!important;left:calc(100% + 8px)!important;top:50%!important;
+  transform:translateY(-50%)!important;margin:0!important;width:max-content!important;
+}
+#pk48 .p48-next-step-btn{opacity:.46!important}
+#pk48 .p48-node:hover .p48-next-step-btn,#pk48 .p48-node.selected .p48-next-step-btn,#pk48 .p48-next-step-btn:focus-visible{opacity:1!important}
+/* One familiar resize affordance is enough. Connector points remain available
+   but recede until the pointer reaches them. */
+#pk48 .p48-node.selected .p48-resize:not(.se),#pk48 .p48-node.multi-selected .p48-resize:not(.se){display:none!important}
+#pk48 .p48-node.selected .p48-resize.se,#pk48 .p48-node.multi-selected .p48-resize.se{
+  display:block!important;width:11px!important;height:11px!important;right:-7px!important;bottom:-7px!important;
+  border:2px solid #fff!important;border-radius:999px!important;background:#2f8065!important;
+  box-shadow:0 0 0 1px #2f8065!important;
+}
+#pk48 .p48-node.selected{outline:2px solid rgba(47,128,101,.82)!important;outline-offset:3px!important;box-shadow:0 6px 18px rgba(31,52,70,.10)!important}
+#pk48 .p48-node.selected .p48-handle{width:10px!important;height:10px!important;border-width:2px!important;opacity:.28!important;box-shadow:none!important}
+#pk48 .p48-node.selected .p48-handle:hover,#pk48 .p48-node.selected .p48-handle:focus-visible{opacity:1!important}
+#pk48 .p48-node.selected .p48-handle.right{right:-6px!important;transform:translateY(-50%)}
+#pk48 .p48-node.selected .p48-handle.left{left:-6px!important;transform:translateY(-50%)}
+#pk48 .p48-node.selected .p48-handle.top{top:-6px!important;transform:translateX(-50%)}
+#pk48 .p48-node.selected .p48-handle.bottom{bottom:-6px!important;transform:translateX(-50%)}
+@media(max-width:700px),(pointer:coarse){
+  #pk48 .p48-node>.p48-next-step-wrap{left:calc(100% + 6px)!important}
+  #pk48 .p48-node.selected .p48-handle{opacity:.5!important}
+  #pk48 .p48-node.selected .p48-resize.se{width:16px!important;height:16px!important;right:-9px!important;bottom:-9px!important}
+}
 @media(max-width:700px),(pointer:coarse){
   #pk48{--p48-control-h:44px;--p48-control-radius:10px}
   #pk48 .p48-btn{min-height:44px}
@@ -5313,10 +5372,12 @@ function activateMobileConsumptionDefault(){
   requestAnimationFrame(()=>fitMobileReadProcess({announce:false}));return true;
 }
 function select(el){
+  const previousSelectedId=selectedId;
   const hadLinks=(selectedLinkIndex!=null||selectedLinkIndices.size>0);
   selectedLinkIndex=null;selectedLinkIndices.clear();refreshLinkControls();
   selectedIds.clear();selectedId=el.dataset.id;selectedIds.add(selectedId);
   refreshControls();updateSelectionUi();scheduleOverviewRefresh();
+  if(previousSelectedId!==selectedId&&sidePanel&&!readMode){requestAnimationFrame(()=>{sidePanel.scrollTop=0})}
   if(readMode){renderReadPanel(nodes.get(selectedId));refreshReadFocusPath()}
   if(hadLinks)requestFullLinkRender(true);
 }

@@ -6,7 +6,7 @@ UNDERSTANDING_CORE = (Path(__file__).resolve().parents[1] / "maplini_step_unders
 
 
 def test_edit_form_precedes_context_summary():
-    assert 'APP_VERSION = "0.20.88"' in APP
+    assert 'APP_VERSION = "0.20.89"' in APP
     assert APP.index('id="p48-process-info"') < APP.index('id="p48-step-understanding"')
 
 
@@ -23,4 +23,4 @@ def test_context_summary_is_secondary_but_preserved():
 
 
 def test_wide_desktop_gets_readable_sidebar_without_harming_narrow_layout():
-    assert "@media(min-width:1200px){#pk48 .p48-body{grid-template-columns:320px minmax(0,1fr)!important}}" in APP
+    assert "@media(min-width:1200px){#pk48 .p48-body{grid-template-columns:336px minmax(0,1fr)!important}}" in APP
