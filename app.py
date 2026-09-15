@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.20.82"
+APP_VERSION = "0.20.83"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -2166,6 +2166,20 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 #pk48.p48-side-context-node .p48-step-understanding-head span{font-size:9px!important;white-space:nowrap}
 #pk48.p48-side-context-node .p48-step-understanding-row{grid-template-columns:60px minmax(0,1fr)!important;gap:8px!important;font-size:10.5px!important;line-height:1.4!important}
 #pk48.p48-side-context-node .p48-step-understanding-row b{font-size:8.5px!important;line-height:1.45!important}
+/* v0.20.83 – Focused Step Editing: the form is the primary selected-step action. */
+@media(min-width:1200px){#pk48 .p48-body{grid-template-columns:320px minmax(0,1fr)!important}}
+#pk48.p48-side-context-node .p48-step-io-context{
+  margin:6px 0 8px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;
+}
+#pk48.p48-side-context-node .p48-step-understanding{
+  margin:12px 0 2px!important;padding:10px 0 0!important;border:0!important;border-top:1px solid #e5ece8!important;
+  border-radius:0!important;background:transparent!important;
+}
+#pk48.p48-side-context-node .p48-step-understanding-head{margin-bottom:7px!important}
+#pk48.p48-side-context-node .p48-step-understanding-list{gap:0!important}
+#pk48.p48-side-context-node .p48-step-understanding-row{padding:4px 0!important;border-top:1px solid #f0f3f1}
+#pk48.p48-side-context-node .p48-step-understanding-row:first-child{border-top:0}
+#pk48.p48-side-context-node .p48-step-understanding-next{margin-top:2px!important;padding-top:7px!important;border-top-color:#dde7e2!important}
 @media(max-width:700px),(pointer:coarse){
   #pk48{--p48-control-h:44px;--p48-control-radius:10px}
   #pk48 .p48-btn{min-height:44px}
@@ -2653,15 +2667,10 @@ Skicka orderbekräftelse"></textarea>
       <div class="p48-title p48-format-context-title" id="p48-format-title">Formatering</div>
       <div class="p48-sub p48-format-context-hint" id="p48-format-hint">Markera en ruta eller pil för att visa relevanta inställningar.</div>
       <div id="p48-controls">
-        <section id="p48-step-understanding" class="p48-step-understanding p48-node-only p48-single-node-only" hidden aria-label="Förstå steget">
-          <div class="p48-step-understanding-head"><strong>Förstå steget</strong><span>Snabböverblick</span></div>
-          <div id="p48-step-understanding-list" class="p48-step-understanding-list"></div>
-          <div id="p48-empty-step-suggestions" class="p48-empty-step-suggestions" hidden><div class="p48-empty-step-suggestions-head">Förslag utifrån stegen runt omkring · kontrollera innan du använder</div><div id="p48-empty-step-suggestion-list"></div></div>
-        </section>
         <div id="p48-process-info" class="p48-process-info p48-node-only p48-single-node-only" hidden>
           <div class="p48-process-info-head">
             <div><div class="p48-title">Om steget</div><div class="p48-small">Beskriv arbetet – utan att belasta canvasen.</div></div>
-            <span id="p48-process-info-progress" class="p48-process-info-progress">0 av 8</span>
+            <span id="p48-process-info-progress" class="p48-process-info-progress">0 av 8 fält</span>
           </div>
           <label>Vad händer?<textarea id="p48-info-description" rows="3" maxlength="12000" placeholder="Beskriv kort vad som görs och varför."></textarea></label>
           <div class="p48-step-io p48-step-io-context">
@@ -2694,8 +2703,12 @@ Skicka orderbekräftelse"></textarea>
             <div id="p48-check-question-list" class="p48-check-question-list"></div>
             <button type="button" id="p48-add-check-question" class="p48-mini p48-add-check-question">＋ Lägg till fråga</button>
           </details>
-          <div class="p48-process-info-foot">Input och output hanteras separat och sparas med steget.</div>
         </div>
+        <section id="p48-step-understanding" class="p48-step-understanding p48-node-only p48-single-node-only" hidden aria-label="Förstå steget">
+          <div class="p48-step-understanding-head"><strong>Stegets sammanhang</strong></div>
+          <div id="p48-step-understanding-list" class="p48-step-understanding-list"></div>
+          <div id="p48-empty-step-suggestions" class="p48-empty-step-suggestions" hidden><div class="p48-empty-step-suggestions-head">Förslag utifrån stegen runt omkring · kontrollera innan du använder</div><div id="p48-empty-step-suggestion-list"></div></div>
+        </section>
         <section id="p48-source-trace" class="p48-source-trace p48-node-only p48-single-node-only" hidden aria-label="Källspårning">
           <div class="p48-source-trace-head"><div><div class="p48-title">Källa till steget</div><div class="p48-small">Underlaget som låg bakom källtolkningen.</div></div><span id="p48-source-trace-count" class="p48-source-trace-count"></span></div>
           <div id="p48-source-support" class="p48-source-support" hidden></div><div id="p48-source-disagreements" class="p48-source-disagreements"></div><div id="p48-source-trace-list" class="p48-source-trace-list"></div>
@@ -5404,7 +5417,7 @@ function renderProcessInfoEditor(item){
   renderSuggestionList(systemSuggestions,processInfoSuggestions('system'));
   const c=MapliniProcessInfoCore.completion(info);
   if(processInfoProgress){
-    processInfoProgress.textContent=`${c.filled} av ${c.total}`;
+    processInfoProgress.textContent=`${c.filled} av ${c.total} fält`;
     processInfoProgress.title=c.filled===c.total?'Steget är väl beskrivet':'Frivilligt – fyll bara i det som är relevant';
   }
   if(processInfoMoreCount){

@@ -28,7 +28,7 @@ with sync_playwright() as playwright:
     summary = page.locator("#p48-step-understanding")
     assert summary.is_visible()
     assert summary.locator(".p48-step-understanding-row").count() >= 5
-    assert summary.locator(".p48-step-understanding-head span").evaluate("el => getComputedStyle(el).whiteSpace") == "nowrap"
+    assert summary.locator(".p48-step-understanding-head").inner_text() == "Stegets sammanhang"
 
     browser.close()
 

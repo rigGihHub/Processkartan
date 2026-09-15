@@ -8,7 +8,7 @@ def test_version_and_core_loaded():
     assert '_STEP_UNDERSTANDING_CORE_JS' in APP
     assert 'MapliniStepUnderstandingCore' in CORE
 def test_compact_understanding_ui_present():
-    for text in ['Förstå steget','Snabböverblick','p48-step-understanding-list']:
+    for text in ['Förstå steget','Stegets sammanhang','p48-step-understanding-list']:
         assert text in APP
     assert 'renderStepUnderstanding(item)' in APP
     assert 'stepUnderstandingNext(item)' in APP

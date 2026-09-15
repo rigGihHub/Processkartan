@@ -1,3 +1,11 @@
+## v0.20.83 – Focused Step Editing
+
+- Låter redigeringsfälten komma före sammanhangsöversikten när ett steg markeras.
+- Tar bort kort-i-kort-ramen runt Input och Output och onödig förklarande fotnot.
+- Gör sammanhangsöversikten lugnare och sekundär utan att ta bort Vad/Vem/Input/Output/Sedan.
+- Ger sidopanelen 320 px på bred desktop där utrymmet finns, men behåller kompaktare bredd på mindre skärmar.
+- Ingen ändring av processdata, synk, behörigheter eller sparformat.
+
 ## v0.20.82 – Canvas Calm verified
 
 - Fixar CSS-ordningsfelet som gjorde att nodernas `+` fortfarande renderades som en fylld grön knapp live.
