@@ -21,3 +21,10 @@ def test_draw_mode_does_not_repeat_step_summary():
     assert "#pk48:not(.p48-read-mode).p48-side-context-node #p48-step-understanding{display:none!important}" in APP
     assert "previousSelectedId!==selectedId" in APP
     assert "sidePanel.scrollTop=0" in APP
+
+
+def test_responsive_and_lifecycle_hooks_stay_inside_editor_scope():
+    scope_close = APP.rindex("})();\n</script>")
+    assert APP.index("function syncResponsiveLayout()") < scope_close
+    assert APP.index("function flushLifecycleSave(context)") < scope_close
+    assert APP.index("function alignEditorTop()") < scope_close

@@ -5,6 +5,7 @@
 - Tar bort den duplicerade sammanhangssammanfattningen från Rita-panelen och låter redigeringsfälten vara huvuduppgiften.
 - Plattar ut stegredigeringen och rutstorleksvalen så sidopanelen inte består av kort inuti kort.
 - Återställer sidopanelen till toppen när användaren väljer ett nytt steg.
+- Håller responsivitets- och livscykelhanteringen i editorns runtime-scope så liveappen inte kastar `ReferenceError` vid start, resize eller sidbyte.
 - Bevarar användarens processfärger, typsnitt, positioner, fria rutstorlekar och processlogik.
 
 ## v0.20.88 – Flow-aware Palette

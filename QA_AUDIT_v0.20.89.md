@@ -18,6 +18,7 @@ Samlad Editor Reset efter visuell granskning av v0.20.88: stegredigering, marker
 - Fri storleksändring och storlekspresets använder befintliga width/height-fält.
 - Processfärger, typsnitt, nodpositioner och kopplingslogik bevaras.
 - Förstå och Följ använder oförändrad processlogik.
+- Responsiv layout, livscykelsparning och initial canvasjustering körs inom editorns runtime-scope.
 
 ## Livekontroll efter deploy
 

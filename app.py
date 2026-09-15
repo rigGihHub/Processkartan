@@ -9732,7 +9732,6 @@ renderProcesses();refreshControls();updateSelectionUi();updateAccountUi();setSav
    }
  }
 })();
-})();
 
 
 function syncResponsiveLayout(){
@@ -9781,6 +9780,7 @@ function alignEditorTop(){
 MapliniPerformanceCore.rafOnce('align-editor-top',alignEditorTop);
 setTimeout(()=>MapliniPerformanceCore.rafOnce('align-editor-top',alignEditorTop),100);
 
+})();
 </script>
 </div>
 """
