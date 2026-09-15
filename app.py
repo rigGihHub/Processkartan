@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.20.86"
+APP_VERSION = "0.20.87"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -2165,6 +2165,13 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 #pk48 .p48-node.process{box-shadow:0 1px 4px rgba(31,52,70,.07)!important}
 #pk48 .p48-node.process:hover{box-shadow:0 2px 7px rgba(31,52,70,.09)!important}
 #pk48 .p48-node .p48-label{font-family:Inter,system-ui,sans-serif;word-break:normal;overflow-wrap:break-word;hyphens:none}
+.p48-node-size-presets{margin:2px 0 10px;padding:9px 10px;border:1px solid #dbe5e0;border-radius:9px;background:#fafcfb}
+.p48-node-size-presets-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:7px;color:#40584e;font:750 10px/1.3 Inter,system-ui}
+.p48-node-size-presets-head span{color:#819087;font-size:8.5px;font-weight:600}
+.p48-node-size-presets-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.p48-node-size-preset{min-height:32px;border:1px solid #d5dfda;border-radius:8px;background:#fff;color:#40584e;font:700 10px Inter,system-ui;cursor:pointer}
+.p48-node-size-preset:hover{border-color:#aac5b8;background:#f3f8f5}
+.p48-node-size-preset.active{border-color:#75a58f;background:#eaf4ef;color:#225f49}
 @media(min-width:901px){
   #pk48.p48-small-map .p48-hnav{display:none!important}
   #pk48 .p48-scroll{scrollbar-width:thin;scrollbar-color:rgba(91,108,101,.34) transparent}
@@ -2726,6 +2733,14 @@ Skicka orderbekräftelse"></textarea>
           <div class="p48-source-change"><button id="p48-source-change-btn" type="button">Jämför ny version av källan</button><input id="p48-source-change-file" type="file" accept=".pdf,.docx,.txt,.md,.csv" hidden><div id="p48-source-change-results" class="p48-source-change-results"></div><div class="p48-source-change-note">Maplini ändrar inte processen automatiskt. Du granskar skillnaderna först.</div></div>
           <div class="p48-source-trace-note"><span class="p48-source-trace-badge">KÄLLSPÅR</span>Visar vad Maplini utgick från när steget skapades. Kontrollera alltid mot originalkällan. För dokument: Kontrollera alltid mot originaldokumentet.</div>
         </section>
+        <div class="p48-node-size-presets p48-node-only" aria-label="Rutstorlek">
+          <div class="p48-node-size-presets-head">Rutstorlek <span>Dra i hörnen för fri storlek</span></div>
+          <div class="p48-node-size-presets-actions" role="group" aria-label="Välj rutstorlek">
+            <button type="button" class="p48-node-size-preset" data-node-size-preset="compact">Kompakt</button>
+            <button type="button" class="p48-node-size-preset" data-node-size-preset="normal">Normal</button>
+            <button type="button" class="p48-node-size-preset" data-node-size-preset="large">Stor</button>
+          </div>
+        </div>
         <details class="p48-visual-details p48-node-only">
           <summary>Utseende</summary>
           <div class="p48-text-format-block p48-node-only">
@@ -3039,6 +3054,7 @@ const bold=root.querySelector('#p48-bold'),italic=root.querySelector('#p48-itali
 const documentLinkEditor=root.querySelector('#p48-document-link-editor'),documentUrlInput=root.querySelector('#p48-document-url'),documentOpenEditor=root.querySelector('#p48-document-open-editor');
 const fontAllBtn=root.querySelector('#p48-font-all');
 const nodeStyleSelect=root.querySelector('#p48-node-style'),nodeShapeSelect=root.querySelector('#p48-node-shape'),nodeStyleAllBtn=root.querySelector('#p48-node-style-all');
+const nodeSizePresetButtons=[...root.querySelectorAll('[data-node-size-preset]')];
 const pointSize=root.querySelector('#p48-point-size'),pointColor=root.querySelector('#p48-point-color'),hidePoints=root.querySelector('#p48-hide-points');
 const canvasBg=root.querySelector('#p48-canvas-bg'),bgType=root.querySelector('#p48-bg-type'),bgPatternColor=root.querySelector('#p48-bg-pattern-color'),bgDensity=root.querySelector('#p48-bg-density'),logoFile=root.querySelector('#p48-logo-file'),logoRemove=root.querySelector('#p48-logo-remove'),logoHide=root.querySelector('#p48-logo-hide'),logoSize=root.querySelector('#p48-logo-size'),processLogo=root.querySelector('#p48-process-logo');
 const gradientControls=root.querySelector('#p48-gradient-controls'),gradientStart=root.querySelector('#p48-gradient-start'),gradientEnd=root.querySelector('#p48-gradient-end'),gradientAngle=root.querySelector('#p48-gradient-angle');
@@ -5519,6 +5535,35 @@ function sharedStyleValue(items,key){
   const first=styleOf(items[0].data)[key];
   return items.every(item=>styleOf(item.data)[key]===first)?first:null;
 }
+const nodeSizePresets={
+  compact:{process:[140,60],object:[120,54],decision:[140,140],default:[140,60]},
+  normal:{process:[200,76],object:[170,64],decision:[180,180],default:[200,76]},
+  large:{process:[280,100],object:[240,86],decision:[240,240],default:[280,100]}
+};
+function nodePresetDimensions(item,preset){
+  const config=nodeSizePresets[preset];if(!config||!item)return null;
+  return config[item.data.type]||config.default;
+}
+function nodeSizePresetOf(item){
+  if(!item)return'';const width=Math.round(item.el.offsetWidth),height=Math.round(item.el.offsetHeight);
+  for(const name of Object.keys(nodeSizePresets)){const dims=nodePresetDimensions(item,name);if(Math.abs(width-dims[0])<=1&&Math.abs(height-dims[1])<=1)return name}
+  return'';
+}
+function refreshNodeSizePresets(items){
+  const presets=(items||[]).map(nodeSizePresetOf),active=presets.length&&presets.every(x=>x&&x===presets[0])?presets[0]:'';
+  nodeSizePresetButtons.forEach(button=>{const on=button.dataset.nodeSizePreset===active;button.classList.toggle('active',on);button.setAttribute('aria-pressed',on?'true':'false')});
+}
+function applyNodeSizePreset(preset){
+  if(!requireEdit())return false;const items=selectedNodeItems();if(!items.length||!nodeSizePresets[preset])return false;
+  pushUndo(true);
+  for(const item of items){
+    const [width,height]=nodePresetDimensions(item,preset),centerX=item.el.offsetLeft+item.el.offsetWidth/2,centerY=item.el.offsetTop+item.el.offsetHeight/2;
+    const pos=MapliniCanvasCore.place(centerX-width/2,centerY-height/2,width,height);
+    item.el.style.boxSizing='border-box';item.el.style.minWidth='0px';item.el.style.maxWidth='none';item.el.style.width=width+'px';item.el.style.minHeight='0px';item.el.style.height=height+'px';
+    item.el.style.left=pos.x+'px';item.el.style.top=pos.y+'px';item.data.width=width;item.data.height=height;sync(item.el);invalidateNodeGeom(item.data.id);markNodeLinksDirty(item.data.id);
+  }
+  requestFullLinkRender(true);drawLinks();persist();refreshControls();updateSelectionUi();msg(`${items.length>1?items.length+' rutor':'Rutan'} fick ${preset==='compact'?'kompakt':preset==='large'?'stor':'normal'} storlek`);return true;
+}
 function syncFontSelect(value){
   if(!font)return;
   const wanted=String(value||'Inter');
@@ -5606,6 +5651,7 @@ function refreshControls(){
   borderWidth.value=String(sharedStyleValue(items,'borderWidth')??s.borderWidth);
   syncNodeStyleSelect(sharedStyleValue(items,'nodeStyle')||s.nodeStyle);
   if(nodeShapeSelect)nodeShapeSelect.value=sharedStyleValue(items,'shapePreset')||s.shapePreset;
+  refreshNodeSizePresets(items);
   bold.classList.toggle('active',sharedStyleValue(items,'fontWeight')==='700');
   italic.classList.toggle('active',sharedStyleValue(items,'fontStyle')==='italic');
   under.classList.toggle('active',sharedStyleValue(items,'textDecoration')==='underline');
@@ -8906,6 +8952,7 @@ fontAllBtn.addEventListener('click',()=>{
 });
 nodeStyleSelect.addEventListener('change',()=>updateStyle({nodeStyle:nodeStyleSelect.value}));
 if(nodeShapeSelect)nodeShapeSelect.addEventListener('change',()=>updateStyle({shapePreset:nodeShapeSelect.value}));
+nodeSizePresetButtons.forEach(button=>button.addEventListener('click',()=>applyNodeSizePreset(button.dataset.nodeSizePreset)));
 
 nodeQuickShapeChoices.forEach(btn=>btn.addEventListener('click',e=>{
   e.preventDefault();e.stopPropagation();

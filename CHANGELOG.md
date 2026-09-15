@@ -1,3 +1,10 @@
+## v0.20.87 – Direct Node Sizing
+
+- Lägger till tydliga storleksval: **Kompakt**, **Normal** och **Stor** när en eller flera rutor markeras.
+- Behåller fri storleksändring via hörnhandtagen och visar detta direkt bredvid storleksvalen.
+- Storleksval fungerar för flera markerade rutor, sparas i befintliga width/height-fält och uppdaterar kopplingarna.
+- Beslut behåller kvadratisk form och olika nodtyper får proportioner anpassade till sitt innehåll.
+
 ## v0.20.86 – Resizable Nodes Restored
 
 - Tar bort den hårda minsta aktivitetsbredden från v0.20.85.

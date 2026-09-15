@@ -7,7 +7,7 @@ CANVAS_CORE = (ROOT / "maplini_canvas_core.js").read_text(encoding="utf-8")
 
 
 def test_activity_width_is_not_locked_by_css():
-    assert 'APP_VERSION = "0.20.86"' in APP
+    assert 'APP_VERSION = "0.20.87"' in APP
     assert "#pk48 .p48-node.process{min-width:200px!important}" not in APP
 
 
