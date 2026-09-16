@@ -5,7 +5,7 @@ APP = (Path(__file__).parents[1] / "app.py").read_text(encoding="utf-8")
 
 
 def test_understand_keeps_a_contextual_desktop_sidebar():
-    assert 'APP_VERSION = "0.20.92"' in APP
+    assert 'APP_VERSION = "0.20.93"' in APP
     assert '#pk48.p48-read-mode .p48-side{display:flex!important' in APP
     assert '#pk48.p48-read-mode .p48-body{grid-template-columns:240px minmax(0,1fr)!important}' in APP
     assert 'class="p48-read-sidebar"' in APP

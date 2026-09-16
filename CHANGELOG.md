@@ -1,3 +1,10 @@
+## v0.20.93 – Truthful Process Outline
+
+- Sorterar Förstå-listan efter processens verkliga kopplingar i stället för rutornas position på canvasen.
+- Visar Ja/Nej och andra explicita grenetiketter utan att välja en huvudgren åt användaren.
+- Väntar med sammanfogade steg tills grenarna har visats och hanterar loopar utan dubbletter.
+- Samlar fristående delflöden under Okopplade steg så att listan inte antyder ett samband som saknas.
+
 ## v0.20.92 – Understand Sidebar
 
 - Behåller vänsterflanken i Förstå på desktop i stället för att låta hela arbetsytan hoppa i sidled.

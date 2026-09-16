@@ -5,7 +5,7 @@ APP = (Path(__file__).parents[1] / "app.py").read_text(encoding="utf-8")
 
 
 def test_primary_node_formatting_is_visible_before_step_form():
-    assert 'APP_VERSION = "0.20.92"' in APP
+    assert 'APP_VERSION = "0.20.93"' in APP
     quick = APP.index('class="p48-quick-format p48-node-only"')
     process_info = APP.index('id="p48-process-info"')
     advanced = APP.index('class="p48-visual-details p48-node-only"')

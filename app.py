@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.20.92"
+APP_VERSION = "0.20.93"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -1698,6 +1698,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 #pk48 .p48-read-sidebar-title{margin-top:4px;font:800 16px/1.25 Inter,system-ui;color:#263f35}
 #pk48 .p48-read-sidebar-help{margin-top:5px;color:#788880;font:550 9.5px/1.45 Inter,system-ui}
 #pk48 .p48-read-sidebar-list{display:flex;flex-direction:column;gap:3px;min-height:0;margin-top:13px;overflow:auto;scrollbar-width:thin}
+#pk48 .p48-read-sidebar-group{margin:9px 7px 3px;color:#8a9791;font:750 8px/1.2 Inter,system-ui;letter-spacing:.08em;text-transform:uppercase}
 #pk48 .p48-read-sidebar-step{display:grid;grid-template-columns:22px minmax(0,1fr);align-items:center;gap:7px;width:100%;min-height:38px;padding:6px 7px;border:1px solid transparent;border-radius:8px;background:transparent;color:#40544b;text-align:left;cursor:pointer}
 #pk48 .p48-read-sidebar-step:hover{border-color:#dbe5e0;background:#f3f7f5}
 #pk48 .p48-read-sidebar-step.active{border-color:#9fc4b3;background:#eaf4ef;color:#214f3e}
@@ -5456,17 +5457,18 @@ function refreshMobileReaderBar(){
 function renderReadSidebar(){
   if(!readSidebarList)return;
   readSidebarList.innerHTML='';
-  const ordered=[...nodes.values()].sort((a,b)=>{
-    const ax=Number(a.data.x)||0,bx=Number(b.data.x)||0;if(Math.abs(ax-bx)>48)return ax-bx;
-    return(Number(a.data.y)||0)-(Number(b.data.y)||0);
-  });
-  ordered.forEach((item,index)=>{
+  const ordered=MapliniNavigationCore.orderedOutline([...nodes.values()].map(item=>item.data),links);
+  let disconnectedLabelShown=false;
+  ordered.forEach((entry,index)=>{
+    const item=nodes.get(entry.id);if(!item)return;
+    if(entry.disconnected&&!disconnectedLabelShown){const label=document.createElement('div');label.className='p48-read-sidebar-group';label.textContent='Okopplade steg';readSidebarList.appendChild(label);disconnectedLabelShown=true}
     const button=document.createElement('button');button.type='button';button.className='p48-read-sidebar-step';button.dataset.readSidebarId=item.data.id;
+    button.style.paddingLeft=(7+Math.min(3,Number(entry.depth)||0)*10)+'px';
     if(selectedIds.has(item.data.id))button.classList.add('active');
     const number=document.createElement('span');number.className='p48-read-sidebar-index';number.textContent=String(index+1);
     const copy=document.createElement('span');copy.className='p48-read-sidebar-copy';
     const title=document.createElement('strong');title.textContent=item.data.text||'Namnlöst steg';
-    const type=document.createElement('small');type.textContent=readTypeLabel(item.data.type);
+    const type=document.createElement('small');type.textContent=(entry.branchLabel?entry.branchLabel+' · ':'')+readTypeLabel(item.data.type);
     copy.append(title,type);button.append(number,copy);button.addEventListener('click',()=>jumpToProcessNode(item.data.id));readSidebarList.appendChild(button);
   });
   if(readSidebarStart)readSidebarStart.disabled=!ordered.length;

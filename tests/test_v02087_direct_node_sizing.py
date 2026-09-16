@@ -5,7 +5,7 @@ APP = (Path(__file__).resolve().parents[1] / "app.py").read_text(encoding="utf-8
 
 
 def test_direct_size_presets_are_available_for_selected_nodes():
-    assert 'APP_VERSION = "0.20.92"' in APP
+    assert 'APP_VERSION = "0.20.93"' in APP
     for preset, label in (("compact", "Kompakt"), ("normal", "Normal"), ("large", "Stor")):
         assert f'data-node-size-preset="{preset}">{label}</button>' in APP
     assert "Dra i hörnen för fri storlek" in APP
