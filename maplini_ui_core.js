@@ -8,14 +8,14 @@ function selectionHint(state){
   const linkCount=Number(state.selectedLinkCount||0);
   if(singleLink)return 'Koppling markerad – endast kopplingsinställningar visas.';
   if(nodeCount>1)return nodeCount+' objekt markerade – använd Ta bort markerat eller klicka utanför för att avmarkera.';
-  if(nodeCount===1 || state.nodeEnabled)return 'Ruta markerad – redigera text, färg, formatering och inputs/outputs.';
+  if(nodeCount===1 || state.nodeEnabled)return 'Ruta markerad – börja med text och formatering. Fler inställningar finns längre ned.';
   if(linkCount>0)return linkCount+' kopplingar markerade – använd Ta bort markerat eller klicka utanför för att avmarkera.';
   return 'Markera en ruta eller koppling för att visa relevanta inställningar.';
 }
 
 function applyCanvasCalmHotfix(){
   if(typeof document==='undefined')return;
-  const styleId='maplini-v02094-workspace-focus';
+  const styleId='maplini-v02095-focused-editing';
   if(!document.getElementById(styleId)){
     const style=document.createElement('style');
     style.id=styleId;
@@ -29,16 +29,19 @@ function applyCanvasCalmHotfix(){
       #pk48 .p48-node.process{box-shadow:0 1px 4px rgba(31,52,70,.07)!important}
       #pk48 .p48-node.process:hover{box-shadow:0 2px 7px rgba(31,52,70,.09)!important}
 
-      /* v0.20.94 – keep editing chrome subordinate to the process */
-      #pk48:not(.p48-read-mode) .p48-side{width:268px!important;padding:10px 9px!important}
+      /* v0.20.95 – focused editing: common controls first, secondary chrome quieter */
+      #pk48:not(.p48-read-mode) .p48-side{width:268px!important;padding:9px 9px!important}
       #pk48:not(.p48-read-mode) .p48-body{grid-template-columns:268px minmax(0,1fr)!important}
-      #pk48 .p48-side details{margin-block:4px!important}
-      #pk48 .p48-side summary{min-height:32px!important}
-      #pk48 .p48-quick-format{gap:5px!important;padding:7px!important;margin-bottom:7px!important}
-      #pk48 .p48-quick-format button{min-height:30px!important}
+      #pk48 .p48-side details{margin-block:3px!important;border-color:#e1e8e4!important}
+      #pk48 .p48-side summary{min-height:30px!important;padding-block:5px!important}
+      #pk48 .p48-quick-format{gap:4px!important;padding:6px!important;margin:5px 0 7px!important;border-radius:9px!important}
+      #pk48 .p48-quick-format button{min-height:30px!important;min-width:30px!important;padding:4px 6px!important}
+      #pk48 .p48-side input,#pk48 .p48-side textarea,#pk48 .p48-side select{min-height:34px!important}
+      #pk48 .p48-side textarea{resize:vertical!important}
+      #pk48 .p48-side .p48-muted,#pk48 .p48-side small{line-height:1.35!important}
       #pk48 .p48-canvas-wrap,#pk48 .p48-stage{min-width:0!important}
       @media (min-width:1100px){#pk48:not(.p48-read-mode) .p48-side{width:252px!important}#pk48:not(.p48-read-mode) .p48-body{grid-template-columns:252px minmax(0,1fr)!important}}
-      @media (max-width:700px){#pk48:not(.p48-read-mode) .p48-body{grid-template-columns:minmax(0,1fr)!important}#pk48:not(.p48-read-mode) .p48-side{width:auto!important}}
+      @media (max-width:700px){#pk48:not(.p48-read-mode) .p48-body{grid-template-columns:minmax(0,1fr)!important}#pk48:not(.p48-read-mode) .p48-side{width:auto!important;padding:8px!important}#pk48 .p48-quick-format{position:sticky;top:0;z-index:4;background:rgba(255,255,255,.97)!important}}
     `;
     document.head.appendChild(style);
   }
