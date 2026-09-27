@@ -15,7 +15,7 @@ function selectionHint(state){
 
 function applyCanvasCalmHotfix(){
   if(typeof document==='undefined')return;
-  const styleId='maplini-v02095-focused-editing';
+  const styleId='maplini-v02096-draw-flow-focus';
   if(!document.getElementById(styleId)){
     const style=document.createElement('style');
     style.id=styleId;
@@ -29,7 +29,7 @@ function applyCanvasCalmHotfix(){
       #pk48 .p48-node.process{box-shadow:0 1px 4px rgba(31,52,70,.07)!important}
       #pk48 .p48-node.process:hover{box-shadow:0 2px 7px rgba(31,52,70,.09)!important}
 
-      /* v0.20.95 – focused editing: common controls first, secondary chrome quieter */
+      /* v0.20.96 – draw-flow focus: keep creation actions visible and secondary controls quiet */
       #pk48:not(.p48-read-mode) .p48-side{width:268px!important;padding:9px 9px!important}
       #pk48:not(.p48-read-mode) .p48-body{grid-template-columns:268px minmax(0,1fr)!important}
       #pk48 .p48-side details{margin-block:3px!important;border-color:#e1e8e4!important}
@@ -40,6 +40,11 @@ function applyCanvasCalmHotfix(){
       #pk48 .p48-side textarea{resize:vertical!important}
       #pk48 .p48-side .p48-muted,#pk48 .p48-side small{line-height:1.35!important}
       #pk48 .p48-canvas-wrap,#pk48 .p48-stage{min-width:0!important}
+      #pk48:not(.p48-read-mode) .p48-node.selected{z-index:3!important}
+      #pk48:not(.p48-read-mode) .p48-node.selected .p48-next-step-wrap{opacity:1!important;pointer-events:auto!important}
+      #pk48:not(.p48-read-mode) .p48-next-step-menu{max-height:min(320px,55vh)!important;overflow:auto!important}
+      #pk48:not(.p48-read-mode) .p48-side details:not([open]){background:transparent!important;box-shadow:none!important}
+      #pk48:not(.p48-read-mode) .p48-side details[open]{background:#fff!important}
       @media (min-width:1100px){#pk48:not(.p48-read-mode) .p48-side{width:252px!important}#pk48:not(.p48-read-mode) .p48-body{grid-template-columns:252px minmax(0,1fr)!important}}
       @media (max-width:700px){#pk48:not(.p48-read-mode) .p48-body{grid-template-columns:minmax(0,1fr)!important}#pk48:not(.p48-read-mode) .p48-side{width:auto!important;padding:8px!important}#pk48 .p48-quick-format{position:sticky;top:0;z-index:4;background:rgba(255,255,255,.97)!important}}
     `;
