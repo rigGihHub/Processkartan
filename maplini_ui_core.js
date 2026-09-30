@@ -1,6 +1,18 @@
 (function(global){
 'use strict';
 
+function processGuidance(process){
+  const workflow=global.MapliniWorkflowCore;
+  if(!workflow||typeof workflow.readiness!=='function')return '';
+  const status=workflow.readiness(process);
+  if(status.level==='empty')return 'Börja med första steget.';
+  if(status.level==='draft')return 'Fortsätt från den första rutan med + för att skapa nästa steg.';
+  if(status.level==='warning')return status.detail+' Koppla ihop stegen innan du går vidare.';
+  if(status.level==='error')return status.detail+' Rätta flödet innan du fortsätter.';
+  if(status.level==='ready')return 'Grundflödet hänger ihop. Kontrollera beslut, ansvar och innehåll innan delning eller export.';
+  return status.detail||'';
+}
+
 function selectionHint(state){
   state=state||{};
   const singleLink=state.selectedLinkIndex!==null && state.selectedLinkIndex!==undefined;
@@ -10,6 +22,7 @@ function selectionHint(state){
   if(nodeCount>1)return nodeCount+' objekt markerade – använd Ta bort markerat eller klicka utanför för att avmarkera.';
   if(nodeCount===1 || state.nodeEnabled)return 'Ruta markerad – börja med text och formatering. Fler inställningar finns längre ned.';
   if(linkCount>0)return linkCount+' kopplingar markerade – använd Ta bort markerat eller klicka utanför för att avmarkera.';
+  if(state.process)return processGuidance(state.process)||'Markera en ruta eller koppling för att visa relevanta inställningar.';
   return 'Markera en ruta eller koppling för att visa relevanta inställningar.';
 }
 
@@ -74,5 +87,5 @@ if(typeof document!=='undefined'){
   else setTimeout(applyCanvasCalmHotfix,0);
 }
 
-global.MapliniUiCore={selectionHint,applyCanvasCalmHotfix};
+global.MapliniUiCore={selectionHint,processGuidance,applyCanvasCalmHotfix};
 })(typeof window!=='undefined'?window:globalThis);
