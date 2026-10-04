@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.20.102"
+APP_VERSION = "0.20.103"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -2419,6 +2419,40 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
  #pk48.p48-read-mode .p48-process-glance{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible!important}
  #pk48.p48-read-mode .p48-glance-item{width:auto;min-width:0;box-sizing:border-box}
  #pk48.p48-read-mode .p48-glance-value{white-space:normal;overflow-wrap:anywhere}
+}
+/* v0.20.103 – mobile editing uses bounded rows and tools beside the map. */
+@media(max-width:900px),(pointer:coarse) and (max-width:1100px){
+ #pk48:not(.p48-read-mode) .p48-brand{position:static!important;width:100%!important;height:44px!important;min-height:44px!important;padding:4px 10px!important;box-sizing:border-box}
+ #pk48 .p48-brand-inner{width:100%!important;flex-direction:row;justify-content:space-between;gap:10px}
+ #pk48 .p48-logo-crop{width:130px!important;height:35px!important;overflow:hidden!important;flex:none}
+ #pk48 .p48-logo-crop img{width:130px!important;height:auto!important;transform:none!important}
+ #pk48 .p48-tagline{display:none!important}
+ #pk48 .p48-version{font-size:10px!important;white-space:nowrap}
+ #pk48:not(.p48-read-mode) .p48-top{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px!important;flex-wrap:wrap!important;overflow:visible!important;padding:8px!important;box-sizing:border-box!important}
+ #pk48 .p48-top>*{min-width:0!important;max-width:100%!important}
+ #pk48 .p48-process-cluster,#pk48 .p48-top-utilities{display:contents!important}
+ #pk48 .p48-top #p48-name{grid-column:1/-1;order:0;width:100%!important;min-width:0!important;max-width:100%!important;height:44px!important;font-size:16px!important;box-sizing:border-box}
+ #pk48 .p48-top #p48-mobile-tools{grid-column:1/span 2;order:1;display:inline-flex!important;position:static!important;box-shadow:none!important}
+ #pk48 .p48-top #p48-save{grid-column:3;order:1}
+ #pk48 .p48-top #p48-new{grid-column:4;order:1}
+ #pk48 .p48-top .p48-work-modes{grid-column:1/-1;order:2;width:100%;display:flex!important;box-sizing:border-box}
+ #pk48 .p48-work-modes .p48-mode-btn{flex:1;min-width:0!important;min-height:44px!important;font-size:14px!important}
+ #pk48 .p48-top #p48-home,#pk48 .p48-top #p48-find-menu,#pk48 .p48-top #p48-export-menu,#pk48 .p48-top #p48-more-menu{order:3;grid-column:auto;min-width:0!important;width:100%!important}
+ #pk48 .p48-top .p48-btn,#pk48 .p48-top details>summary{min-width:0!important;width:100%!important;min-height:44px!important;height:auto!important;padding:6px!important;font-size:13px!important;box-sizing:border-box;white-space:nowrap}
+ #pk48 .p48-top #p48-undo,#pk48 .p48-top #p48-redo,#pk48 .p48-top #p48-view-menu,#pk48 .p48-top .p48-smart-layout-split{display:none!important}
+ #pk48 .p48-top .p48-save-state{grid-column:1/-1;order:4;justify-self:end;font-size:10px!important}
+ #pk48 .p48-top details{position:static!important}
+ #pk48 .p48-top .p48-find-popover,#pk48 .p48-top .p48-export-popover,#pk48 .p48-top .p48-more-popover{position:absolute!important;top:calc(100% + 4px)!important;bottom:auto!important;left:8px!important;right:8px!important;width:auto!important;min-width:0!important;max-width:none!important;max-height:min(60dvh,400px)!important;overflow:auto!important;box-sizing:border-box;z-index:320!important}
+ #pk48:not(.p48-read-mode) .p48-body{display:flex!important;flex-direction:column;height:auto!important;min-height:0!important}
+ #pk48:not(.p48-read-mode):not(.p48-mobile-canvas-fullscreen) .p48-scroll{order:1;height:clamp(280px,42dvh,380px)!important;min-height:280px!important;max-height:380px!important;padding-bottom:0!important;box-sizing:border-box}
+ #pk48:not(.p48-read-mode) .p48-mobile-bar{position:sticky!important;top:0!important;bottom:auto!important;left:auto!important;right:auto!important;order:0;margin:0;width:100%;box-sizing:border-box;border-radius:0;box-shadow:none;gap:4px;padding:6px}
+ #pk48 .p48-mobile-bar button{font-size:12px;white-space:normal;overflow-wrap:anywhere}
+ #pk48 .p48-mobile-sheet{position:absolute!important;top:62px!important;bottom:auto!important;max-height:min(60dvh,360px)!important;box-sizing:border-box}
+ #pk48 .p48-mobile-sheet-backdrop{position:absolute!important}
+ #pk48:not(.p48-read-mode) .p48-side{max-height:100%!important;overscroll-behavior:auto!important}
+ #pk48.p48-mobile-canvas-fullscreen .p48-mobile-bar{position:absolute!important;top:auto!important;bottom:8px!important;left:8px!important;right:8px!important;width:auto}
+ #pk48.p48-mobile-canvas-fullscreen .p48-top,#pk48.p48-mobile-canvas-fullscreen .p48-brand{display:none!important}
+ html:has(#pk48.p48-mobile-canvas-fullscreen),body:has(#pk48.p48-mobile-canvas-fullscreen){overflow:hidden!important}
 }
 </style>
 
@@ -5623,6 +5657,7 @@ function renderReadSidebar(){
 }
 function setReadMode(on){return setReadModeWithOptions(on)}
 function setReadModeWithOptions(on,{silent=false}={}){
+  if(isMobileLayout()){setMobileTools(false);setMobileSheet(null)}
   readMode=Boolean(on);root.classList.toggle('p48-read-mode',readMode);syncWorkModeButtons();if(readMode){refreshProcessGlance();renderReadSidebar()}else refreshReadScanGuide();if(readModeToggle){readModeToggle.textContent='Förstå'}if(readHint)readHint.hidden=!readMode;
   if(!readMode&&readPanel)readPanel.hidden=true;refreshMobileReaderBar();applyRoleUi();refreshControls();updateSelectionUi();if(readMode&&selectedId)renderReadPanel(nodes.get(selectedId));refreshReadFocusPath();if(!silent)msg(readMode?'Läsvy – tryck på ett steg för detaljer':'Redigeringsläge');
 }

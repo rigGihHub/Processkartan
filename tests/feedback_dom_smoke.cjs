@@ -100,7 +100,20 @@ async function finishBranch(e,answer){
   assert.equal(phone.doc.querySelector('#p48-export-menu').parentElement.className,'p48-top-utilities');
   assert.equal(swipe(map,'pointerdown',200).defaultPrevented,true,'editing retains custom canvas panning');
   swipe(map,'pointerup',200);
+  const count=phone.doc.querySelectorAll('.p48-node').length;
+  phone.click('#p48-mobile-add');assert.equal(phone.doc.querySelector('#p48-mobile-sheet').getAttribute('aria-hidden'),'false');
+  phone.click('[data-mobile-add="process"]');
+  assert.equal(phone.doc.querySelectorAll('.p48-node').length,count+1,'the mobile add menu creates a real editable step');
+  assert.equal(phone.doc.querySelector('#p48-mobile-sheet').getAttribute('aria-hidden'),'true');
+  phone.click('#p48-mobile-format');phone.click('#p48-mobile-sheet-format');
+  assert.equal(phone.doc.querySelector('#p48-mobile-tools').getAttribute('aria-expanded'),'true');
+  phone.change('#p48-info-name','Kontrollera mobilredigering');
+  assert.ok([...phone.doc.querySelectorAll('.p48-node .p48-label')].some(el=>el.textContent==='Kontrollera mobilredigering'));
+  phone.click('#p48-readmode-toggle');
+  assert.equal(phone.doc.querySelector('#p48-mobile-tools').getAttribute('aria-expanded'),'false','reading closes the editing drawer');
+  assert.equal(phone.doc.querySelector('#p48-mobile-sheet').getAttribute('aria-hidden'),'true');
+  assert.equal(phone.doc.querySelector('#p48-export-menu').parentElement.id,'p48-mobile-reader-extras');
   assert.deepEqual(phone.errors,[]);
  }finally{phone.dom.window.close()}
- console.log('Feedback DOM smoke passed: onboarding, export placement, both branches, content edits, undo, legacy data, incomplete decisions and native mobile swipes.');
+ console.log('Feedback DOM smoke passed: onboarding, export placement, both branches, content edits, undo, legacy data, incomplete decisions, native mobile swipes and mobile editing.');
 })().catch(e=>{console.error(e);process.exitCode=1});

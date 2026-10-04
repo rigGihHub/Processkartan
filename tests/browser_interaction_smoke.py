@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import ast
 from pathlib import Path
-from playwright.sync_api import sync_playwright
 
 ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "app.py"
@@ -93,6 +92,8 @@ def midpoint_of_box(box):
 
 
 def run() -> None:
+    from playwright.sync_api import sync_playwright
+
     html = extract_editor_html()
     storage_prelude = """<script>
     (function(){

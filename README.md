@@ -1,4 +1,10 @@
-# Maplini v0.20.102 – scrollning på mobilen
+# Maplini v0.20.103 – mobilens redigeringsvy
+
+Mobilens verktygsrad använder rader som ryms på skärmen, med processnamnet på egen rad. Logotypen är mindre och den dubbla underrubriken är borttagen. Snabbknapparna ligger ovanför kartan, som har begränsad höjd. Lägg till-menyn och export/sök/fler verktyg öppnas nära sina knappar. Växling till läsvyn stänger öppna redigeringspaneler.
+
+Verifierat med 516 Python-tester, 39 JavaScript-sviter och DOM-tester av mobilflödet: lägga till ett steg, öppna egenskaper, ändra namnet och växla läge. DOM-tester verifierar inte CSS-layout eller fysisk touch på Android/iOS.
+
+## v0.20.102 – scrollning på mobilen
 
 Mobilens läsvy använder vanlig sidscrollning även när svepet börjar över kartan, ett steg eller en pil. Steglistan har naturlig höjd och överblickens fyra kort visas i två kolumner. Kartan går fortfarande att scrolla i sidled; redigeringslägets panorering behålls. Scrollning är även aktiverad i Streamlits inbäddade ram.
 
