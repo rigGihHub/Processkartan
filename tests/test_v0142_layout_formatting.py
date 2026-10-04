@@ -5,7 +5,7 @@ def test_v0142_contract():
     assert 'APP_VERSION = "' in APP
     assert "syncDesktopViewportHeight" in APP
     assert "--p48-desktop-body-h" in APP
-    assert "components.html(html, height=920, scrolling=False)" in APP
+    assert "components.html(html, height=920, scrolling=True)" in APP
 
 def test_smart_layout_recenters_connectors():
     assert "polishAutomaticConnectedLinks(ids,{forceAuto:true});" in APP

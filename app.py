@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.20.101"
+APP_VERSION = "0.20.102"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -2404,6 +2404,21 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
  #pk48 .p48-welcome-choices button{min-height:0;padding:18px;grid-template-columns:32px 1fr;gap:8px 12px}
  #pk48 .p48-welcome-choices small{grid-column:2}
  #pk48 #p48-export-menu>summary,#pk48 #p48-home{min-height:44px!important}
+}
+/* v0.20.102 – native mobile reading scroll, including swipes on the map. */
+@media(max-width:900px),(pointer:coarse) and (max-width:1100px){
+ html,body{height:auto!important;overflow-y:auto!important;touch-action:pan-x pan-y pinch-zoom!important;overscroll-behavior-y:auto}
+ #pk48{box-sizing:border-box}
+ #pk48.p48-read-mode .p48-body{min-height:0!important;max-height:none!important;overflow:visible!important}
+ #pk48.p48-read-mode .p48-scroll{overflow-x:auto!important;overflow-y:hidden!important;touch-action:pan-x pan-y pinch-zoom!important;overscroll-behavior:auto!important}
+ #pk48.p48-read-mode .p48-canvas-wrap,
+ #pk48.p48-read-mode #p48-canvas,
+ #pk48.p48-read-mode #p48-canvas *{touch-action:pan-x pan-y pinch-zoom!important}
+ #pk48.p48-read-mode .p48-side{box-sizing:border-box}
+ #pk48.p48-read-mode .p48-read-sidebar-list{max-height:none!important;overflow:visible!important;overscroll-behavior:auto;touch-action:pan-y pinch-zoom}
+ #pk48.p48-read-mode .p48-process-glance{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));overflow:visible!important}
+ #pk48.p48-read-mode .p48-glance-item{width:auto;min-width:0;box-sizing:border-box}
+ #pk48.p48-read-mode .p48-glance-value{white-space:normal;overflow-wrap:anywhere}
 }
 </style>
 
@@ -6897,6 +6912,7 @@ function addHtmlLinkHitSegment(index,x1,y1,x2,y2){
   seg.style.transformOrigin='0 50%';
   seg.style.pointerEvents='auto';
   const choose=e=>{
+    if(nativeMobileReadTouch(e))return;
     e.preventDefault();
     e.stopPropagation();
     if(canEdit()){
@@ -6970,6 +6986,7 @@ function renderAllLinksNow(){
     hit.style.pointerEvents='stroke';
     hit.style.cursor='pointer';
     hit.addEventListener('pointerdown',e=>{
+      if(nativeMobileReadTouch(e))return;
       e.preventDefault();
       e.stopPropagation();
       if(canEdit()){
@@ -7146,6 +7163,7 @@ function drawLinks(immediate=false){
 
 
 document.addEventListener('pointerdown',e=>{
+  if(nativeMobileReadTouch(e))return;
   if(e.button!==0)return;
   if(!canvas.contains(e.target))return;
   if(e.target.closest&&e.target.closest('.p48-node'))return;
@@ -7324,12 +7342,13 @@ if(scroll){
 }
 
 // v0.13 mobile canvas gestures: one finger pans blank canvas, two fingers pinch-zoom.
+function nativeMobileReadTouch(e){return readMode&&isMobileLayout()&&e.pointerType==='touch'}
 const mobilePointers=new Map();let mobileGesture=null;
 function mobileGestureBlocked(target){return Boolean(target&&target.closest&&target.closest('.p48-node,.p48-node-quick,.p48-link-quick,.p48-link-hit-segment,.p48-link-visible,.p48-link-selection,.p48-link-handle,.p48-handle,.p48-resize,button,input,select,summary,a'));}
 function resetMobileGesture(){mobileGesture=null;if(!mobilePointers.size&&scroll)scroll.classList.remove('p48-touching')}
 if(scroll){
   scroll.addEventListener('pointerdown',e=>{
-    if(!isMobileLayout()||selectionMode||e.pointerType!=='touch'||mobileGestureBlocked(e.target))return;
+    if(!isMobileLayout()||readMode||selectionMode||e.pointerType!=='touch'||mobileGestureBlocked(e.target))return;
     mobilePointers.set(e.pointerId,{x:e.clientX,y:e.clientY});scroll.classList.add('p48-touching');
     try{scroll.setPointerCapture(e.pointerId)}catch(_){}
     const pts=[...mobilePointers.values()];
@@ -7338,7 +7357,7 @@ if(scroll){
     e.preventDefault();
   },{passive:false});
   scroll.addEventListener('pointermove',e=>{
-    if(!mobilePointers.has(e.pointerId)||!mobileGesture)return;
+    if(readMode||!mobilePointers.has(e.pointerId)||!mobileGesture)return;
     mobilePointers.set(e.pointerId,{x:e.clientX,y:e.clientY});const pts=[...mobilePointers.values()];
     if(pts.length>=2){
       const a=pts[0],b=pts[1],mid=MapliniMobileCore.gestureMidpoint(a,b),rect=scroll.getBoundingClientRect();
@@ -8896,6 +8915,7 @@ deleteSelectionBtn.addEventListener('click',deleteSelectedMany);
 if(clearCanvasBtn)clearCanvasBtn.addEventListener('click',()=>{if(clearEntireCanvas()&&moreMenu)moreMenu.open=false});
 
 canvas.addEventListener('pointerdown',e=>{
+  if(nativeMobileReadTouch(e))return;
   if(!selectionMode||e.button!==0||e.target.closest('.p48-node'))return;
   e.preventDefault();finishTempArrow();
   const startPoint=clientToCanvas(e.clientX,e.clientY);
@@ -10172,4 +10192,4 @@ html = html.replace('</style>', '''
 
 
 ''' + '</style>', 1)
-components.html(html, height=920, scrolling=False)
+components.html(html, height=920, scrolling=True)

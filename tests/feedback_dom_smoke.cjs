@@ -81,10 +81,26 @@ async function finishBranch(e,answer){
  const phone=await editor(null,true);try{
   phone.click('#p48-welcome-example');await delay(80);
   assert.equal(phone.doc.querySelector('#p48-export-menu').parentElement.id,'p48-mobile-reader-extras');
+  const swipe=(target,type,y)=>{
+   const event=new phone.dom.window.Event(type,{bubbles:true,cancelable:true});
+   Object.assign(event,{pointerType:'touch',pointerId:7,clientX:150,clientY:y,button:0});
+   target.dispatchEvent(event);return event;
+  };
+  const map=phone.doc.querySelector('#p48-canvas'),viewport=phone.doc.querySelector('#p48-scroll');
+  const connector=phone.doc.querySelector('.p48-link-hit-segment,.p48-link-hit');assert.ok(connector,'a real connector receives a native swipe');
+  for(const target of [map,phone.doc.querySelector('.p48-node .p48-label'),connector]){
+   const top=viewport.scrollTop;
+   assert.equal(swipe(target,'pointerdown',200).defaultPrevented,false,'reading lets the browser start a native swipe');
+   assert.equal(swipe(target,'pointermove',80).defaultPrevented,false,'reading lets the browser scroll vertically');
+   assert.equal(viewport.scrollTop,top,'reading does not pan the map vertically');
+   swipe(target,'pointerup',80);
+  }
   phone.click('#p48-mobile-reader-home');assert.equal(phone.doc.querySelector('#p48-welcome').hidden,false);
   phone.click('#p48-welcome-close');phone.click('#p48-mobile-reader-edit');
   assert.equal(phone.doc.querySelector('#p48-export-menu').parentElement.className,'p48-top-utilities');
+  assert.equal(swipe(map,'pointerdown',200).defaultPrevented,true,'editing retains custom canvas panning');
+  swipe(map,'pointerup',200);
   assert.deepEqual(phone.errors,[]);
  }finally{phone.dom.window.close()}
- console.log('Feedback DOM smoke passed: onboarding, export placement, both branches, content edits, undo, legacy data and incomplete decisions.');
+ console.log('Feedback DOM smoke passed: onboarding, export placement, both branches, content edits, undo, legacy data, incomplete decisions and native mobile swipes.');
 })().catch(e=>{console.error(e);process.exitCode=1});

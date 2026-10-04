@@ -1,4 +1,10 @@
-# Maplini v0.20.101 – förbättringar från användargranskningen
+# Maplini v0.20.102 – scrollning på mobilen
+
+Mobilens läsvy använder vanlig sidscrollning även när svepet börjar över kartan, ett steg eller en pil. Steglistan har naturlig höjd och överblickens fyra kort visas i två kolumner. Kartan går fortfarande att scrolla i sidled; redigeringslägets panorering behålls. Scrollning är även aktiverad i Streamlits inbäddade ram.
+
+Verifierat med 516 Python-tester, 39 JavaScript-sviter och funktionella DOM-tester av mobilsvep i läs- och redigeringsläge. DOM-testerna kontrollerar händelsehanteringen; fysisk touchscrollning på Android/iOS behöver fortfarande verifieras på en telefon.
+
+## v0.20.101 – förbättringar från användargranskningen
 
 - En komplett upphandlingsprocess med beskrivningar, ansvar, Ja-/Nej-väg och två avslut.
 - Följ-läget stannar vid ofullständiga beslut. Alla vägar behöver namn; ett korrekt Ja/Nej-beslut styrs direkt av svaret. Även beslut med fler namngivna alternativ fungerar.
@@ -10,7 +16,7 @@
 
 Verifierat med 516 Python-tester, 39 JavaScript-sviter och funktionella DOM-tester av den faktiska editorn, inklusive båda beslutsvägarna, import, mobilmeny, ångra och återställning av sparad data. Visuell webbläsar-QA återstår: lokal förhandsvisning blockerades av webbläsarens URL-policy.
 
-Ändringarna är förberedda lokalt och inte pushade eller publicerade.
+Publicerad på https://processkartan.streamlit.app/.
 
 ## Förberedd version: v0.20.100 – Mobil läsvy
 

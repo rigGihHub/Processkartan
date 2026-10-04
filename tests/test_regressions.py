@@ -182,7 +182,7 @@ def test_mobile_logo_uses_contain_and_is_not_crop_locked():
     assert "overflow:visible!important" in mobile
 
 def test_streamlit_component_is_tall_enough_for_mobile_page_scroll():
-    assert "components.html(html, height=920, scrolling=False)" in APP
+    assert "components.html(html, height=920, scrolling=True)" in APP
 
 
 def test_connector_restore_is_normalized():
@@ -506,7 +506,7 @@ def test_v0130_mobile_bottom_bar_and_touch_targets():
         assert f'id="{control}"' in html
     assert 'height:clamp(520px,68dvh,760px)!important' in html
     assert '.p48-link-hit-segment{height:44px!important;min-height:44px!important}' in html
-    assert "if(!isMobileLayout()||selectionMode||e.pointerType!=='touch'||mobileGestureBlocked(e.target))return;" in APP
+    assert "if(!isMobileLayout()||readMode||selectionMode||e.pointerType!=='touch'||mobileGestureBlocked(e.target))return;" in APP
     assert "mobileBar.dataset.mode=selectedMode?'selected':'normal'" in APP
 
 def test_v01023_real_resize_selector_gets_touch_behavior():
@@ -1058,7 +1058,7 @@ def test_v01041_node_formatting_preserves_active_selection():
     assert "refreshControls();updateSelectionUi()" in chunk
 
 def test_v01041_simplified_vertical_scroll_contract():
-    assert "components.html(html, height=920, scrolling=False)" in APP
+    assert "components.html(html, height=920, scrolling=True)" in APP
     assert ".p48-side{scrollbar-width:thin;overscroll-behavior:contain;scrollbar-color:#aab5bf transparent}" in APP
     assert "@media(max-width:900px),(pointer:coarse){.p48-side{scrollbar-width:none}.p48-side::-webkit-scrollbar{width:0;height:0;display:none}}" in APP
     assert ".p48-scroll{overscroll-behavior:contain;scrollbar-gutter:auto}" in APP
