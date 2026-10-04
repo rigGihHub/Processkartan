@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.20.103"
+APP_VERSION = "0.20.104"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -2420,7 +2420,8 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
  #pk48.p48-read-mode .p48-glance-item{width:auto;min-width:0;box-sizing:border-box}
  #pk48.p48-read-mode .p48-glance-value{white-space:normal;overflow-wrap:anywhere}
 }
-/* v0.20.103 – mobile editing uses bounded rows and tools beside the map. */
+/* v0.20.104 – explicit grid rows avoid gaps from reordered grid children. */
+.p48-mobile-main-actions,.p48-mobile-panel-close{display:none}
 @media(max-width:900px),(pointer:coarse) and (max-width:1100px){
  #pk48:not(.p48-read-mode) .p48-brand{position:static!important;width:100%!important;height:44px!important;min-height:44px!important;padding:4px 10px!important;box-sizing:border-box}
  #pk48 .p48-brand-inner{width:100%!important;flex-direction:row;justify-content:space-between;gap:10px}
@@ -2431,18 +2432,27 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
  #pk48:not(.p48-read-mode) .p48-top{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px!important;flex-wrap:wrap!important;overflow:visible!important;padding:8px!important;box-sizing:border-box!important}
  #pk48 .p48-top>*{min-width:0!important;max-width:100%!important}
  #pk48 .p48-process-cluster,#pk48 .p48-top-utilities{display:contents!important}
- #pk48 .p48-top #p48-name{grid-column:1/-1;order:0;width:100%!important;min-width:0!important;max-width:100%!important;height:44px!important;font-size:16px!important;box-sizing:border-box}
- #pk48 .p48-top #p48-mobile-tools{grid-column:1/span 2;order:1;display:inline-flex!important;position:static!important;box-shadow:none!important}
- #pk48 .p48-top #p48-save{grid-column:3;order:1}
- #pk48 .p48-top #p48-new{grid-column:4;order:1}
- #pk48 .p48-top .p48-work-modes{grid-column:1/-1;order:2;width:100%;display:flex!important;box-sizing:border-box}
+ #pk48 .p48-top #p48-name{grid-column:1/-1;grid-row:1;order:0;width:100%!important;min-width:0!important;max-width:100%!important;height:44px!important;font-size:16px!important;box-sizing:border-box}
+ #pk48 .p48-top #p48-mobile-tools{display:none!important}
+ #pk48 .p48-top #p48-save{grid-column:1;grid-row:3;order:1}
+ #pk48 .p48-top #p48-new{grid-column:2;grid-row:3;order:1}
+ #pk48 .p48-top .p48-work-modes{grid-column:1/-1;grid-row:2;order:2;width:100%;display:flex!important;box-sizing:border-box}
  #pk48 .p48-work-modes .p48-mode-btn{flex:1;min-width:0!important;min-height:44px!important;font-size:14px!important}
- #pk48 .p48-top #p48-home,#pk48 .p48-top #p48-find-menu,#pk48 .p48-top #p48-export-menu,#pk48 .p48-top #p48-more-menu{order:3;grid-column:auto;min-width:0!important;width:100%!important}
+ #pk48 .p48-top #p48-export-menu{grid-column:3;grid-row:3;min-width:0!important;width:100%!important}
+ #pk48 .p48-top #p48-more-menu{grid-column:4;grid-row:3;min-width:0!important;width:100%!important}
  #pk48 .p48-top .p48-btn,#pk48 .p48-top details>summary{min-width:0!important;width:100%!important;min-height:44px!important;height:auto!important;padding:6px!important;font-size:13px!important;box-sizing:border-box;white-space:nowrap}
  #pk48 .p48-top #p48-undo,#pk48 .p48-top #p48-redo,#pk48 .p48-top #p48-view-menu,#pk48 .p48-top .p48-smart-layout-split{display:none!important}
- #pk48 .p48-top .p48-save-state{grid-column:1/-1;order:4;justify-self:end;font-size:10px!important}
+ #pk48 .p48-brand-inner .p48-save-state{font-size:10px!important;padding:3px 5px;white-space:nowrap}
+ #pk48 .p48-brand-inner{gap:6px}
+ #pk48 .p48-top details>summary{list-style:none!important;display:flex!important;align-items:center;justify-content:center;font-size:12px!important}
+ #pk48 .p48-top details>summary::-webkit-details-marker{display:none}
+ #pk48 .p48-top details>summary::marker{content:''}
+ #pk48 .p48-mobile-main-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;grid-column:1/-1;margin-bottom:8px}
+ #pk48 .p48-mobile-main-actions #p48-home,#pk48 .p48-mobile-main-actions #p48-find-menu{width:100%;min-width:0;box-sizing:border-box}
+ #pk48 .p48-mobile-main-actions #p48-find-menu[open]{grid-column:1/-1}
  #pk48 .p48-top details{position:static!important}
  #pk48 .p48-top .p48-find-popover,#pk48 .p48-top .p48-export-popover,#pk48 .p48-top .p48-more-popover{position:absolute!important;top:calc(100% + 4px)!important;bottom:auto!important;left:8px!important;right:8px!important;width:auto!important;min-width:0!important;max-width:none!important;max-height:min(60dvh,400px)!important;overflow:auto!important;box-sizing:border-box;z-index:320!important}
+ #pk48 .p48-top .p48-mobile-main-actions .p48-find-popover{position:static!important;margin-top:6px;max-height:240px!important;width:100%!important;box-sizing:border-box}
  #pk48:not(.p48-read-mode) .p48-body{display:flex!important;flex-direction:column;height:auto!important;min-height:0!important}
  #pk48:not(.p48-read-mode):not(.p48-mobile-canvas-fullscreen) .p48-scroll{order:1;height:clamp(280px,42dvh,380px)!important;min-height:280px!important;max-height:380px!important;padding-bottom:0!important;box-sizing:border-box}
  #pk48:not(.p48-read-mode) .p48-mobile-bar{position:sticky!important;top:0!important;bottom:auto!important;left:auto!important;right:auto!important;order:0;margin:0;width:100%;box-sizing:border-box;border-radius:0;box-shadow:none;gap:4px;padding:6px}
@@ -2450,10 +2460,12 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
  #pk48 .p48-mobile-sheet{position:absolute!important;top:62px!important;bottom:auto!important;max-height:min(60dvh,360px)!important;box-sizing:border-box}
  #pk48 .p48-mobile-sheet-backdrop{position:absolute!important}
  #pk48:not(.p48-read-mode) .p48-side{max-height:100%!important;overscroll-behavior:auto!important}
+ #pk48:not(.p48-read-mode) .p48-side .p48-mobile-panel-close{display:block;position:sticky;top:0;z-index:2;width:100%;min-height:44px;margin-bottom:10px;border:1px solid #d5dfda;border-radius:9px;background:#fff;color:#30473e;font:600 14px system-ui}
  #pk48.p48-mobile-canvas-fullscreen .p48-mobile-bar{position:absolute!important;top:auto!important;bottom:8px!important;left:8px!important;right:8px!important;width:auto}
  #pk48.p48-mobile-canvas-fullscreen .p48-top,#pk48.p48-mobile-canvas-fullscreen .p48-brand{display:none!important}
  html:has(#pk48.p48-mobile-canvas-fullscreen),body:has(#pk48.p48-mobile-canvas-fullscreen){overflow:hidden!important}
 }
+@media(max-width:360px){#pk48 .p48-logo-crop{width:96px!important;height:27px!important}#pk48 .p48-logo-crop img{width:96px!important}}
 </style>
 
 <div class="p48-brand">
@@ -2571,6 +2583,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   <details class="p48-more-menu" id="p48-more-menu">
     <summary class="p48-btn" title="Fler verktyg">••• Mer</summary>
     <div class="p48-more-popover">
+      <div id="p48-mobile-main-actions" class="p48-mobile-main-actions" aria-label="Start och sökning"></div>
       <div class="p48-pop-title p48-more-section-title">Skapa snabbare</div>
       <button type="button" class="p48-btn p48-more-wide" id="p48-batch-launch" title="Klistra in en lista och skapa en process">▤ Klistra in steg</button>
       <button type="button" class="p48-btn p48-more-wide" id="p48-doc-launch" title="Analysera dokument, text eller artikel och skapa ett granskningsbart processförslag">▣ Källa → processförslag</button>
@@ -2885,6 +2898,7 @@ Skicka orderbekräftelse"></textarea>
 <nav id="p48-breadcrumbs" class="p48-breadcrumbs" aria-label="Delprocessnavigation"></nav>
 <div class="p48-body">
   <aside class="p48-side" id="p48-side">
+    <button type="button" id="p48-mobile-tools-close" class="p48-mobile-panel-close">× Stäng verktyg</button>
     <section class="p48-read-sidebar" id="p48-read-sidebar" aria-label="Processens steg">
       <div class="p48-read-sidebar-kicker">Förstå</div>
       <div class="p48-read-sidebar-title">Processens steg</div>
@@ -5627,7 +5641,23 @@ function renderReadPanel(item){
   }
   readPanelEmpty.hidden=shown>0;readPanel.hidden=false;
 }
+function syncMobileEditorChrome(){
+  const mobile=isMobileLayout(),top=root.querySelector('.p48-top'),brand=root.querySelector('.p48-brand-inner'),utilities=root.querySelector('.p48-top-utilities');
+  const actions=root.querySelector('#p48-mobile-main-actions'),home=root.querySelector('#p48-home'),find=root.querySelector('#p48-find-menu');
+  const more=root.querySelector('#p48-more-menu .p48-more-popover'),intro=more?.querySelector('.p48-more-intro');
+  if(mobile&&actions){
+    if(intro&&actions.previousElementSibling!==intro)intro.after(actions);
+    if(home&&home.parentElement!==actions)actions.appendChild(home);
+    if(find&&find.parentElement!==actions){find.open=false;actions.appendChild(find)}
+  }else if(utilities){
+    if(home&&home.parentElement!==utilities)utilities.prepend(home);
+    if(find&&find.parentElement!==utilities){find.open=false;if(home)home.after(find);else utilities.prepend(find)}
+  }
+  const savedDestination=mobile?brand:top;
+  if(saveState&&savedDestination&&saveState.parentElement!==savedDestination)savedDestination.appendChild(saveState);
+}
 function refreshMobileReaderBar(){
+  syncMobileEditorChrome();
   const menu=root.querySelector('#p48-export-menu'),extras=root.querySelector('#p48-mobile-reader-extras'),utilities=root.querySelector('.p48-top-utilities');
   const destination=readMode&&isMobileLayout()?extras:utilities;
   if(menu&&destination&&menu.parentElement!==destination){menu.open=false;destination.appendChild(menu)}
@@ -7297,6 +7327,7 @@ function setMobileFullscreen(on,{fromBrowser=false}={}){
 }
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement&&root.classList.contains('p48-mobile-canvas-fullscreen'))setMobileFullscreen(false,{fromBrowser:true})});
 if(mobileToolsBtn)mobileToolsBtn.addEventListener('click',()=>setMobileTools(!sidePanel.classList.contains('p48-mobile-open')));
+const mobileToolsClose=root.querySelector('#p48-mobile-tools-close');if(mobileToolsClose)mobileToolsClose.addEventListener('click',()=>setMobileTools(false));
 if(mobileBackdrop)mobileBackdrop.addEventListener('click',()=>setMobileTools(false));
 if(mobileAdd)mobileAdd.addEventListener('click',()=>setMobileSheet('add'));
 if(mobileUndo)mobileUndo.addEventListener('click',()=>root.querySelector('#p48-undo').click());

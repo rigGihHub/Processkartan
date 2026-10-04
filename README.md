@@ -1,4 +1,10 @@
-# Maplini v0.20.103 – mobilens redigeringsvy
+# Maplini v0.20.104 – kompakt mobilverktygsfält
+
+Mobilfältet har tre fasta rader: processnamn, arbetssätt och **Spara / Ny / Exportera / Mer**. Det rättar tomraden som uppstod när Ny placerades före de andra knapparna i samma grid-ordning. **Start** och **Hitta** finns under Mer på mobilen, autosparstatus visas vid logotypen och **Verktyg** visas bara i snabbmenyn ovanför kartan. Verktygspanelen har en egen stängknapp. Datorläget återfår sina ursprungliga knappar vid fönsterbyte.
+
+516 Python-tester, 39 JavaScript-sviter och funktionella DOM-tester godkända. DOM-kontrollen aktiverar även mobilens faktiska CSS-regler för att kontrollera fasta rader/kolumner; den utför ingen webbläsarlayout eller fysisk touch.
+
+## v0.20.103 – mobilens redigeringsvy
 
 Mobilens verktygsrad använder rader som ryms på skärmen, med processnamnet på egen rad. Logotypen är mindre och den dubbla underrubriken är borttagen. Snabbknapparna ligger ovanför kartan, som har begränsad höjd. Lägg till-menyn och export/sök/fler verktyg öppnas nära sina knappar. Växling till läsvyn stänger öppna redigeringspaneler.
 

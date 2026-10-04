@@ -20,7 +20,7 @@ async function editor(store=null,mobile=false){
   if(store)w.localStorage.setItem('maplini_v050',JSON.stringify(store));
  }});
  await delay(70);const doc=dom.window.document;
- return {dom,doc,errors,click:id=>{const el=doc.querySelector(id);assert.ok(el,id);el.click()},change:(id,value)=>{const el=doc.querySelector(id);el.value=value;el.dispatchEvent(new dom.window.Event('change',{bubbles:true}))}};
+ return {dom,doc,errors,setMobile:async next=>{mobile=next;dom.window.dispatchEvent(new dom.window.Event('resize'));await delay(120)},click:id=>{const el=doc.querySelector(id);assert.ok(el,id);el.click()},change:(id,value)=>{const el=doc.querySelector(id);el.value=value;el.dispatchEvent(new dom.window.Event('change',{bubbles:true}))}};
 }
 async function finishBranch(e,answer){
  e.click('#p48-walkthrough-launch');e.click('#p48-walkthrough-start-btn');
@@ -81,6 +81,9 @@ async function finishBranch(e,answer){
  const phone=await editor(null,true);try{
   phone.click('#p48-welcome-example');await delay(80);
   assert.equal(phone.doc.querySelector('#p48-export-menu').parentElement.id,'p48-mobile-reader-extras');
+  assert.equal(phone.doc.querySelector('#p48-home').parentElement.id,'p48-mobile-main-actions');
+  assert.equal(phone.doc.querySelector('#p48-find-menu').parentElement.id,'p48-mobile-main-actions');
+  assert.equal(phone.doc.querySelector('#p48-save-state').parentElement.className,'p48-brand-inner');
   const swipe=(target,type,y)=>{
    const event=new phone.dom.window.Event(type,{bubbles:true,cancelable:true});
    Object.assign(event,{pointerType:'touch',pointerId:7,clientX:150,clientY:y,button:0});
@@ -98,6 +101,25 @@ async function finishBranch(e,answer){
   phone.click('#p48-mobile-reader-home');assert.equal(phone.doc.querySelector('#p48-welcome').hidden,false);
   phone.click('#p48-welcome-close');phone.click('#p48-mobile-reader-edit');
   assert.equal(phone.doc.querySelector('#p48-export-menu').parentElement.className,'p48-top-utilities');
+  // jsdom does not apply viewport media queries. Activate their actual CSS for
+  // a 360 px phone to check matching selectors and explicit placement, not layout.
+  const mobileCSS=phone.doc.createElement('style');
+  const rules=[...phone.doc.styleSheets].flatMap(sheet=>[...sheet.cssRules]);
+  mobileCSS.textContent=rules.filter(rule=>rule.media&&/max-width:(?:360|480|700|900)px/.test(rule.conditionText.replace(/\s/g,'')))
+   .flatMap(rule=>[...rule.cssRules].map(child=>child.cssText)).join('\n');
+  phone.doc.head.appendChild(mobileCSS);
+  const style=id=>phone.dom.window.getComputedStyle(phone.doc.querySelector(id));
+  const actionIDs=['#p48-save','#p48-new','#p48-export-menu','#p48-more-menu'];
+  const actionRows=actionIDs.map(id=>style(id).gridRow);
+  assert.ok(actionRows.every(row=>/^\d+$/.test(row)&&row===actionRows[0]),'every process action has the same explicit row');
+  assert.equal(new Set(actionIDs.map(id=>style(id).gridColumn)).size,4,'actions occupy four distinct columns');
+  assert.equal(style('#p48-mobile-tools').display,'none','the toolbar does not duplicate the quick menu Tools button');
+  phone.click('#p48-more-menu>summary');phone.click('#p48-find-menu>summary');await delay(50);
+  assert.equal(phone.doc.querySelector('#p48-more-menu').open,true,'nested search keeps Mer open');
+  const search=phone.doc.querySelector('#p48-find-input');search.value='upphandling';search.dispatchEvent(new phone.dom.window.Event('input',{bubbles:true}));
+  assert.ok(phone.doc.querySelector('.p48-find-result'),'moved search retains its input handler');
+  phone.click('.p48-find-result');assert.ok(phone.doc.querySelector('.p48-node.selected'),'moved search navigates to a real step');
+  phone.click('#p48-find-menu>summary');phone.click('#p48-more-menu>summary');
   assert.equal(swipe(map,'pointerdown',200).defaultPrevented,true,'editing retains custom canvas panning');
   swipe(map,'pointerup',200);
   const count=phone.doc.querySelectorAll('.p48-node').length;
@@ -107,12 +129,21 @@ async function finishBranch(e,answer){
   assert.equal(phone.doc.querySelector('#p48-mobile-sheet').getAttribute('aria-hidden'),'true');
   phone.click('#p48-mobile-format');phone.click('#p48-mobile-sheet-format');
   assert.equal(phone.doc.querySelector('#p48-mobile-tools').getAttribute('aria-expanded'),'true');
+  phone.click('#p48-mobile-tools-close');
+  assert.equal(phone.doc.querySelector('#p48-mobile-tools').getAttribute('aria-expanded'),'false','the drawer has an accessible close action');
+  phone.click('#p48-mobile-more');
   phone.change('#p48-info-name','Kontrollera mobilredigering');
   assert.ok([...phone.doc.querySelectorAll('.p48-node .p48-label')].some(el=>el.textContent==='Kontrollera mobilredigering'));
   phone.click('#p48-readmode-toggle');
   assert.equal(phone.doc.querySelector('#p48-mobile-tools').getAttribute('aria-expanded'),'false','reading closes the editing drawer');
   assert.equal(phone.doc.querySelector('#p48-mobile-sheet').getAttribute('aria-hidden'),'true');
   assert.equal(phone.doc.querySelector('#p48-export-menu').parentElement.id,'p48-mobile-reader-extras');
+  await phone.setMobile(false);
+  for(const id of ['#p48-home','#p48-find-menu','#p48-export-menu'])assert.equal(phone.doc.querySelector(id).parentElement.className,'p48-top-utilities','desktop restores original controls');
+  assert.ok(phone.doc.querySelector('#p48-save-state').parentElement.classList.contains('p48-top'));
+  await phone.setMobile(true);
+  assert.equal(phone.doc.querySelector('#p48-home').parentElement.id,'p48-mobile-main-actions');
+  assert.equal(phone.doc.querySelectorAll('#p48-home').length,1,'resizing preserves a single live control');
   assert.deepEqual(phone.errors,[]);
  }finally{phone.dom.window.close()}
  console.log('Feedback DOM smoke passed: onboarding, export placement, both branches, content edits, undo, legacy data, incomplete decisions, native mobile swipes and mobile editing.');
