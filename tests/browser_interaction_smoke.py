@@ -62,11 +62,27 @@ def extract_editor_html() -> str:
     for token, filename in CORE_REPLACEMENTS.items():
         html = html.replace(token, (ROOT / filename).read_text(encoding="utf-8"))
     html = html.replace("__MAPLINI_LOGO__", "")
-    html = html.replace("__MAPLINI_VERSION__", "0.19.1")
+    version = next(
+        node.value.value for node in tree.body
+        if isinstance(node, ast.Assign)
+        and any(isinstance(t, ast.Name) and t.id == "APP_VERSION" for t in node.targets)
+    )
+    html = html.replace("__MAPLINI_VERSION__", version)
     html = html.replace("__SUPABASE_URL__", "")
     html = html.replace("__SUPABASE_ANON_KEY__", "")
     html = html.replace("__PUBLIC_APP_URL__", "https://example.invalid")
     html = html.replace("__SHARE_TOKEN__", "")
+    # Include the runtime typography override, so QA uses the same CSS as Streamlit.
+    for node in tree.body:
+        if not isinstance(node, ast.Assign) or not isinstance(node.value, ast.Call):
+            continue
+        call = node.value
+        if (isinstance(call.func, ast.Attribute) and call.func.attr == "replace"
+                and isinstance(call.func.value, ast.Name) and call.func.value.id == "html"
+                and len(call.args) == 3 and isinstance(call.args[0], ast.Constant)
+                and call.args[0].value == "</style>" and isinstance(call.args[1], ast.BinOp)):
+            css = call.args[1].left.value + call.args[1].right.value
+            html = html.replace("</style>", css, 1)
     test_hook = "let pdfView='A4P',pageCountMode='auto',canvasScale=1,canvasLogicalWidth=2400,canvasLogicalHeight=1400,processScalePercent=100,processScaleGesture=false;"
     html = html.replace(test_hook, test_hook + "window.__mapliniTestState={link:i=>JSON.parse(JSON.stringify(links[i])),scale:()=>canvasScale,node:id=>JSON.parse(JSON.stringify(nodes.get(id)?.data||null)),nodes:()=>[...nodes.values()].map(x=>JSON.parse(JSON.stringify(x.data))),links:()=>JSON.parse(JSON.stringify(links)),clear:()=>clearCanvas(),syncFont:value=>syncFontSelect(value),syncBackground:value=>syncBackgroundTypeSelect(value),syncNodeStyle:value=>syncNodeStyleSelect(value),coachDirect:(from,to)=>{links.push(MapliniConnectorCore.create(from,to,'right',{}));coachDirectActivityLink(links.length-1);return links.length-1},addNode:(type,x,y)=>addNode(type,x,y),connect:(from,to)=>{links.push(MapliniConnectorCore.create(from,to,'right',{}));requestFullLinkRender(true);return links.length-1},linkStyle:i=>JSON.parse(JSON.stringify(linkStyle(links[i]))),setLinkLabel:(i,label)=>{setLinkStyle(i,{label:String(label||'')});drawLinks();return JSON.parse(JSON.stringify(linkStyle(links[i])))},polish:(ids,force=false)=>polishAutomaticConnectedLinks(ids,{forceAuto:force}),undoCount:()=>undo.length,redoCount:()=>redo.length,resetHistory:()=>resetHistory(),geomCacheSize:()=>nodeGeomCache.size,geom:(id)=>nodeGeom(id),adjacency:(id)=>linksForNode(id).slice(),fastMode:()=>fastGeometryInteraction,setCloudSession:(s)=>{cloudSession=s;sharedView=false;currentWorkspaceId=null;currentWorkspaceOwnerId=s?.user?.id||null;return Boolean(ownerId())},loadCloudWalkthrough:()=>loadCloudWalkthroughRuns(),saveCloudWalkthrough:r=>saveWalkthroughRunToCloud(r),updateCloudWalkthrough:r=>updateWalkthroughRunStatusInCloud(r),walkthroughRuns:()=>walkthroughRunsForCurrentProcess(),currentId:()=>currentId,setWalkthroughRuns:r=>writeWalkthroughRuns(r),openDeviationDashboard:()=>openDeviationDashboard(),closeDeviationDashboard:()=>closeDeviationDashboard(),deviationRows:()=>deviationRows(),renderDeviationDashboard:()=>renderDeviationDashboard(),updateDeviation:(runId,index,status)=>updateWalkthroughDeviationStatus(runId,index,status),autoClean:()=>autoCleanProcess(),decisionBranches:id=>addDecisionBranches(id)};")
     return html

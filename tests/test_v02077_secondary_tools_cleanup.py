@@ -8,7 +8,7 @@ def test_version_and_more_hierarchy_contract():
     assert "more.dataset.organized='1'" in TEXT
     assert "Snabbåtgärder" in TEXT
     assert "Redigering & struktur" in TEXT
-    assert "Utseende, layout & export" in TEXT
+    assert "Utseende & layout" in TEXT
     assert "p48-more-group" in TEXT
 
 def test_existing_tool_ids_are_preserved():

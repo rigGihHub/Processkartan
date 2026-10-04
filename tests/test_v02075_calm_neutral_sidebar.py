@@ -13,6 +13,6 @@ def test_secondary_palette_is_collapsible():
     assert 'class="p48-palette-more-grid"' in SRC
 
 def test_core_palette_remains_directly_available():
-    assert 'aria-label="Lägg till Objekt in"' in SRC
+    assert 'aria-label="Lägg till Underlag"' in SRC
     assert 'aria-label="Lägg till Aktivitet"' in SRC
-    assert 'aria-label="Lägg till Objekt ut"' in SRC
+    assert 'aria-label="Lägg till Resultat"' in SRC

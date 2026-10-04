@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.20.93"
+APP_VERSION = "0.20.101"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -2325,6 +2325,86 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   #pk48{--p48-control-h:44px;--p48-control-radius:10px}
   #pk48 .p48-btn{min-height:44px}
 }
+/* Mobile reading keeps every step reachable even when the map is wider than
+   the screen. Reuse the graph outline; do not invent a linear process. */
+@media(max-width:900px),(pointer:coarse) and (max-width:1100px){
+  #pk48.p48-read-mode .p48-brand,#pk48.p48-read-mode .p48-top,#pk48.p48-read-mode .p48-mobile-bar{display:none!important}
+  #pk48.p48-read-mode .p48-mobile-reader-bar{
+    position:sticky!important;top:0!important;left:auto!important;right:auto!important;
+    display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;
+    margin:0;padding:10px 12px;border:0;border-bottom:1px solid #dce7e1;border-radius:0;box-shadow:none;
+  }
+  #pk48 .p48-mobile-reader-title{grid-column:1/-1;padding:0 0 4px}
+  #pk48 .p48-mobile-reader-kicker{font-size:9px}
+  #pk48 .p48-mobile-reader-name{white-space:normal;overflow-wrap:anywhere;font-size:15px;line-height:1.3}
+  #pk48 .p48-mobile-reader-bar button{min-height:44px;font-size:12px}
+  #pk48.p48-read-mode .p48-breadcrumbs{padding-top:7px!important}
+  #pk48.p48-read-mode .p48-body{display:flex!important;flex-direction:column;height:auto!important}
+  #pk48.p48-read-mode .p48-scroll{
+    order:1;flex:none;scroll-padding-top:12px;height:clamp(220px,34dvh,320px)!important;
+    min-height:220px!important;max-height:320px!important;padding-bottom:0!important;
+  }
+  #pk48.p48-read-mode .p48-side{
+    order:2;display:flex!important;position:static!important;inset:auto!important;
+    width:100%!important;height:auto!important;max-height:none!important;transform:none!important;
+    visibility:visible!important;pointer-events:auto!important;transition:none!important;
+    overflow:visible!important;border:0;border-top:1px solid #dce7e1;box-shadow:none!important;
+    padding:14px 12px!important;z-index:auto!important;
+  }
+  #pk48.p48-read-mode .p48-read-sidebar{width:100%;height:auto}
+  #pk48 .p48-read-sidebar-title{font-size:16px}
+  #pk48 .p48-read-sidebar-help{font-size:12px;line-height:1.45}
+  #pk48 .p48-read-sidebar-list{max-height:min(38dvh,340px);margin-top:10px;overscroll-behavior:contain}
+  #pk48 .p48-read-sidebar-step{min-height:52px;font-size:14px!important;padding-top:8px;padding-bottom:8px}
+  #pk48 .p48-read-sidebar-copy strong{font-size:13px;white-space:normal;overflow-wrap:anywhere;line-height:1.35}
+  #pk48 .p48-read-sidebar-copy small{font-size:10px;line-height:1.35}
+  #pk48 .p48-read-sidebar-actions{margin-top:10px;padding-top:10px}
+  #pk48 .p48-read-sidebar-actions button{font-size:12px!important;min-height:44px}
+  #pk48.p48-read-mode .p48-read-hint{display:none!important}
+  #pk48 .p48-read-sidebar-step:focus-visible{outline:2px solid #2f8065;outline-offset:-2px}
+}
+/* v0.20.101 – named actions, readable content, and a clear first visit. */
+#pk48{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+#pk48 .p48-node .p48-label{font-family:inherit}
+#pk48 .p48-process-info input,#pk48 .p48-process-info textarea{font-size:14px!important;line-height:1.5}
+#pk48 .p48-process-info .p48-field-label{font-size:13px}
+#pk48 .p48-top-utilities>#p48-export-menu{display:block!important}
+#pk48 #p48-export-menu>summary{font-size:12px!important;white-space:nowrap}
+#pk48 .p48-new-compact{width:auto!important;min-width:58px!important;gap:4px!important;padding:0 9px!important;font-size:12px!important}
+#pk48 .p48-new-compact .p48-new-label{position:static!important;width:auto!important;height:auto!important;overflow:visible!important;clip:auto!important}
+#pk48 .p48-top-utilities .p48-find-menu>summary,#pk48 .p48-top-utilities #p48-more-menu>summary{font-size:12px!important;width:auto!important;padding:0 9px!important}
+#pk48 .p48-top-utilities .p48-find-menu>summary::before,#pk48 .p48-top-utilities #p48-more-menu>summary::before{content:none!important}
+#pk48 .p48-welcome[hidden]{display:none!important}
+#pk48 .p48-welcome{position:absolute;inset:0;z-index:400;background:linear-gradient(145deg,#f4f8f6,#fff);overflow:auto;padding:72px 24px;box-sizing:border-box;display:grid;place-items:start center}
+#pk48 .p48-welcome-content{max-width:920px;width:100%;color:#233e32}
+#pk48 .p48-welcome-kicker{font-size:12px;letter-spacing:.09em;font-weight:700;color:#4b7563}
+#pk48 .p48-welcome h1{font-size:clamp(30px,4vw,46px);line-height:1.15;margin:16px 0}
+#pk48 .p48-welcome p{font-size:16px;line-height:1.6}
+#pk48 .p48-welcome-choices{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:32px 0}
+#pk48 .p48-welcome-choices button{font:inherit;cursor:pointer;text-align:left;padding:24px;background:#fff;color:#233e32;border:1px solid #cdded4;border-radius:16px;display:grid;gap:14px;box-shadow:0 5px 20px #234a3410;min-height:210px}
+#pk48 .p48-welcome-choices button:hover,#pk48 .p48-welcome-choices button:focus-visible{border-color:#267a54;box-shadow:0 0 0 3px #267a5420;outline:none}
+#pk48 .p48-welcome-choices button>span{font-size:28px;color:#267a54}
+#pk48 .p48-welcome-choices strong{font-size:19px}
+#pk48 .p48-welcome-choices small{font-size:14px;line-height:1.5}
+#pk48 .p48-welcome .p48-welcome-note{font-size:12px;color:#587365}
+#pk48 .p48-mobile-reader-extras{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#pk48 .p48-mobile-reader-extras>.p48-export-menu{display:block!important}
+#pk48 .p48-mobile-reader-extras .p48-export-menu>summary{display:grid;place-items:center;min-height:44px;box-sizing:border-box;border-radius:10px;background:#eef5f1;color:#275d49;font-size:12px!important}
+#pk48 .p48-mobile-reader-extras .p48-export-popover{position:absolute!important;top:calc(100% + 6px)!important;left:0!important;right:0!important;width:auto!important;min-width:0!important;max-height:60dvh;overflow:auto}
+#pk48.p48-welcome-open>.p48-top,#pk48.p48-welcome-open>.p48-body,#pk48.p48-welcome-open>.p48-mobile-reader-bar{visibility:hidden}
+@media(min-width:901px){
+ #pk48 .p48-top-simplified{padding-left:210px!important;grid-template-columns:minmax(210px,1fr) auto auto auto!important;column-gap:8px!important}
+ #pk48 .p48-process-cluster .p48-name{min-width:100px!important;width:clamp(100px,14vw,240px)!important}
+ #pk48 .p48-top-utilities{gap:4px}
+}
+@media(max-width:1180px) and (min-width:901px){#pk48 .p48-top-simplified{padding-left:210px!important;column-gap:8px!important;grid-template-columns:minmax(200px,1fr) auto!important}#pk48 .p48-top-utilities{grid-column:1/-1;justify-self:end}#pk48 .p48-work-modes .p48-mode-btn{min-width:54px!important;padding:6px 8px!important}}
+@media(max-width:900px){
+ #pk48 .p48-welcome{padding:28px 18px}
+ #pk48 .p48-welcome-choices{grid-template-columns:1fr;gap:12px;margin:24px 0}
+ #pk48 .p48-welcome-choices button{min-height:0;padding:18px;grid-template-columns:32px 1fr;gap:8px 12px}
+ #pk48 .p48-welcome-choices small{grid-column:2}
+ #pk48 #p48-export-menu>summary,#pk48 #p48-home{min-height:44px!important}
+}
 </style>
 
 <div class="p48-brand">
@@ -2334,6 +2414,20 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
     <div class="p48-version">v. __MAPLINI_VERSION__</div>
   </div>
 </div>
+<section id="p48-welcome" class="p48-welcome" hidden aria-labelledby="p48-welcome-title">
+  <div class="p48-welcome-content">
+    <p class="p48-welcome-kicker">MAPLINI · FRÅN ARBETE TILL TYDLIG PROCESS</p>
+    <h1 id="p48-welcome-title">Hur vill du börja?</h1>
+    <p>Rita en process, förstå vem som gör vad och följ arbetet steg för steg.</p>
+    <div class="p48-welcome-choices">
+      <button type="button" id="p48-welcome-create"><span aria-hidden="true">＋</span><strong>Skapa själv</strong><small>Börja med ett namn och ditt första steg.</small></button>
+      <button type="button" id="p48-welcome-document"><span aria-hidden="true">▤</span><strong>Utgå från dokument</strong><small>Ladda upp underlag och granska ett processförslag.</small></button>
+      <button type="button" id="p48-welcome-example"><span aria-hidden="true">→</span><strong>Prova exempel</strong><small>Utforska ett komplett flöde med ansvar, Ja/Nej och avslut.</small></button>
+    </div>
+    <button type="button" class="p48-btn" id="p48-welcome-close">Tillbaka till processen</button>
+    <p class="p48-welcome-note">Dina befintliga processer finns kvar. Ett exempel öppnas som en egen process.</p>
+  </div>
+</section>
 <div class="p48-top p48-top-simplified">
   <strong>Process</strong>
   <div class="p48-process-cluster" aria-label="Aktuell process">
@@ -2348,6 +2442,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
     <button type="button" class="p48-btn p48-walkthrough-launch p48-mode-btn" id="p48-walkthrough-launch" title="Gå igenom processen steg för steg">Följ</button>
   </div>
   <div class="p48-top-utilities" aria-label="Snabbverktyg">
+  <button type="button" class="p48-btn" id="p48-home" title="Välj hur du vill börja">Start</button>
   <details class="p48-find-menu" id="p48-find-menu">
     <summary class="p48-btn" title="Hitta ett steg i processen (Ctrl/Cmd+F)">⌕ Hitta</summary>
     <div class="p48-find-popover">
@@ -2728,8 +2823,9 @@ Skicka orderbekräftelse"></textarea>
 <div id="p48-mobile-reader-bar" class="p48-mobile-reader-bar" aria-label="Mobil läsvy">
   <div class="p48-mobile-reader-title"><span class="p48-mobile-reader-kicker">LÄSVY</span><strong id="p48-mobile-reader-name" class="p48-mobile-reader-name">Process</strong></div>
   <button type="button" class="primary" id="p48-mobile-reader-follow" title="Följ processen steg för steg">▶ Följ</button>
-  <button type="button" id="p48-mobile-reader-fit" title="Anpassa hela processen">⊡</button>
-  <button type="button" id="p48-mobile-reader-edit" title="Öppna redigeringsläget">✎</button>
+  <button type="button" id="p48-mobile-reader-fit" title="Anpassa hela processen">Visa hela</button>
+  <button type="button" id="p48-mobile-reader-edit" title="Öppna redigeringsläget">Redigera</button>
+  <div id="p48-mobile-reader-extras" class="p48-mobile-reader-extras"><button type="button" id="p48-mobile-reader-home">Start</button></div>
 </div>
 <section id="p48-process-glance" class="p48-process-glance" aria-label="Processöverblick">
   <div class="p48-glance-item"><div class="p48-glance-label">Börjar med</div><div class="p48-glance-value" id="p48-glance-start">–</div></div>
@@ -2796,11 +2892,11 @@ Skicka orderbekräftelse"></textarea>
 
     <div class="p48-section p48-method-palette">
       <div class="p48-title">Bygg processen</div>
-      <div class="p48-palette-hint">Grundflödet är <strong>Objekt → Aktivitet → Objekt</strong>. Ett resultat kan bli nästa aktivitets input.</div>
-      <div class="p48-method-flow" aria-label="Processens grundmodell"><span>▪ Objekt in</span><b>→</b><span>▭ Aktivitet</span><b>→</b><span>▪ Objekt ut</span></div>
-      <div class="p48-item p48-item-core p48-item-object" draggable="true" role="button" tabindex="0" aria-label="Lägg till Objekt in" title="Det som triggar eller behövs före en aktivitet" data-type="object" data-object-role="input"><span class="p48-icon">▪</span><span><strong>Objekt in</strong><small>Trigger / det som behövs</small></span></div>
+      <div class="p48-palette-hint">Grundflödet är <strong>Underlag → Aktivitet → Resultat</strong>. Ett resultat kan bli nästa stegs underlag.</div>
+      <div class="p48-method-flow" aria-label="Processens grundmodell"><span>▪ Underlag</span><b>→</b><span>▭ Aktivitet</span><b>→</b><span>▪ Resultat</span></div>
+      <div class="p48-item p48-item-core p48-item-object" draggable="true" role="button" tabindex="0" aria-label="Lägg till Underlag" title="Det som triggar eller behövs före en aktivitet" data-type="object" data-object-role="input"><span class="p48-icon">▪</span><span><strong>Underlag</strong><small>Vad behövs före?</small></span></div>
       <div class="p48-item p48-item-core" draggable="true" role="button" tabindex="0" aria-label="Lägg till Aktivitet" title="Det som görs och transformerar objekt" data-type="process"><span class="p48-icon">▭</span><span><strong>Aktivitet</strong><small>Det som görs</small></span></div>
-      <div class="p48-item p48-item-core p48-item-object" draggable="true" role="button" tabindex="0" aria-label="Lägg till Objekt ut" title="Resultatet från en aktivitet" data-type="object" data-object-role="output"><span class="p48-icon">▪</span><span><strong>Objekt ut</strong><small>Resultat / det som blir</small></span></div>
+      <div class="p48-item p48-item-core p48-item-object" draggable="true" role="button" tabindex="0" aria-label="Lägg till Resultat" title="Resultatet från en aktivitet" data-type="object" data-object-role="output"><span class="p48-icon">▪</span><span><strong>Resultat</strong><small>Resultat / det som blir</small></span></div>
       <details class="p48-palette-more" id="p48-palette-more">
         <summary>Fler typer <span>Start, beslut, dokument…</span></summary>
         <div class="p48-palette-more-grid">
@@ -2818,40 +2914,25 @@ Skicka orderbekräftelse"></textarea>
       <div class="p48-title p48-format-context-title" id="p48-format-title">Formatering</div>
       <div class="p48-sub p48-format-context-hint" id="p48-format-hint">Markera en ruta eller pil för att visa relevanta inställningar.</div>
       <div id="p48-controls">
-        <div class="p48-quick-format p48-node-only" aria-label="Snabbformatering">
-          <div class="p48-quick-format-head"><strong>Formatera ruta</strong><span>Fler val under Utseende</span></div>
-          <div class="p48-quick-format-row">
-            <label class="p48-quick-format-color" title="Rutans bakgrundsfärg"><span>Ruta</span><input id="p48-quick-bg" type="color" value="#ffffff"></label>
-            <label class="p48-quick-format-color" title="Textfärg"><span>Text</span><input id="p48-quick-text" type="color" value="#17202a"></label>
-            <span class="p48-quick-format-separator" aria-hidden="true"></span>
-            <button type="button" class="p48-quick-format-button" id="p48-quick-bold" title="Fet text" aria-label="Fet text" aria-pressed="false"><b>B</b></button>
-            <button type="button" class="p48-quick-format-button" id="p48-quick-italic" title="Kursiv text" aria-label="Kursiv text" aria-pressed="false"><i>I</i></button>
-            <button type="button" class="p48-quick-format-button" id="p48-quick-under" title="Understruken text" aria-label="Understruken text" aria-pressed="false"><u>U</u></button>
-          </div>
-          <div class="p48-quick-format-size" role="group" aria-label="Textstorlek">
-            <span>Textstorlek</span>
-            <button type="button" id="p48-quick-size-down" title="Minska textstorleken" aria-label="Minska textstorleken">−</button>
-            <output id="p48-quick-size-value">13 px</output>
-            <button type="button" id="p48-quick-size-up" title="Öka textstorleken" aria-label="Öka textstorleken">+</button>
-          </div>
-        </div>
         <div id="p48-process-info" class="p48-process-info p48-node-only p48-single-node-only" hidden>
           <div class="p48-process-info-head">
             <div><div class="p48-title">Om steget</div><div class="p48-small">Beskriv arbetet – utan att belasta canvasen.</div></div>
             <span id="p48-process-info-progress" class="p48-process-info-progress">0 av 8 fält</span>
           </div>
+          <div id="p48-info-decision-warning" class="p48-walkthrough-route-warning" role="alert" hidden></div>
+          <label><span class="p48-field-label">Stegnamn</span><input id="p48-info-name" type="text" maxlength="500" placeholder="Ex. Kontrollera beställningen"></label>
           <label><span class="p48-field-label">Vad händer?</span><textarea id="p48-info-description" rows="3" maxlength="12000" placeholder="Beskriv kort vad som görs och varför."></textarea></label>
+          <label><span class="p48-field-label">Vem ansvarar?</span><input id="p48-info-role" type="text" maxlength="300" list="p48-role-suggestions" placeholder="Ex. Kundtjänst"></label>
           <div class="p48-step-io p48-step-io-context">
             <div class="p48-io-wrap">
-              <div class="p48-io-title">Input</div>
+              <div class="p48-io-title">Vad behövs före?</div>
               <div id="p48-inputs" class="p48-io-list"></div>
-              <button type="button" class="p48-addio" id="p48-add-input">+ Lägg till input</button>
-              <div class="p48-io-title">Output</div>
+              <button type="button" class="p48-addio" id="p48-add-input">+ Lägg till underlag</button>
+              <div class="p48-io-title">Vad blir resultatet?</div>
               <div id="p48-outputs" class="p48-io-list"></div>
-              <button type="button" class="p48-addio" id="p48-add-output">+ Lägg till output</button>
+              <button type="button" class="p48-addio" id="p48-add-output">+ Lägg till resultat</button>
             </div>
           </div>
-          <label><span class="p48-field-label">Vem ansvarar?</span><input id="p48-info-role" type="text" maxlength="300" list="p48-role-suggestions" placeholder="Ex. Kundtjänst"></label>
           <datalist id="p48-role-suggestions"></datalist>
           <datalist id="p48-system-suggestions"></datalist>
           <details id="p48-process-info-more" class="p48-process-info-more">
@@ -2871,6 +2952,23 @@ Skicka orderbekräftelse"></textarea>
             <div id="p48-check-question-list" class="p48-check-question-list"></div>
             <button type="button" id="p48-add-check-question" class="p48-mini p48-add-check-question">＋ Lägg till fråga</button>
           </details>
+        </div>
+        <div class="p48-quick-format p48-node-only" aria-label="Snabbformatering">
+          <div class="p48-quick-format-head"><strong>Formatera ruta</strong><span>Fler val under Utseende</span></div>
+          <div class="p48-quick-format-row">
+            <label class="p48-quick-format-color" title="Rutans bakgrundsfärg"><span>Ruta</span><input id="p48-quick-bg" type="color" value="#ffffff"></label>
+            <label class="p48-quick-format-color" title="Textfärg"><span>Text</span><input id="p48-quick-text" type="color" value="#17202a"></label>
+            <span class="p48-quick-format-separator" aria-hidden="true"></span>
+            <button type="button" class="p48-quick-format-button" id="p48-quick-bold" title="Fet text" aria-label="Fet text" aria-pressed="false"><b>B</b></button>
+            <button type="button" class="p48-quick-format-button" id="p48-quick-italic" title="Kursiv text" aria-label="Kursiv text" aria-pressed="false"><i>I</i></button>
+            <button type="button" class="p48-quick-format-button" id="p48-quick-under" title="Understruken text" aria-label="Understruken text" aria-pressed="false"><u>U</u></button>
+          </div>
+          <div class="p48-quick-format-size" role="group" aria-label="Textstorlek">
+            <span>Textstorlek</span>
+            <button type="button" id="p48-quick-size-down" title="Minska textstorleken" aria-label="Minska textstorleken">−</button>
+            <output id="p48-quick-size-value">13 px</output>
+            <button type="button" id="p48-quick-size-up" title="Öka textstorleken" aria-label="Öka textstorleken">+</button>
+          </div>
         </div>
         <section id="p48-step-understanding" class="p48-step-understanding p48-node-only p48-single-node-only" hidden aria-label="Förstå steget">
           <div class="p48-step-understanding-head"><strong>Stegets sammanhang</strong></div>
@@ -3058,7 +3156,7 @@ Skicka orderbekräftelse"></textarea>
           <input id="p48-empty-first-text" type="text" maxlength="160" autocomplete="off" spellcheck="true" placeholder="Ex. Ta emot beställning" aria-label="Första aktiviteten">
           <button type="button" class="primary" id="p48-empty-activity">Skapa</button>
         </div>
-        <div class="p48-empty-alt"><span>Vill du börja mer metodiskt?</span><button type="button" id="p48-empty-object">▪ Objekt in</button><button type="button" id="p48-empty-start">▶ Start</button></div>
+        <div class="p48-empty-alt"><span>Vill du börja mer metodiskt?</span><button type="button" id="p48-empty-object">▪ Underlag</button><button type="button" id="p48-empty-start">▶ Start</button></div>
         <button type="button" class="p48-empty-import" id="p48-empty-import">Klistra in flera steg</button>
         <div class="p48-empty-tip">När första steget är skapat: tryck <strong>Tab</strong> för nästa steg.</div>
       </section>
@@ -3300,8 +3398,8 @@ function simplifyTopNavigation(){
   });
   collaboration.after(edit.details);
 
-  const presentation=makeGroup('p48-more-presentation-group','Utseende, layout & export');
-  const advanced=[root.querySelector('#p48-view-menu'),root.querySelector('.p48-smart-layout-split'),root.querySelector('.p48-canvas-menu'),root.querySelector('#p48-logo-menu'),root.querySelector('#p48-export-menu')].filter(Boolean);
+  const presentation=makeGroup('p48-more-presentation-group','Utseende & layout');
+  const advanced=[root.querySelector('#p48-view-menu'),root.querySelector('.p48-smart-layout-split'),root.querySelector('.p48-canvas-menu'),root.querySelector('#p48-logo-menu')].filter(Boolean);
   advanced.forEach(el=>presentation.body.appendChild(el));
   edit.details.after(presentation.details);
 
@@ -3544,8 +3642,14 @@ setTimeout(scheduleHorizontalNavSync,0);
 
 
 const starter={id:'proc-1',name:'Exempel – upphandlingsprocess',nodes:[
-{id:'n1',type:'start',text:'Upphandling identifieras',x:100,y:130},{id:'n2',type:'process',text:'Första bedömning',x:390,y:130},{id:'n3',type:'decision',text:'Relevant?',x:680,y:110},{id:'n4',type:'process',text:'Kvalificera upphandling',x:950,y:130}
-],links:[['n1','n2','right'],['n2','n3','right'],['n3','n4','right']]};
+{id:'n1',type:'start',text:'Upphandling identifieras',x:80,y:150,fontSize:16},
+{id:'n2',type:'process',text:'Bedöm upphandlingen',x:340,y:150,fontSize:16,inputs:['Upphandlingsunderlag'],outputs:['Bedömning'],processInfo:{description:'Läs kraven och bedöm om uppdraget passar vår verksamhet, kompetens och kapacitet.',responsibleRole:'Anbudsansvarig',system:'Upphandlingsportal'}},
+{id:'n3',type:'decision',text:'Är upphandlingen relevant?',x:600,y:120,fontSize:16,processInfo:{description:'Välj Ja om vi kan möta kraven och vill gå vidare. Välj Nej om upphandlingen inte passar.',responsibleRole:'Anbudsansvarig'}},
+{id:'n4',type:'process',text:'Kvalificera upphandlingen',x:600,y:360,fontSize:16,inputs:['Bedömning'],outputs:['Kvalificeringsbeslut'],processInfo:{description:'Kontrollera obligatoriska krav, resurser och sista anbudsdag. Dokumentera beslutet att förbereda ett anbud.',responsibleRole:'Anbudsansvarig',instruction:'Spara kravlista och beslut i ärendet.'}},
+{id:'n5',type:'end',text:'Redo att förbereda anbud',x:600,y:550,fontSize:16},
+{id:'n6',type:'process',text:'Dokumentera varför vi avstår',x:870,y:150,fontSize:16,outputs:['Dokumenterad motivering'],processInfo:{description:'Spara skälen till att vi avstår och meddela berörda kollegor.',responsibleRole:'Anbudsansvarig'}},
+{id:'n7',type:'end',text:'Upphandlingen avslutad',x:870,y:360,fontSize:16}
+],links:[['n1','n2','right'],['n2','n3','right'],['n3','n4','bottom',{label:'Ja'}],['n4','n5','bottom'],['n3','n6','right',{label:'Nej'}],['n6','n7','bottom']]};
 
 
 function cloudKey(){return'maplini_supabase_session'}
@@ -4205,7 +4309,7 @@ function styleOf(d){
   const nodeStyle=allowedNodeStyles.has(d.nodeStyle)?d.nodeStyle:'standard';
   const shapePreset=allowedShapes.has(d.shapePreset)?d.shapePreset:'standard';
   const legacyBorder=!d.borderColor||d.borderColor==='#637387';
-  return{fontFamily:d.fontFamily||'Inter',fontSize:Number(d.fontSize||13),textColor:d.textColor||'#17202a',bgColor:d.bgColor||defBg(d.type),fontWeight:d.fontWeight||'700',fontStyle:d.fontStyle||'normal',textDecoration:d.textDecoration||'none',textAlign:d.textAlign||'center',borderColor:legacyBorder?'#7f8d87':d.borderColor,borderWidth:legacyBorder&&Number(d.borderWidth||2)===2?1.5:Number(d.borderWidth||1.5),nodeStyle,shapePreset}
+  return{fontFamily:d.fontFamily||'Inter',fontSize:Number(d.fontSize||16),textColor:d.textColor||'#17202a',bgColor:d.bgColor||defBg(d.type),fontWeight:d.fontWeight||'700',fontStyle:d.fontStyle||'normal',textDecoration:d.textDecoration||'none',textAlign:d.textAlign||'center',borderColor:legacyBorder?'#7f8d87':d.borderColor,borderWidth:legacyBorder&&Number(d.borderWidth||2)===2?1.5:Number(d.borderWidth||1.5),nodeStyle,shapePreset}
 }
 function responsibilityRole(item){
   if(!item||!['process','subprocess','decision'].includes(String(item.data?.type||'')))return '';
@@ -4235,8 +4339,8 @@ function applyStyle(item){
   item.el.classList.remove('p48-style-3d','p48-style-raised','p48-style-glass','p48-style-flat','p48-shape-rectangle','p48-shape-rounded','p48-shape-pill');
   if(s.nodeStyle!=='standard')item.el.classList.add('p48-style-'+s.nodeStyle);
   if(s.shapePreset!=='standard')item.el.classList.add('p48-shape-'+s.shapePreset);
-  item.el.style.fontFamily=s.fontFamily;item.label.style.fontFamily=s.fontFamily;item.label.style.fontSize=s.fontSize+'px';item.label.style.color=s.textColor;item.label.style.fontWeight=s.fontWeight;item.label.style.fontStyle=s.fontStyle;item.label.style.textDecoration=s.textDecoration;item.label.style.textAlign=s.textAlign;
-  if(item.io){item.io.style.fontFamily=s.fontFamily;item.io.style.fontSize=Math.max(9,Math.round(s.fontSize*.72))+'px'}if(item.docOpen){item.docOpen.style.fontFamily=s.fontFamily;item.docOpen.style.fontSize=Math.max(9,Math.round(s.fontSize*.85))+'px'}
+  const displayFont=s.fontFamily==='Inter'?'Inter,system-ui,sans-serif':s.fontFamily;item.el.style.fontFamily=displayFont;item.label.style.fontFamily=displayFont;item.label.style.fontSize=s.fontSize+'px';item.label.style.color=s.textColor;item.label.style.fontWeight=s.fontWeight;item.label.style.fontStyle=s.fontStyle;item.label.style.textDecoration=s.textDecoration;item.label.style.textAlign=s.textAlign;
+  if(item.io){item.io.style.fontFamily=s.fontFamily==='Inter'?'Inter,system-ui,sans-serif':s.fontFamily;item.io.style.fontSize=Math.max(9,Math.round(s.fontSize*.72))+'px'}if(item.docOpen){item.docOpen.style.fontFamily=s.fontFamily==='Inter'?'Inter,system-ui,sans-serif':s.fontFamily;item.docOpen.style.fontSize=Math.max(9,Math.round(s.fontSize*.85))+'px'}
   let visualBg=s.bgColor;
   if(s.nodeStyle==='3d')visualBg=`linear-gradient(145deg,rgba(255,255,255,.78) 0%,rgba(255,255,255,.18) 42%,rgba(0,0,0,.14) 100%),${s.bgColor}`;
   else if(s.nodeStyle==='raised')visualBg=`linear-gradient(180deg,rgba(255,255,255,.72) 0%,rgba(255,255,255,.10) 55%,rgba(0,0,0,.05) 100%),${s.bgColor}`;
@@ -4327,7 +4431,7 @@ function renderDocumentLink(item){
   btn.textContent=valid?'↗ Öppna dokument':'+ Lägg till dokumentlänk';
   btn.title=valid?valid:'Lägg till dokumentlänk direkt i rutan';
   btn.hidden=Boolean(item.docInlineEditor&&!item.docInlineEditor.hidden);
-  const ts=styleOf(item.data);btn.style.fontFamily=ts.fontFamily;btn.style.fontSize=Math.max(9,Math.round(ts.fontSize*.85))+'px';
+  const ts=styleOf(item.data);btn.style.fontFamily=ts.fontFamily==='Inter'?'Inter,system-ui,sans-serif':ts.fontFamily;btn.style.fontSize=Math.max(9,Math.round(ts.fontSize*.85))+'px';
 }
 
 function state(){
@@ -4662,8 +4766,9 @@ function createProcessFromBatch(){
 }
 
 
-function setDocDialog(open){
-  if(!docDialog||!docBackdrop)return false;const show=Boolean(open);docDialog.hidden=!show;docBackdrop.hidden=!show;
+let docCreateAsNew=false;
+function setDocDialog(open,{asNew=false}={}){
+  if(!docDialog||!docBackdrop)return false;const show=Boolean(open);docDialog.hidden=!show;docBackdrop.hidden=!show;if(show)docCreateAsNew=Boolean(asNew);
   if(show){docStructuredProposal=[];docFlowPlan=null;docConflictResolutions={};if(docFile)docFile.value='';if(sourceUrl)sourceUrl.value='';if(sourceText)sourceText.value='';if(docSteps)docSteps.value='';if(docReview)docReview.hidden=true;if(docStructured)docStructured.hidden=true;if(docConflicts)docConflicts.hidden=true;if(docInsights)docInsights.hidden=true;if(docMode)docMode.hidden=true;if(docCreate)docCreate.disabled=true;if(docStatus)docStatus.textContent='Välj källa ovan.';setDocReviewMode('structured');const m=root.querySelector('#p48-more-menu');if(m)m.open=false}
   return true;
 }
@@ -4795,8 +4900,14 @@ async function handleDocumentFiles(fileList){
 }
 function createProcessFromDocumentProposal(){
   if(unresolvedDocumentConflictCount()>0){msg('Lös dokumentkonflikterna innan processen ritas');setDocReviewMode('structured');return false}
-  if(docModeStructured?.classList.contains('active')&&docStructuredProposal.length)return createProcessFromStructuredDocument();
-  if(!docSteps)return false;const text=docSteps.value;if(!parseBatchSteps(text).length){msg('Förslaget innehåller inga steg');return false}
+  const structured=docModeStructured?.classList.contains('active')&&docStructuredProposal.length;
+  const text=String(docSteps?.value||'');
+  if(!structured&&!parseBatchSteps(text).length){msg('Förslaget innehåller inga steg');return false}
+  if(!requireEdit())return false;
+  if(docCreateAsNew){
+    persist();const id=uid();processes[id]=MapliniWorkflowCore.emptyProcess(id,'Process från dokument');openProcess(id);renderProcesses();docCreateAsNew=false;
+  }
+  if(structured)return createProcessFromStructuredDocument();
   if(batchText)batchText.value=text;const ok=createProcessFromBatch();if(ok){setDocDialog(false);msg('Processförslag ritat · kontrollera flöde, ansvar och beslut mot dokumentet')}return ok;
 }
 
@@ -4942,6 +5053,19 @@ function createNewProcessFromDialog(){
   setTimeout(()=>{refreshEmptyState();if(emptyFirstText&&!emptyState.hidden)emptyFirstText.focus()},0);
   return true;
 }
+function setWelcome(show){
+  const welcome=root.querySelector('#p48-welcome');welcome.hidden=!show;root.classList.toggle('p48-welcome-open',Boolean(show));
+  if(show){closeTransientMenus();root.querySelector('#p48-welcome-create').focus()}else root.querySelector('#p48-home').focus();
+}
+root.querySelector('#p48-home').addEventListener('click',()=>{if(!sharedView)setWelcome(true)});
+root.querySelector('#p48-mobile-reader-home').addEventListener('click',()=>{if(!sharedView)setWelcome(true)});
+root.querySelector('#p48-welcome-close').addEventListener('click',()=>setWelcome(false));
+root.querySelector('#p48-welcome-create').addEventListener('click',()=>{if(!requireEdit())return;setWelcome(false);setReadMode(false);newProcess()});
+root.querySelector('#p48-welcome-document').addEventListener('click',()=>{if(!requireEdit())return;setWelcome(false);setReadMode(false);setDocDialog(true,{asNew:true})});
+root.querySelector('#p48-welcome-example').addEventListener('click',()=>{
+  if(!requireEdit())return;persist();const example=clone(starter);example.id=uid();processes[example.id]=example;
+  setWelcome(false);openProcess(example.id);renderProcesses();saveLocal();setReadMode(true);fitProcessToScreen();msg('Exemplet är öppnat – prova Förstå och Följ');
+});
 function newProcess(){if(!requireEdit())return;setNewProcessDialog(true)}
 async function deleteProcess(id){
   if(!requireEdit())return;
@@ -5435,7 +5559,7 @@ function renderReadPanel(item){
   if(!item){readPanel.hidden=true;return}
   const info=ensureProcessInfo(item), fields=[
     ['Beskrivning',info.description],['Ansvar',info.responsibleRole],['System',info.system],['Instruktion',info.instruction],['Tid',info.duration],['KPI',info.kpi],['Risk',info.risk],['Kontroll',info.control],
-    ['Input',Array.isArray(item.data.inputs)?item.data.inputs.join(', '):''],['Output',Array.isArray(item.data.outputs)?item.data.outputs.join(', '):'']
+    ['Vad behövs före?',Array.isArray(item.data.inputs)?item.data.inputs.join(', '):''],['Vad blir resultatet?',Array.isArray(item.data.outputs)?item.data.outputs.join(', '):'']
   ];
   readPanelKicker.textContent=readTypeLabel(item.data.type);readPanelTitle.textContent=item.data.text||'Namnlöst steg';readPanelGrid.innerHTML='';let shown=0;
   for(const [label,value] of fields){if(!String(value||'').trim())continue;shown++;const wrap=document.createElement('div');wrap.className='p48-read-field';const l=document.createElement('div');l.className='p48-read-label';l.textContent=label;const v=document.createElement('div');v.className='p48-read-value';v.textContent=String(value);wrap.append(l,v);readPanelGrid.appendChild(wrap)}
@@ -5448,9 +5572,17 @@ function renderReadPanel(item){
   }else if(item.data.type==='end'){
     const wrap=document.createElement('div');wrap.className='p48-read-field p48-read-next';const l=document.createElement('div');l.className='p48-read-label';l.textContent='Därefter';const v=document.createElement('div');v.className='p48-read-value';v.textContent='Processen slutar här';wrap.append(l,v);readPanelGrid.appendChild(wrap);shown++;
   }
+  if(item.data.type==='decision'){
+    const check=MapliniWalkthroughCore.decisionStatus(MapliniWalkthroughCore.nextEdges(item.data.id,walkthroughNodeData(),links));
+    if(!check.complete){const warning=document.createElement('div');warning.className='p48-walkthrough-route-warning';warning.setAttribute('role','alert');warning.textContent=check.message;readPanelGrid.appendChild(warning);shown++}
+  }
   readPanelEmpty.hidden=shown>0;readPanel.hidden=false;
 }
 function refreshMobileReaderBar(){
+  const menu=root.querySelector('#p48-export-menu'),extras=root.querySelector('#p48-mobile-reader-extras'),utilities=root.querySelector('.p48-top-utilities');
+  const destination=readMode&&isMobileLayout()?extras:utilities;
+  if(menu&&destination&&menu.parentElement!==destination){menu.open=false;destination.appendChild(menu)}
+  const home=root.querySelector('#p48-mobile-reader-home');if(home)home.hidden=sharedView;const desktopHome=root.querySelector('#p48-home');if(desktopHome)desktopHome.hidden=sharedView;
   if(mobileReaderName)mobileReaderName.textContent=String(nameInput?.value||processes[String(currentId||'')]?.name||'Process').trim()||'Process';
   if(mobileReaderEdit)mobileReaderEdit.hidden=!MapliniAccessCore.canEdit({sharedView,currentRole});
 }
@@ -5464,12 +5596,12 @@ function renderReadSidebar(){
     if(entry.disconnected&&!disconnectedLabelShown){const label=document.createElement('div');label.className='p48-read-sidebar-group';label.textContent='Okopplade steg';readSidebarList.appendChild(label);disconnectedLabelShown=true}
     const button=document.createElement('button');button.type='button';button.className='p48-read-sidebar-step';button.dataset.readSidebarId=item.data.id;
     button.style.paddingLeft=(7+Math.min(3,Number(entry.depth)||0)*10)+'px';
-    if(selectedIds.has(item.data.id))button.classList.add('active');
+    if(selectedIds.has(item.data.id)){button.classList.add('active');button.setAttribute('aria-current','step')}
     const number=document.createElement('span');number.className='p48-read-sidebar-index';number.textContent=String(index+1);
     const copy=document.createElement('span');copy.className='p48-read-sidebar-copy';
     const title=document.createElement('strong');title.textContent=item.data.text||'Namnlöst steg';
     const type=document.createElement('small');type.textContent=(entry.branchLabel?entry.branchLabel+' · ':'')+readTypeLabel(item.data.type);
-    copy.append(title,type);button.append(number,copy);button.addEventListener('click',()=>jumpToProcessNode(item.data.id));readSidebarList.appendChild(button);
+    copy.append(title,type);button.append(number,copy);button.addEventListener('click',()=>{jumpToProcessNode(item.data.id);if(isMobileLayout())fitMobileReadProcess({announce:false})});readSidebarList.appendChild(button);
   });
   if(readSidebarStart)readSidebarStart.disabled=!ordered.length;
   if(readSidebarFit)readSidebarFit.disabled=!ordered.length;
@@ -5482,7 +5614,7 @@ function setReadModeWithOptions(on,{silent=false}={}){
 function activateMobileConsumptionDefault(){
   if(mobileConsumptionInitialized||!isMobileLayout()||!nodes.size)return false;
   mobileConsumptionInitialized=true;setReadModeWithOptions(true,{silent:true});
-  msg(MapliniAccessCore.canEdit({sharedView,currentRole})?'Mobil läsvy – Följ processen eller tryck ✎ för att redigera':'Mobil läsvy');
+  msg(MapliniAccessCore.canEdit({sharedView,currentRole})?'Välj ett steg i listan eller tryck Följ':'Välj ett steg i listan');
   requestAnimationFrame(()=>fitMobileReadProcess({announce:false}));return true;
 }
 function select(el){
@@ -5520,13 +5652,13 @@ function renderNodeIO(item){
   if(item.data.inputs.length){const s=document.createElement('span');s.textContent='In: '+item.data.inputs.join(', ');item.io.appendChild(s);}
   if(item.data.outputs.length){const s=document.createElement('span');s.textContent='Out: '+item.data.outputs.join(', ');item.io.appendChild(s);}
   item.io.style.display=(item.data.inputs.length||item.data.outputs.length)?'grid':'none';
-  const ts=styleOf(item.data);item.io.style.fontFamily=ts.fontFamily;item.io.style.fontSize=Math.max(9,Math.round(ts.fontSize*.72))+'px';
+  const ts=styleOf(item.data);item.io.style.fontFamily=ts.fontFamily==='Inter'?'Inter,system-ui,sans-serif':ts.fontFamily;item.io.style.fontSize=Math.max(9,Math.round(ts.fontSize*.72))+'px';
 }
 function renderIOEditor(item){
   inputsBox.innerHTML='';outputsBox.innerHTML='';ensureIO(item);
   const row=(value,index,kind)=>{
     const r=document.createElement('div');r.className='p48-io-row';
-    const inp=document.createElement('input');inp.value=value;inp.placeholder=kind==='inputs'?'Input':'Output';
+    const inp=document.createElement('input');inp.value=value;inp.placeholder=kind==='inputs'?'Underlag':'Resultat';
     inp.addEventListener('change',()=>{if(!requireEdit())return;pushUndo();item.data[kind][index]=inp.value.trim();item.data[kind]=item.data[kind].filter(Boolean);renderNodeIO(item);drawLinks();persist();refreshControls();});
     const del=document.createElement('button');del.type='button';del.textContent='×';
     del.addEventListener('click',()=>{if(!requireEdit())return;pushUndo();item.data[kind].splice(index,1);renderNodeIO(item);drawLinks();persist();refreshControls();});
@@ -5613,9 +5745,12 @@ function renderProcessInfoEditor(item){
   renderSourceTrace(item);
   renderStepUnderstanding(item);
   const eligible=processInfoEligible(item);
+  const decisionWarning=root.querySelector('#p48-info-decision-warning');
+  if(decisionWarning){const check=item?.data?.type==='decision'?MapliniWalkthroughCore.decisionStatus(MapliniWalkthroughCore.nextEdges(item.data.id,walkthroughNodeData(),links)):{complete:true,message:''};decisionWarning.hidden=check.complete;decisionWarning.textContent=check.message}
   if(processInfoPanel)processInfoPanel.hidden=!eligible;
   if(!eligible)return;
   const info=ensureProcessInfo(item);
+  const nameField=root.querySelector('#p48-info-name');if(nameField&&document.activeElement!==nameField)nameField.value=item.data.text||'';
   for(const [key,el] of Object.entries(processInfoFields))if(el&&document.activeElement!==el)el.value=info[key]||'';
   renderSuggestionList(roleSuggestions,processInfoSuggestions('responsibleRole'));
   renderSuggestionList(systemSuggestions,processInfoSuggestions('system'));
@@ -5787,7 +5922,7 @@ function setFormatEnabled(enabled){
     else if(context==='node'){
       const item=selectedId?nodes.get(selectedId):null;
       if(item?.data?.type==='object'){
-        const role=item.data.objectRole==='input'?'Objekt in · det som triggar eller behövs före en aktivitet.':(item.data.objectRole==='output'?'Objekt ut · resultatet som aktiviteten producerar.':'Objekt · kan vara både resultat från ett steg och input till nästa.');
+        const role=item.data.objectRole==='input'?'Underlag · det som triggar eller behövs före en aktivitet.':(item.data.objectRole==='output'?'Resultat · resultatet som aktiviteten producerar.':'Underlag eller resultat · kan användas i nästa steg.');
         formatHint.textContent=role+' Ändra text och utseende här.';
       }else if(processInfoEligible(item))formatHint.textContent='Beskriv vad som händer, vem som ansvarar och vilket system som används. Utseendet ligger separat.';
       else formatHint.textContent='Ändra text och utseende för den markerade rutan.';
@@ -5841,6 +5976,11 @@ function refreshControls(){
   if(documentOpenEditor){const u=(!multi&&item&&item.data.type==='document')?safeDocumentUrl(item.data.documentUrl):'';documentOpenEditor.hidden=!u;if(u)documentOpenEditor.href=u;else documentOpenEditor.removeAttribute('href');}
   if(!multi&&item){renderIOEditor(item);renderProcessInfoEditor(item)}else{inputsBox.innerHTML='';outputsBox.innerHTML='';if(processInfoPanel)processInfoPanel.hidden=true;if(stepUnderstanding)stepUnderstanding.hidden=true;if(sourceTracePanel)sourceTracePanel.hidden=true;}
 }
+root.querySelector('#p48-info-name').addEventListener('change',e=>{
+  if(!requireEdit())return;const item=selectedId?nodes.get(selectedId):null;if(!processInfoEligible(item))return;
+  const text=String(e.target.value||'').trim().slice(0,500);if(!text){e.target.value=item.data.text||'';msg('Stegnamnet får inte vara tomt');return}
+  if(text===item.data.text)return;pushUndo(true);item.data.text=text;item.label.textContent=text;applyStyle(item);invalidateNodeGeom(item.data.id);markNodeLinksDirty(item.data.id);drawLinks();persist();renderProcessInfoEditor(item);msg('Stegnamn sparat');
+});
 for(const [key,el] of Object.entries(processInfoFields)){
   if(!el)continue;
   el.addEventListener('change',()=>saveProcessInfoField(key,el.value));
@@ -5964,7 +6104,7 @@ function createConnectedNodeAt(source,side,clientX,clientY){
   links.push(MapliniConnectorCore.create(source.data.id,id,side,{label:autoLabel}));
   polishAutomaticConnectedLinks([source.data.id,id],{forceAuto:true});
   celebrateCreatedNode(el);quickBuildNodeIds.add(id);select(el);requestFullLinkRender(true);persist();refreshControls();refreshLinkControls();updateSelectionUi();
-  const names={object:'Objekt ut',process:'Aktivitet',decision:'Beslut',document:'Dokument',end:'Slut'};
+  const names={object:'Resultat',process:'Aktivitet',decision:'Beslut',document:'Dokument',end:'Slut'};
   msg((names[type]||'Steg')+' skapat och kopplat');
   requestAnimationFrame(()=>{ensureNodeVisible(el);beginInlineEdit(el)});
   return true;
@@ -6197,14 +6337,14 @@ function preferredNextLabel(item){
   const current=String(item?.data?.type||'');
   if(current==='decision')return'＋ Ja + Nej';
   const type=preferredNextType(item);
-  if(type==='object')return'＋ Objekt ut';
+  if(type==='object')return'＋ Resultat';
   if(type==='process')return'＋ Aktivitet';
   return'＋ Nästa steg';
 }
 function workflowCue(item){
   const current=String(item?.data?.type||'');
-  const currentLabel=current==='process'?'Aktivitet':(current==='object'?(item.data.objectRole==='input'?'Objekt in':(item.data.objectRole==='output'?'Objekt ut':'Objekt')):(current==='start'?'Start':(current==='decision'?'Beslut':(current==='document'?'Dokument':(current==='subprocess'?'Delprocess':'')))));
-  const next=preferredNextType(item),nextLabel=next==='object'?'Objekt ut':(next==='process'?'Aktivitet':'');
+  const currentLabel=current==='process'?'Aktivitet':(current==='object'?(item.data.objectRole==='input'?'Underlag':(item.data.objectRole==='output'?'Resultat':'Objekt')):(current==='start'?'Start':(current==='decision'?'Beslut':(current==='document'?'Dokument':(current==='subprocess'?'Delprocess':'')))));
+  const next=preferredNextType(item),nextLabel=next==='object'?'Resultat':(next==='process'?'Aktivitet':'');
   return currentLabel&&nextLabel?`${currentLabel} → ${nextLabel}`:'';
 }
 function ensureNodeVisible(el){
@@ -6449,7 +6589,7 @@ function addNextStepFromNode(sourceId,type='process'){
   const autoLabel=decisionAutoLabel(sourceId);links.push(MapliniConnectorCore.create(sourceId,id,nextStepConnectorSide(pos.direction||direction),{label:autoLabel}));
   polishAutomaticConnectedLinks([sourceId,id],{forceAuto:true});
   closeNodeNextMenus();quickBuildNodeIds.add(id);select(el);requestFullLinkRender(true);persist();refreshControls();refreshLinkControls();updateSelectionUi();
-  const names={object:(nextObjectRole==='output'?'Objekt ut':'Objekt'),process:'Aktivitet',decision:'Beslut',document:'Dokument',end:'Slut'};
+  const names={object:(nextObjectRole==='output'?'Resultat':'Objekt'),process:'Aktivitet',decision:'Beslut',document:'Dokument',end:'Slut'};
   msg((names[type]||'Steg')+' tillagt · skriv namnet · Enter fortsätter · Ctrl+Enter fortsätter klassiskt');
   requestAnimationFrame(()=>{ensureNodeVisible(el);beginInlineEdit(el)});return true;
 }
@@ -7764,6 +7904,10 @@ function walkthroughQuestionsFor(item){
   const explicit=MapliniWalkthroughCore.normalizeQuestions(item?.data?.walkthroughQuestions);
   if(explicit.length)return explicit;
   const type=String(item?.data?.type||'');
+  if(type==='decision'){
+    const edges=MapliniWalkthroughCore.nextEdges(item.data.id,walkthroughNodeData(),links),branches=MapliniWalkthroughCore.routeEdges(edges);
+    if(MapliniWalkthroughCore.decisionStatus(edges).complete&&edges.length===2&&branches.yes&&branches.no)return [{id:'__maplini_decision_route__',text:item.data.text||'Vilken väg gäller?',kind:'route',route:true,required:true}];
+  }
   if(type==='process'||type==='subprocess'){
     return [{id:'__maplini_default_done__',text:'Har du gjort detta?',kind:'control',required:true,quick:true}];
   }
@@ -7897,7 +8041,7 @@ function renderWalkthroughStep(){
   if(walkthroughQuestions){
     walkthroughQuestions.innerHTML='';
     if(!questions.length){
-      const empty=document.createElement('div');empty.className='p48-walkthrough-no-questions';empty.textContent='Det här steget kräver inget Ja/Nej-svar. Fortsätt när du är redo.';walkthroughQuestions.appendChild(empty);
+      const empty=document.createElement('div');empty.className='p48-walkthrough-no-questions';empty.textContent=data.type==='decision'?'Välj den väg som gäller nedan.':'Det här steget kräver inget Ja/Nej-svar. Fortsätt när du är redo.';walkthroughQuestions.appendChild(empty);
     }else questions.forEach((q,index)=>{
       const single=questions.length===1;
       const box=document.createElement('div');box.className='p48-walkthrough-question'+(q.quick?' quick':'')+(single?' single-question':'');
@@ -8010,6 +8154,15 @@ function renderWalkthroughNavigation(item){
   if(walkthroughNextChoices){walkthroughNextChoices.innerHTML='';walkthroughNextChoices.hidden=true}
   if(walkthroughNext)walkthroughNext.hidden=true;
   if(walkthroughFinish)walkthroughFinish.hidden=true;
+  if(data.type==='decision'){
+    const decision=MapliniWalkthroughCore.decisionStatus(edges);
+    if(!decision.complete){
+      if(walkthroughNextChoices){walkthroughNextChoices.hidden=false;const warning=document.createElement('div');warning.className='p48-walkthrough-route-warning';warning.setAttribute('role','alert');warning.textContent=decision.message+' Genomgången stannar här tills beslutet är kompletterat.';walkthroughNextChoices.appendChild(warning)}
+      if(walkthroughQuestions&&!questions.length)walkthroughQuestions.innerHTML='';
+      if(walkthroughComingText)walkthroughComingText.textContent='Beslutet behöver kompletteras';
+      return;
+    }
+  }
 
   if(edges.length===0){
     if(walkthroughFinish){walkthroughFinish.hidden=false;walkthroughFinish.textContent=(walkthroughState?.processStack||[]).length?'Klar här – tillbaka till huvudflödet →':'Klar – avsluta genomgång';walkthroughFinish.onclick=()=>commitWalkthroughStep(null)}
@@ -8091,6 +8244,10 @@ function commitWalkthroughStep(nextId){
   if(walkthroughState?.quickAdvanceTimer){window.clearTimeout(walkthroughState.quickAdvanceTimer);walkthroughState.quickAdvanceTimer=null}
   if(!walkthroughState?.currentId)return false;
   const item=nodes.get(String(walkthroughState.currentId));if(!item)return false;
+  if(item.data.type==='decision'){
+    const decision=MapliniWalkthroughCore.decisionStatus(MapliniWalkthroughCore.nextEdges(item.data.id,walkthroughNodeData(),links));
+    if(!decision.complete){setWalkthroughValidation(decision.message);return false}
+  }
   if(!walkthroughAnswersAreComplete(item)){setWalkthroughValidation('Besvara alla frågor innan du går vidare.');return false}
   if(!walkthroughDeviationDetailsAreComplete(item)){setWalkthroughValidation('Fyll i förklaring, ansvarig och förfallodatum för varje avvikelse.');return false}
   const questions=walkthroughQuestionsFor(item);
@@ -8228,7 +8385,7 @@ function buildSheetXml(headers,rows,widths){
 function buildGoogleSheetsXlsx(){
   persist();
   const s=state();
-  const stepHeaders=['Ordning','ID','Typ','Text','Dokumentlänk','Inputs','Outputs','Nästa steg','Föregående steg','X','Y','Bredd','Höjd'];
+  const stepHeaders=['Ordning','ID','Typ','Text','Dokumentlänk','Vad behövs före?','Vad blir resultatet?','Nästa steg','Föregående steg','X','Y','Bredd','Höjd'];
   const stepRows=processRowsForSheet();
   const nodeMap=new Map((s.nodes||[]).map(n=>[n.id,n]));
   const linkHeaders=['Från ID','Från steg','Till ID','Till steg','Anslutning','Piltext'];
@@ -8525,7 +8682,7 @@ async function renderMapSnapshot(){
 
     const fontSize=Math.max(10,Math.min(36,Number(s.fontSize||13)));
     const weight=s.fontWeight==='700'?'700':'400',italicStyle=s.fontStyle==='italic'?'italic ':'';
-    ctx.font=`${italicStyle}${weight} ${fontSize}px ${s.fontFamily==='system-ui'?'Arial':s.fontFamily}`;
+    ctx.font=`${italicStyle}${weight} ${fontSize}px ${['Inter','system-ui'].includes(s.fontFamily)?'Arial':s.fontFamily}`;
     ctx.fillStyle=s.textColor||'#17202a';ctx.textBaseline='top';
     const inputs=Array.isArray(d.inputs)?d.inputs.filter(Boolean):[],outputs=Array.isArray(d.outputs)?d.outputs.filter(Boolean):[];
     const ioLines=[];
@@ -8818,10 +8975,10 @@ function addFromPalette(item,{closeMobile=false}={}){
   const [x,y]=paletteInsertPoint();
   addNode(type,x,y,{objectRole:item.dataset.objectRole||null});
   if(closeMobile)setMobileTools(false);
-  const paletteName=item.dataset.type==='object'?(item.dataset.objectRole==='input'?'Objekt in':'Objekt ut'):(item.dataset.type==='process'?'Aktivitet':'Steg');
+  const paletteName=item.dataset.type==='object'?(item.dataset.objectRole==='input'?'Underlag':'Resultat'):(item.dataset.type==='process'?'Aktivitet':'Steg');
   msg(`${paletteName} tillagt · markera rutan och använd Nästa för att fortsätta`);
 }
-if(emptyObject)emptyObject.addEventListener('click',()=>{if(addFirstStep('object','input'))msg('Objekt in tillagt · skriv vad som triggar processen')});
+if(emptyObject)emptyObject.addEventListener('click',()=>{if(addFirstStep('object','input'))msg('Underlag tillagt · skriv vad som triggar processen')});
 if(emptyStart)emptyStart.addEventListener('click',()=>{if(addFirstStep('start'))msg('Start tillagd · skriv en tydlig startpunkt')});
 if(emptyActivity)emptyActivity.addEventListener('click',createFirstActivityFromStarter);
 if(emptyImport)emptyImport.addEventListener('click',()=>setBatchDialog(true));
@@ -9356,8 +9513,8 @@ documentUrlInput.addEventListener('change',()=>{
   persist();
   msg(raw?'Dokumentlänk sparad':'Dokumentlänk borttagen');
 });
-addInputBtn.addEventListener('click',()=>{if(!requireEdit())return;const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();ensureIO(item);item.data.inputs.push('Ny input');renderNodeIO(item);persist();refreshControls();});
-addOutputBtn.addEventListener('click',()=>{if(!requireEdit())return;const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();ensureIO(item);item.data.outputs.push('Ny output');renderNodeIO(item);persist();refreshControls();});
+addInputBtn.addEventListener('click',()=>{if(!requireEdit())return;const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();ensureIO(item);item.data.inputs.push('Nytt underlag');renderNodeIO(item);persist();refreshControls();});
+addOutputBtn.addEventListener('click',()=>{if(!requireEdit())return;const item=selectedId?nodes.get(selectedId):null;if(!item)return;pushUndo();ensureIO(item);item.data.outputs.push('Nytt resultat');renderNodeIO(item);persist();refreshControls();});
 
 deleteNodeBtn.addEventListener('click',()=>deleteSelected());
 linkColor.addEventListener('input',()=>{
@@ -9604,6 +9761,7 @@ function fitProcessToScreen(){
 }
 function mobileReadFocusRect(rects){
   const list=Array.isArray(rects)?rects:[];if(!list.length)return null;
+  const selected=list.find(r=>String(r.id)===String(selectedId||''));if(selected)return selected;
   const starts=list.filter(r=>nodes.get(String(r.id))?.data?.type==='start');
   return (starts.length?starts:list).slice().sort((a,b)=>(Number(a.x)||0)-(Number(b.x)||0)||(Number(a.y)||0)-(Number(b.y)||0))[0]||null;
 }
@@ -9843,7 +10001,8 @@ const SHARE_TOKEN="__SHARE_TOKEN__";
 (async()=>{
  if(SHARE_TOKEN&&await loadShared(SHARE_TOKEN))return;
  loadVersionHistories();
- if(!loadLocal()){processes[starter.id]=clone(starter);currentId=starter.id}
+ const restoredLocal=loadLocal();
+ if(!restoredLocal){processes[starter.id]=clone(starter);currentId=starter.id}
  try{
   openProcess(currentId);
 }catch(err){
@@ -9855,6 +10014,7 @@ const SHARE_TOKEN="__SHARE_TOKEN__";
 }
 renderProcesses();refreshControls();updateSelectionUi();updateAccountUi();setSaveState('saved');showPendingRecovery();msg('Klar');
  if(isMobileLayout())activateMobileConsumptionDefault();
+ if(!restoredLocal&&!ownerId())setWelcome(true);
  applyProcessStyle();
  renderPrintPages();
  if(ownerId()){

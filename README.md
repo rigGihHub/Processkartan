@@ -1,4 +1,24 @@
-## Senaste release: v0.20.80 – Release Candidate
+# Maplini v0.20.101 – förbättringar från användargranskningen
+
+- En komplett upphandlingsprocess med beskrivningar, ansvar, Ja-/Nej-väg och två avslut.
+- Följ-läget stannar vid ofullständiga beslut. Alla vägar behöver namn; ett korrekt Ja/Nej-beslut styrs direkt av svaret. Även beslut med fler namngivna alternativ fungerar.
+- Första besöket erbjuder **Skapa själv**, **Utgå från dokument** och **Prova exempel**. **Start** öppnar valen igen. Dokumentflödet från Start och exempel skapar egna processer.
+- Stegnamn, beskrivning och ansvar ligger före formatering. Stegnamnet kan ändras i panelen och ångras.
+- **Exportera** finns direkt i verktygsraden och mobilens läsvy.
+- **Underlag**, **Resultat**, **Vad behövs före?** och **Vad blir resultatet?** ersätter fackspråket i huvudflödet.
+- Nya standardtexter är 16 px med fungerande sans-serif-reserv. Ny, Hitta och Mer har synliga namn. Exemplet använder en kompakt förgrenad layout; startvyn ger tomrummet en tydlig funktion.
+
+Verifierat med 516 Python-tester, 39 JavaScript-sviter och funktionella DOM-tester av den faktiska editorn, inklusive båda beslutsvägarna, import, mobilmeny, ångra och återställning av sparad data. Visuell webbläsar-QA återstår: lokal förhandsvisning blockerades av webbläsarens URL-policy.
+
+Ändringarna är förberedda lokalt och inte pushade eller publicerade.
+
+## Förberedd version: v0.20.100 – Mobil läsvy
+
+Mobilens Förstå-läge har en kompakt kartvy och en klickbar lista över samtliga steg direkt under kartan. Listan använder processens riktiga kopplingar, visar grenvägar och markerar okopplade steg. Knapparna heter **Följ**, **Visa hela** och **Redigera**, och långa processnamn kan radbrytas. Vid fönsterändring behålls markerat steg i fokus. Stegens placering, kopplingar och sparade processinnehåll ändras inte av läsvyn.
+
+Förberedd från GitHub main `780e59a`. Inte pushad eller publicerad. Python- och JavaScript-kontroller är godkända; visuell mobilkontroll återstår eftersom Chromium inte kunde installeras i utvecklingsmiljön.
+
+## Tidigare release: v0.20.80 – Release Candidate
 
 Den här releasen samlar de senaste UI-/canvasförbättringarna till en release candidate och kör dem genom hela kärnflödet. Ett faktiskt mobilfel hittades och rättades: vid återställning av en liten process kunde en schemalagd desktop-fit köra efter att mobil **Förstå** hade aktiverats och skriva över den läsbara zoomen till 25 %. Fit-racet avbryts nu när läsvyn hunnit aktiveras.
 

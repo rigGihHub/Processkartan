@@ -59,6 +59,15 @@ function routeEdges(edges){
   const no=list.filter(e=>normalizedBranchLabel(e&&e.label)==='no');
   return {yes:yes.length===1?yes[0]:null,no:no.length===1?no[0]:null,ambiguous:yes.length>1||no.length>1};
 }
+function decisionStatus(edges){
+  const list=Array.isArray(edges)?edges:[];
+  if(list.length<2)return {complete:false,message:'Beslutet saknar alternativa vägar. Lägg till minst två utgående pilar och namnge varje väg, till exempel Ja och Nej.'};
+  const labels=list.map(e=>safeString(e&&e.label,500).toLocaleLowerCase('sv-SE').replace(/[.!?:;]+$/g,'').trim());
+  if(labels.some(label=>!label))return {complete:false,message:'Beslutet har en väg utan namn. Namnge alla utgående pilar så att det går att välja rätt väg.'};
+  const keys=labels.map(label=>normalizedBranchLabel(label)||label);
+  if(new Set(keys).size!==keys.length)return {complete:false,message:'Beslutet har flera vägar med samma namn. Ge varje utgående pil ett eget namn.'};
+  return {complete:true,message:''};
+}
 function automaticRoute(questions,answers,edges){
   const q=routeQuestion(questions);
   if(!q)return {mode:'manual',reason:'no-route-question',question:null,edge:null};
@@ -101,5 +110,5 @@ function summarize(history){
   }
   return {steps:rows.length,answered,yes,no,routeYes,routeNo,controlYes,controlNo,deviations,passed:deviations.length===0};
 }
-global.MapliniWalkthroughCore={normalizeQuestion,normalizeQuestions,graph,startNodeIds,nextEdges,normalizedBranchLabel,routeQuestion,routeEdges,automaticRoute,answerIsDeviation,currentDeviationCount,summarize};
+global.MapliniWalkthroughCore={normalizeQuestion,normalizeQuestions,graph,startNodeIds,nextEdges,normalizedBranchLabel,routeQuestion,routeEdges,decisionStatus,automaticRoute,answerIsDeviation,currentDeviationCount,summarize};
 })(typeof window!=='undefined'?window:globalThis);

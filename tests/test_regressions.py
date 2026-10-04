@@ -241,7 +241,7 @@ def test_v01015_mobile_palette_supports_tap_and_keyboard_add():
 
 def test_v01015_mobile_palette_explains_tap_behavior():
     html = _template()
-    assert "Grundflödet är <strong>Objekt → Aktivitet → Objekt</strong>" in html
+    assert "Grundflödet är <strong>Underlag → Aktivitet → Resultat</strong>" in html
     assert "Bygg processen" in html
 
 
@@ -1620,9 +1620,9 @@ def test_v0160_object_activity_object_method_is_core_model():
     assert 'APP_VERSION = "' in APP
     html=_template()
     assert 'Bygg processen' in html
-    assert 'Objekt → Aktivitet → Objekt' in html
-    assert 'aria-label="Lägg till Objekt in"' in html
-    assert 'aria-label="Lägg till Objekt ut"' in html
+    assert 'Underlag → Aktivitet → Resultat' in html
+    assert 'aria-label="Lägg till Underlag"' in html
+    assert 'aria-label="Lägg till Resultat"' in html
     assert html.count('data-type="object"') >= 2
     assert '.p48-node.object{' in html
     assert "object:'Nytt objekt'" in APP
@@ -1773,7 +1773,7 @@ def test_v0169_fast_next_step_flow_uses_recommended_type_and_keeps_alternatives(
     assert "function preferredNextType(item)" in APP
     assert "if(type==='process')return'object';" in APP
     assert "if(['start','object','decision','document','subprocess'].includes(type))return'process';" in APP
-    assert "if(type==='object')return'＋ Objekt ut';" in APP
+    assert "if(type==='object')return'＋ Resultat';" in APP
     assert "if(type==='process')return'＋ Aktivitet';" in APP
     assert "if(item&&type)addNextStepFromNode(item.data.id,type);" in APP
     assert "if(item&&isNextStepSource(item)&&item.nextBtn)item.nextBtn.click();" in APP
@@ -1853,7 +1853,7 @@ def test_v0174_build_flow_ux_polish_recommends_and_keeps_next_node_visible():
     assert "Aktivitet → ${nextLabel}" not in APP
     assert "nodeQuickFlow.textContent=source?workflowCue(items[0]):'';" in APP
     assert "b.classList.add('recommended')" in APP
-    assert "Objekt ut" in APP
+    assert "Resultat" in APP
     assert "Ctrl+Enter fortsätter" in APP
     assert "ensureNodeVisible(el);beginInlineEdit(el)" in APP
 

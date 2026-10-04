@@ -6,7 +6,7 @@ NAV = (Path(__file__).parents[1] / "maplini_navigation_core.js").read_text(encod
 
 
 def test_understand_outline_uses_graph_order_not_canvas_order():
-    assert 'APP_VERSION = "0.20.93"' in APP
+    assert 'APP_VERSION = "' in APP
     assert "MapliniNavigationCore.orderedOutline" in APP
     assert "function orderedOutline(nodes,links)" in NAV
     assert "components.sort" in NAV
