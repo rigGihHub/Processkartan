@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.20.104"
+APP_VERSION = "0.20.105"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -664,18 +664,24 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-item-object{border-color:#a9c8cf!important;background:#f8fbfc!important}
 .p48-palette-more-label{margin:12px 0 5px;padding-top:9px;border-top:1px solid #e3e9ed;color:#71808b;font:800 9px/1 Inter,system-ui;text-transform:uppercase;letter-spacing:.08em}
 
-/* v0.15.11 empty-process first view — must live inside the editor iframe. */
+/* v0.20.105: the starter belongs to the viewport, outside the scaled canvas. */
 .p48-empty-state{
   position:absolute;
   inset:0;
   z-index:18;
   display:grid;
   place-items:start center;
-  pointer-events:none;
+  pointer-events:auto;
   padding:72px 32px 32px;
   box-sizing:border-box;
+  overflow-y:auto;
+  touch-action:pan-y pinch-zoom;
 }
 .p48-empty-state[hidden]{display:none!important}
+#pk48.p48-empty-process .p48-scroll{overflow:hidden!important;touch-action:pan-y pinch-zoom!important}
+#pk48.p48-empty-process .p48-canvas-wrap,
+#pk48.p48-empty-process .p48-hnav,
+#pk48.p48-empty-process .p48-scroll-bottom-spacer{display:none!important}
 .p48-empty-card{
   width:min(460px,calc(100% - 48px));
   box-sizing:border-box;
@@ -699,11 +705,12 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-empty-actions button:hover{filter:brightness(.98)}
 .p48-empty-tip{margin-top:13px;padding-top:11px;border-top:1px solid #e5ebef;font:500 11px/1.45 Inter,system-ui;color:#74828e}
 @media(max-width:700px),(pointer:coarse){
-  .p48-empty-state{padding:54px 14px 18px}
+  .p48-empty-state{padding:18px 12px;overscroll-behavior:auto}
   .p48-empty-card{width:min(100%,390px);padding:19px}
   .p48-empty-title{font-size:19px}
   .p48-empty-actions{grid-template-columns:1fr}
   .p48-empty-actions button{min-height:46px}
+  #pk48.p48-empty-process:not(.p48-read-mode):not(.p48-mobile-canvas-fullscreen) .p48-scroll{height:420px!important;min-height:420px!important;max-height:none!important}
 }
 /* v0.20.44 – first process flow: type the first step, then continue with Tab. */
 .p48-empty-first-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:stretch}
@@ -721,7 +728,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-batch-head{display:flex;align-items:start;justify-content:space-between;gap:12px;margin-bottom:10px}.p48-batch-title{font:800 18px/1.2 Inter,system-ui;color:#263a49}.p48-batch-sub{margin-top:4px;color:#657783;font:500 12px/1.45 Inter,system-ui}.p48-batch-close{border:0;background:transparent;font-size:22px;cursor:pointer;color:#657783}
 .p48-batch-dialog textarea{width:100%;min-height:220px;resize:vertical;box-sizing:border-box;border:1px solid #bccbd6;border-radius:10px;padding:12px;font:500 14px/1.5 Inter,system-ui;color:#263a49}.p48-batch-dialog textarea:focus{outline:2px solid rgba(48,121,92,.18);border-color:#5d917c}.p48-batch-hint{margin-top:8px;color:#6c7b86;font:500 11px/1.45 Inter,system-ui}.p48-batch-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}.p48-batch-actions button{min-height:38px}
 @media(max-width:700px),(pointer:coarse){.p48-batch-dialog{padding:15px;top:48%}.p48-batch-dialog textarea{min-height:240px;font-size:16px}.p48-batch-actions{display:grid;grid-template-columns:1fr 1fr}.p48-batch-actions button{min-height:44px}}
-@media(max-width:700px),(pointer:coarse){.p48-empty-first-row{grid-template-columns:1fr}.p48-empty-first-row input,.p48-empty-first-row button{min-height:46px}.p48-empty-alt{margin-top:12px}}
+@media(max-width:700px),(pointer:coarse){.p48-empty-first-row{grid-template-columns:1fr}.p48-empty-first-row input,.p48-empty-first-row button{min-height:46px}.p48-empty-first-row input{font:650 16px Inter,system-ui}.p48-empty-alt{margin-top:12px}.p48-empty-alt button,.p48-empty-import{min-height:44px;font-size:12px}}
 
 /* v0.15.10 real canvas zoom — this MUST live inside the editor iframe.
    Scaling the canvas itself makes nodes, text, connectors, labels, logos and print guides
@@ -3210,7 +3217,7 @@ Skicka orderbekräftelse"></textarea>
       <div class="p48-overview-hint">Klicka på ett steg för att hoppa dit. Pilarna följer processens riktiga kopplingar.</div>
     </aside>
     <div id="p48-clean-preview-bar" class="p48-clean-preview-bar" hidden role="status" aria-live="polite"><div class="p48-clean-preview-copy"><strong>Förhandsvisning · Snygga till</strong><span id="p48-clean-preview-summary">Processens logik ändras inte.</span></div><div class="p48-clean-preview-actions"><button type="button" class="p48-btn" id="p48-clean-preview-cancel">Behåll som det är</button><button type="button" class="p48-btn primary" id="p48-clean-preview-apply">Använd</button></div></div>
-    <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><div id="p48-empty-state" class="p48-empty-state" hidden aria-hidden="true">
+    <div id="p48-empty-state" class="p48-empty-state" hidden aria-hidden="true">
       <section class="p48-empty-card" aria-labelledby="p48-empty-title">
         <div class="p48-empty-kicker">BÖRJA HÄR</div>
         <h2 id="p48-empty-title" class="p48-empty-title">Vad händer först?</h2>
@@ -3223,7 +3230,8 @@ Skicka orderbekräftelse"></textarea>
         <button type="button" class="p48-empty-import" id="p48-empty-import">Klistra in flera steg</button>
         <div class="p48-empty-tip">När första steget är skapat: tryck <strong>Tab</strong> för nästa steg.</div>
       </section>
-    </div><div id="p48-canvas-watermark" class="p48-canvas-watermark" aria-hidden="true"></div><img id="p48-process-logo" class="p48-process-logo" alt="Processlogotype"><div id="p48-link-hit-layer" class="p48-link-hit-layer"></div><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-link-quick" class="p48-link-quick" role="toolbar" aria-label="Snabbval för pil"><button type="button" data-link-routing="straight" title="Gör pilen rak">— Rak</button><button type="button" data-link-routing="orthogonal" title="Gör pilen vinkelrät">⌜ Vinkelrät</button><button type="button" data-link-routing="free" title="Flytta pilens bana fritt">↝ Fri</button></div><div id="p48-node-quick" class="p48-node-quick" role="toolbar" aria-label="Snabbval för markerade rutor" data-mode="single"><span id="p48-node-quick-flow" class="p48-node-quick-flow" data-single-only></span><button type="button" id="p48-node-quick-next" data-single-only title="Lägg till nästa steg · Tab" aria-keyshortcuts="Tab">＋ Nästa steg</button><button type="button" id="p48-node-quick-next-more" data-single-only title="Välj typ av nästa steg · Skift+Tab" aria-label="Välj typ av nästa steg" aria-keyshortcuts="Shift+Tab">▾</button><details id="p48-node-quick-shape" class="p48-node-quick-shape" title="Byt form på markerad ruta"><summary aria-label="Byt form"><span id="p48-node-quick-shape-icon" class="p48-shape-icon standard"></span> Form</summary><div class="p48-node-quick-shape-pop"><button type="button" data-quick-shape="standard" title="Typstandard" aria-label="Typstandard"><span class="p48-shape-icon standard"></span></button><button type="button" data-quick-shape="rectangle" title="Rektangel" aria-label="Rektangel"><span class="p48-shape-icon rectangle"></span></button><button type="button" data-quick-shape="rounded" title="Rundad" aria-label="Rundad"><span class="p48-shape-icon rounded"></span></button><button type="button" data-quick-shape="pill" title="Kapsel" aria-label="Kapsel"><span class="p48-shape-icon pill"></span></button></div></details><details id="p48-node-quick-arrange" data-multi-only><summary title="Ordna markerade rutor">Ordna</summary><div class="p48-node-quick-arrange-pop"><button type="button" data-node-quick-align="top">Överkant</button><button type="button" data-node-quick-align="left">Vänster</button><button type="button" data-node-quick-distribute="horizontal">Jämnt →</button><button type="button" data-node-quick-distribute="vertical">Jämnt ↓</button><button type="button" class="wide" data-node-quick-layout="horizontal">Snygga till markerade →</button><button type="button" class="wide" data-node-quick-layout="vertical">Snygga till markerade ↓</button></div></details><button type="button" id="p48-node-quick-subprocess" class="p48-subprocess-open" data-single-only hidden title="Öppna eller skapa karta för delprocessen">↳ Öppna delprocess</button><button type="button" id="p48-node-quick-format" title="Öppna egenskaper för markerad ruta">Egenskaper</button><label class="p48-quick-color-label" data-multi-only title="Ändra bakgrundsfärg för markerade"><input type="color" id="p48-node-quick-color" value="#ffffff"> Färg</label><button type="button" id="p48-node-quick-duplicate" title="Duplicera markerade">Duplicera</button><button type="button" id="p48-node-quick-delete" class="danger" title="Ta bort markerade">Ta bort</button></div><div id="p48-selection-hull" class="p48-selection-hull" hidden></div><div id="p48-print-frame" class="p48-print-frame"></div>
+    </div>
+    <div class="p48-canvas-wrap" id="p48-canvas-scroll"><div id="p48-canvas"><div id="p48-canvas-watermark" class="p48-canvas-watermark" aria-hidden="true"></div><img id="p48-process-logo" class="p48-process-logo" alt="Processlogotype"><div id="p48-link-hit-layer" class="p48-link-hit-layer"></div><div id="p48-link-handle" class="p48-link-handle" title="Dra för att ändra kopplingens bana"></div><div id="p48-link-quick" class="p48-link-quick" role="toolbar" aria-label="Snabbval för pil"><button type="button" data-link-routing="straight" title="Gör pilen rak">— Rak</button><button type="button" data-link-routing="orthogonal" title="Gör pilen vinkelrät">⌜ Vinkelrät</button><button type="button" data-link-routing="free" title="Flytta pilens bana fritt">↝ Fri</button></div><div id="p48-node-quick" class="p48-node-quick" role="toolbar" aria-label="Snabbval för markerade rutor" data-mode="single"><span id="p48-node-quick-flow" class="p48-node-quick-flow" data-single-only></span><button type="button" id="p48-node-quick-next" data-single-only title="Lägg till nästa steg · Tab" aria-keyshortcuts="Tab">＋ Nästa steg</button><button type="button" id="p48-node-quick-next-more" data-single-only title="Välj typ av nästa steg · Skift+Tab" aria-label="Välj typ av nästa steg" aria-keyshortcuts="Shift+Tab">▾</button><details id="p48-node-quick-shape" class="p48-node-quick-shape" title="Byt form på markerad ruta"><summary aria-label="Byt form"><span id="p48-node-quick-shape-icon" class="p48-shape-icon standard"></span> Form</summary><div class="p48-node-quick-shape-pop"><button type="button" data-quick-shape="standard" title="Typstandard" aria-label="Typstandard"><span class="p48-shape-icon standard"></span></button><button type="button" data-quick-shape="rectangle" title="Rektangel" aria-label="Rektangel"><span class="p48-shape-icon rectangle"></span></button><button type="button" data-quick-shape="rounded" title="Rundad" aria-label="Rundad"><span class="p48-shape-icon rounded"></span></button><button type="button" data-quick-shape="pill" title="Kapsel" aria-label="Kapsel"><span class="p48-shape-icon pill"></span></button></div></details><details id="p48-node-quick-arrange" data-multi-only><summary title="Ordna markerade rutor">Ordna</summary><div class="p48-node-quick-arrange-pop"><button type="button" data-node-quick-align="top">Överkant</button><button type="button" data-node-quick-align="left">Vänster</button><button type="button" data-node-quick-distribute="horizontal">Jämnt →</button><button type="button" data-node-quick-distribute="vertical">Jämnt ↓</button><button type="button" class="wide" data-node-quick-layout="horizontal">Snygga till markerade →</button><button type="button" class="wide" data-node-quick-layout="vertical">Snygga till markerade ↓</button></div></details><button type="button" id="p48-node-quick-subprocess" class="p48-subprocess-open" data-single-only hidden title="Öppna eller skapa karta för delprocessen">↳ Öppna delprocess</button><button type="button" id="p48-node-quick-format" title="Öppna egenskaper för markerad ruta">Egenskaper</button><label class="p48-quick-color-label" data-multi-only title="Ändra bakgrundsfärg för markerade"><input type="color" id="p48-node-quick-color" value="#ffffff"> Färg</label><button type="button" id="p48-node-quick-duplicate" title="Duplicera markerade">Duplicera</button><button type="button" id="p48-node-quick-delete" class="danger" title="Ta bort markerade">Ta bort</button></div><div id="p48-selection-hull" class="p48-selection-hull" hidden></div><div id="p48-print-frame" class="p48-print-frame"></div>
       <div id="p48-snap-guide-x" class="p48-snap-guide p48-snap-guide-x" hidden></div><div id="p48-snap-guide-y" class="p48-snap-guide p48-snap-guide-y" hidden></div>
       <div id="p48-marquee" class="p48-marquee"></div>
       <svg id="p48-svg" viewBox="0 0 2400 1400">
@@ -4758,6 +4766,7 @@ function refreshEmptyState(){
   refreshLargeMapMode();
   if(!emptyState)return;
   const show=nodes.size===0&&!sharedView&&!readMode;
+  root.classList.toggle('p48-empty-process',show);
   emptyState.hidden=!show;emptyState.setAttribute('aria-hidden',show?'false':'true');
 }
 function firstStepPoint(){
@@ -5123,10 +5132,14 @@ function setWelcome(show){
 root.querySelector('#p48-home').addEventListener('click',()=>{if(!sharedView)setWelcome(true)});
 root.querySelector('#p48-mobile-reader-home').addEventListener('click',()=>{if(!sharedView)setWelcome(true)});
 root.querySelector('#p48-welcome-close').addEventListener('click',()=>setWelcome(false));
-root.querySelector('#p48-welcome-create').addEventListener('click',()=>{if(!requireEdit())return;setWelcome(false);setReadMode(false);newProcess()});
-root.querySelector('#p48-welcome-document').addEventListener('click',()=>{if(!requireEdit())return;setWelcome(false);setReadMode(false);setDocDialog(true,{asNew:true})});
+function beginWelcomeEdit(){
+  if(!MapliniAccessCore.canEdit({sharedView,currentRole})||cleanPreview){msg('Endast visning');return false}
+  setReadMode(false);setWelcome(false);return true;
+}
+root.querySelector('#p48-welcome-create').addEventListener('click',()=>{if(beginWelcomeEdit())newProcess()});
+root.querySelector('#p48-welcome-document').addEventListener('click',()=>{if(beginWelcomeEdit())setDocDialog(true,{asNew:true})});
 root.querySelector('#p48-welcome-example').addEventListener('click',()=>{
-  if(!requireEdit())return;persist();const example=clone(starter);example.id=uid();processes[example.id]=example;
+  if(!beginWelcomeEdit())return;persist();const example=clone(starter);example.id=uid();processes[example.id]=example;
   setWelcome(false);openProcess(example.id);renderProcesses();saveLocal();setReadMode(true);fitProcessToScreen();msg('Exemplet är öppnat – prova Förstå och Följ');
 });
 function newProcess(){if(!requireEdit())return;setNewProcessDialog(true)}
@@ -5688,7 +5701,7 @@ function renderReadSidebar(){
 function setReadMode(on){return setReadModeWithOptions(on)}
 function setReadModeWithOptions(on,{silent=false}={}){
   if(isMobileLayout()){setMobileTools(false);setMobileSheet(null)}
-  readMode=Boolean(on);root.classList.toggle('p48-read-mode',readMode);syncWorkModeButtons();if(readMode){refreshProcessGlance();renderReadSidebar()}else refreshReadScanGuide();if(readModeToggle){readModeToggle.textContent='Förstå'}if(readHint)readHint.hidden=!readMode;
+  readMode=Boolean(on);root.classList.toggle('p48-read-mode',readMode);refreshEmptyState();syncWorkModeButtons();if(readMode){refreshProcessGlance();renderReadSidebar()}else refreshReadScanGuide();if(readModeToggle){readModeToggle.textContent='Förstå'}if(readHint)readHint.hidden=!readMode;
   if(!readMode&&readPanel)readPanel.hidden=true;refreshMobileReaderBar();applyRoleUi();refreshControls();updateSelectionUi();if(readMode&&selectedId)renderReadPanel(nodes.get(selectedId));refreshReadFocusPath();if(!silent)msg(readMode?'Läsvy – tryck på ett steg för detaljer':'Redigeringsläge');
 }
 function activateMobileConsumptionDefault(){
@@ -6402,6 +6415,7 @@ return el}
 
 function addNode(type,x,y,options={}){
   if(!requireEdit())return;pushUndo();seq++;
+  if(nodes.size===0)applyCanvasScale(1,false);
   const objectRole=type==='object'&&['input','output','intermediate'].includes(options.objectRole)?options.objectRole:'intermediate';
   const el=makeNode({id:'n'+seq,type,text:nodeText(type),x:x-90,y:y-38,objectRole,processInfo:MapliniProcessInfoCore.normalize({})});
   place(el,x-90,y-38);sync(el);select(el);drawLinks();persist();
@@ -7410,7 +7424,7 @@ if(scroll){
 // v0.13 mobile canvas gestures: one finger pans blank canvas, two fingers pinch-zoom.
 function nativeMobileReadTouch(e){return readMode&&isMobileLayout()&&e.pointerType==='touch'}
 const mobilePointers=new Map();let mobileGesture=null;
-function mobileGestureBlocked(target){return Boolean(target&&target.closest&&target.closest('.p48-node,.p48-node-quick,.p48-link-quick,.p48-link-hit-segment,.p48-link-visible,.p48-link-selection,.p48-link-handle,.p48-handle,.p48-resize,button,input,select,summary,a'));}
+function mobileGestureBlocked(target){return Boolean(target&&target.closest&&target.closest('.p48-empty-state,.p48-node,.p48-node-quick,.p48-link-quick,.p48-link-hit-segment,.p48-link-visible,.p48-link-selection,.p48-link-handle,.p48-handle,.p48-resize,button,input,select,summary,a'));}
 function resetMobileGesture(){mobileGesture=null;if(!mobilePointers.size&&scroll)scroll.classList.remove('p48-touching')}
 if(scroll){
   scroll.addEventListener('pointerdown',e=>{

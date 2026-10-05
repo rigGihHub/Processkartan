@@ -39,7 +39,60 @@ async function finishBranch(e,answer){
  assert.equal(e.doc.querySelector('#p48-walkthrough-summary-stats .p48-walkthrough-summary-stat:last-child strong').textContent,'0','No at a decision is a normal branch');
  e.click('#p48-walkthrough-close');
 }
+function activateMobileCSS(e){
+ // jsdom does not perform viewport media matching or layout. Apply the app's
+ // own mobile declarations to check selector matching and sizing contracts.
+ for(const style of e.doc.querySelectorAll('style')){
+  const rules=[...style.sheet.cssRules];
+  style.textContent=rules.flatMap(rule=>{
+   if(!rule.media)return [rule.cssText];
+   const mobile=/max-width:(?:360|480|700|900)px/.test(rule.conditionText.replace(/\s/g,''));
+   return mobile?[...rule.cssRules].map(child=>child.cssText):[];
+  }).join('\n');
+ }
+}
 (async()=>{
+ for(const mobile of [false,true]){
+  const starter=await editor(null,mobile);try{
+   starter.click('#p48-readmode-toggle');
+   starter.click('#p48-welcome-create');
+   assert.equal(starter.doc.querySelector('#p48-new-process-dialog').hidden,false,'start choices can leave reading when the user owns the process');
+   starter.change('#p48-new-process-name','Test av första steget');
+   starter.click('#p48-new-process-create');await delay(80);
+   if(mobile)activateMobileCSS(starter);
+   const get=id=>starter.doc.querySelector(id),css=id=>starter.dom.window.getComputedStyle(get(id));
+   const overlay=get('#p48-empty-state');
+   assert.equal(overlay.parentElement.id,'p48-scroll','the starter belongs to the viewport');
+   assert.equal(get('#p48-canvas').contains(overlay),false,'the starter cannot inherit canvas scaling');
+   for(let i=0;i<16;i++)starter.click('#p48-zoom-out');
+   assert.equal(get('#p48-canvas').style.getPropertyValue('--p48-canvas-scale'),'0.25');
+   assert.equal(overlay.hidden,false);
+   assert.equal(get('#pk48').classList.contains('p48-empty-process'),true);
+   assert.equal(css('#p48-canvas-scroll').display,'none','empty processes have no oversized map');
+   assert.equal(css('#p48-hnav').display,'none','empty processes have no horizontal navigator');
+   if(mobile){
+    assert.equal(css('#p48-empty-first-text').fontSize,'16px','the mobile input remains readable');
+    assert.equal(css('#p48-empty-activity').minHeight,'46px');
+    const down=new starter.dom.window.Event('pointerdown',{bubbles:true,cancelable:true});
+    Object.assign(down,{pointerType:'touch',pointerId:9,clientX:150,clientY:160,button:0});
+    get('.p48-empty-copy').dispatchEvent(down);
+    assert.equal(down.defaultPrevented,false,'swiping starter text must not initiate map panning');
+   }
+   starter.click('#p48-empty-activity');
+   assert.equal(starter.doc.querySelectorAll('.p48-node').length,0,'a blank first activity cannot be created');
+   starter.change('#p48-empty-first-text','Ta emot beställning');starter.click('#p48-empty-activity');await delay(80);
+   assert.equal(starter.doc.querySelectorAll('.p48-node').length,1);
+   assert.equal(get('.p48-node .p48-label').textContent,'Ta emot beställning');
+   assert.equal(overlay.hidden,true);assert.notEqual(css('#p48-canvas-scroll').display,'none');
+   assert.equal(get('#p48-canvas').style.getPropertyValue('--p48-canvas-scale'),'1','the first step starts at readable zoom');
+   starter.click('#p48-undo');await delay(80);
+   assert.equal(overlay.hidden,false,'undoing the first step restores the viewport starter');
+   starter.click('#p48-readmode-toggle');assert.equal(overlay.hidden,true);
+   assert.equal(get('#pk48').classList.contains('p48-empty-process'),false,'reading restores the regular map viewport');
+   starter.click('#p48-mode-draw');assert.equal(overlay.hidden,false);
+   assert.deepEqual(starter.errors,[]);
+  }finally{starter.dom.window.close()}
+ }
  const e=await editor();try{
   assert.equal(e.doc.querySelector('#p48-welcome').hidden,false);
   assert.equal(e.doc.querySelectorAll('.p48-welcome-choices button').length,3);
@@ -103,11 +156,7 @@ async function finishBranch(e,answer){
   assert.equal(phone.doc.querySelector('#p48-export-menu').parentElement.className,'p48-top-utilities');
   // jsdom does not apply viewport media queries. Activate their actual CSS for
   // a 360 px phone to check matching selectors and explicit placement, not layout.
-  const mobileCSS=phone.doc.createElement('style');
-  const rules=[...phone.doc.styleSheets].flatMap(sheet=>[...sheet.cssRules]);
-  mobileCSS.textContent=rules.filter(rule=>rule.media&&/max-width:(?:360|480|700|900)px/.test(rule.conditionText.replace(/\s/g,'')))
-   .flatMap(rule=>[...rule.cssRules].map(child=>child.cssText)).join('\n');
-  phone.doc.head.appendChild(mobileCSS);
+  activateMobileCSS(phone);
   const style=id=>phone.dom.window.getComputedStyle(phone.doc.querySelector(id));
   const actionIDs=['#p48-save','#p48-new','#p48-export-menu','#p48-more-menu'];
   const actionRows=actionIDs.map(id=>style(id).gridRow);

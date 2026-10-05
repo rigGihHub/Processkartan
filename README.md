@@ -1,4 +1,10 @@
-# Maplini v0.20.104 – kompakt mobilverktygsfält
+# Maplini v0.20.105 – läsbar start på mobilen
+
+Startrutan **Vad händer först?** ligger i den synliga arbetsytan, utanför kartans zoom. En tom process behöver därför ingen bred kartscrollning. Mobilens inmatning är 16 px och knapparna har minst 44 px tryckyta. Första skapade steget börjar på 100 % zoom. Skapa, ångra och växling mellan Rita och Förstå återställer rätt vy. Startvalen fungerar även när ägaren kommer från läsläget.
+
+Verifierat med 516 Python-tester, 39 JavaScript-sviter och funktionella DOM-tester för start på mobil/dator, utzoomning till 25 %, första steget, ångra, lägesväxling och mobilsvep. DOM-testet bevarar CSS-reglernas ordning när mobilregler aktiveras. Det ersätter inte fysisk mobiltestning.
+
+## v0.20.104 – kompakt mobilverktygsfält
 
 Mobilfältet har tre fasta rader: processnamn, arbetssätt och **Spara / Ny / Exportera / Mer**. Det rättar tomraden som uppstod när Ny placerades före de andra knapparna i samma grid-ordning. **Start** och **Hitta** finns under Mer på mobilen, autosparstatus visas vid logotypen och **Verktyg** visas bara i snabbmenyn ovanför kartan. Verktygspanelen har en egen stängknapp. Datorläget återfår sina ursprungliga knappar vid fönsterbyte.
 
