@@ -8,6 +8,7 @@ Användarbilden visar en mycket liten startruta långt åt höger i en i övrigt
 - Tom redigerbar process döljer kartwrapper, sidnavigator och bottenutfyllnad. Mobilens tomma arbetsyta har plats för startformuläret; vid behov går själva formuläret att scrolla.
 - Inmatning 16 px, primär knapp 46 px och övriga mobilknappar minst 44 px.
 - Första manuellt tillagda steget återställer kartzoom till 100 %.
+- Efter första aktiviteten uppdateras även egenskapspanelens namn direkt. Felet upptäcktes vid prov i den publicerade webbläsaren.
 - Lägesväxling uppdaterar startvyn direkt.
 - Startvalen kan gå från läsläge till redigering när användaren har redigeringsbehörighet; delade läsvyer behåller samma behörighetskontroll.
 - Svep i startvyn fångas inte av kartans gesthantering.

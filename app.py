@@ -4779,7 +4779,7 @@ function addFirstStep(type,objectRole=null,{text='',edit=true}={}){
   const item=selectedId?nodes.get(selectedId):null;
   if(item){
     const clean=String(text||'').trim();
-    if(clean){item.data.text=clean;item.label.textContent=clean;applyStyle(item);persist();}
+    if(clean){item.data.text=clean;item.label.textContent=clean;applyStyle(item);refreshControls();persist();}
     quickBuildNodeIds.add(item.data.id);
     requestAnimationFrame(()=>{ensureNodeVisible(item.el);item.el.focus();if(edit&&!clean)beginInlineEdit(item.el)});
   }

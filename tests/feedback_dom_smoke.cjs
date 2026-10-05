@@ -83,6 +83,7 @@ function activateMobileCSS(e){
    starter.change('#p48-empty-first-text','Ta emot beställning');starter.click('#p48-empty-activity');await delay(80);
    assert.equal(starter.doc.querySelectorAll('.p48-node').length,1);
    assert.equal(get('.p48-node .p48-label').textContent,'Ta emot beställning');
+   assert.equal(get('#p48-info-name').value,'Ta emot beställning','the selected step inspector uses the entered name');
    assert.equal(overlay.hidden,true);assert.notEqual(css('#p48-canvas-scroll').display,'none');
    assert.equal(get('#p48-canvas').style.getPropertyValue('--p48-canvas-scale'),'1','the first step starts at readable zoom');
    starter.click('#p48-undo');await delay(80);
