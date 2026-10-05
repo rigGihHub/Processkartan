@@ -18,3 +18,5 @@ Användarbilden visar en höjdbeskuren logotyp och en extra slogan ovanpå den s
 32 inbäddade skript syntaxkontrollerade, Python-kompilering och diffkontroll godkända.
 
 DOM-testet utför ingen fysisk CSS-layout. Den publicerade datorvyn granskas separat i webbläsaren, inklusive faktisk skalning och kontrollplacering. Ingen fysisk mobilkontroll är utförd.
+
+Visuell kontroll i publicerad webbläsare: rutan går från 202,4 px till 222,6 px bredd vid 100 → 110 %, medan zoomfältet behåller samma position och bredd. Den kontrollen upptäckte även ett äldre 210 px rubrikindrag som inte rymde 238 px logotypfält; det ändrades till 246 px för att ge 8 px mellanrum.

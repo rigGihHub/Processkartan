@@ -2401,7 +2401,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 #pk48 .p48-mobile-reader-extras .p48-export-popover{position:absolute!important;top:calc(100% + 6px)!important;left:0!important;right:0!important;width:auto!important;min-width:0!important;max-height:60dvh;overflow:auto}
 #pk48.p48-welcome-open>.p48-top,#pk48.p48-welcome-open>.p48-body,#pk48.p48-welcome-open>.p48-mobile-reader-bar{visibility:hidden}
 @media(min-width:901px){
- #pk48 .p48-top-simplified{padding-left:210px!important;grid-template-columns:minmax(210px,1fr) auto auto auto!important;column-gap:8px!important}
+ #pk48 .p48-top-simplified{padding-left:246px!important;grid-template-columns:minmax(210px,1fr) auto auto auto!important;column-gap:8px!important}
  #pk48 .p48-process-cluster .p48-name{min-width:100px!important;width:clamp(100px,14vw,240px)!important}
  #pk48 .p48-top-utilities{gap:4px}
 }
