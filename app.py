@@ -6,7 +6,7 @@ import google_docs
 import maplini_google_ui
 
 st.set_page_config(page_title="Maplini", page_icon="🧭", layout="wide", initial_sidebar_state="collapsed")
-APP_VERSION = "0.20.105"
+APP_VERSION = "0.20.106"
 _LOGO_PATH = Path(__file__).resolve().parent / "assets" / "maplini_logo.png"
 _LOGO_B64 = base64.b64encode(_LOGO_PATH.read_bytes()).decode("ascii") if _LOGO_PATH.exists() else ""
 _SUPABASE = st.secrets.get("supabase", {})
@@ -962,6 +962,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 
 /* v0.10.2 — DOM-correct editor layout */
 .p48-body{
+  position:relative;
   display:grid;
   grid-template-columns:220px minmax(0,1fr);
   height:var(--p48-desktop-body-h,640px);
@@ -1173,8 +1174,9 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 #pk48 *{box-sizing:border-box}
 .p48-brand{height:94px;background:#fff;border-bottom:1px solid #e1e7ed;display:flex;align-items:center;padding:8px 18px}
 .p48-brand-inner{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;width:315px}
-.p48-logo-crop{height:52px;width:315px;overflow:hidden;display:flex;align-items:flex-start}
-.p48-logo-crop img{width:315px!important;height:auto!important;max-width:none!important;display:block;transform:translateY(-1px)}
+.p48-logo-crop{height:52px;width:315px;overflow:visible;display:flex;align-items:center}
+#pk48 .p48-logo-crop img{width:100%!important;height:100%!important;max-width:100%!important;object-fit:contain;object-position:left center;display:block;transform:none!important}
+#pk48 .p48-tagline{display:none!important}
 .p48-tagline{font:800 13px/1.1 Inter,system-ui,sans-serif;letter-spacing:2.2px;color:#20364f;margin-left:0;text-align:center;width:100%;white-space:nowrap}
 .p48-resize{position:absolute;width:13px;height:13px;background:#fff;border:2px solid #2c7be5;border-radius:3px;z-index:10;display:none}
 .p48-node.selected .p48-resize{display:block}
@@ -1189,7 +1191,7 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 .p48-addio{width:100%;margin-top:5px;border:1px dashed #9fb0bf;background:#f8fafc;border-radius:7px;padding:6px;font:700 11px system-ui;cursor:pointer}
 .p48-node-io{width:100%;margin-top:6px;display:grid;gap:2px;font-size:10px;font-weight:500;opacity:.8;text-align:left}
 .p48-node-io span{display:block;white-space:pre-wrap;overflow-wrap:anywhere}
-.p48-brand img{height:56px;width:auto;max-width:310px;object-fit:contain;display:block}
+.p48-brand img{height:100%;width:100%;max-width:100%;object-fit:contain;display:block}
 .p48-top{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px;background:#fff;border-bottom:1px solid #dce2e8}
 .p48-btn{border:1px solid #ccd4dc;background:#fff;color:#24303d;border-radius:8px;min-height:38px;padding:8px 11px;font:600 13px system-ui;cursor:pointer}
 .p48-btn:hover{background:#f2f5f7}.p48-btn.primary{background:#1f6f55;color:#fff;border-color:#1f6f55}
@@ -1934,11 +1936,10 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
 /* v0.20.74 – Editor Coherence: one header, calmer sidebar, cleaner selection. */
 @media(min-width:901px){
   .p48-brand{position:absolute!important;top:0!important;left:0!important;z-index:225!important;width:238px!important;height:54px!important;min-height:54px!important;padding:5px 10px!important;border-bottom:0!important;background:transparent!important;box-sizing:border-box!important;pointer-events:none}
-  .p48-brand-inner{width:218px!important;height:44px!important;align-items:flex-start!important;justify-content:center!important;gap:0!important}
-  .p48-logo-crop{width:218px!important;height:29px!important}
-  .p48-logo-crop img{width:218px!important;height:auto!important}
+  .p48-brand-inner{width:218px!important;height:44px!important;flex-direction:row!important;align-items:center!important;justify-content:space-between!important;gap:8px!important}
+  .p48-logo-crop{width:auto!important;min-width:0;flex:1;height:44px!important}
   .p48-tagline{font-size:7px!important;letter-spacing:.16em!important;margin-left:4px!important}
-  .p48-version{position:absolute!important;left:179px!important;bottom:4px!important;font-size:7px!important;color:#81908a!important}
+  .p48-version{position:static!important;flex:none;font-size:9px!important;white-space:nowrap;color:#81908a!important}
   .p48-top-simplified{min-height:54px!important;padding:6px 10px 6px 246px!important;gap:6px!important;border-bottom:1px solid #e3e9e6!important;box-sizing:border-box!important}
   .p48-top-simplified .p48-name{min-width:170px!important;max-width:280px!important;height:36px!important;border-radius:9px!important;padding:0 10px!important}
   .p48-top-simplified .p48-btn,.p48-work-modes{min-height:36px!important}
@@ -2433,7 +2434,6 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
  #pk48:not(.p48-read-mode) .p48-brand{position:static!important;width:100%!important;height:44px!important;min-height:44px!important;padding:4px 10px!important;box-sizing:border-box}
  #pk48 .p48-brand-inner{width:100%!important;flex-direction:row;justify-content:space-between;gap:10px}
  #pk48 .p48-logo-crop{width:130px!important;height:35px!important;overflow:hidden!important;flex:none}
- #pk48 .p48-logo-crop img{width:130px!important;height:auto!important;transform:none!important}
  #pk48 .p48-tagline{display:none!important}
  #pk48 .p48-version{font-size:10px!important;white-space:nowrap}
  #pk48:not(.p48-read-mode) .p48-top{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px!important;flex-wrap:wrap!important;overflow:visible!important;padding:8px!important;box-sizing:border-box!important}
@@ -2472,7 +2472,15 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
  #pk48.p48-mobile-canvas-fullscreen .p48-top,#pk48.p48-mobile-canvas-fullscreen .p48-brand{display:none!important}
  html:has(#pk48.p48-mobile-canvas-fullscreen),body:has(#pk48.p48-mobile-canvas-fullscreen){overflow:hidden!important}
 }
-@media(max-width:360px){#pk48 .p48-logo-crop{width:96px!important;height:27px!important}#pk48 .p48-logo-crop img{width:96px!important}}
+@media(max-width:360px){#pk48 .p48-logo-crop{width:96px!important;height:27px!important}}
+@media(min-width:901px) and (max-width:1180px){.p48-brand{width:202px!important}.p48-brand-inner{width:182px!important}.p48-version{font-size:8px!important}}
+/* v0.20.106: viewport controls are outside the canvas and its scroll content. */
+#pk48 .p48-canvas-zoom{position:absolute;top:12px;right:12px;z-index:180;display:flex;align-items:center;gap:2px;padding:4px;border:1px solid #d0ddd6;border-radius:12px;background:rgba(255,255,255,.97);box-shadow:0 3px 12px rgba(31,52,70,.1)}
+#pk48 .p48-canvas-zoom .p48-btn{min-width:44px;min-height:44px;padding:0;border:0;border-radius:8px;background:transparent;font:600 22px/1 system-ui;color:#315747}
+#pk48 .p48-canvas-zoom .p48-btn:hover{background:#edf5f0}
+#pk48 .p48-canvas-zoom .p48-btn:focus-visible{outline:2px solid #28715c;outline-offset:1px}
+#pk48 .p48-canvas-zoom .p48-btn:disabled{opacity:.35;cursor:default}
+#pk48 .p48-canvas-zoom .p48-zoom-value{min-width:58px;font:650 12px/1 system-ui;font-variant-numeric:tabular-nums}
 </style>
 
 <div class="p48-brand">
@@ -2522,14 +2530,9 @@ button,summary,select,input{-webkit-tap-highlight-color:transparent}
   <button type="button" class="p48-btn p48-icon-action" id="p48-undo" title="Ångra (Ctrl/Cmd+Z)" aria-label="Ångra">↶</button>
   <button type="button" class="p48-btn p48-icon-action" id="p48-redo" title="Gör om (Ctrl/Cmd+Shift+Z eller Ctrl/Cmd+Y)" aria-label="Gör om">↷</button>
   <details class="p48-view-menu" id="p48-view-menu">
-    <summary class="p48-btn" title="Zoom, översikt och ansvar">Visa ▾</summary>
+    <summary class="p48-btn" title="Översikt och ansvar">Visa ▾</summary>
     <div class="p48-view-popover">
       <div class="p48-pop-title">Visa processen</div>
-      <div class="p48-view-row p48-zoom-controls" role="group" aria-label="Storlek på canvasinnehåll">
-        <button type="button" class="p48-btn" id="p48-zoom-out" aria-label="Zooma ut" title="Zooma ut">−</button>
-        <button type="button" class="p48-btn p48-zoom-value" id="p48-zoom-reset" title="Återställ till 100%">100%</button>
-        <button type="button" class="p48-btn" id="p48-zoom-in" aria-label="Zooma in" title="Zooma in">+</button>
-      </div>
       <div class="p48-view-row">
         <button type="button" class="p48-btn" id="p48-fit-screen" title="Anpassa hela processen till fönstret">⊡ Anpassa</button>
       </div>
@@ -3258,6 +3261,11 @@ Skicka orderbekräftelse"></textarea>
     <div id="p48-hnav-inner" class="p48-hnav-inner"></div>
   </div>
 </main>
+  <div id="p48-canvas-zoom" class="p48-canvas-zoom p48-zoom-controls" role="group" aria-label="Storlek på hela kartan">
+    <button type="button" class="p48-btn" id="p48-zoom-out" aria-label="Zooma ut" title="Förminska hela kartan">−</button>
+    <button type="button" class="p48-btn p48-zoom-value" id="p48-zoom-reset" aria-label="Återställ zoom till 100 procent" title="Återställ till 100%">100%</button>
+    <button type="button" class="p48-btn" id="p48-zoom-in" aria-label="Zooma in" title="Förstora hela kartan">+</button>
+  </div>
   <nav id="p48-mobile-bar" class="p48-mobile-bar" data-mode="normal" aria-label="Mobil snabbmeny">
     <button type="button" class="primary" data-mobile-group="normal" id="p48-mobile-add">＋ Lägg till</button>
     <button type="button" data-mobile-group="normal" id="p48-mobile-undo">↶ Ångra</button>
@@ -3556,6 +3564,11 @@ function applyCanvasScale(next,keepCenter=true){
   return value;
 }
 function screenDeltaToCanvas(dx,dy){return{dx:dx/canvasScale,dy:dy/canvasScale}}
+function syncCanvasZoomPlacement(){
+  const toolbar=root.querySelector('#p48-canvas-zoom');
+  if(toolbar&&scroll)toolbar.style.top=(scroll.offsetTop+12)+'px';
+}
+function scheduleCanvasZoomPlacement(){MapliniPerformanceCore.rafOnce('canvas-zoom-placement',syncCanvasZoomPlacement)}
 
 let overviewRaf=0,overviewBounds=null;
 function processOverviewBounds(){
@@ -5677,6 +5690,7 @@ function refreshMobileReaderBar(){
   const home=root.querySelector('#p48-mobile-reader-home');if(home)home.hidden=sharedView;const desktopHome=root.querySelector('#p48-home');if(desktopHome)desktopHome.hidden=sharedView;
   if(mobileReaderName)mobileReaderName.textContent=String(nameInput?.value||processes[String(currentId||'')]?.name||'Process').trim()||'Process';
   if(mobileReaderEdit)mobileReaderEdit.hidden=!MapliniAccessCore.canEdit({sharedView,currentRole});
+  scheduleCanvasZoomPlacement();
 }
 function renderReadSidebar(){
   if(!readSidebarList)return;
@@ -10152,6 +10166,11 @@ function scheduleResponsiveLayout(){
 window.addEventListener('orientationchange',()=>setTimeout(scheduleResponsiveLayout,120));
 window.addEventListener('resize',scheduleResponsiveLayout,{passive:true});
 scheduleResponsiveLayout();
+if(typeof ResizeObserver!=='undefined'){
+  const zoomPlacementObserver=new ResizeObserver(scheduleCanvasZoomPlacement);
+  zoomPlacementObserver.observe(scroll);zoomPlacementObserver.observe(scroll.parentElement);
+}
+scheduleCanvasZoomPlacement();
 
 function flushLifecycleSave(context){
   if(!MapliniPrivacyCore.shouldPersistLocally({sharedView}))return true;

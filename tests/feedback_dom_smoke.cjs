@@ -51,6 +51,33 @@ function activateMobileCSS(e){
   }).join('\n');
  }
 }
+function checkViewportZoom(e){
+ const get=id=>e.doc.querySelector(id),map=get('#p48-canvas'),wrap=get('#p48-canvas-scroll');
+ const toolbar=get('#p48-canvas-zoom');
+ assert.equal(toolbar.parentElement.className,'p48-body','zoom is anchored to the work area');
+ assert.equal(map.contains(toolbar),false,'zoom controls never scale with the map');
+ assert.equal(get('#p48-scroll').contains(toolbar),false,'map panning cannot scroll away the controls');
+ assert.equal(e.doc.querySelectorAll('#p48-zoom-in').length,1,'the main window has the single working set of controls');
+ assert.equal(get('#p48-view-menu').contains(get('#p48-zoom-out')),false,'zoom needs no menu');
+ const positions=[...map.querySelectorAll('.p48-node')].map(n=>[n.style.left,n.style.top,n.querySelector('.p48-label').textContent]);
+ e.click('#p48-zoom-reset');const width=parseFloat(wrap.style.getPropertyValue('--p48-canvas-visual-width'));
+ e.click('#p48-zoom-in');
+ assert.equal(map.style.getPropertyValue('--p48-canvas-scale'),'1.1');
+ assert.equal(get('#p48-zoom-reset').textContent,'110%');
+ assert.ok(Math.abs(parseFloat(wrap.style.getPropertyValue('--p48-canvas-visual-width'))-width*1.1)<.01);
+ assert.ok(map.contains(get('#p48-svg'))&&map.contains(get('#p48-process-logo')),'connectors and embedded images share canvas zoom');
+ e.click('#p48-zoom-out');assert.equal(map.style.getPropertyValue('--p48-canvas-scale'),'1');
+ for(let i=0;i<16;i++)e.click('#p48-zoom-in');
+ assert.equal(get('#p48-zoom-in').disabled,true);assert.equal(get('#p48-zoom-reset').textContent,'150%');
+ for(let i=0;i<16;i++)e.click('#p48-zoom-out');
+ assert.equal(get('#p48-zoom-out').disabled,true);assert.equal(get('#p48-zoom-reset').textContent,'25%');
+ e.click('#p48-zoom-reset');assert.equal(get('#p48-zoom-reset').textContent,'100%');
+ assert.deepEqual([...map.querySelectorAll('.p48-node')].map(n=>[n.style.left,n.style.top,n.querySelector('.p48-label').textContent]),positions,'zoom preserves the saved map geometry and text');
+ const logo=e.dom.window.getComputedStyle(get('.p48-logo-crop img'));
+ assert.equal(logo.objectFit,'contain','the logo keeps its aspect ratio');
+ assert.equal(logo.height,'100%','the entire logo fits the available height');
+ assert.equal(e.dom.window.getComputedStyle(get('.p48-tagline')).display,'none','the slogan is shown once in the image');
+}
 (async()=>{
  for(const mobile of [false,true]){
   const starter=await editor(null,mobile);try{
@@ -109,6 +136,7 @@ function activateMobileCSS(e){
   assert.equal(e.doc.querySelector('#p48-export-menu').parentElement.className,'p48-top-utilities','export stays in the main toolbar');
   await delay(220);
   const saved=JSON.parse(e.dom.window.localStorage.getItem('maplini_v050'));
+  checkViewportZoom(e);
   assert.equal(Object.keys(saved.processes).length,3,'sample does not replace the existing process');
   await finishBranch(e,'yes');await finishBranch(e,'no');
   e.click('#p48-mode-draw');e.click('.p48-node[data-id="n2"] .p48-label');
@@ -134,6 +162,7 @@ function activateMobileCSS(e){
  }finally{old.dom.window.close()}
  const phone=await editor(null,true);try{
   phone.click('#p48-welcome-example');await delay(80);
+  checkViewportZoom(phone);
   assert.equal(phone.doc.querySelector('#p48-export-menu').parentElement.id,'p48-mobile-reader-extras');
   assert.equal(phone.doc.querySelector('#p48-home').parentElement.id,'p48-mobile-main-actions');
   assert.equal(phone.doc.querySelector('#p48-find-menu').parentElement.id,'p48-mobile-main-actions');

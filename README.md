@@ -1,4 +1,10 @@
-# Maplini v0.20.105 – läsbar start på mobilen
+# Maplini v0.20.106 – hel logga och zoom i kartfönstret
+
+Logotypen visas i sin helhet med bibehållna proportioner. Den dubbla sloganen är dold och versionsnumret ligger separat. **Minus / procent / plus** finns alltid uppe till höger i kartfönstret, både i Rita och Förstå. Knapparna skalar hela kartan (rutor, text, pilar och inlagda bilder) utan att ändra sparade stegpositioner. Klicka på procenttalet för 100 %. Kontrollerna ligger utanför kartans scrollning och har 44 px tryckytor.
+
+516 Python-tester, 39 JavaScript-sviter och DOM-tester av zoom, gränser, återställning och bevarad kartgeometri är godkända. Den publicerade datorvyn kontrolleras visuellt; fysisk mobiltestning ingår inte.
+
+## v0.20.105 – läsbar start på mobilen
 
 Startrutan **Vad händer först?** ligger i den synliga arbetsytan, utanför kartans zoom. En tom process behöver därför ingen bred kartscrollning. Mobilens inmatning är 16 px och knapparna har minst 44 px tryckyta. Första skapade steget börjar på 100 % zoom. Skapa, ångra och växling mellan Rita och Förstå återställer rätt vy. Startvalen fungerar även när ägaren kommer från läsläget.
 

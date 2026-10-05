@@ -17,8 +17,16 @@ def test_view_tools_are_grouped_without_losing_ids():
     view=soup.select_one('#p48-view-menu')
     assert view is not None
     assert 'Visa' in view.get_text(' ',strip=True)
-    for eid in ('p48-zoom-out','p48-zoom-reset','p48-zoom-in','p48-fit-screen','p48-overview-toggle','p48-responsibility-toggle'):
+    for eid in ('p48-fit-screen','p48-overview-toggle','p48-responsibility-toggle'):
         assert len(view.select(f'#{eid}'))==1
+    zoom=soup.select_one('#p48-canvas-zoom')
+    assert zoom is not None
+    assert zoom.find_parent(class_='p48-body') is not None
+    assert zoom.find_parent(id='p48-canvas') is None
+    assert zoom.find_parent(id='p48-scroll') is None
+    for eid in ('p48-zoom-out','p48-zoom-reset','p48-zoom-in'):
+        assert len(zoom.select(f'#{eid}'))==1
+        assert not view.select(f'#{eid}')
     top=soup.select_one('.p48-top-simplified')
     direct={x.get('id') for x in top.find_all(recursive=False) if x.get('id')}
     assert 'p48-overview-toggle' not in direct
